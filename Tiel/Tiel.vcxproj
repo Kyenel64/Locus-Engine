@@ -15,9 +15,11 @@
     <ClInclude Include="src\Tiel\Application.h" />
     <ClInclude Include="src\Tiel\Core.h" />
     <ClInclude Include="src\Tiel\EntryPoint.h" />
+    <ClInclude Include="src\Tiel\Log.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Tiel\Application.cpp" />
+    <ClCompile Include="src\Tiel\Log.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -62,6 +64,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>TIEL_PLATFORM_WINDOWS;TIEL_BUILD_DLL;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)Tiel\vendor\spdlog\include\;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -76,6 +79,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>TIEL_PLATFORM_WINDOWS;TIEL_BUILD_DLL;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)Tiel\vendor\spdlog\include\;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

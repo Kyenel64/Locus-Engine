@@ -1,5 +1,8 @@
 #include "Application.h"
 
+#include "Tiel/Events/ApplicationEvent.h"
+#include "Tiel/Log.h"
+
 #include <stdio.h>
 
 namespace Tiel
@@ -16,9 +19,16 @@ namespace Tiel
 
 	void Application::Run()
 	{
-		while (true)
+		WindowResizeEvent e(1280, 720);
+		if (e.IsInCategory(EventCategoryApplication))
 		{
-
+			TIEL_TRACE(e);
 		}
+		if (e.IsInCategory(EventCategoryInput))
+		{
+			TIEL_TRACE(e);
+		}
+
+		while (true);
 	}
 }

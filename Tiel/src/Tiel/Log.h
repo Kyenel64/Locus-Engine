@@ -2,21 +2,22 @@
 
 #include "Core.h"
 #include "spdlog/spdlog.h"
+#include "spdlog/fmt/ostr.h"
 #include <memory>
 
 namespace Tiel
 {
-	class TIEL_API Log
+	class Log // include TIEL_API here if errors
 	{
 	public:
-		static void Init();
+		TIEL_API static void Init();
 
 		inline static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return s_CoreLogger; }
 		inline static std::shared_ptr<spdlog::logger>& GetClientLogger() { return s_ClientLogger; }
 
 	private:
-		static std::shared_ptr<spdlog::logger> s_CoreLogger;
-		static std::shared_ptr<spdlog::logger> s_ClientLogger;
+		TIEL_API static std::shared_ptr<spdlog::logger> s_CoreLogger;
+		TIEL_API static std::shared_ptr<spdlog::logger> s_ClientLogger;
 
 	};
 }

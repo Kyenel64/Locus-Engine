@@ -12,6 +12,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "Tiel/Log.h"
+
 #ifdef TIEL_PLATFORM_WINDOWS
 	#include <Windows.h>
 #endif

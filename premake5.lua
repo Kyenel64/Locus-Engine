@@ -10,6 +10,12 @@ workspace "Tiel"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+-- Include directory relative to root folder
+IncludeDir = {}
+IncludeDir["GLFW"] = "Tiel/vendor/GLFW/include"
+
+include "Tiel/vendor/GLFW"
+
 project "Tiel"
 	location "Tiel"
 	kind "SharedLib"
@@ -31,7 +37,14 @@ project "Tiel"
 	includedirs
 	{
 		"%{prj.name}/src",
-		"%{prj.name}/vendor/spdlog/include"
+		"%{prj.name}/vendor/spdlog/include",
+		"%{IncludeDir.GLFW}"
+	}
+
+	links
+	{
+		"GLFW",
+		"opengl32.lib"
 	}
 
 	filter "system:windows"
@@ -51,7 +64,11 @@ project "Tiel"
 		}
 
 	filter "configurations:Debug"
-		defines "TIEL_DEBUG"
+		defines 
+		{
+			"TIEL_DEBUG",
+			"TIEL_ENABLE_ASSERTS"
+		}
 		symbols "On"
 
 	filter "configurations:Release"

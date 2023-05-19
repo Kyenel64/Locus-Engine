@@ -1,5 +1,6 @@
 workspace "Tiel"
 	architecture "x64"
+	startproject "Sandbox"
 
 	configurations
 	{
@@ -44,7 +45,8 @@ project "Tiel"
 	links
 	{
 		"GLFW",
-		"opengl32.lib"
+		"opengl32.lib",
+		"Dwmapi.lib"
 	}
 
 	filter "system:windows"
@@ -64,6 +66,8 @@ project "Tiel"
 		}
 
 	filter "configurations:Debug"
+		staticruntime "off"
+		runtime "Debug"
 		defines 
 		{
 			"TIEL_DEBUG",
@@ -72,10 +76,14 @@ project "Tiel"
 		symbols "On"
 
 	filter "configurations:Release"
+		staticruntime "off"
+		runtime "Release"
 		defines "TIEL_RELEASE"
 		optimize "On"
 
 	filter "configurations:Dist"
+		staticruntime "off"
+		runtime "Release"
 		defines "TIEL_DIST"
 		optimize "On"
 

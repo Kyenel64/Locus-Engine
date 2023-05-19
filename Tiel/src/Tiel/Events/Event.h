@@ -2,9 +2,6 @@
 
 #include "Tiel/Core.h"
 
-#include <string>
-#include <functional>
-
 namespace Tiel
 {
 	enum class EventType // Enum classes dont convert to integers

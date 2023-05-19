@@ -1,9 +1,8 @@
+#include "tpch.h"
 #include "Application.h"
 
 #include "Tiel/Events/ApplicationEvent.h"
 #include "Tiel/Log.h"
-
-#include <stdio.h>
 
 namespace Tiel
 {

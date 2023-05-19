@@ -18,6 +18,10 @@ project "Tiel"
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
+	pchheader "tpch.h"
+	pchsource "Tiel/src/tpch.cpp"
+
+
 	files
 	{
 		"%{prj.name}/src/**.h",

@@ -46,6 +46,7 @@ project "Tiel"
 	{
 		"GLFW",
 		"opengl32.lib",
+		"Dwmapi.lib"
 	}
 
 	filter "system:windows"

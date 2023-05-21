@@ -46,20 +46,21 @@ namespace Tiel
 		}
 
 	protected: // Private but children can access
-		bool m_Handled = false; // Check for if event should be handled or not.
+		bool m_Handled = false;
 	};
 
 	// Dispatches event based on event type
 	class EventDispatcher
 	{
-		template<typename T> // Template makes datatype a parameter.
+		template<typename T>
 		using EventFn = std::function<bool(T&)>;
 	public:
 		EventDispatcher(Event& event) : m_Event(event) {}
 
 		template<typename T>
-		bool Dispatch(EventFn<T> func)
+		bool Dispatch(EventFn<T> func) // passes function as parameter
 		{
+			// If dispatch event matches event
 			if (m_Event.GetEventType() == T::GetStaticType())
 			{
 				m_Event.m_Handled = func(*(T*)&m_Event);

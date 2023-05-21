@@ -6,17 +6,17 @@
 
 namespace Tiel
 {
-	class Log // include TIEL_API here if errors
+	class TIEL_API Log // include TIEL_API here if errors
 	{
 	public:
-		TIEL_API static void Init();
+		static void Init();
 
 		inline static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return s_CoreLogger; }
 		inline static std::shared_ptr<spdlog::logger>& GetClientLogger() { return s_ClientLogger; }
 
 	private:
-		TIEL_API static std::shared_ptr<spdlog::logger> s_CoreLogger;
-		TIEL_API static std::shared_ptr<spdlog::logger> s_ClientLogger;
+		static std::shared_ptr<spdlog::logger> s_CoreLogger;
+		static std::shared_ptr<spdlog::logger> s_ClientLogger;
 
 	};
 }

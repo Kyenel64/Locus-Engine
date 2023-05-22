@@ -55,11 +55,14 @@ namespace Tiel
 		// Set GLFW callbacks
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
 		{
+			// Sets window data to glfw callback data.
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 			data.Width = width;
 			data.Height = height;
 
+			// Create a Tiel event
 			WindowResizeEvent event(width, height);
+			// Calls OnEvent within Application class with event
 			data.EventCallback(event);
 		});
 

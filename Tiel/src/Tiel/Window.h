@@ -1,3 +1,7 @@
+// --- Window -----------------------------------------------------------------
+// Abstract window class. Platform specific window class must be implemented.
+// Sets event callbacks.
+
 #pragma once
 
 #include "tpch.h"

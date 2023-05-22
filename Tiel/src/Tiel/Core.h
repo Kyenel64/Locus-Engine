@@ -1,3 +1,6 @@
+// --- Core -------------------------------------------------------------------
+// Includes all the macros used across Tiel.
+
 #pragma once
 
 #ifdef TIEL_PLATFORM_WINDOWS

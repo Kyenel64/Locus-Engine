@@ -1,3 +1,6 @@
+// --- Log --------------------------------------------------------------------
+// Logging class for Tiel. Uses spdlog and includes macros for logging.
+
 #pragma once
 
 #include "Core.h"

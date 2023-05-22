@@ -1,3 +1,7 @@
+// --- WindowsWindow ----------------------------------------------------------
+// Window class for Windows. Holds window data and a GLFW window pointer.
+// Sets and calls callback functions from GLFW to the application class.
+
 #pragma once
 
 #include "Tiel/Window.h"

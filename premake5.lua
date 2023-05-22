@@ -66,25 +66,22 @@ project "Tiel"
 		}
 
 	filter "configurations:Debug"
-		staticruntime "off"
-		runtime "Debug"
 		defines 
 		{
 			"TIEL_DEBUG",
 			"TIEL_ENABLE_ASSERTS"
 		}
+		buildoptions "/MDd"
 		symbols "On"
 
 	filter "configurations:Release"
-		staticruntime "off"
-		runtime "Release"
 		defines "TIEL_RELEASE"
+		buildoptions "/MD"
 		optimize "On"
 
 	filter "configurations:Dist"
-		staticruntime "off"
-		runtime "Release"
 		defines "TIEL_DIST"
+		buildoptions "/MD"
 		optimize "On"
 
 project "Sandbox"
@@ -124,12 +121,15 @@ project "Sandbox"
 
 	filter "configurations:Debug"
 		defines "TIEL_DEBUG"
+		buildoptions "/MDd"
 		symbols "On"
 
 	filter "configurations:Release"
 		defines "TIEL_RELEASE"
+		buildoptions "/MD"
 		optimize "On"
 
 	filter "configurations:Dist"
 		defines "TIEL_DIST"
+		buildoptions "/MD"
 		optimize "On"

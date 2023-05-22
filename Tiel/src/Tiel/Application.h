@@ -1,12 +1,15 @@
 // --- Application ------------------------------------------------------------
 // Main application class for the game engine.
 // Contains pointer to window class. Contains core run loop.
+// Contains a layer stack for executing layers.
 
 #pragma once
 #include "Core.h"
-#include "Events/Event.h"
-#include "Tiel/Events/ApplicationEvent.h"
+
 #include "Window.h"
+#include "Events/Event.h"
+#include "Tiel/LayerStack.h"
+#include "Tiel/Events/ApplicationEvent.h"
 
 namespace Tiel
 {
@@ -22,11 +25,15 @@ namespace Tiel
 
 		// Called whenever there is an event
 		void OnEvent(Event& e);
+
+		void PushLayer(Layer* layer);
+		void PushOverlay(Layer* overlay);
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
 
 		std::unique_ptr<Window> m_Window;
 		bool m_Running = true;
+		LayerStack m_LayerStack;
 	};
 
 	// To be defined in client

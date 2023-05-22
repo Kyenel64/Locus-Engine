@@ -1,3 +1,6 @@
+// --- Event ------------------------------------------------------------------
+// Contains abstract class for events and the event dispatcher.
+
 #pragma once
 
 #include "tpch.h"
@@ -8,10 +11,14 @@ namespace Tiel
 	enum class EventType // Enum classes dont convert to integers
 	{
 		None = 0,
+		// Window events
 		WindowClose, WindowResize, WindowFocus, WindowLostFocus, WindowMoved,
-		AppTick, AppUpdate, AppRender, // Application event types
-		KeyPressed, KeyReleased, // Key event types
-		MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled // Mouse event types
+		// Application event types
+		AppTick, AppUpdate, AppRender,
+		// Key event types
+		KeyPressed, KeyReleased,
+		// Mouse event types
+		MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
 	};
 
 	enum EventCategory
@@ -36,16 +43,16 @@ namespace Tiel
 		friend class EventDispatcher; // Friend classes can access private and protected.
 	public:
 		virtual EventType GetEventType() const = 0; // Virtual functions are meant to be overridden.
-		virtual const char* GetName() const = 0; // Pure virtual functions require children classes to override.
+		virtual const char* GetName() const = 0;
 		virtual int GetCategoryFlags() const = 0;
 		virtual std::string ToString() const { return GetName(); }
 
-		inline bool IsInCategory(EventCategory category) // Inline fills function within code. Doesn't search for function elsewhere.
+		// Inline fills function within code. Doesn't search for function elsewhere.
+		inline bool IsInCategory(EventCategory category)
 		{
 			return GetCategoryFlags() & category;
 		}
 
-	protected: // Private but children can access
 		bool m_Handled = false;
 	};
 

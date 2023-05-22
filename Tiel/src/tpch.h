@@ -1,3 +1,6 @@
+// --- tpch -------------------------------------------------------------------
+// Pre-compiled header for Tiel.
+
 #pragma once
 
 #include <iostream>

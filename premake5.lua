@@ -14,8 +14,10 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 -- Include directory relative to root folder
 IncludeDir = {}
 IncludeDir["GLFW"] = "Tiel/vendor/GLFW/include"
+IncludeDir["Glad"] = "Tiel/vendor/Glad/include"
 
 include "Tiel/vendor/GLFW"
+include "Tiel/vendor/Glad"
 
 project "Tiel"
 	location "Tiel"
@@ -39,12 +41,14 @@ project "Tiel"
 	{
 		"%{prj.name}/src",
 		"%{prj.name}/vendor/spdlog/include",
-		"%{IncludeDir.GLFW}"
+		"%{IncludeDir.GLFW}",
+		"%{IncludeDir.Glad}"
 	}
 
 	links
 	{
 		"GLFW",
+		"Glad",
 		"opengl32.lib",
 		"Dwmapi.lib"
 	}
@@ -57,7 +61,8 @@ project "Tiel"
 		defines
 		{
 			"TIEL_PLATFORM_WINDOWS",
-			"TIEL_BUILD_DLL"
+			"TIEL_BUILD_DLL",
+			"GLFW_INCLUDE_NONE"
 		}
 
 		postbuildcommands

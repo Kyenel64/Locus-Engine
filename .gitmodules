@@ -4,6 +4,3 @@
 [submodule "Tiel/vendor/GLFW"]
 	path = Tiel/vendor/GLFW
 	url = https://github.com/kyenel64/glfw
-[submodule "Tiel/vendor/imgui"]
-	path = Tiel/vendor/imgui
-	url = https://github.com/Kyenel64/imgui

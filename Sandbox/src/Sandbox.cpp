@@ -7,7 +7,7 @@ public:
 
 	void OnUpdate() override
 	{
-		TIEL_INFO("ExampleLayer::Update");
+		//TIEL_INFO("ExampleLayer::Update");
 	}
 
 	void OnEvent(Tiel::Event& event) override

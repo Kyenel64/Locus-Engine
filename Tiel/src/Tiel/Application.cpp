@@ -59,13 +59,14 @@ namespace Tiel
 		{
 			glClearColor(1, 0, 1, 1);
 			glClear(GL_COLOR_BUFFER_BIT);
-			m_Window->OnUpdate();
 
 			// Iterate through layers on update
 			for (Layer* layer : m_LayerStack)
 			{
 				layer->OnUpdate();
 			}
+
+			m_Window->OnUpdate();
 		}
 	}
 

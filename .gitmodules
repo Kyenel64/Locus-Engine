@@ -1,9 +1,6 @@
 [submodule "Tiel/vendor/spdlog"]
 	path = Tiel/vendor/spdlog
 	url = https://github.com/gabime/spdlog
-[submodule "Tiel/vendor/GLFW"]
-	path = Tiel/vendor/GLFW
-	url = https://github.com/kyenel64/glfw
 [submodule "Tiel/vendor/ImGui"]
 	path = Tiel/vendor/ImGui
 	url = https://github.com/kyenel64/ImGui

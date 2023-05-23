@@ -16,7 +16,7 @@ namespace Tiel
 		// Application event types
 		AppTick, AppUpdate, AppRender,
 		// Key event types
-		KeyPressed, KeyReleased,
+		KeyPressed, KeyReleased, KeyTyped,
 		// Mouse event types
 		MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
 	};

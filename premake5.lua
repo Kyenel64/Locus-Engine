@@ -25,6 +25,7 @@ project "Tiel"
 	location "Tiel"
 	kind "SharedLib"
 	language "C++"
+	staticruntime "off"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -59,7 +60,6 @@ project "Tiel"
 
 	filter "system:windows"
 		cppdialect "C++17"
-		staticruntime "On"
 		systemversion "latest"
 
 		defines
@@ -75,28 +75,25 @@ project "Tiel"
 		}
 
 	filter "configurations:Debug"
-		defines 
-		{
-			"TIEL_DEBUG",
-			"TIEL_ENABLE_ASSERTS"
-		}
-		buildoptions "/MDd"
+		defines "TIEL_DEBUG"
+		runtime "Debug" -- /MDd
 		symbols "On"
 
 	filter "configurations:Release"
 		defines "TIEL_RELEASE"
-		buildoptions "/MD"
+		runtime "Release" -- /MD
 		optimize "On"
 
 	filter "configurations:Dist"
 		defines "TIEL_DIST"
-		buildoptions "/MD"
+		runtime "Release" -- /MD
 		optimize "On"
 
 project "Sandbox"
 	location "Sandbox"
 	kind "ConsoleApp"
 	language "C++"
+	staticruntime "off"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -120,7 +117,6 @@ project "Sandbox"
 
 	filter "system:windows"
 		cppdialect "C++17"
-		staticruntime "On"
 		systemversion "latest"
 
 		defines
@@ -130,15 +126,15 @@ project "Sandbox"
 
 	filter "configurations:Debug"
 		defines "TIEL_DEBUG"
-		buildoptions "/MDd"
+		runtime "Debug" -- /MDd
 		symbols "On"
 
 	filter "configurations:Release"
 		defines "TIEL_RELEASE"
-		buildoptions "/MD"
+		runtime "Release" -- /MD
 		optimize "On"
 
 	filter "configurations:Dist"
 		defines "TIEL_DIST"
-		buildoptions "/MD"
+		runtime "Release" -- /MD
 		optimize "On"

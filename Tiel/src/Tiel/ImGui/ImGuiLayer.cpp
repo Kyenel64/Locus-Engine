@@ -10,6 +10,7 @@
 // Temporary
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
+
 namespace Tiel
 {
 	ImGuiLayer::ImGuiLayer() : Layer("ImGuiLayer")
@@ -53,6 +54,7 @@ namespace Tiel
 		io.KeyMap[ImGuiKey_Y] = GLFW_KEY_Y;
 		io.KeyMap[ImGuiKey_Z] = GLFW_KEY_Z;
 
+		// Version 410 not working.
 		ImGui_ImplOpenGL3_Init("#version 330");
 	}
 
@@ -67,11 +69,14 @@ namespace Tiel
 		ImGuiIO& io = ImGui::GetIO();
 		Application& app = Application::Get();
 		io.DisplaySize = ImVec2(app.GetWindow().GetWidth(), app.GetWindow().GetHeight());
+		io.FontGlobalScale = 2.0f;
 
+		// Delta time calculations
 		float time = (float)glfwGetTime();
 		io.DeltaTime = m_Time > 0.0f ? (time - m_Time) : (1.0f / 60.0f);
 		m_Time = time;
 
+		// Render ImGui
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui::NewFrame();
 

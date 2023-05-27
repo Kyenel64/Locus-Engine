@@ -1,5 +1,5 @@
 // --- Layer ------------------------------------------------------------------
-// Layer class. 
+// Layer interface. Handles attached, detached, updates and events.
 
 #pragma once
 

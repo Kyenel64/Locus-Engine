@@ -1,5 +1,5 @@
 // --- WindowsWindow ----------------------------------------------------------
-// Window class for Windows. Holds window data and a GLFW window pointer.
+// Window class for Windows. Handles GLFW actions
 // Sets and calls callback functions from GLFW to the application class.
 
 #pragma once

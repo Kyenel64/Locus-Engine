@@ -54,8 +54,8 @@ namespace Tiel
 		io.KeyMap[ImGuiKey_Y] = GLFW_KEY_Y;
 		io.KeyMap[ImGuiKey_Z] = GLFW_KEY_Z;
 
-		// Version 410 not working.
-		ImGui_ImplOpenGL3_Init("#version 330");
+		// Version 410 not supported on m1 mac ARM
+		ImGui_ImplOpenGL3_Init("#version 410");
 	}
 
 	void ImGuiLayer::OnDetach()

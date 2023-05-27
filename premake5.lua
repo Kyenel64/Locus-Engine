@@ -17,9 +17,12 @@ IncludeDir["GLFW"] = "Tiel/vendor/GLFW/include"
 IncludeDir["Glad"] = "Tiel/vendor/Glad/include"
 IncludeDir["ImGui"] = "Tiel/vendor/imgui"
 
-include "Tiel/vendor/GLFW"
-include "Tiel/vendor/Glad"
-include "Tiel/vendor/imgui"
+group "Dependencies"
+	include "Tiel/vendor/GLFW"
+	include "Tiel/vendor/Glad"
+	include "Tiel/vendor/imgui"
+
+group ""
 
 project "Tiel"
 	location "Tiel"
@@ -71,7 +74,7 @@ project "Tiel"
 
 		postbuildcommands
 		{
-			("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox")
+			("{COPY} %{cfg.buildtarget.relpath} \"../bin/" .. outputdir .. "/Sandbox/\"")
 		}
 
 	filter "configurations:Debug"

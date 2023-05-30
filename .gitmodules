@@ -7,3 +7,6 @@
 [submodule "Tiel/vendor/GLFW"]
 	path = Tiel/vendor/GLFW
 	url = https://github.com/kyenel64/GLFW
+[submodule "Tiel/vendor/glm"]
+	path = Tiel/vendor/glm
+	url = https://github.com/g-truc/glm

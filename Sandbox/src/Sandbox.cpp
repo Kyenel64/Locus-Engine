@@ -1,13 +1,17 @@
 #include <Tiel.h>
 
+#include "ImGui/imgui.h"
+
 class ExampleLayer : public Tiel::Layer
 {
 public:
 	ExampleLayer() : Layer("Example") {}
 
-	void OnUpdate() override
+	virtual void OnImGuiRender() override
 	{
-		//TIEL_INFO("ExampleLayer::Update");
+		ImGui::Begin("Test");
+		ImGui::Text("Hello world");
+		ImGui::End();
 	}
 
 	void OnEvent(Tiel::Event& event) override
@@ -27,7 +31,6 @@ public:
 	Sandbox()
 	{
 		PushLayer(new ExampleLayer());
-		PushOverlay(new Tiel::ImGuiLayer());
 	}
 
 	~Sandbox()

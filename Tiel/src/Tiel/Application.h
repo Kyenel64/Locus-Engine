@@ -11,6 +11,8 @@
 #include "Tiel/LayerStack.h"
 #include "Tiel/Events/ApplicationEvent.h"
 
+#include "Tiel/ImGui/ImGuiLayer.h"
+
 namespace Tiel
 {
 	class TIEL_API Application
@@ -35,6 +37,7 @@ namespace Tiel
 		bool OnWindowClose(WindowCloseEvent& e);
 
 		std::unique_ptr<Window> m_Window;
+		ImGuiLayer* m_ImGuiLayer;
 		bool m_Running = true;
 		LayerStack m_LayerStack;
 

@@ -115,6 +115,7 @@ project "Sandbox"
 	{
 		"Tiel/vendor/spdlog/include",
 		"Tiel/src",
+		"Tiel/vendor",
 		"%{IncludeDir.glm}"
 	}
 
@@ -129,7 +130,7 @@ project "Sandbox"
 
 		defines
 		{
-			"TIEL_PLATFORM_WINDOWS"
+			"TIEL_PLATFORM_WINDOWS",
 		}
 
 	filter "configurations:Debug"

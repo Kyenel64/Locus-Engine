@@ -12,7 +12,11 @@ public:
 
 	void OnEvent(Tiel::Event& event) override
 	{
-		TIEL_TRACE("{0}", event);
+		if (event.GetEventType() == Tiel::EventType::KeyPressed)
+		{
+			Tiel::KeyPressedEvent e = (Tiel::KeyPressedEvent&)event;
+			TIEL_TRACE("{0}", (char)e.GetKeyCode());
+		}
 	}
 };
 

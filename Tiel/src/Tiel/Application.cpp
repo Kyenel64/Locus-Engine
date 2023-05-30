@@ -3,6 +3,8 @@
 
 #include <glad/glad.h>
 
+#include "Input.h"
+
 namespace Tiel
 {
 
@@ -66,6 +68,7 @@ namespace Tiel
 				layer->OnUpdate();
 			}
 
+			
 			m_Window->OnUpdate();
 		}
 	}

@@ -4,12 +4,15 @@
 #pragma once
 
 #include "Tiel/Application.h"
-//#include "Tiel/Core.h"
+
 #include "Tiel/Log.h"
 #include "Tiel/Layer.h"
+
+#include "Tiel/Input.h"
+#include "Tiel/KeyCodes.h"
+#include "Tiel/MouseButtonCodes.h"
+
 #include "Tiel/ImGui/ImGuiLayer.h"
-
-
 
 #include <stdio.h>
 // ---------- Entry Point ------------

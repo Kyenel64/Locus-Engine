@@ -9,7 +9,7 @@
 
 namespace Tiel
 {
-	class TIEL_API Log // include TIEL_API here if errors
+	class TIEL_API Log
 	{
 	public:
 		static void Init();

@@ -13,7 +13,9 @@ namespace Tiel
 	class WindowsWindow : public Window
 	{
 	public:
+		// Calls Init()
 		WindowsWindow(const WindowProps& props);
+		// Calls Shutdown()
 		virtual ~WindowsWindow();
 
 		void OnUpdate() override;
@@ -29,6 +31,7 @@ namespace Tiel
 		inline virtual void* GetNativeWindow() const { return m_Window; }
 
 	private:
+		// Initiates GLFW and glad, sets GLFW callbacks
 		virtual void Init(const WindowProps& props);
 		virtual void Shutdown();
 

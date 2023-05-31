@@ -7,7 +7,6 @@
 
 #ifdef TIEL_PLATFORM_WINDOWS
 
-// Function declaration for creating project application.
 // We dont want any connection with the client app so we cant link a header.
 extern Tiel::Application* Tiel::CreateApplication();
 

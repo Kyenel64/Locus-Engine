@@ -11,8 +11,6 @@ namespace Tiel
 
 	bool WindowsInput::IsKeyPressedImpl(int keycode)
 	{
-		// Get window instance, get key, return if is pressed or repeated.
-		// static_cast forces datatype to be another datatype.
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 		auto state = glfwGetKey(window, keycode);
 		return state == GLFW_PRESS || state == GLFW_REPEAT;

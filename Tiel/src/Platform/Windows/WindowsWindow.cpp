@@ -17,6 +17,7 @@ namespace Tiel
 		TIEL_CORE_ERROR("GLFW Error {{0}}: {1}", error, description);
 	}
 
+	// Note returns Window not WindowsWindow
 	Window* Window::Create(const WindowProps& props)
 	{
 		return new WindowsWindow(props);
@@ -34,10 +35,10 @@ namespace Tiel
 
 	void WindowsWindow::Init(const WindowProps& props)
 	{
+		// --- Initialize data, GLFW, and glad --------------------------------
 		m_Data.Title = props.Title;
 		m_Data.Width = props.Width;
 		m_Data.Height = props.Height;
-
 		TIEL_CORE_INFO("Create Window {0} ({1}, {2})", props.Title, props.Width, props.Height);
 
 		if (!s_GLFWInitialized)
@@ -47,15 +48,14 @@ namespace Tiel
 			glfwSetErrorCallback(GLFWErrorCallback);
 			s_GLFWInitialized = true;
 		}
-		// Create Window
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 		glfwMakeContextCurrent(m_Window);
-		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		TIEL_CORE_ASSERT(status, "Failed to initialize Glad");
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
+		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+		TIEL_CORE_ASSERT(status, "Failed to initialize Glad");
 
-		// Set GLFW callbacks
+		// --- Set GLFW callbacks ---------------------------------------------
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
 		{
 			// Sets window data to glfw callback data.
@@ -65,7 +65,7 @@ namespace Tiel
 
 			// Create a Tiel event
 			WindowResizeEvent event(width, height);
-			// Calls OnEvent within Application class with event
+			// Calls OnEvent(event)
 			data.EventCallback(event);
 		});
 

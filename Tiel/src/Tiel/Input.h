@@ -14,8 +14,9 @@ namespace Tiel
 	class TIEL_API Input
 	{
 	public:
+		// Input is static but must run platform specific code. The private functions
+		// are overriden in a platform specific input class.
 		inline static bool IsKeyPressed(int keycode) { return s_Instance->IsKeyPressedImpl(keycode); }
-
 		inline static bool IsMouseButtonPressed(int button) { return s_Instance->IsMouseButtonPressedImpl(button); }
 		inline static std::pair<float, float> GetMousePosition() { return s_Instance->GetMousePositionImpl(); }
 		inline static float GetMouseX() { return s_Instance->GetMouseXImpl(); }

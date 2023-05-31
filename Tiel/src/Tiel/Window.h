@@ -1,5 +1,5 @@
 // --- Window -----------------------------------------------------------------
-// Abstract window class. Platform specific window class must be implemented.
+// Window interface. Platform specific window class must be implemented.
 // Sets event callbacks.
 
 #pragma once
@@ -43,7 +43,7 @@ namespace Tiel
 
 		virtual void* GetNativeWindow() const = 0;
 
-		// Creates window
+
 		static Window* Create(const WindowProps& props = WindowProps());
 	};
 }

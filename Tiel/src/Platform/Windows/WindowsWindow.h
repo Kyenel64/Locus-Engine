@@ -6,6 +6,8 @@
 
 #include "Tiel/Window.h"
 
+#include "Tiel/Renderer/GraphicsContext.h"
+
 #include <GLFW/glfw3.h>
 
 namespace Tiel
@@ -37,12 +39,14 @@ namespace Tiel
 
 	private:
 		GLFWwindow* m_Window;
+		GraphicsContext* m_Context;
 
 		struct WindowData
 		{
 			std::string Title;
-			unsigned int Width, Height;
-			bool VSync;
+			unsigned int Width = 1920;
+			unsigned int Height = 1080;
+			bool VSync = true;
 
 			EventCallbackFn EventCallback;
 		};

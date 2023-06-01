@@ -6,7 +6,7 @@
 #include "Tiel/Events/KeyEvent.h"
 #include "Tiel/Events/Event.h"
 
-#include <glad/glad.h>
+#include "Platform/OpenGL/OpenGLContext.h"
 
 namespace Tiel
 {
@@ -35,12 +35,11 @@ namespace Tiel
 
 	void WindowsWindow::Init(const WindowProps& props)
 	{
-		// --- Initialize data, GLFW, and glad --------------------------------
+		// --- Initialize data, and GLFW --------------------------------------s
 		m_Data.Title = props.Title;
 		m_Data.Width = props.Width;
 		m_Data.Height = props.Height;
 		TIEL_CORE_INFO("Create Window {0} ({1}, {2})", props.Title, props.Width, props.Height);
-
 		if (!s_GLFWInitialized)
 		{
 			int success = glfwInit();
@@ -48,12 +47,14 @@ namespace Tiel
 			glfwSetErrorCallback(GLFWErrorCallback);
 			s_GLFWInitialized = true;
 		}
+
+		// --- Create window and initialize renderer context ------------------
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
-		glfwMakeContextCurrent(m_Window);
+		m_Context = new OpenGLContext(m_Window);
+		m_Context->Init();
+
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
-		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		TIEL_CORE_ASSERT(status, "Failed to initialize Glad");
 
 		// --- Set GLFW callbacks ---------------------------------------------
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
@@ -157,7 +158,7 @@ namespace Tiel
 	void WindowsWindow::OnUpdate()
 	{
 		glfwPollEvents();
-		glfwSwapBuffers(m_Window);
+		m_Context->SwapBuffers();
 	}
 
 	void WindowsWindow::SetVSync(bool enabled)

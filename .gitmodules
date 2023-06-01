@@ -1,0 +1,3 @@
+[submodule "Tiel/vendor/GLFW"]
+	path = Tiel/vendor/GLFW
+	url = https://github.com/kyenel64/GlFW

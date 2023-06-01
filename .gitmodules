@@ -4,10 +4,10 @@
 [submodule "Tiel/vendor/glm"]
 	path = Tiel/vendor/glm
 	url = https://github.com/g-truc/glm
-[submodule "Tiel/vendor/spdlog"]
-	path = Tiel/vendor/spdlog
-	url = https://github.com/gabime/spdlog
 [submodule "Tiel/vendor/ImGui"]
 	path = Tiel/vendor/ImGui
 	url = https://github.com/kyenel64/imgui
 	branch = docking
+[submodule "Tiel/vendor/spdlog"]
+	path = Tiel/vendor/spdlog
+	url = https://github.com/gabime/spdlog

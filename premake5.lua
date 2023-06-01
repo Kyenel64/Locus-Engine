@@ -67,8 +67,7 @@ project "Tiel"
 		"GLFW",
 		"Glad",
 		"ImGui",
-		"opengl32.lib",
-		"Dwmapi.lib"
+		"opengl32.lib"	
 	}
 
 	filter "system:windows"

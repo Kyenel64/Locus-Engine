@@ -24,7 +24,7 @@ namespace Tiel
 	};
 
 	// Window class interface for desktops
-	class TIEL_API Window
+	class Window
 	{
 	public:
 		using EventCallbackFn = std::function<void(Event&)>;

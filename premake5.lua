@@ -27,9 +27,10 @@ group ""
 
 project "Tiel"
 	location "Tiel"
-	kind "SharedLib"
+	kind "StaticLib"
 	language "C++"
-	staticruntime "off"
+	cppdialect "C++17"
+	staticruntime "on"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -44,6 +45,11 @@ project "Tiel"
 		"%{prj.name}/src/**.cpp",
 		"%{prj.name}/vendor/glm/glm/**.hpp",
 		"%{prj.name}/vendor/glm/glm/**.inl"
+	}
+
+	defines
+	{
+		"_CRT_SECURE_NO_WARNINGS"
 	}
 
 	includedirs
@@ -66,7 +72,6 @@ project "Tiel"
 	}
 
 	filter "system:windows"
-		cppdialect "C++17"
 		systemversion "latest"
 
 		defines
@@ -76,31 +81,27 @@ project "Tiel"
 			"GLFW_INCLUDE_NONE"
 		}
 
-		postbuildcommands
-		{
-			("{COPY} %{cfg.buildtarget.relpath} \"../bin/" .. outputdir .. "/Sandbox/\"")
-		}
-
 	filter "configurations:Debug"
 		defines "TIEL_DEBUG"
 		runtime "Debug" -- /MDd
-		symbols "On"
+		symbols "on"
 
 	filter "configurations:Release"
 		defines "TIEL_RELEASE"
 		runtime "Release" -- /MD
-		optimize "On"
+		optimize "on"
 
 	filter "configurations:Dist"
 		defines "TIEL_DIST"
 		runtime "Release" -- /MD
-		optimize "On"
+		optimize "on"
 
 project "Sandbox"
 	location "Sandbox"
 	kind "ConsoleApp"
 	language "C++"
-	staticruntime "off"
+	cppdialect "C++17"
+	staticruntime "on"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -125,7 +126,6 @@ project "Sandbox"
 	}
 
 	filter "system:windows"
-		cppdialect "C++17"
 		systemversion "latest"
 
 		defines
@@ -136,14 +136,15 @@ project "Sandbox"
 	filter "configurations:Debug"
 		defines "TIEL_DEBUG"
 		runtime "Debug" -- /MDd
-		symbols "On"
+		symbols "on"
 
 	filter "configurations:Release"
 		defines "TIEL_RELEASE"
 		runtime "Release" -- /MD
-		optimize "On"
+		optimize "on"
 
 	filter "configurations:Dist"
 		defines "TIEL_DIST"
 		runtime "Release" -- /MD
-		optimize "On"
+		optimize "on"
+		

@@ -5,7 +5,7 @@
 namespace Tiel
 {
 	// Event class for mouse movement
-	class TIEL_API MouseMovedEvent : public Event
+	class MouseMovedEvent : public Event
 	{
 	public:
 		MouseMovedEvent(float x, float y) : m_MouseX(x), m_MouseY(y) {}
@@ -28,7 +28,7 @@ namespace Tiel
 	};
 
 	// Event class for mouse scroll
-	class TIEL_API MouseScrolledEvent : public Event
+	class MouseScrolledEvent : public Event
 	{
 	public:
 		MouseScrolledEvent(float xOffset, float yOffset) : m_XOffset(xOffset), m_YOffset(yOffset) {}
@@ -50,7 +50,7 @@ namespace Tiel
 	};
 
 	// Parent class for mouse button events
-	class TIEL_API MouseButtonEvent : public Event
+	class MouseButtonEvent : public Event
 	{
 	public:
 		inline int GetMouseButton() const { return m_Button; }
@@ -63,7 +63,7 @@ namespace Tiel
 	};
 
 	// Mouse button event class for mouse presses
-	class TIEL_API MouseButtonPressedEvent : public MouseButtonEvent
+	class MouseButtonPressedEvent : public MouseButtonEvent
 	{
 	public:
 		MouseButtonPressedEvent(int button) : MouseButtonEvent(button) {}
@@ -79,7 +79,7 @@ namespace Tiel
 	};
 
 	// Mouse button event class for mouse release
-	class TIEL_API MouseButtonReleasedEvent : public MouseButtonEvent
+	class MouseButtonReleasedEvent : public MouseButtonEvent
 	{
 	public:
 		MouseButtonReleasedEvent(int button) : MouseButtonEvent(button) {}

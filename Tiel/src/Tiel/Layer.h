@@ -8,7 +8,7 @@
 
 namespace Tiel
 {
-	class TIEL_API Layer
+	class Layer
 	{
 	public:
 		Layer(const std::string& name = "Layer");

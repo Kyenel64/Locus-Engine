@@ -11,7 +11,7 @@
 
 namespace Tiel
 {
-	class TIEL_API Input
+	class Input
 	{
 	public:
 		// Input is static but must run platform specific code. The private functions

@@ -15,7 +15,7 @@
 
 namespace Tiel
 {
-	class TIEL_API Application
+	class Application
 	{
 	public:
 		// Creates window, sets event callbacks, and creates ImGui layer.

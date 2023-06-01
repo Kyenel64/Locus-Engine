@@ -4,12 +4,16 @@
 #pragma once
 
 #ifdef TIEL_PLATFORM_WINDOWS
+#if TIEL_DYNAMIC_LINK
 	#ifdef TIEL_BUILD_DLL
 		#define TIEL_API __declspec(dllexport)
 
 	#else
 		#define TIEL_API __declspec(dllimport)
 	#endif
+#else
+	#define TIEL_API
+#endif
 #else
 	#error Tiel only supports Windows
 #endif

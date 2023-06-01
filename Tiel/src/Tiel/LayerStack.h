@@ -9,7 +9,7 @@
 
 namespace Tiel
 {
-	class TIEL_API LayerStack
+	class LayerStack
 	{
 	public:
 		LayerStack();

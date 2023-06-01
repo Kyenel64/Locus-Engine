@@ -38,7 +38,7 @@ namespace Tiel
 #define EVENT_CLASS_CATEGORY(category) virtual int GetCategoryFlags() const override { return category; }
 
 	// Parent class for events
-	class TIEL_API Event
+	class Event
 	{
 		friend class EventDispatcher; // Friend classes can access private and protected.
 	public:

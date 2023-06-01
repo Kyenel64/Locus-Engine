@@ -5,7 +5,7 @@
 namespace Tiel
 {
 	// Event class for window resizing
-	class TIEL_API WindowResizeEvent : public Event
+	class WindowResizeEvent : public Event
 	{
 	public:
 		WindowResizeEvent(unsigned int width, unsigned int height) : m_Width(width), m_Height(height) {}
@@ -28,7 +28,7 @@ namespace Tiel
 	};
 
 	// Event class for window close
-	class TIEL_API WindowCloseEvent : public Event
+	class WindowCloseEvent : public Event
 	{
 	public:
 		WindowCloseEvent() {}
@@ -38,7 +38,7 @@ namespace Tiel
 	};
 
 	// Event class for tick events
-	class TIEL_API AppTickEvent : public Event
+	class AppTickEvent : public Event
 	{
 	public:
 		AppTickEvent() {}
@@ -48,7 +48,7 @@ namespace Tiel
 	};
 
 	// Event class for update events
-	class TIEL_API AppUpdateEvent : public Event
+	class AppUpdateEvent : public Event
 	{
 	public:
 		AppUpdateEvent() {}
@@ -58,7 +58,7 @@ namespace Tiel
 	};
 
 	// Event class for render events
-	class TIEL_API AppRenderEvent : public Event
+	class AppRenderEvent : public Event
 	{
 	public:
 		AppRenderEvent() {}

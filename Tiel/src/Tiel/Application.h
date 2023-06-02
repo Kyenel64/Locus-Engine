@@ -38,7 +38,11 @@ namespace Tiel
 
 	private:
 		static Application* s_Instance;
+
 		std::unique_ptr<Window> m_Window;
+		
+		unsigned int m_VertexArray, m_VertexBuffer, m_IndexBuffer;
+
 		ImGuiLayer* m_ImGuiLayer;
 		bool m_Running = true;
 		LayerStack m_LayerStack;

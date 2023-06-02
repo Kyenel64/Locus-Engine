@@ -31,11 +31,11 @@ namespace Tiel
 #define TIEL_CORE_WARN(...)  ::Tiel::Log::GetCoreLogger()->warn(__VA_ARGS__)
 #define TIEL_CORE_INFO(...)  ::Tiel::Log::GetCoreLogger()->info(__VA_ARGS__)
 #define TIEL_CORE_TRACE(...) ::Tiel::Log::GetCoreLogger()->trace(__VA_ARGS__)
-#define TIEL_CORE_FATAL(...) ::Tiel::Log::GetCoreLogger()->fatal(__VA_ARGS__)
+#define TIEL_CORE_CRITICAL(...) ::Tiel::Log::GetCoreLogger()->critical(__VA_ARGS__)
 
 // Client log macros
 #define TIEL_ERROR(...) ::Tiel::Log::GetClientLogger()->error(__VA_ARGS__)
 #define TIEL_WARN(...)  ::Tiel::Log::GetClientLogger()->warn(__VA_ARGS__)
 #define TIEL_INFO(...)  ::Tiel::Log::GetClientLogger()->info(__VA_ARGS__)
 #define TIEL_TRACE(...) ::Tiel::Log::GetClientLogger()->trace(__VA_ARGS__)
-#define TIEL_FATAL(...) ::Tiel::Log::GetClientLogger()->fatal(__VA_ARGS__)
+#define TIEL_CRITICAL(...) ::Tiel::Log::GetClientLogger()->critical(__VA_ARGS__)

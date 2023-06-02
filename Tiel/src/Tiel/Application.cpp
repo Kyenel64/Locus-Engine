@@ -23,7 +23,7 @@ namespace Tiel
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
 
-		// Temporary rendering
+		// --- Temporary rendering --------------------------------------------------
 		float vertices[3 * 3] =
 		{
 			-0.5f, -0.5f, 0.0f,
@@ -47,6 +47,30 @@ namespace Tiel
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBuffer);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
+		std::string vertexSrc = R"(
+			#version 460 core
+			layout (location = 0) in vec3 aPos;
+			out vec3 v_Position;
+			
+			void main()
+			{
+				gl_Position = vec4(aPos, 1.0);
+				v_Position = aPos;
+			}
+		)";
+		std::string fragmentSrc = R"(
+			#version 460 core
+
+			in vec3 v_Position;
+			out vec4 color;
+			
+			void main()
+			{
+				color = vec4(v_Position * 0.5 + 0.5, 1.0);
+			}
+		)";
+
+		m_Shader.reset(new Shader(vertexSrc, fragmentSrc));
 	}
 
 	Application::~Application()
@@ -86,9 +110,10 @@ namespace Tiel
 	{
 		while (m_Running)
 		{
-			glClearColor(0.2f, 0.3f, 0.3f, 1);
+			glClearColor(0.2f, 0.2f, 0.25f, 1);
 			glClear(GL_COLOR_BUFFER_BIT);
 
+			m_Shader->Bind();
 			glBindVertexArray(m_VertexArray);
 			glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
 

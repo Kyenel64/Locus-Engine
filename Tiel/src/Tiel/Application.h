@@ -12,6 +12,7 @@
 #include "Tiel/LayerStack.h"
 #include "Tiel/Events/ApplicationEvent.h"
 #include "Tiel/ImGui/ImGuiLayer.h"
+#include "Renderer/Shader.h"
 
 namespace Tiel
 {
@@ -42,6 +43,7 @@ namespace Tiel
 		std::unique_ptr<Window> m_Window;
 		
 		unsigned int m_VertexArray, m_VertexBuffer, m_IndexBuffer;
+		std::unique_ptr<Shader> m_Shader;
 
 		ImGuiLayer* m_ImGuiLayer;
 		bool m_Running = true;

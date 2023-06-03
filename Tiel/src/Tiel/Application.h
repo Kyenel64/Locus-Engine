@@ -9,10 +9,13 @@
 
 #include "Window.h"
 #include "Events/Event.h"
+
 #include "Tiel/LayerStack.h"
 #include "Tiel/Events/ApplicationEvent.h"
 #include "Tiel/ImGui/ImGuiLayer.h"
+
 #include "Renderer/Shader.h"
+#include "Renderer/Buffer.h"
 
 namespace Tiel
 {
@@ -42,8 +45,10 @@ namespace Tiel
 
 		std::unique_ptr<Window> m_Window;
 		
-		unsigned int m_VertexArray, m_VertexBuffer, m_IndexBuffer;
+		unsigned int m_VertexArray;
 		std::unique_ptr<Shader> m_Shader;
+		std::unique_ptr<VertexBuffer> m_VertexBuffer;
+		std::unique_ptr<IndexBuffer> m_IndexBuffer;
 
 		ImGuiLayer* m_ImGuiLayer;
 		bool m_Running = true;

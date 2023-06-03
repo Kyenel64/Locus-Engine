@@ -15,7 +15,7 @@ namespace Tiel
 	{
 	public:
 		ImGuiLayer();
-		~ImGuiLayer();
+		virtual ~ImGuiLayer() {}
 
 		// Initiates and sets styling for ImGui
 		virtual void OnAttach() override;

@@ -24,7 +24,7 @@ namespace Tiel
 	public:
 		// Creates window, sets event callbacks, and creates ImGui layer.
 		Application();
-		virtual ~Application();
+		virtual ~Application() {}
 
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);

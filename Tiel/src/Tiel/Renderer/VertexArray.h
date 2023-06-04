@@ -1,3 +1,6 @@
+// --- VertexArray ------------------------------------------------------------
+// Interface for vertex arrays. 
+// Create() checks RendererAPI and creates a RenderAPI specific VertexArray.
 #pragma once
 
 #include "Tiel/Renderer/Buffer.h"

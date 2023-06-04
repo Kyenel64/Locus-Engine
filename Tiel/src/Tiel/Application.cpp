@@ -1,7 +1,7 @@
 #include "tpch.h"
 #include "Application.h"
 
-#include <glad/glad.h>
+#include "Renderer/Renderer.h"
 
 namespace Tiel
 {
@@ -152,6 +152,7 @@ namespace Tiel
 		EventDispatcher dispatcher(e);
 		// Dispatch event if event class type matches event type
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
+		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(OnWindowResize));
 
 		// Iterate each layer's events backwards
 		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();)
@@ -166,16 +167,20 @@ namespace Tiel
 	{
 		while (m_Running)
 		{
-			glClearColor(0.2f, 0.2f, 0.25f, 1);
-			glClear(GL_COLOR_BUFFER_BIT);
+			RenderCommand::SetClearColor({ 0.2f, 0.2f, 0.25f, 1 });
+			RenderCommand::Clear();
+
+			Renderer::BeginScene();
 
 			m_BlueShader->Bind();
-			m_SquareVA->Bind();
-			glDrawElements(GL_TRIANGLES, m_SquareVA->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+			Renderer::Submit(m_SquareVA);
 
 			m_Shader->Bind();
-			m_VertexArray->Bind();
-			glDrawElements(GL_TRIANGLES, m_VertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+			Renderer::Submit(m_VertexArray);
+
+			Renderer::EndScene();
+
+
 			// Iterate through layers on update BEFORE window update.
 			for (Layer* layer : m_LayerStack)
 				layer->OnUpdate();
@@ -194,6 +199,12 @@ namespace Tiel
 	bool Application::OnWindowClose(WindowCloseEvent& e)
 	{
 		m_Running = false;
+		return true;
+	}
+
+	bool Application::OnWindowResize(WindowResizeEvent& e)
+	{
+		RenderCommand::Resize(0, 0, e.GetWidth(), e.GetHeight());
 		return true;
 	}
 }

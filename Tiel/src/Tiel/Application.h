@@ -40,6 +40,7 @@ namespace Tiel
 
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
+		bool OnWindowResize(WindowResizeEvent& e);
 
 	private:
 		static Application* s_Instance;

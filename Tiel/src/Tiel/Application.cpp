@@ -11,7 +11,7 @@ namespace Tiel
 
 	Application* Application::s_Instance = nullptr;
 
-	Application::Application()
+	Application::Application() : m_Camera(-1.6f, 1.6f, -0.9f, 0.9f)
 	{
 		TIEL_CORE_ASSERT(!s_Instance, "Application already exists");
 		s_Instance = this;
@@ -30,6 +30,7 @@ namespace Tiel
 		// Vertex Buffer
 		float vertices[3 * 7] =
 		{
+			// Position          // Color
 			-0.5f, -0.5f,  0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
 			 0.5f, -0.5f,  0.0f, 0.2f, 0.8f, 0.8f, 1.0f,
 			 0.0f,  0.5f,  0.0f, 0.8f, 0.8f, 0.2f, 1.0f
@@ -57,26 +58,25 @@ namespace Tiel
 			layout (location = 0) in vec3 a_Position;
 			layout (location = 1) in vec4 a_Color;
 
-			out vec3 v_Position;
+			uniform mat4 u_ViewProjection;
+
 			out vec4 v_Color;
 			
 			void main()
 			{
-				gl_Position = vec4(a_Position, 1.0);
-				v_Position = a_Position;
+				gl_Position = u_ViewProjection * vec4(a_Position, 1.0f);
 				v_Color = a_Color;
+				
 			}
 		)";
 		std::string fragmentSrc = R"(
 			#version 460 core
 
-			in vec3 v_Position;
 			in vec4 v_Color;
 			out vec4 color;
 			
 			void main()
 			{
-				color = vec4(v_Position * 0.5 + 0.5, 1.0);
 				color = vec4(v_Color);
 			}
 		)";
@@ -114,11 +114,12 @@ namespace Tiel
 			#version 330 core
 			
 			layout(location = 0) in vec3 a_Position;
-			out vec3 v_Position;
+
+			uniform mat4 u_ViewProjection;
+
 			void main()
 			{
-				v_Position = a_Position;
-				gl_Position = vec4(a_Position, 1.0);	
+				gl_Position = u_ViewProjection * vec4(a_Position, 1.0f);
 			}
 		)";
 
@@ -126,7 +127,6 @@ namespace Tiel
 			#version 330 core
 			
 			layout(location = 0) out vec4 color;
-			in vec3 v_Position;
 			void main()
 			{
 				color = vec4(0.2, 0.3, 0.8, 1.0);
@@ -170,13 +170,13 @@ namespace Tiel
 			RenderCommand::SetClearColor({ 0.2f, 0.2f, 0.25f, 1 });
 			RenderCommand::Clear();
 
-			Renderer::BeginScene();
+			//m_Camera.SetPosition({ 0.5f, 0.5f, 0.0f });
+			//m_Camera.SetRotation(45.0f);
 
-			m_BlueShader->Bind();
-			Renderer::Submit(m_SquareVA);
+			Renderer::BeginScene(m_Camera);
 
-			m_Shader->Bind();
-			Renderer::Submit(m_VertexArray);
+			Renderer::Submit(m_BlueShader, m_SquareVA);
+			Renderer::Submit(m_Shader, m_VertexArray);
 
 			Renderer::EndScene();
 

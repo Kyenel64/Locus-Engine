@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 
+#include "glm/glm.hpp"
+
 namespace Tiel
 {
 	class Shader
@@ -11,6 +13,8 @@ namespace Tiel
 
 		void Bind() const;
 		void Unbind() const;
+
+		void UploadUniformMat4(const std::string& name, const glm::mat4& matrix);
 
 		inline unsigned int getID() const { return m_RendererID; }
 

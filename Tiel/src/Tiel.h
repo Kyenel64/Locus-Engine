@@ -14,6 +14,16 @@
 
 #include "Tiel/ImGui/ImGuiLayer.h"
 
-#include <stdio.h>
+// --- Renderer ---------------------------------------------------------------
+#include "Tiel/Renderer/Renderer.h"
+#include "Tiel/Renderer/RendererAPI.h"
+#include "Tiel/Renderer/RenderCommand.h"
+
+#include "Tiel/Renderer/Buffer.h"
+#include "Tiel/Renderer/VertexArray.h"
+#include "Tiel/Renderer/Shader.h"
+
+#include "Tiel/Renderer/OrthographicCamera.h"
+
 // ---------- Entry Point ------------
 #include "Tiel/EntryPoint.h"

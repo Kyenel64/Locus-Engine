@@ -4,6 +4,7 @@
 #pragma once
 
 #include <iostream>
+#include <stdio.h>
 #include <memory>
 #include <utility>
 #include <algorithm>

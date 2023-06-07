@@ -1,7 +1,7 @@
 #include "tpch.h"
 #include "Application.h"
 
-#include "Renderer/Renderer.h"
+#include "Tiel/Renderer/Renderer.h"
 
 namespace Tiel
 {

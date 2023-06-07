@@ -1,7 +1,7 @@
 #include "tpch.h"
 #include "WindowsInput.h"
 
-#include "Tiel/Application.h"
+#include "Tiel/Core/Application.h"
 #include "GLFW/glfw3.h"
 
 namespace Tiel

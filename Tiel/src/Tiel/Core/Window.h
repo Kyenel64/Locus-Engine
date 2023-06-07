@@ -6,7 +6,7 @@
 
 #include "tpch.h"
 
-#include "Tiel/Core.h"
+#include "Tiel/Core/Core.h"
 #include "Tiel/Events/Event.h"
 
 namespace Tiel

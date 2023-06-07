@@ -8,17 +8,17 @@
 #include "Core.h"
 
 #include "Window.h"
-#include "Events/Event.h"
+#include "Tiel/Events/Event.h"
 
-#include "Tiel/LayerStack.h"
+#include "Tiel/Core/LayerStack.h"
 #include "Tiel/Events/ApplicationEvent.h"
 #include "Tiel/ImGui/ImGuiLayer.h"
 
-#include "Renderer/Shader.h"
-#include "Renderer/Buffer.h"
-#include "Renderer/VertexArray.h"
+#include "Tiel/Renderer/Shader.h"
+#include "Tiel/Renderer/Buffer.h"
+#include "Tiel/Renderer/VertexArray.h"
 
-#include "Renderer/OrthographicCamera.h"
+#include "Tiel/Renderer/OrthographicCamera.h"
 
 namespace Tiel
 {

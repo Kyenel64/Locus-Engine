@@ -65,7 +65,7 @@ public:
 			}
 		)";
 
-		m_Shader.reset(new Tiel::Shader(vertexSrc, fragmentSrc));
+		m_Shader.reset(Tiel::Shader::Create(vertexSrc, fragmentSrc));
 
 		// --- Rendering Square -----------------------------------------------
 
@@ -117,7 +117,7 @@ public:
 			}
 		)";
 
-		m_BlueShader.reset(new Tiel::Shader(blueShaderVertexSrc, blueShaderFragmentSrc));
+		m_BlueShader.reset(Tiel::Shader::Create(blueShaderVertexSrc, blueShaderFragmentSrc));
 	}
 
 	void OnUpdate() override
@@ -186,10 +186,7 @@ public:
 		PushLayer(new ExampleLayer());
 	}
 
-	~Sandbox()
-	{
-
-	}
+	~Sandbox() {}
 };
 
 Tiel::Application* Tiel::CreateApplication()

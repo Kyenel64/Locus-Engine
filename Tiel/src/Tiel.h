@@ -3,14 +3,14 @@
 
 #pragma once
 
-#include "Tiel/Application.h"
+#include "Tiel/Core/Application.h"
 
-#include "Tiel/Log.h"
-#include "Tiel/Layer.h"
+#include "Tiel/Core/Log.h"
+#include "Tiel/Core/Layer.h"
 
-#include "Tiel/Input.h"
-#include "Tiel/KeyCodes.h"
-#include "Tiel/MouseButtonCodes.h"
+#include "Tiel/Core/Input.h"
+#include "Tiel/Core/KeyCodes.h"
+#include "Tiel/Core/MouseButtonCodes.h"
 
 #include "Tiel/ImGui/ImGuiLayer.h"
 
@@ -25,5 +25,5 @@
 
 #include "Tiel/Renderer/OrthographicCamera.h"
 
-// ---------- Entry Point ------------
-#include "Tiel/EntryPoint.h"
+// --- Entry Point ------------------------------------------------------------
+#include "Tiel/Core/EntryPoint.h"

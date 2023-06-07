@@ -8,17 +8,15 @@ namespace Tiel
 	class Shader
 	{
 	public:
-		Shader(const std::string vertexSrc, const std::string fragmentSrc);
-		~Shader();
 
-		void Bind() const;
-		void Unbind() const;
+		virtual void Bind() const = 0;
+		virtual void Unbind() const = 0;
 
-		void UploadUniformMat4(const std::string& name, const glm::mat4& matrix);
+		virtual void UploadUniformMat4(const std::string& name, const glm::mat4& matrix) const = 0;
 
-		inline unsigned int getID() const { return m_RendererID; }
+		virtual inline unsigned int getID() const = 0;
 
-	private:
-		uint32_t m_RendererID;
+		static Shader* Create(const std::string vertexSrc, const std::string fragmentSrc);
+
 	};
 }

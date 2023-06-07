@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Tiel/Window.h"
+#include "Tiel/Core/Window.h"
 
 #include "Tiel/Renderer/GraphicsContext.h"
 

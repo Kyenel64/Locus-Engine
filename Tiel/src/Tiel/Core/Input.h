@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "Tiel/Core.h"
+#include "Tiel/Core/Core.h"
 
 namespace Tiel
 {

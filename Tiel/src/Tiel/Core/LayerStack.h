@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Tiel/Core.h"
+#include "Tiel/Core/Core.h"
 #include "Layer.h"
 
 namespace Tiel

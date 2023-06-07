@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Tiel/Input.h"
+#include "Tiel/Core/Input.h"
 
 namespace Tiel
 {

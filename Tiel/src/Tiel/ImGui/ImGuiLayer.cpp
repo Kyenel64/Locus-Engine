@@ -4,7 +4,7 @@
 #include "imgui.h"
 #include "GLFW/glfw3.h"
 
-#include "Tiel/Application.h"
+#include "Tiel/Core/Application.h"
 
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_glfw.h"

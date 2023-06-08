@@ -1,7 +1,8 @@
-# TIEL
+# TIEL ENGINE
 Tiel is a game engine developed for Windows using C++ and OpenGL. More platforms and rendering APIs may be implemented in the future.
 ***
-##How to Install
+## How to Install
+
 Requirements: Visual Studio 2022
 
 #### 1. Downloading source code

@@ -55,9 +55,14 @@ namespace Tiel
 	{
 		while (m_Running)
 		{
+			// Calculate deltaTime
+			float time = m_Window->GetTime();
+			Timestep timestep = time - m_LastFrameTime;
+			m_LastFrameTime = time;
+
 			// Iterate through layers on update BEFORE window update.
 			for (Layer* layer : m_LayerStack)
-				layer->OnUpdate();
+				layer->OnUpdate(timestep);
 
 			// Render ImGui
 			m_ImGuiLayer->Begin();

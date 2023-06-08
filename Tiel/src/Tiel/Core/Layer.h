@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Tiel/Core/Core.h"
+#include "Tiel/Core/Timestep.h"
 #include "Tiel/Events/Event.h"
 
 namespace Tiel
@@ -16,7 +17,7 @@ namespace Tiel
 
 		virtual void OnAttach() {}
 		virtual void OnDetach() {}
-		virtual void OnUpdate() {}
+		virtual void OnUpdate(Timestep deltaTime) {}
 		virtual void OnEvent(Event& event) {}
 		virtual void OnImGuiRender() {}
 

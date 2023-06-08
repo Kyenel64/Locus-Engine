@@ -1,5 +1,5 @@
 # TIEL ENGINE
-Tiel is a game engine developed for Windows using C++ and OpenGL. More platforms and rendering APIs may be implemented in the future.
+Tiel is a game engine currently in development for Windows using C++ and OpenGL. More platforms and rendering APIs may be implemented in the future.
 ***
 ## How to Install
 

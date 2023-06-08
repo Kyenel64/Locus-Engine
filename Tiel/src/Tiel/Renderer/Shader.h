@@ -1,3 +1,6 @@
+// --- Shader -----------------------------------------------------------------
+// Interface for shaders. Creates platform specific shader class.
+
 #pragma once
 #include <string>
 
@@ -14,7 +17,7 @@ namespace Tiel
 
 		virtual void UploadUniformMat4(const std::string& name, const glm::mat4& matrix) const = 0;
 
-		virtual inline unsigned int getID() const = 0;
+		virtual unsigned int getID() const = 0;
 
 		static Shader* Create(const std::string vertexSrc, const std::string fragmentSrc);
 

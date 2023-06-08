@@ -5,7 +5,7 @@
 class ExampleLayer : public Tiel::Layer
 {
 public:
-	ExampleLayer() : Layer("Example"), m_Camera(-1.6f, 1.6f, -0.9f, 0.9f), m_CameraPosition(0.0f)
+	ExampleLayer() : Layer("Example"), m_Camera(-1.6f, 1.6f, -0.9f, 0.9f), m_CameraPosition({0.0f, 0.0f, 0.5f})
 	{
 		// --- Rendering Triangle ---------------------------------------------
 

@@ -1,3 +1,5 @@
+// --- OpenGlShader -----------------------------------------------------------
+// OpenGL Shader class. Creates OpenGL shaders with GLSL source data.
 #pragma once
 
 #include "Tiel/Renderer/Shader.h"
@@ -15,7 +17,7 @@ namespace Tiel
 
 		virtual void UploadUniformMat4(const std::string& name, const glm::mat4& matrix) const override;
 
-		virtual inline unsigned int getID() const override { return m_RendererID; }
+		virtual unsigned int getID() const override { return m_RendererID; }
 
 	private:
 		uint32_t m_RendererID;

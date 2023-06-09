@@ -1,6 +1,7 @@
 #include <Tiel.h>
 
-#include "ImGui/imgui.h"
+//#include "ImGui/imgui.h"
+#include "glm/glm/gtc/matrix_transform.hpp"
 
 class ExampleLayer : public Tiel::Layer
 {
@@ -43,12 +44,13 @@ public:
 			layout (location = 1) in vec4 a_Color;
 
 			uniform mat4 u_ViewProjection;
+			uniform mat4 u_Transform;
 
 			out vec4 v_Color;
 			
 			void main()
 			{
-				gl_Position = u_ViewProjection * vec4(a_Position, 1.0f);
+				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0f);
 				v_Color = a_Color;
 				
 			}
@@ -72,10 +74,10 @@ public:
 		m_SquareVA.reset(Tiel::VertexArray::Create());
 		// Vertex Buffer
 		float squareVertices[3 * 4] = {
-			-0.75f, -0.75f, 0.0f,
-			 0.75f, -0.75f, 0.0f,
-			 0.75f,  0.75f, 0.0f,
-			-0.75f,  0.75f, 0.0f
+			-0.5f, -0.5f, 0.0f,
+			 0.5f, -0.5f, 0.0f,
+			 0.5f,  0.5f, 0.0f,
+			-0.5f,  0.5f, 0.0f
 		};
 		std::shared_ptr<Tiel::VertexBuffer> squareVB;
 		squareVB.reset(Tiel::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
@@ -100,10 +102,11 @@ public:
 			layout(location = 0) in vec3 a_Position;
 
 			uniform mat4 u_ViewProjection;
+			uniform mat4 u_Transform;
 
 			void main()
 			{
-				gl_Position = u_ViewProjection * vec4(a_Position, 1.0f);
+				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0f);
 			}
 		)";
 
@@ -145,7 +148,15 @@ public:
 
 		Tiel::Renderer::BeginScene(m_Camera);
 
-		Tiel::Renderer::Submit(m_BlueShader, m_SquareVA);
+		for (int i = 0; i < 25; i++)
+		{
+			for (int j = 0; j < 25; j++)
+			{
+				glm::mat4 transform = glm::translate(glm::mat4(1.0f),
+					glm::vec3((i * 1.1), (j * 1.1), 0.0f));
+				Tiel::Renderer::Submit(m_BlueShader, m_SquareVA, transform);
+			}
+		}
 		Tiel::Renderer::Submit(m_Shader, m_VertexArray);
 
 		Tiel::Renderer::EndScene();

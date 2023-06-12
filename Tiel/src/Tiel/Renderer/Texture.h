@@ -1,3 +1,7 @@
+// --- Texture ----------------------------------------------------------------
+// Texture interfaces. 2D. 3D in the future.
+// Create() creates a RendererAPI specific texture object.
+
 #pragma once
 
 #include "Tiel/Core/Core.h"

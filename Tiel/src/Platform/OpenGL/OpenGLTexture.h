@@ -1,3 +1,7 @@
+// --- OpenGLTexture ----------------------------------------------------------
+// OpenGL specific texure class. Handles initial setup and binding.
+// 2D. 3D in the future.
+
 #pragma once
 
 #include "Tiel/Renderer/Texture.h"

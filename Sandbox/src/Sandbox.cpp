@@ -20,7 +20,7 @@ public:
 			 0.5f, -0.5f,  0.0f, 0.2f, 0.8f, 0.8f, 1.0f,
 			 0.0f,  0.5f,  0.0f, 0.8f, 0.8f, 0.2f, 1.0f
 		};
-		std::shared_ptr<Tiel::VertexBuffer> vertexBuffer;
+		Tiel::Ref<Tiel::VertexBuffer> vertexBuffer;
 		vertexBuffer.reset(Tiel::VertexBuffer::Create(vertices, sizeof(vertices)));
 		// Add element here and GLSL
 		Tiel::BufferLayout layout =
@@ -33,7 +33,7 @@ public:
 
 		// Index Buffer
 		uint32_t indices[3] = { 0, 1, 2 };
-		std::shared_ptr<Tiel::IndexBuffer> indexBuffer;
+		Tiel::Ref<Tiel::IndexBuffer> indexBuffer;
 		indexBuffer.reset(Tiel::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
 		m_VertexArray->SetIndexBuffer(indexBuffer);
 
@@ -79,7 +79,7 @@ public:
 			 0.5f,  0.5f, 0.0f,
 			-0.5f,  0.5f, 0.0f
 		};
-		std::shared_ptr<Tiel::VertexBuffer> squareVB;
+		Tiel::Ref<Tiel::VertexBuffer> squareVB;
 		squareVB.reset(Tiel::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
 		// Add element here and GLSL
 		Tiel::BufferLayout squareLayout =
@@ -91,7 +91,7 @@ public:
 
 		// Index Buffer
 		uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
-		std::shared_ptr<Tiel::IndexBuffer> squareIB;
+		Tiel::Ref<Tiel::IndexBuffer> squareIB;
 		squareIB.reset(Tiel::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
 		m_SquareVA->SetIndexBuffer(squareIB);
 
@@ -174,11 +174,11 @@ public:
 
 private:
 
-	std::shared_ptr<Tiel::Shader> m_Shader;
-	std::shared_ptr<Tiel::VertexArray> m_VertexArray;
+	Tiel::Ref<Tiel::Shader> m_Shader;
+	Tiel::Ref<Tiel::VertexArray> m_VertexArray;
 
-	std::shared_ptr<Tiel::Shader> m_BlueShader;
-	std::shared_ptr<Tiel::VertexArray> m_SquareVA;
+	Tiel::Ref<Tiel::Shader> m_BlueShader;
+	Tiel::Ref<Tiel::VertexArray> m_SquareVA;
 
 	Tiel::OrthographicCamera m_Camera;
 	glm::vec3 m_CameraPosition;

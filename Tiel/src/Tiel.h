@@ -24,6 +24,7 @@
 #include "Tiel/Renderer/Buffer.h"
 #include "Tiel/Renderer/VertexArray.h"
 #include "Tiel/Renderer/Shader.h"
+#include "Tiel/Renderer/Texture.h"
 
 #include "Tiel/Renderer/OrthographicCamera.h"
 

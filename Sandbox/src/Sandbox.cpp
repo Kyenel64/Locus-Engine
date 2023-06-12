@@ -1,7 +1,10 @@
 #include <Tiel.h>
 
-//#include "ImGui/imgui.h"
+#include "Platform/OpenGL/OpenGLShader.h"
+
+#include "ImGui/imgui.h"
 #include "glm/glm/gtc/matrix_transform.hpp"
+#include "glm/glm/gtc/type_ptr.hpp"
 
 class ExampleLayer : public Tiel::Layer
 {
@@ -11,7 +14,6 @@ public:
 		// --- Rendering Triangle ---------------------------------------------
 
 		m_VertexArray.reset(Tiel::VertexArray::Create());
-
 		// Vertex Buffer
 		float vertices[3 * 7] =
 		{
@@ -37,7 +39,36 @@ public:
 		indexBuffer.reset(Tiel::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
 		m_VertexArray->SetIndexBuffer(indexBuffer);
 
-		// Shaders
+
+		// --- Rendering Square -----------------------------------------------
+
+		m_SquareVA.reset(Tiel::VertexArray::Create());
+		// Vertex Buffer
+		float squareVertices[5 * 4] = {
+			-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
+			 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+			 0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
+			-0.5f,  0.5f, 0.0f, 0.0f, 1.0f
+		};
+		Tiel::Ref<Tiel::VertexBuffer> squareVB;
+		squareVB.reset(Tiel::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
+		// Add element here and GLSL
+		Tiel::BufferLayout squareLayout =
+		{
+			{ Tiel::ShaderDataType::Float3, "a_Position" },
+			{ Tiel::ShaderDataType::Float2, "a_TexCoord" }
+		};
+		squareVB->SetLayout(squareLayout);
+		m_SquareVA->AddVertexBuffer(squareVB);
+		// Index Buffer
+		uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
+		Tiel::Ref<Tiel::IndexBuffer> squareIB;
+		squareIB.reset(Tiel::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
+		m_SquareVA->SetIndexBuffer(squareIB);
+
+
+
+		// --- Shaders --------------------------------------------------------------
 		std::string vertexSrc = R"(
 			#version 460 core
 			layout (location = 0) in vec3 a_Position;
@@ -69,37 +100,10 @@ public:
 
 		m_Shader.reset(Tiel::Shader::Create(vertexSrc, fragmentSrc));
 
-		// --- Rendering Square -----------------------------------------------
-
-		m_SquareVA.reset(Tiel::VertexArray::Create());
-		// Vertex Buffer
-		float squareVertices[3 * 4] = {
-			-0.5f, -0.5f, 0.0f,
-			 0.5f, -0.5f, 0.0f,
-			 0.5f,  0.5f, 0.0f,
-			-0.5f,  0.5f, 0.0f
-		};
-		Tiel::Ref<Tiel::VertexBuffer> squareVB;
-		squareVB.reset(Tiel::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
-		// Add element here and GLSL
-		Tiel::BufferLayout squareLayout =
-		{
-			{ Tiel::ShaderDataType::Float3, "a_Position" }
-		};
-		squareVB->SetLayout(squareLayout);
-		m_SquareVA->AddVertexBuffer(squareVB);
-
-		// Index Buffer
-		uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
-		Tiel::Ref<Tiel::IndexBuffer> squareIB;
-		squareIB.reset(Tiel::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
-		m_SquareVA->SetIndexBuffer(squareIB);
-
 		// Shaders
-		std::string blueShaderVertexSrc = R"(
-			#version 330 core
-			
-			layout(location = 0) in vec3 a_Position;
+		std::string flatColorVertexSrc = R"(
+			#version 460 core
+			layout (location = 0) in vec3 a_Position;
 
 			uniform mat4 u_ViewProjection;
 			uniform mat4 u_Transform;
@@ -107,20 +111,66 @@ public:
 			void main()
 			{
 				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0f);
+				
+			}
+		)";
+		std::string flatColorFragmentxSrc = R"(
+			#version 460 core
+
+			uniform vec3 u_Color;
+
+			out vec4 color;
+			
+			void main()
+			{
+				color = vec4(u_Color, 1.0f);
 			}
 		)";
 
-		std::string blueShaderFragmentSrc = R"(
+		m_FlatColorShader.reset(Tiel::Shader::Create(flatColorVertexSrc, flatColorFragmentxSrc));
+
+		std::string textureShaderVertexSrc = R"(
+			#version 330 core
+			
+			layout(location = 0) in vec3 a_Position;
+			layout(location = 1) in vec2 a_TexCoord;
+
+			uniform mat4 u_ViewProjection;
+			uniform mat4 u_Transform;
+
+			out vec2 v_TexCoord;
+
+			void main()
+			{
+				v_TexCoord = a_TexCoord;
+				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0f);
+			}
+		)";
+
+		std::string textureShaderFragmentSrc = R"(
 			#version 330 core
 			
 			layout(location = 0) out vec4 color;
+
+			in vec2 v_TexCoord;
+
+			uniform sampler2D u_Texture;
+
 			void main()
 			{
-				color = vec4(0.2, 0.3, 0.8, 1.0);
+				color = texture(u_Texture, v_TexCoord);
 			}
 		)";
 
-		m_BlueShader.reset(Tiel::Shader::Create(blueShaderVertexSrc, blueShaderFragmentSrc));
+		m_TextureShader.reset(Tiel::Shader::Create(textureShaderVertexSrc, textureShaderFragmentSrc));
+
+
+
+		// What we want
+		m_Texture = Tiel::Texture2D::Create("assets/textures/Checkerboard.png");
+
+		std::dynamic_pointer_cast<Tiel::OpenGLShader>(m_TextureShader)->Bind();
+		std::dynamic_pointer_cast<Tiel::OpenGLShader>(m_TextureShader)->UploadUniformInt("u_Texture", 0);
 	}
 
 	void OnUpdate(Tiel::Timestep deltaTime) override
@@ -148,23 +198,33 @@ public:
 
 		Tiel::Renderer::BeginScene(m_Camera);
 
+		std::dynamic_pointer_cast<Tiel::OpenGLShader>(m_FlatColorShader)->Bind();
+		std::dynamic_pointer_cast<Tiel::OpenGLShader>(m_FlatColorShader)->UploadUniformFloat3("u_Color", m_SquareColor);
+
 		for (int i = 0; i < 25; i++)
 		{
 			for (int j = 0; j < 25; j++)
 			{
 				glm::mat4 transform = glm::translate(glm::mat4(1.0f),
 					glm::vec3((i * 1.1), (j * 1.1), 0.0f));
-				Tiel::Renderer::Submit(m_BlueShader, m_SquareVA, transform);
+				Tiel::Renderer::Submit(m_FlatColorShader, m_SquareVA, transform);
 			}
 		}
-		Tiel::Renderer::Submit(m_Shader, m_VertexArray);
+
+		m_Texture->Bind();
+		Tiel::Renderer::Submit(m_TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+
+		// Triangle
+		//Tiel::Renderer::Submit(m_Shader, m_VertexArray);
 
 		Tiel::Renderer::EndScene();
 	}
 
 	virtual void OnImGuiRender() override
 	{
-
+		ImGui::Begin("Settings");
+		ImGui::ColorEdit3("Square Color", glm::value_ptr(m_SquareColor));
+		ImGui::End();
 	}
 
 	void OnEvent(Tiel::Event& event) override
@@ -177,8 +237,10 @@ private:
 	Tiel::Ref<Tiel::Shader> m_Shader;
 	Tiel::Ref<Tiel::VertexArray> m_VertexArray;
 
-	Tiel::Ref<Tiel::Shader> m_BlueShader;
+	Tiel::Ref<Tiel::Shader> m_FlatColorShader, m_TextureShader;
 	Tiel::Ref<Tiel::VertexArray> m_SquareVA;
+
+	Tiel::Ref<Tiel::Texture2D> m_Texture;
 
 	Tiel::OrthographicCamera m_Camera;
 	glm::vec3 m_CameraPosition;
@@ -186,6 +248,8 @@ private:
 
 	float m_CameraRotation = 0.0f;
 	float m_CameraRotationSpeed = 50.0f;
+
+	glm::vec3 m_SquareColor = { 0.2f, 0.3f, 0.8f };
 };
 
 

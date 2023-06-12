@@ -10,6 +10,11 @@ namespace Tiel
 	class RenderCommand
 	{
 	public:
+		inline static void Init()
+		{
+			s_RendererAPI->Init();
+		}
+
 		inline static void SetClearColor(const glm::vec4& color) 
 		{
 			return s_RendererAPI->SetClearColor(color);

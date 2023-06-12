@@ -168,6 +168,7 @@ public:
 
 		// What we want
 		m_Texture = Tiel::Texture2D::Create("assets/textures/Checkerboard.png");
+		m_CockatielTexture = Tiel::Texture2D::Create("assets/textures/Cockatiel.png");
 
 		std::dynamic_pointer_cast<Tiel::OpenGLShader>(m_TextureShader)->Bind();
 		std::dynamic_pointer_cast<Tiel::OpenGLShader>(m_TextureShader)->UploadUniformInt("u_Texture", 0);
@@ -213,6 +214,8 @@ public:
 
 		m_Texture->Bind();
 		Tiel::Renderer::Submit(m_TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+		m_CockatielTexture->Bind();
+		Tiel::Renderer::Submit(m_TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 
 		// Triangle
 		//Tiel::Renderer::Submit(m_Shader, m_VertexArray);
@@ -240,7 +243,7 @@ private:
 	Tiel::Ref<Tiel::Shader> m_FlatColorShader, m_TextureShader;
 	Tiel::Ref<Tiel::VertexArray> m_SquareVA;
 
-	Tiel::Ref<Tiel::Texture2D> m_Texture;
+	Tiel::Ref<Tiel::Texture2D> m_Texture, m_CockatielTexture;
 
 	Tiel::OrthographicCamera m_Camera;
 	glm::vec3 m_CameraPosition;

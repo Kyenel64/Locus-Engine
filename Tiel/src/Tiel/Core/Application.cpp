@@ -62,9 +62,13 @@ namespace Tiel
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
-			// Iterate through layers on update BEFORE window update.
-			for (Layer* layer : m_LayerStack)
-				layer->OnUpdate(timestep);
+			if (!m_Minimized)
+			{
+				// Iterate through layers on update BEFORE window update.
+				for (Layer* layer : m_LayerStack)
+					layer->OnUpdate(timestep);
+			}
+			
 
 			// Render ImGui
 			m_ImGuiLayer->Begin();
@@ -85,7 +89,14 @@ namespace Tiel
 
 	bool Application::OnWindowResize(WindowResizeEvent& e)
 	{
-		RenderCommand::Resize(0, 0, e.GetWidth(), e.GetHeight());
-		return true;
+		if (e.GetWidth() == 0 || e.GetHeight() == 0)
+		{
+			m_Minimized = true;
+			return false;
+		}
+		m_Minimized = false;
+		Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
+
+		return false;
 	}
 }

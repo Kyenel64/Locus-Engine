@@ -9,7 +9,7 @@
 class ExampleLayer : public Tiel::Layer
 {
 public:
-	ExampleLayer() : Layer("Example"), m_Camera(-1.6f, 1.6f, -0.9f, 0.9f), m_CameraPosition({0.0f, 0.0f, 0.5f})
+	ExampleLayer() : Layer("Example"), m_CameraController(1920.0f / 1080.0f)
 	{
 		// --- Rendering Triangle ---------------------------------------------
 
@@ -140,28 +140,14 @@ public:
 
 	void OnUpdate(Tiel::Timestep deltaTime) override
 	{
-		if (Tiel::Input::IsKeyPressed(TIEL_KEY_A) || Tiel::Input::IsKeyPressed(TIEL_KEY_LEFT))
-			m_CameraPosition.x -= m_CameraMoveSpeed * deltaTime;
-		else if (Tiel::Input::IsKeyPressed(TIEL_KEY_D) || Tiel::Input::IsKeyPressed(TIEL_KEY_RIGHT))
-			m_CameraPosition.x += m_CameraMoveSpeed * deltaTime;
+		// Update
+		m_CameraController.OnUpdate(deltaTime);
 
-		if (Tiel::Input::IsKeyPressed(TIEL_KEY_W) || Tiel::Input::IsKeyPressed(TIEL_KEY_UP))
-			m_CameraPosition.y += m_CameraMoveSpeed * deltaTime;
-		else if (Tiel::Input::IsKeyPressed(TIEL_KEY_S) || Tiel::Input::IsKeyPressed(TIEL_KEY_DOWN))
-			m_CameraPosition.y -= m_CameraMoveSpeed * deltaTime;
-		
-		if (Tiel::Input::IsKeyPressed(TIEL_KEY_Q))
-			m_CameraRotation += m_CameraRotationSpeed * deltaTime;
-		else if (Tiel::Input::IsKeyPressed(TIEL_KEY_E))
-			m_CameraRotation -= m_CameraRotationSpeed * deltaTime;
-
+		// Render
 		Tiel::RenderCommand::SetClearColor({ 0.2f, 0.2f, 0.25f, 1 });
 		Tiel::RenderCommand::Clear();
 
-		m_Camera.SetPosition(m_CameraPosition);
-		m_Camera.SetRotation(m_CameraRotation);
-
-		Tiel::Renderer::BeginScene(m_Camera);
+		Tiel::Renderer::BeginScene(m_CameraController.GetCamera());
 
 		std::dynamic_pointer_cast<Tiel::OpenGLShader>(m_FlatColorShader)->Bind();
 		std::dynamic_pointer_cast<Tiel::OpenGLShader>(m_FlatColorShader)->UploadUniformFloat3("u_Color", m_SquareColor);
@@ -175,16 +161,12 @@ public:
 				Tiel::Renderer::Submit(m_FlatColorShader, m_SquareVA, transform);
 			}
 		}
-
 		auto textureShader = m_ShaderLibrary.Get("Texture");
 
 		m_Texture->Bind();
 		Tiel::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 		m_CockatielTexture->Bind();
 		Tiel::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
-
-		// Triangle
-		//Tiel::Renderer::Submit(m_Shader, m_VertexArray);
 
 		Tiel::Renderer::EndScene();
 	}
@@ -196,9 +178,9 @@ public:
 		ImGui::End();
 	}
 
-	void OnEvent(Tiel::Event& event) override
+	void OnEvent(Tiel::Event& e) override
 	{
-
+		m_CameraController.OnEvent(e);
 	}
 
 private:
@@ -212,12 +194,7 @@ private:
 
 	Tiel::Ref<Tiel::Texture2D> m_Texture, m_CockatielTexture;
 
-	Tiel::OrthographicCamera m_Camera;
-	glm::vec3 m_CameraPosition;
-	float m_CameraMoveSpeed = 7.0f;
-
-	float m_CameraRotation = 0.0f;
-	float m_CameraRotationSpeed = 50.0f;
+	Tiel::OrthographicCameraController m_CameraController;
 
 	glm::vec3 m_SquareColor = { 0.2f, 0.3f, 0.8f };
 };

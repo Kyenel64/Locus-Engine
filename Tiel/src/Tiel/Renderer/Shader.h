@@ -22,6 +22,8 @@ namespace Tiel
 		static Ref<Shader> Create(const std::string& filepath);
 	};
 
+
+	// --- ShaderLibrary ---------------------------------------------------------
 	class ShaderLibrary
 	{
 	public:

@@ -17,14 +17,27 @@ namespace Tiel
 	void OrthographicCameraController::OnUpdate(Timestep deltaTime)
 	{
 		if (Tiel::Input::IsKeyPressed(TIEL_KEY_A) || Tiel::Input::IsKeyPressed(TIEL_KEY_LEFT))
-			m_CameraPosition.x -= m_CameraTranslationSpeed * deltaTime;
+		{
+			m_CameraPosition.x -= cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * deltaTime;
+			m_CameraPosition.y -= sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * deltaTime;
+		}
 		else if (Tiel::Input::IsKeyPressed(TIEL_KEY_D) || Tiel::Input::IsKeyPressed(TIEL_KEY_RIGHT))
-			m_CameraPosition.x += m_CameraTranslationSpeed * deltaTime;
+		{
+			m_CameraPosition.x += cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * deltaTime;
+			m_CameraPosition.y += sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * deltaTime;
+		}
 
 		if (Tiel::Input::IsKeyPressed(TIEL_KEY_W) || Tiel::Input::IsKeyPressed(TIEL_KEY_UP))
-			m_CameraPosition.y += m_CameraTranslationSpeed * deltaTime;
+		{
+			m_CameraPosition.x += -sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * deltaTime;
+			m_CameraPosition.y += cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * deltaTime;
+		}
+			
 		else if (Tiel::Input::IsKeyPressed(TIEL_KEY_S) || Tiel::Input::IsKeyPressed(TIEL_KEY_DOWN))
-			m_CameraPosition.y -= m_CameraTranslationSpeed * deltaTime;
+		{
+			m_CameraPosition.x -= -sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * deltaTime;
+			m_CameraPosition.y -= cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * deltaTime;
+		}
 
 		if (m_Rotation)
 		{
@@ -32,6 +45,11 @@ namespace Tiel
 				m_CameraRotation += m_CameraRotationSpeed * deltaTime;
 			if (Tiel::Input::IsKeyPressed(TIEL_KEY_E))
 				m_CameraRotation -= m_CameraRotationSpeed * deltaTime;
+
+			if (m_CameraRotation > 180.0f)
+				m_CameraRotation -= 360.0f;
+			else if (m_CameraRotation <= -180.0f)
+				m_CameraRotation += 360.0f;
 		}
 
 		m_Camera.SetPosition(m_CameraPosition);

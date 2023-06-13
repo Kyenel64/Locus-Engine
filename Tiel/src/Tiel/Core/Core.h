@@ -5,20 +5,36 @@
 
 #include <memory>
 
-#ifdef TIEL_PLATFORM_WINDOWS
-#if TIEL_DYNAMIC_LINK
-	#ifdef TIEL_BUILD_DLL
-		#define TIEL_API __declspec(dllexport)
-
+// Platform detection using predefined macros
+#ifdef _WIN32
+	#ifdef _WIN64
+		#define TIEL_PLATFORM_WINDOWS
 	#else
-		#define TIEL_API __declspec(dllimport)
+		#error "x86 builds are not supported!"
 	#endif
+#elif defined(__APPLE__) || defined(__MACH__)
+	#include <TargetConditionals.h>
+	#if TARGET_IPHONE_SIMULATOR == 1
+		#error "IOS simulator is not supported!"
+	#elif TARGET_OS_IPHONE == 1
+		#define TIEL_PLATFORM_IOS
+		#error "IOS is not supported!"
+	#elif TARGET_OS_MAC == 1
+		#define TIEL_PLATFORM_MACOS
+		#error "MacOS is not supported!"
+	#else
+		#error "Unknown Apple platform!"
+	#endif
+#elif defined(__ANDROID__)
+	#define TIEL_PLATFORM_ANDROID
+	#error "Android is not supported!"
+#elif defined(__linux__)
+	#define TIEL_PLATFORM_LINUX
+	#error "Linux is not supported!"
 #else
-	#define TIEL_API
-#endif
-#else
-	#error Tiel only supports Windows
-#endif
+	#error "Unknown platform!"
+#endif // End of platform detection
+
 
 #ifdef TIEL_DEBUG
 	#define TIEL_ENABLE_ASSERTS

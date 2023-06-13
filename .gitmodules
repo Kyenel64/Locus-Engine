@@ -1,6 +1,7 @@
 [submodule "Tiel/vendor/glm"]
 	path = Tiel/vendor/glm
 	url = https://github.com/g-truc/glm
+	branch = master
 [submodule "Tiel/vendor/ImGui"]
 	path = Tiel/vendor/ImGui
 	url = https://github.com/kyenel64/imgui
@@ -8,6 +9,8 @@
 [submodule "Tiel/vendor/GLFW"]
 	path = Tiel/vendor/GLFW
 	url = https://github.com/kyenel64/glfw
+	branch = master
 [submodule "Tiel/vendor/spdlog"]
 	path = Tiel/vendor/spdlog
 	url = https://github.com/kyenel64/spdlog
+	branch = v1.x

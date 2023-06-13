@@ -98,7 +98,7 @@ public:
 			}
 		)";
 
-		m_Shader.reset(Tiel::Shader::Create(vertexSrc, fragmentSrc));
+		m_Shader = Tiel::Shader::Create("VertexPosColor", vertexSrc, fragmentSrc);
 
 		// Shaders
 		std::string flatColorVertexSrc = R"(
@@ -127,17 +127,15 @@ public:
 			}
 		)";
 
-		m_FlatColorShader.reset(Tiel::Shader::Create(flatColorVertexSrc, flatColorFragmentxSrc));
+		m_FlatColorShader = Tiel::Shader::Create("FlatColor", flatColorVertexSrc, flatColorFragmentxSrc);
 
-		m_TextureShader.reset(Tiel::Shader::Create("assets/Shaders/Texture.glsl"));
-
-
+		auto textureShader = m_ShaderLibrary.Load("assets/Shaders/Texture.glsl");
 
 		m_Texture = Tiel::Texture2D::Create("assets/Textures/Checkerboard.png");
 		m_CockatielTexture = Tiel::Texture2D::Create("assets/Textures/Cockatiel.png");
 
-		std::dynamic_pointer_cast<Tiel::OpenGLShader>(m_TextureShader)->Bind();
-		std::dynamic_pointer_cast<Tiel::OpenGLShader>(m_TextureShader)->UploadUniformInt("u_Texture", 0);
+		std::dynamic_pointer_cast<Tiel::OpenGLShader>(textureShader)->Bind();
+		std::dynamic_pointer_cast<Tiel::OpenGLShader>(textureShader)->UploadUniformInt("u_Texture", 0);
 	}
 
 	void OnUpdate(Tiel::Timestep deltaTime) override
@@ -178,10 +176,12 @@ public:
 			}
 		}
 
+		auto textureShader = m_ShaderLibrary.Get("Texture");
+
 		m_Texture->Bind();
-		Tiel::Renderer::Submit(m_TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+		Tiel::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 		m_CockatielTexture->Bind();
-		Tiel::Renderer::Submit(m_TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+		Tiel::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 
 		// Triangle
 		//Tiel::Renderer::Submit(m_Shader, m_VertexArray);
@@ -203,10 +203,11 @@ public:
 
 private:
 
+	Tiel::ShaderLibrary m_ShaderLibrary;
 	Tiel::Ref<Tiel::Shader> m_Shader;
 	Tiel::Ref<Tiel::VertexArray> m_VertexArray;
 
-	Tiel::Ref<Tiel::Shader> m_FlatColorShader, m_TextureShader;
+	Tiel::Ref<Tiel::Shader> m_FlatColorShader;
 	Tiel::Ref<Tiel::VertexArray> m_SquareVA;
 
 	Tiel::Ref<Tiel::Texture2D> m_Texture, m_CockatielTexture;

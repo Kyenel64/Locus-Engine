@@ -12,7 +12,7 @@
 #include "Tiel/Core/KeyCodes.h"
 #include "Tiel/Core/MouseButtonCodes.h"
 
-#include "Tiel/Core/OrthographicCameraController.h"
+#include "Tiel/Renderer/OrthographicCameraController.h"
 
 #include "Tiel/Core/Timestep.h"
 

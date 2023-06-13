@@ -1,8 +1,8 @@
 #include "tpch.h"
 #include "OrthographicCameraController.h"
 
-#include "Input.h"
-#include "KeyCodes.h"
+#include "Tiel/Core/Input.h"
+#include "Tiel/Core/KeyCodes.h"
 
 namespace Tiel
 {

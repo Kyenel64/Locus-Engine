@@ -1,5 +1,6 @@
 #include <Tiel.h>
 
+// Dont want!
 #include "Platform/OpenGL/OpenGLShader.h"
 
 #include "ImGui/imgui.h"
@@ -13,7 +14,7 @@ public:
 	{
 		// --- Rendering Triangle ---------------------------------------------
 
-		m_VertexArray.reset(Tiel::VertexArray::Create());
+		m_VertexArray = Tiel::VertexArray::Create();
 		// Vertex Buffer
 		float vertices[3 * 7] =
 		{
@@ -23,7 +24,7 @@ public:
 			 0.0f,  0.5f,  0.0f, 0.8f, 0.8f, 0.2f, 1.0f
 		};
 		Tiel::Ref<Tiel::VertexBuffer> vertexBuffer;
-		vertexBuffer.reset(Tiel::VertexBuffer::Create(vertices, sizeof(vertices)));
+		vertexBuffer = Tiel::VertexBuffer::Create(vertices, sizeof(vertices));
 		// Add element here and GLSL
 		Tiel::BufferLayout layout =
 		{
@@ -36,13 +37,13 @@ public:
 		// Index Buffer
 		uint32_t indices[3] = { 0, 1, 2 };
 		Tiel::Ref<Tiel::IndexBuffer> indexBuffer;
-		indexBuffer.reset(Tiel::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+		indexBuffer = Tiel::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
 		m_VertexArray->SetIndexBuffer(indexBuffer);
 
 
 		// --- Rendering Square -----------------------------------------------
 
-		m_SquareVA.reset(Tiel::VertexArray::Create());
+		m_SquareVA = Tiel::VertexArray::Create();
 		// Vertex Buffer
 		float squareVertices[5 * 4] = {
 			-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
@@ -51,7 +52,7 @@ public:
 			-0.5f,  0.5f, 0.0f, 0.0f, 1.0f
 		};
 		Tiel::Ref<Tiel::VertexBuffer> squareVB;
-		squareVB.reset(Tiel::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
+		squareVB = Tiel::VertexBuffer::Create(squareVertices, sizeof(squareVertices));
 		// Add element here and GLSL
 		Tiel::BufferLayout squareLayout =
 		{
@@ -63,7 +64,7 @@ public:
 		// Index Buffer
 		uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
 		Tiel::Ref<Tiel::IndexBuffer> squareIB;
-		squareIB.reset(Tiel::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
+		squareIB = Tiel::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t));
 		m_SquareVA->SetIndexBuffer(squareIB);
 
 
@@ -175,6 +176,7 @@ public:
 	{
 		ImGui::Begin("Settings");
 		ImGui::ColorEdit3("Square Color", glm::value_ptr(m_SquareColor));
+		ImGui::Text("%f", m_CameraController.GetZoomLevel());
 		ImGui::End();
 	}
 

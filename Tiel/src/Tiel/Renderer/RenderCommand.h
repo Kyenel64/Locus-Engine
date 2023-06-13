@@ -17,7 +17,7 @@ namespace Tiel
 
 		inline static void SetClearColor(const glm::vec4& color) 
 		{
-			return s_RendererAPI->SetClearColor(color);
+			s_RendererAPI->SetClearColor(color);
 		}
 
 		inline static void Clear()

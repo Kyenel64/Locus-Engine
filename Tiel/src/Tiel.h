@@ -29,6 +29,3 @@
 #include "Tiel/Renderer/Texture.h"
 
 #include "Tiel/Renderer/OrthographicCamera.h"
-
-// --- Entry Point ------------------------------------------------------------
-#include "Tiel/Core/EntryPoint.h"

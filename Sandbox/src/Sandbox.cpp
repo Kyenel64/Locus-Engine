@@ -1,4 +1,6 @@
 #include <Tiel.h>
+// --- Entry Point ------------------------------------------------------------
+#include <Tiel/Core/EntryPoint.h>
 
 // Dont want!
 #include "Platform/OpenGL/OpenGLShader.h"
@@ -6,6 +8,8 @@
 #include "ImGui/imgui.h"
 #include "glm/glm/gtc/matrix_transform.hpp"
 #include "glm/glm/gtc/type_ptr.hpp"
+
+#include "Sandbox2D.h"
 
 class ExampleLayer : public Tiel::Layer
 {
@@ -130,10 +134,10 @@ public:
 
 		m_FlatColorShader = Tiel::Shader::Create("FlatColor", flatColorVertexSrc, flatColorFragmentxSrc);
 
-		auto textureShader = m_ShaderLibrary.Load("assets/Shaders/Texture.glsl");
+		auto textureShader = m_ShaderLibrary.Load("assets/shaders/Texture.glsl");
 
-		m_Texture = Tiel::Texture2D::Create("assets/Textures/Checkerboard.png");
-		m_CockatielTexture = Tiel::Texture2D::Create("assets/Textures/Cockatiel.png");
+		m_Texture = Tiel::Texture2D::Create("assets/textures/Checkerboard.png");
+		m_CockatielTexture = Tiel::Texture2D::Create("assets/textures/Cockatiel.png");
 
 		std::dynamic_pointer_cast<Tiel::OpenGLShader>(textureShader)->Bind();
 		std::dynamic_pointer_cast<Tiel::OpenGLShader>(textureShader)->UploadUniformInt("u_Texture", 0);
@@ -207,7 +211,8 @@ class Sandbox : public Tiel::Application
 public:
 	Sandbox()
 	{
-		PushLayer(new ExampleLayer());
+		//PushLayer(new ExampleLayer());
+		PushLayer(new Sandbox2D());
 	}
 
 	~Sandbox() {}

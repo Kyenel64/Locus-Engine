@@ -18,7 +18,7 @@ namespace Tiel
 		virtual void OnAttach() {}
 		virtual void OnDetach() {}
 		virtual void OnUpdate(Timestep deltaTime) {}
-		virtual void OnEvent(Event& event) {}
+		virtual void OnEvent(Event& e) {}
 		virtual void OnImGuiRender() {}
 
 		inline const std::string& GetName() const { return m_DebugName; }

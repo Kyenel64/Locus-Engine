@@ -79,8 +79,6 @@ project "Tiel"
 
 		defines
 		{
-			"TIEL_PLATFORM_WINDOWS",
-			"TIEL_BUILD_DLL",
 			"GLFW_INCLUDE_NONE"
 		}
 

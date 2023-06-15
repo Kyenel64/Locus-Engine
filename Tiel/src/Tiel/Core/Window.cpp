@@ -7,10 +7,10 @@
 
 namespace Tiel
 {
-	Window* Window::Create(const WindowProps& props)
+	Scope<Window> Window::Create(const WindowProps& props)
 	{
 		#ifdef TIEL_PLATFORM_WINDOWS
-			return new WindowsWindow(props);
+			return CreateScope<WindowsWindow>(props);
 		#else
 			TIEL_CORE_ASSERT(false, "Unknown Platform!");
 			return nullptr;

@@ -20,6 +20,7 @@
 
 // --- Renderer ---------------------------------------------------------------
 #include "Tiel/Renderer/Renderer.h"
+#include "Tiel/Renderer/Renderer2D.h"
 #include "Tiel/Renderer/RendererAPI.h"
 #include "Tiel/Renderer/RenderCommand.h"
 

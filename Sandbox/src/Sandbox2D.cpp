@@ -35,13 +35,13 @@ void Sandbox2D::OnUpdate(Tiel::Timestep deltaTime)
 
 	Tiel::Renderer2D::BeginScene(m_CameraController.GetCamera());
 
-	Tiel::Renderer2D::DrawQuad({ 0.0f, 0.0f }, { 1.0f, 1.0f }, m_SquareColor);
+	Tiel::Renderer2D::DrawQuad({ 0.0f, 0.5f }, { 2.0f, 1.0f }, m_SquareColor);
 
 	Tiel::Renderer2D::EndScene();
 
 	// TODO: SetMat4, SetFloat4
-	//std::dynamic_pointer_cast<Tiel::OpenGLShader>(m_FlatColorShader)->Bind();
-	//std::dynamic_pointer_cast<Tiel::OpenGLShader>(m_FlatColorShader)->UploadUniformFloat4("u_Color", m_SquareColor);
+	//m_FlatColorShader->Bind();
+	//m_FlatColorShader->SetFloat4("u_Color", m_SquareColor);
 
 
 }

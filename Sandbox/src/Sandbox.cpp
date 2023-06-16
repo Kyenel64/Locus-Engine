@@ -139,8 +139,8 @@ public:
 		m_Texture = Tiel::Texture2D::Create("assets/textures/Checkerboard.png");
 		m_CockatielTexture = Tiel::Texture2D::Create("assets/textures/Cockatiel.png");
 
-		std::dynamic_pointer_cast<Tiel::OpenGLShader>(textureShader)->Bind();
-		std::dynamic_pointer_cast<Tiel::OpenGLShader>(textureShader)->UploadUniformInt("u_Texture", 0);
+		textureShader->Bind();
+		textureShader->SetInt("u_Texture", 0);
 	}
 
 	void OnUpdate(Tiel::Timestep deltaTime) override
@@ -154,8 +154,8 @@ public:
 
 		Tiel::Renderer::BeginScene(m_CameraController.GetCamera());
 
-		std::dynamic_pointer_cast<Tiel::OpenGLShader>(m_FlatColorShader)->Bind();
-		std::dynamic_pointer_cast<Tiel::OpenGLShader>(m_FlatColorShader)->UploadUniformFloat3("u_Color", m_SquareColor);
+		m_FlatColorShader->Bind();
+		m_FlatColorShader->SetFloat3("u_Color", m_SquareColor);
 
 		for (int i = 0; i < 25; i++)
 		{

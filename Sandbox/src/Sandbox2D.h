@@ -20,6 +20,7 @@ private:
 	// Temp
 	Tiel::Ref<Tiel::VertexArray> m_SquareVA;
 	Tiel::Ref<Tiel::Shader> m_FlatColorShader;
+	Tiel::Ref<Tiel::Texture2D> m_CheckerboardTexture;
 
 	glm::vec4 m_SquareColor = { 0.2f, 0.5f, 0.3f, 1.0f };
 };

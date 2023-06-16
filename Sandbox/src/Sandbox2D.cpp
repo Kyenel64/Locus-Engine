@@ -16,7 +16,7 @@ Sandbox2D::Sandbox2D()
 
 void Sandbox2D::OnAttach()
 {
-
+	m_CheckerboardTexture = Tiel::Texture2D::Create("assets/textures/Checkerboard.png");
 }
 
 void Sandbox2D::OnDetach()
@@ -35,7 +35,9 @@ void Sandbox2D::OnUpdate(Tiel::Timestep deltaTime)
 
 	Tiel::Renderer2D::BeginScene(m_CameraController.GetCamera());
 
-	Tiel::Renderer2D::DrawQuad({ 0.0f, 0.5f }, { 2.0f, 1.0f }, m_SquareColor);
+	Tiel::Renderer2D::DrawQuad({ 0.2f, -0.2f }, { 2.0f, 1.0f }, m_SquareColor);
+	Tiel::Renderer2D::DrawQuad({ -0.2f, 0.2f }, { 2.0f, 1.0f }, {0.8f, 0.2f, 0.4f, 1.0f});
+	Tiel::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, m_CheckerboardTexture);
 
 	Tiel::Renderer2D::EndScene();
 

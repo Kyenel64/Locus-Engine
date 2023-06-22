@@ -21,8 +21,6 @@ namespace Tiel
 		virtual void OnAttach() override;
 		// Shuts down opengl3 and glfw for ImGui
 		virtual void OnDetach() override;
-		// Currently shows demo window
-		virtual void OnImGuiRender() override;
 
 		// Separates rendering so OnImGuiRender can be simplified
 		void Begin();

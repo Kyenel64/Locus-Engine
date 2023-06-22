@@ -6,8 +6,6 @@
 #include "Tiel/Events/KeyEvent.h"
 #include "Tiel/Events/Event.h"
 
-#include "Platform/OpenGL/OpenGLContext.h"
-
 namespace Tiel
 {
 	static uint8_t s_GLFWWindowCount = 0;
@@ -43,7 +41,7 @@ namespace Tiel
 
 		// --- Create window and initialize renderer context ------------------
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
-		m_Context = CreateScope<OpenGLContext>(m_Window);
+		m_Context = GraphicsContext::Create(m_Window);
 		m_Context->Init();
 		++s_GLFWWindowCount;
 

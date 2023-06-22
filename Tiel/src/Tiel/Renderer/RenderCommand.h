@@ -5,6 +5,7 @@
 #pragma once
 
 #include "RendererAPI.h"
+
 namespace Tiel
 {
 	class RenderCommand
@@ -36,6 +37,6 @@ namespace Tiel
 		}
 
 	private:
-		static RendererAPI* s_RendererAPI;
+		static Scope<RendererAPI> s_RendererAPI;
 	};
 }

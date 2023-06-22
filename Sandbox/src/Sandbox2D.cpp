@@ -2,11 +2,8 @@
 
 #include "imgui/imgui.h"
 
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-// Temp
-#include "Platform/OpenGL/OpenGLShader.h"
 
 Sandbox2D::Sandbox2D()
 	: Layer("Sandbox2D"), m_CameraController(1920.0f / 1080.0f)

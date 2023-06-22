@@ -1,6 +1,6 @@
 // --- Entrypoint -------------------------------------------------------------
 // Contains main function. Creates a project application where the 
-// CreateApplication() is contained in the project (Sandbox) application.
+// CreateApplication() is contained in the project (eg. Sandbox) application.
 // Calls the run-loop.
 
 #pragma once
@@ -12,12 +12,10 @@ extern Tiel::Application* Tiel::CreateApplication();
 
 int main(int argc, char** argv)
 {
-	// ---------- Initialize Log ----------
+	// --- Initialize Log ---
 	Tiel::Log::Init();
-	TIEL_CORE_WARN("Initialized Log!");
-	TIEL_INFO("Hello!");
 
-	// ---- Create project application ----
+	// --- Create project application ---
 	auto app = Tiel::CreateApplication();
 	app->Run();
 	delete app;

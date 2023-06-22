@@ -2,9 +2,6 @@
 // --- Entry Point ------------------------------------------------------------
 #include <Tiel/Core/EntryPoint.h>
 
-// Dont want!
-#include "Platform/OpenGL/OpenGLShader.h"
-
 #include "ImGui/imgui.h"
 #include "glm/glm/gtc/matrix_transform.hpp"
 #include "glm/glm/gtc/type_ptr.hpp"

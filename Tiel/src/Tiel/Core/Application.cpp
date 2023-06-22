@@ -3,11 +3,12 @@
 
 #include "Tiel/Renderer/Renderer.h"
 
+
 namespace Tiel
 {
 
 // Binds to an event function. Ex: OnWindowClose()
-#define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
+//#define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
 
 	Application* Application::s_Instance = nullptr;
 
@@ -17,8 +18,7 @@ namespace Tiel
 		s_Instance = this;
 
 		m_Window = Window::Create();
-		// Calls OnEvent whenever there is a callback
-		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
+		m_Window->SetEventCallback(TIEL_BIND_EVENT_FN(Application::OnEvent));
 
 		Renderer::Init();
 
@@ -41,8 +41,8 @@ namespace Tiel
 	{
 		EventDispatcher dispatcher(e);
 		// Dispatch event if event class type matches event type
-		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
-		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(OnWindowResize));
+		dispatcher.Dispatch<WindowCloseEvent>(TIEL_BIND_EVENT_FN(Application::OnWindowClose));
+		dispatcher.Dispatch<WindowResizeEvent>(TIEL_BIND_EVENT_FN(Application::OnWindowResize));
 
 		// Iterate each layer's events backwards
 		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();)

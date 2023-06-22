@@ -35,7 +35,6 @@ namespace Tiel
 
 		virtual unsigned int GetWidth() const = 0;
 		virtual unsigned int GetHeight() const = 0;
-
 		virtual float GetTime() const = 0;
 
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;

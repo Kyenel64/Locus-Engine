@@ -2,10 +2,9 @@
 // Includes all the macros used across Tiel.
 
 #pragma once
-
 #include <memory>
 
-// Platform detection using predefined macros
+// --- Platform detection using predefined macros -----------------------------
 #ifdef _WIN32
 	#ifdef _WIN64
 		#define TIEL_PLATFORM_WINDOWS
@@ -33,9 +32,10 @@
 	#error "Linux is not supported!"
 #else
 	#error "Unknown platform!"
-#endif // End of platform detection
+#endif
 
 
+// --- Debugs -----------------------------------------------------------------
 #ifdef TIEL_DEBUG
 	#define TIEL_ENABLE_ASSERTS
 #endif
@@ -48,10 +48,14 @@
 	#define TIEL_CORE_ASSERT(x, ...)
 #endif
 
+
+// --- Utility ----------------------------------------------------------------
 #define BIT(x) (1 << x)
 
 #define TIEL_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
 
+
+// --- Memory Management ------------------------------------------------------
 namespace Tiel
 {
 	template<typename T>

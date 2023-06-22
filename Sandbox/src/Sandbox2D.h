@@ -18,7 +18,6 @@ private:
 	Tiel::OrthographicCameraController m_CameraController;
 
 	// Temp
-	Tiel::Ref<Tiel::VertexArray> m_SquareVA;
 	Tiel::Ref<Tiel::Shader> m_FlatColorShader;
 	Tiel::Ref<Tiel::Texture2D> m_CheckerboardTexture;
 

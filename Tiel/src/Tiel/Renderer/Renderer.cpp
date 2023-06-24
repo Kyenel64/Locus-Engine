@@ -12,6 +12,8 @@ namespace Tiel
 
 	void Renderer::Init()
 	{
+		TIEL_PROFILE_FUNCTION();
+
 		RenderCommand::Init();
 		Renderer2D::Init();
 	}

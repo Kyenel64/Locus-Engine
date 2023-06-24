@@ -17,16 +17,22 @@ namespace Tiel
 
 	WindowsWindow::WindowsWindow(const WindowProps& props)
 	{
+		TIEL_PROFILE_FUNCTION();
+
 		Init(props);
 	}
 
 	WindowsWindow::~WindowsWindow()
 	{
+		TIEL_PROFILE_FUNCTION();
+
 		Shutdown();
 	}
 
 	void WindowsWindow::Init(const WindowProps& props)
 	{
+		TIEL_PROFILE_FUNCTION();
+
 		// --- Initialize data, and GLFW --------------------------------------s
 		m_Data.Title = props.Title;
 		m_Data.Width = props.Width;
@@ -34,13 +40,17 @@ namespace Tiel
 		TIEL_CORE_INFO("Create Window {0} ({1}, {2})", props.Title, props.Width, props.Height);
 		if (s_GLFWWindowCount == 0)
 		{
+			TIEL_PROFILE_SCOPE("glfwInit");
 			int success = glfwInit();
 			TIEL_CORE_ASSERT(success, "Could not initialize GLFW");
 			glfwSetErrorCallback(GLFWErrorCallback);
 		}
 
 		// --- Create window and initialize renderer context ------------------
-		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
+		{
+			TIEL_PROFILE_SCOPE("glfwCreateWindow");
+			m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
+		}
 		m_Context = GraphicsContext::Create(m_Window);
 		m_Context->Init();
 		++s_GLFWWindowCount;
@@ -144,6 +154,8 @@ namespace Tiel
 
 	void WindowsWindow::Shutdown()
 	{
+		TIEL_PROFILE_FUNCTION();
+
 		glfwDestroyWindow(m_Window);
 
 		if (--s_GLFWWindowCount == 0)
@@ -155,12 +167,16 @@ namespace Tiel
 
 	void WindowsWindow::OnUpdate()
 	{
+		TIEL_PROFILE_FUNCTION();
+
 		glfwPollEvents();
 		m_Context->SwapBuffers();
 	}
 
 	void WindowsWindow::SetVSync(bool enabled)
 	{
+		TIEL_PROFILE_FUNCTION();
+
 		if (enabled)
 			glfwSwapInterval(1);
 		else

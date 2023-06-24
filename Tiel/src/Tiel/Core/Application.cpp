@@ -14,6 +14,8 @@ namespace Tiel
 
 	Application::Application()
 	{
+		TIEL_PROFILE_FUNCTION();
+
 		TIEL_CORE_ASSERT(!s_Instance, "Application already exists");
 		s_Instance = this;
 
@@ -28,17 +30,23 @@ namespace Tiel
 
 	void Application::PushLayer(Layer* layer)
 	{
+		TIEL_PROFILE_FUNCTION();
+
 		m_LayerStack.PushLayer(layer);
 	}
 
 	void Application::PushOverlay(Layer* overlay)
 	{
+		TIEL_PROFILE_FUNCTION();
+
 		m_LayerStack.PushOverlay(overlay);
 	}
 
 	// Passes event function to dispatcher.
 	void Application::OnEvent(Event& e)
 	{
+		TIEL_PROFILE_FUNCTION();
+
 		EventDispatcher dispatcher(e);
 		// Dispatch event if event class type matches event type
 		dispatcher.Dispatch<WindowCloseEvent>(TIEL_BIND_EVENT_FN(Application::OnWindowClose));
@@ -55,8 +63,11 @@ namespace Tiel
 
 	void Application::Run()
 	{
+		TIEL_PROFILE_FUNCTION();
+
 		while (m_Running)
 		{
+			TIEL_PROFILE_SCOPE("Run loop");
 			// Calculate deltaTime
 			float time = m_Window->GetTime();
 			Timestep timestep = time - m_LastFrameTime;
@@ -64,19 +75,25 @@ namespace Tiel
 
 			if (!m_Minimized)
 			{
-				// Iterate through layers on update BEFORE window update.
-				for (Layer* layer : m_LayerStack)
+				{
+					TIEL_PROFILE_SCOPE("LayerStack OnUpdate");
+					// Iterate through layers on update BEFORE window update.
+					for (Layer* layer : m_LayerStack)
 					layer->OnUpdate(timestep);
+				}
+				
 			}
-			
 
 			// Render ImGui
 			m_ImGuiLayer->Begin();
-			for (Layer* layer : m_LayerStack)
-				layer->OnImGuiRender();
+			{
+				TIEL_PROFILE_SCOPE("LayerStack OnImGuiRender");
+				for (Layer* layer : m_LayerStack)
+					layer->OnImGuiRender();
+			}
 			m_ImGuiLayer->End();
 
-			
+
 			m_Window->OnUpdate();
 		}
 	}
@@ -89,6 +106,8 @@ namespace Tiel
 
 	bool Application::OnWindowResize(WindowResizeEvent& e)
 	{
+		TIEL_PROFILE_FUNCTION();
+
 		if (e.GetWidth() == 0 || e.GetHeight() == 0)
 		{
 			m_Minimized = true;

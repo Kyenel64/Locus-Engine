@@ -18,6 +18,7 @@
 #include <unordered_set>
 
 #include "Tiel/Core/Log.h"
+#include "Tiel/Debug/Instrumentor.h"
 
 #ifdef TIEL_PLATFORM_WINDOWS
 	#include <Windows.h>

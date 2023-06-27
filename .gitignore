@@ -371,3 +371,4 @@ bin-int/
 *.vcxproj.filters
 *.vcxproj.user
 **/imgui.ini
+*.log

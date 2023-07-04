@@ -16,15 +16,15 @@ int main(int argc, char** argv)
 	Tiel::Log::Init();
 
 	// --- Create project application ---
-	TIEL_PROFILE_BEGIN_SESSION("Startup", "TielProfile-Startup.json");
+	TIEL_PROFILE_BEGIN_SESSION("Startup", "TielProfile-Startup.log");
 	auto app = Tiel::CreateApplication();
 	TIEL_PROFILE_END_SESSION();
 
-	TIEL_PROFILE_BEGIN_SESSION("Runtime", "TielProfile-Runtime.json");
+	TIEL_PROFILE_BEGIN_SESSION("Runtime", "TielProfile-Runtime.log");
 	app->Run();
 	TIEL_PROFILE_END_SESSION();
 
-	TIEL_PROFILE_BEGIN_SESSION("Shutdown", "TielProfile-Shutdown.json");
+	TIEL_PROFILE_BEGIN_SESSION("Shutdown", "TielProfile-Shutdown.log");
 	delete app;
 	TIEL_PROFILE_END_SESSION();
 

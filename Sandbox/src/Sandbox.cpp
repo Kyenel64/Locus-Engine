@@ -4,6 +4,7 @@
 
 #include "Sandbox2D.h"
 #include "ExampleLayer.h"
+#include "TielRPG.h"
 
 
 class Sandbox : public Tiel::Application
@@ -13,6 +14,7 @@ public:
 	{
 		//PushLayer(new ExampleLayer());
 		PushLayer(new Sandbox2D());
+		//PushLayer(new TielRPG());
 	}
 
 	~Sandbox() {}

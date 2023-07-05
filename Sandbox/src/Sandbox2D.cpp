@@ -42,8 +42,8 @@ void Sandbox2D::OnUpdate(Tiel::Timestep deltaTime)
 
 		Tiel::Renderer2D::DrawQuad({ 0.2f, -0.2f }, { 0.1f, 0.2f }, m_SquareColor);
 		Tiel::Renderer2D::DrawQuad({ -0.2f, 0.2f }, { 0.3f, 0.3f }, { 0.8f, 0.2f, 0.4f, 1.0f });
-		//Tiel::Renderer2D::DrawRotatedQuad({ -0.2f, -0.2f }, 45.0f, { 0.3f, 0.1f }, m_SquareColor);
-		Tiel::Renderer2D::DrawQuad({ -5.0f, -5.0f, -0.1f }, { 10.0f, 10.0f }, m_CheckerboardTexture, 10.0f);
+		Tiel::Renderer2D::DrawRotatedQuad({ -0.2f, -0.2f }, 45.0f, { 0.3f, 0.1f }, m_SquareColor);
+		Tiel::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, m_CheckerboardTexture, 10.0f);
 
 		Tiel::Renderer2D::EndScene();
 	}

@@ -32,10 +32,10 @@ namespace Tiel
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
 
-		// Dispatches events. Calls events for each layer.
 		void OnEvent(Event& e);
-		// RUN-LOOP. Iterates through layers each frame.
+		// --- Main Engine loop ---
 		void Run();
+		void Close();
 
 		inline Window& GetWindow() { return *m_Window; }
 		inline static Application& Get() { return *s_Instance; }

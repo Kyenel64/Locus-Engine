@@ -29,5 +29,6 @@
 #include "Tiel/Renderer/Shader.h"
 #include "Tiel/Renderer/Texture.h"
 #include "Tiel/Renderer/SubTexture2D.h"
+#include "Tiel/Renderer/Framebuffer.h"
 
 #include "Tiel/Renderer/OrthographicCamera.h"

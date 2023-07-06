@@ -55,9 +55,10 @@ namespace Tiel
 		// Iterate each layer's events backwards
 		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();)
 		{
-			(*--it)->OnEvent(e);
 			if (e.m_Handled)
 				break;
+			(*--it)->OnEvent(e);
+
 		}
 	}
 
@@ -96,6 +97,11 @@ namespace Tiel
 
 			m_Window->OnUpdate();
 		}
+	}
+
+	void Application::Close()
+	{
+		m_Running = false;
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)

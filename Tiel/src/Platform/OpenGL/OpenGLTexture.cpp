@@ -32,6 +32,11 @@ namespace Tiel
 		{
 			TIEL_PROFILE_SCOPE("stbi_load - OpenGLTexture2D::OpenGLTexture2D(const std::string& path)")
 			data = stbi_load(path.c_str(), &width, &height, &channels, 0);
+			if (data == NULL)
+			{
+				data = stbi_load("assets/textures/MissingTexture.png", &width, &height, &channels, 0);
+				TIEL_CORE_ERROR("Texture missing: {0}", path);
+			}
 		}
 		TIEL_CORE_ASSERT(data, "Failed to load image!");
 		m_Width = width;

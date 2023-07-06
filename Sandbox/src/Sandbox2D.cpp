@@ -15,6 +15,9 @@ void Sandbox2D::OnAttach()
 	TIEL_PROFILE_FUNCTION();
 
 	m_CheckerboardTexture = Tiel::Texture2D::Create("assets/textures/Checkerboard.png");
+	m_SpriteSheet = Tiel::Texture2D::Create("assets/textures/TX_Tileset_Grass.png");
+
+	m_Grass = Tiel::SubTexture2D::CreateFromCoords(m_SpriteSheet, { 1, 0 }, { 32, 32 }, {1, 2});
 }
 
 void Sandbox2D::OnDetach()
@@ -60,14 +63,13 @@ void Sandbox2D::OnUpdate(Tiel::Timestep deltaTime)
 			}
 		}
 		Tiel::Renderer2D::EndScene();
-		Tiel::Renderer2D::StatsEndFrame();
 	}
 
-	// TODO: SetMat4, SetFloat4
-	//m_FlatColorShader->Bind();
-	//m_FlatColorShader->SetFloat4("u_Color", m_SquareColor);
+	Tiel::Renderer2D::BeginScene(m_CameraController.GetCamera());
+	Tiel::Renderer2D::DrawQuad({ 1.0f, 0.0f, 0.5f }, { 1.0f, 2.0f }, m_Grass);
+	Tiel::Renderer2D::EndScene();
 
-
+	Tiel::Renderer2D::StatsEndFrame();
 }
 
 void Sandbox2D::OnEvent(Tiel::Event& e)

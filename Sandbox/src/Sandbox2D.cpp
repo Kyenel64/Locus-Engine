@@ -25,6 +25,7 @@ void Sandbox2D::OnDetach()
 void Sandbox2D::OnUpdate(Tiel::Timestep deltaTime)
 {
 	TIEL_PROFILE_FUNCTION();
+	Tiel::Renderer2D::StatsStartFrame();
 
 	// Update
 	m_CameraController.OnUpdate(deltaTime);
@@ -59,6 +60,7 @@ void Sandbox2D::OnUpdate(Tiel::Timestep deltaTime)
 			}
 		}
 		Tiel::Renderer2D::EndScene();
+		Tiel::Renderer2D::StatsEndFrame();
 	}
 
 	// TODO: SetMat4, SetFloat4
@@ -85,6 +87,8 @@ void Sandbox2D::OnImGuiRender()
 	ImGui::Text("Quads: %d", stats.QuadCount);
 	ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
 	ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
+	ImGui::Text("Frame Time: %f", stats.FrameTime);
+	ImGui::Text("FPS: %f", stats.FramesPerSecond);
 
 	ImGui::ColorEdit4("Square Color", glm::value_ptr(m_SquareColor));
 	ImGui::End();

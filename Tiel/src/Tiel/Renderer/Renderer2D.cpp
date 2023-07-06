@@ -390,11 +390,29 @@ namespace Tiel
 
 	void Renderer2D::ResetStats()
 	{
-		memset(&s_Data.Stats, 0, sizeof(Statistics));
+		//memset(&s_Data.Stats, 0, sizeof(Statistics));
+		s_Data.Stats.DrawCalls = 0;
+		s_Data.Stats.QuadCount = 0;
+		s_Data.Stats.FrameTime = 0;
 	}
 
 	Renderer2D::Statistics Renderer2D::GetStats()
 	{
 		return s_Data.Stats;
+	}
+
+	void Renderer2D::StatsStartFrame()
+	{
+		s_Data.Stats.StartTime = std::chrono::steady_clock().now();
+	}
+
+	void Renderer2D::StatsEndFrame()
+	{
+		s_Data.Stats.EndTime = std::chrono::steady_clock().now();
+		long long start = std::chrono::time_point_cast<std::chrono::microseconds>(s_Data.Stats.StartTime).time_since_epoch().count();
+		long long end = std::chrono::time_point_cast<std::chrono::microseconds>(s_Data.Stats.EndTime).time_since_epoch().count();
+		s_Data.Stats.FrameTime = (end - start) * 0.001f;
+		s_Data.Stats.FramesPerSecond = 1.0f / s_Data.Stats.FrameTime * 1000.0f;
+
 	}
 }

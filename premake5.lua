@@ -97,6 +97,54 @@ project "Tiel"
 		runtime "Release" -- /MD
 		optimize "on"
 
+project "TielEditor"
+	location "TielEditor"
+	kind "ConsoleApp"
+	language "C++"
+	cppdialect "C++17"
+	staticruntime "on"
+	
+	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+	
+	files
+	{
+		"%{prj.name}/src/**.h",
+		"%{prj.name}/src/**.cpp",
+	}
+	
+	includedirs
+	{
+		"Tiel/vendor/spdlog/include",
+		"Tiel/src",
+		"Tiel/vendor",
+		"%{IncludeDir.glm}"
+	}
+	
+	links
+	{
+		"Tiel"
+	}
+	
+	filter "system:windows"
+		systemversion "latest"
+
+	filter "configurations:Debug"
+		defines "TIEL_DEBUG"
+		runtime "Debug" -- /MDd
+		symbols "on"
+
+	filter "configurations:Release"
+		defines "TIEL_RELEASE"
+		runtime "Release" -- /MD
+		optimize "on"
+	
+	filter "configurations:Dist"
+		defines "TIEL_DIST"
+		runtime "Release" -- /MD
+		optimize "on"
+				
+
 project "Sandbox"
 	location "Sandbox"
 	kind "ConsoleApp"

@@ -22,7 +22,6 @@ private:
 	Tiel::Ref<Tiel::Texture2D> m_CheckerboardTexture;
 	Tiel::Ref<Tiel::Texture2D> m_SpriteSheet;
 	Tiel::Ref<Tiel::SubTexture2D> m_Grass;
-	Tiel::Ref<Tiel::Framebuffer> m_Framebuffer;
 
 	glm::vec4 m_SquareColor = { 0.2f, 0.5f, 0.3f, 1.0f };
 };

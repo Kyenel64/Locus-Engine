@@ -26,7 +26,7 @@ namespace Tiel
 	{
 	public:
 		// Creates window, sets event callbacks, and creates ImGui layer.
-		Application();
+		Application(const std::string& name = "Tiel App");
 		virtual ~Application() {}
 
 		void PushLayer(Layer* layer);

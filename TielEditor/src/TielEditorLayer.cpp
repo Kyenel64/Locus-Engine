@@ -18,7 +18,7 @@ namespace Tiel
 
 		m_CheckerboardTexture = Texture2D::Create("assets/textures/Checkerboard.png");
 		m_SpriteSheet = Texture2D::Create("assets/textures/TX_Tileset_Grass.png");
-		m_Grass = SubTexture2D::CreateFromCoords(m_SpriteSheet, { 1, 0 }, { 32, 32 }, {1, 2});
+		m_Grass = SubTexture2D::CreateFromCoords(m_SpriteSheet, { 1, 0 }, { 32, 32 }, { 1, 2 });
 
 		FramebufferSpecs FramebufferSpecs;
 		FramebufferSpecs.Width = 1920;
@@ -37,13 +37,14 @@ namespace Tiel
 		Renderer2D::StatsStartFrame();
 
 		// Update
-		m_CameraController.OnUpdate(deltaTime);
+		if (m_ViewportFocused)
+			m_CameraController.OnUpdate(deltaTime);
 
 		// Render
 		Renderer2D::ResetStats();
 		{
 			TIEL_PROFILE_SCOPE("Renderer Prep");
-		
+
 			m_Framebuffer->Bind();
 
 			RenderCommand::SetClearColor({ 0.2f, 0.2f, 0.25f, 1 });
@@ -84,7 +85,7 @@ namespace Tiel
 
 	void TielEditorLayer::OnEvent(Event& e)
 	{
-			m_CameraController.OnEvent(e);
+		m_CameraController.OnEvent(e);
 	}
 
 	void TielEditorLayer::OnImGuiRender()
@@ -150,6 +151,7 @@ namespace Tiel
 			ImGui::EndMenuBar();
 		}
 
+		// --- Stats window ---
 		ImGui::Begin("Stats");
 		auto stats = Renderer2D::GetStats();
 		ImGui::Text("Renderer2D Stats:");
@@ -162,9 +164,14 @@ namespace Tiel
 		ImGui::ColorEdit4("Square Color", glm::value_ptr(m_SquareColor));
 		ImGui::End();
 
-
+		// --- Viewport window ---
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Viewport");
+
+		m_ViewportFocused = ImGui::IsWindowFocused();
+		m_ViewportHovered = ImGui::IsWindowHovered();
+		Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused || !m_ViewportHovered);
+
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 		if (m_ViewportSize != *((glm::vec2*)&viewportPanelSize))
 		{
@@ -173,12 +180,14 @@ namespace Tiel
 
 			m_CameraController.OnResize(viewportPanelSize.x, viewportPanelSize.y);
 		}
+
 		uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
 		ImGui::Image((void*)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 		ImGui::End();
 		ImGui::PopStyleVar();
 
-		ImGui::End();
 
+
+		ImGui::End();
 	}
 }

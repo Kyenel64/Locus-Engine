@@ -19,6 +19,7 @@ namespace Tiel
 	private:
 		OrthographicCameraController m_CameraController;
 		Ref<Framebuffer> m_Framebuffer;
+		bool m_ViewportFocused = false; bool m_ViewportHovered = false;
 
 		// Temp
 		Ref<Shader> m_FlatColorShader;

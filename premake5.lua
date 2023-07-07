@@ -1,6 +1,6 @@
 workspace "Tiel"
 	architecture "x86_64"
-	startproject "Sandbox"
+	startproject "TielEditor"
 
 	configurations
 	{

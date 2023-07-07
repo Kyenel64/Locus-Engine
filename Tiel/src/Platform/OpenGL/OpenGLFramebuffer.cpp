@@ -8,16 +8,25 @@ namespace Tiel
 	OpenGLFramebuffer::OpenGLFramebuffer(const FramebufferSpecs& specs)
 		: m_Specifications(specs)
 	{
-		Resize();
+		Refresh();
 	}
 
 	OpenGLFramebuffer::~OpenGLFramebuffer()
 	{
 		glDeleteFramebuffers(1, &m_RendererID);
+		glDeleteTextures(1, &m_ColorAttachment);
+		glDeleteTextures(1, &m_DepthAttachment);
 	}
 
-	void OpenGLFramebuffer::Resize()
+	void OpenGLFramebuffer::Refresh()
 	{
+		if (m_RendererID)
+		{
+			glDeleteFramebuffers(1, &m_RendererID);
+			glDeleteTextures(1, &m_ColorAttachment);
+			glDeleteTextures(1, &m_DepthAttachment);
+		}
+
 		glCreateFramebuffers(1, &m_RendererID);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
 
@@ -39,9 +48,18 @@ namespace Tiel
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
+	void OpenGLFramebuffer::Resize(uint32_t width, uint32_t height)
+	{
+		m_Specifications.Width = width;
+		m_Specifications.Height = height;
+
+		Refresh();
+	}
+
 	void OpenGLFramebuffer::Bind()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
+		glViewport(0, 0, m_Specifications.Width, m_Specifications.Height);
 	}
 
 	void OpenGLFramebuffer::Unbind()

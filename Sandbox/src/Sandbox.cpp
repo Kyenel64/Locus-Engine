@@ -1,26 +1,24 @@
-#include <Tiel.h>
+#include <SideA.h>
 // --- Entry Point ------------------------------------------------------------
-#include <Tiel/Core/EntryPoint.h>
+#include <SideA/Core/EntryPoint.h>
 
 #include "Sandbox2D.h"
 #include "ExampleLayer.h"
-#include "TielRPG.h"
 
 
-class Sandbox : public Tiel::Application
+class Sandbox : public SideA::Application
 {
 public:
 	Sandbox()
 	{
 		//PushLayer(new ExampleLayer());
 		PushLayer(new Sandbox2D());
-		//PushLayer(new TielRPG());
 	}
 
 	~Sandbox() {}
 };
 
-Tiel::Application* Tiel::CreateApplication()
+SideA::Application* SideA::CreateApplication()
 {
 	return new Sandbox();
 }

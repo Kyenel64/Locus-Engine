@@ -10,7 +10,7 @@ ExampleLayer::ExampleLayer() : Layer("Example"), m_CameraController(1920.0f / 10
 {
 	// --- Rendering Triangle ---------------------------------------------
 
-	m_VertexArray = Tiel::VertexArray::Create();
+	m_VertexArray = SideA::VertexArray::Create();
 	// Vertex Buffer
 	float vertices[3 * 7] =
 	{
@@ -19,27 +19,27 @@ ExampleLayer::ExampleLayer() : Layer("Example"), m_CameraController(1920.0f / 10
 		 0.5f, -0.5f,  0.0f, 0.2f, 0.8f, 0.8f, 1.0f,
 		 0.0f,  0.5f,  0.0f, 0.8f, 0.8f, 0.2f, 1.0f
 	};
-	Tiel::Ref<Tiel::VertexBuffer> vertexBuffer;
-	vertexBuffer = Tiel::VertexBuffer::Create(vertices, sizeof(vertices));
+	SideA::Ref<SideA::VertexBuffer> vertexBuffer;
+	vertexBuffer = SideA::VertexBuffer::Create(vertices, sizeof(vertices));
 	// Add element here and GLSL
-	Tiel::BufferLayout layout =
+	SideA::BufferLayout layout =
 	{
-		{ Tiel::ShaderDataType::Float3, "a_Position" },
-		{ Tiel::ShaderDataType::Float4, "a_Color" }
+		{ SideA::ShaderDataType::Float3, "a_Position" },
+		{ SideA::ShaderDataType::Float4, "a_Color" }
 	};
 	vertexBuffer->SetLayout(layout);
 	m_VertexArray->AddVertexBuffer(vertexBuffer);
 
 	// Index Buffer
 	uint32_t indices[3] = { 0, 1, 2 };
-	Tiel::Ref<Tiel::IndexBuffer> indexBuffer;
-	indexBuffer = Tiel::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
+	SideA::Ref<SideA::IndexBuffer> indexBuffer;
+	indexBuffer = SideA::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
 	m_VertexArray->SetIndexBuffer(indexBuffer);
 
 
 	// --- Rendering Square -----------------------------------------------
 
-	m_SquareVA = Tiel::VertexArray::Create();
+	m_SquareVA = SideA::VertexArray::Create();
 	// Vertex Buffer
 	float squareVertices[5 * 4] = {
 		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
@@ -47,20 +47,20 @@ ExampleLayer::ExampleLayer() : Layer("Example"), m_CameraController(1920.0f / 10
 		 0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
 		-0.5f,  0.5f, 0.0f, 0.0f, 1.0f
 	};
-	Tiel::Ref<Tiel::VertexBuffer> squareVB;
-	squareVB = Tiel::VertexBuffer::Create(squareVertices, sizeof(squareVertices));
+	SideA::Ref<SideA::VertexBuffer> squareVB;
+	squareVB = SideA::VertexBuffer::Create(squareVertices, sizeof(squareVertices));
 	// Add element here and GLSL
-	Tiel::BufferLayout squareLayout =
+	SideA::BufferLayout squareLayout =
 	{
-		{ Tiel::ShaderDataType::Float3, "a_Position" },
-		{ Tiel::ShaderDataType::Float2, "a_TexCoord" }
+		{ SideA::ShaderDataType::Float3, "a_Position" },
+		{ SideA::ShaderDataType::Float2, "a_TexCoord" }
 	};
 	squareVB->SetLayout(squareLayout);
 	m_SquareVA->AddVertexBuffer(squareVB);
 	// Index Buffer
 	uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
-	Tiel::Ref<Tiel::IndexBuffer> squareIB;
-	squareIB = Tiel::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t));
+	SideA::Ref<SideA::IndexBuffer> squareIB;
+	squareIB = SideA::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t));
 	m_SquareVA->SetIndexBuffer(squareIB);
 
 
@@ -95,7 +95,7 @@ ExampleLayer::ExampleLayer() : Layer("Example"), m_CameraController(1920.0f / 10
 		}
 	)";
 
-	m_Shader = Tiel::Shader::Create("VertexPosColor", vertexSrc, fragmentSrc);
+	m_Shader = SideA::Shader::Create("VertexPosColor", vertexSrc, fragmentSrc);
 
 	// Shaders
 	std::string flatColorVertexSrc = R"(
@@ -124,27 +124,27 @@ ExampleLayer::ExampleLayer() : Layer("Example"), m_CameraController(1920.0f / 10
 		}
 	)";
 
-	m_FlatColorShader = Tiel::Shader::Create("FlatColor", flatColorVertexSrc, flatColorFragmentxSrc);
+	m_FlatColorShader = SideA::Shader::Create("FlatColor", flatColorVertexSrc, flatColorFragmentxSrc);
 
 	auto textureShader = m_ShaderLibrary.Load("assets/shaders/Texture.glsl");
 
-	m_Texture = Tiel::Texture2D::Create("assets/textures/Checkerboard.png");
-	m_CockatielTexture = Tiel::Texture2D::Create("assets/textures/Cockatiel.png");
+	m_Texture = SideA::Texture2D::Create("assets/textures/Checkerboard.png");
+	m_CockatielTexture = SideA::Texture2D::Create("assets/textures/Cockatiel.png");
 
 	textureShader->Bind();
 	textureShader->SetInt("u_Texture", 0);
 }
 
-void ExampleLayer::OnUpdate(Tiel::Timestep deltaTime)
+void ExampleLayer::OnUpdate(SideA::Timestep deltaTime)
 {
 	// Update
 	m_CameraController.OnUpdate(deltaTime);
 
 	// Render
-	Tiel::RenderCommand::SetClearColor({ 0.2f, 0.2f, 0.25f, 1 });
-	Tiel::RenderCommand::Clear();
+	SideA::RenderCommand::SetClearColor({ 0.2f, 0.2f, 0.25f, 1 });
+	SideA::RenderCommand::Clear();
 
-	Tiel::Renderer::BeginScene(m_CameraController.GetCamera());
+	SideA::Renderer::BeginScene(m_CameraController.GetCamera());
 
 	m_FlatColorShader->Bind();
 	m_FlatColorShader->SetFloat3("u_Color", m_SquareColor);
@@ -155,17 +155,17 @@ void ExampleLayer::OnUpdate(Tiel::Timestep deltaTime)
 		{
 			glm::mat4 transform = glm::translate(glm::mat4(1.0f),
 				glm::vec3((i * 1.1), (j * 1.1), 0.0f));
-			Tiel::Renderer::Submit(m_FlatColorShader, m_SquareVA, transform);
+			SideA::Renderer::Submit(m_FlatColorShader, m_SquareVA, transform);
 		}
 	}
 	auto textureShader = m_ShaderLibrary.Get("Texture");
 
 	m_Texture->Bind();
-	Tiel::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+	SideA::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 	m_CockatielTexture->Bind();
-	Tiel::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+	SideA::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 
-	Tiel::Renderer::EndScene();
+	SideA::Renderer::EndScene();
 }
 
 void ExampleLayer::OnImGuiRender()
@@ -176,7 +176,7 @@ void ExampleLayer::OnImGuiRender()
 	ImGui::End();
 }
 
-void ExampleLayer::OnEvent(Tiel::Event& e)
+void ExampleLayer::OnEvent(SideA::Event& e)
 {
 	m_CameraController.OnEvent(e);
 }

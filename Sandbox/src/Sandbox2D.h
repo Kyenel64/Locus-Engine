@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Tiel.h"
+#include "SideA.h"
 
-class Sandbox2D : public Tiel::Layer
+class Sandbox2D : public SideA::Layer
 {
 public:
 	Sandbox2D();
@@ -10,18 +10,18 @@ public:
 
 	virtual void OnAttach() override;
 	virtual void OnDetach() override;
-	virtual void OnUpdate(Tiel::Timestep deltaTime) override;
-	virtual void OnEvent(Tiel::Event& event) override;
+	virtual void OnUpdate(SideA::Timestep deltaTime) override;
+	virtual void OnEvent(SideA::Event& event) override;
 	virtual void OnImGuiRender() override;
 
 private:
-	Tiel::OrthographicCameraController m_CameraController;
+	SideA::OrthographicCameraController m_CameraController;
 
 	// Temp
-	Tiel::Ref<Tiel::Shader> m_FlatColorShader;
-	Tiel::Ref<Tiel::Texture2D> m_CheckerboardTexture;
-	Tiel::Ref<Tiel::Texture2D> m_SpriteSheet;
-	Tiel::Ref<Tiel::SubTexture2D> m_Grass;
+	SideA::Ref<SideA::Shader> m_FlatColorShader;
+	SideA::Ref<SideA::Texture2D> m_CheckerboardTexture;
+	SideA::Ref<SideA::Texture2D> m_SpriteSheet;
+	SideA::Ref<SideA::SubTexture2D> m_Grass;
 
 	glm::vec4 m_SquareColor = { 0.2f, 0.5f, 0.3f, 1.0f };
 };

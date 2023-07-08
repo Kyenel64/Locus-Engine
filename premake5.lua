@@ -1,6 +1,6 @@
-workspace "Tiel"
+workspace "SideA"
 	architecture "x86_64"
-	startproject "TielEditor"
+	startproject "SideA-Editor"
 
 	configurations
 	{
@@ -13,21 +13,21 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 -- Include directory relative to root folder
 IncludeDir = {}
-IncludeDir["GLFW"] = "Tiel/vendor/GLFW/include"
-IncludeDir["Glad"] = "Tiel/vendor/Glad/include"
-IncludeDir["ImGui"] = "Tiel/vendor/imgui"
-IncludeDir["glm"] = "Tiel/vendor/glm"
-IncludeDir["stb_image"] = "Tiel/vendor/stb_image"
+IncludeDir["GLFW"] = "SideA/vendor/GLFW/include"
+IncludeDir["Glad"] = "SideA/vendor/Glad/include"
+IncludeDir["ImGui"] = "SideA/vendor/imgui"
+IncludeDir["glm"] = "SideA/vendor/glm"
+IncludeDir["stb_image"] = "SideA/vendor/stb_image"
 
 group "Dependencies"
-	include "Tiel/vendor/GLFW"
-	include "Tiel/vendor/Glad"
-	include "Tiel/vendor/imgui"
+	include "SideA/vendor/GLFW"
+	include "SideA/vendor/Glad"
+	include "SideA/vendor/imgui"
 
 group ""
 
-project "Tiel"
-	location "Tiel"
+project "SideA"
+	location "SideA"
 	kind "StaticLib"
 	language "C++"
 	cppdialect "C++17"
@@ -36,8 +36,8 @@ project "Tiel"
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
-	pchheader "tpch.h"
-	pchsource "Tiel/src/tpch.cpp"
+	pchheader "SApch.h"
+	pchsource "SideA/src/SApch.cpp"
 
 
 	files
@@ -83,22 +83,22 @@ project "Tiel"
 		}
 
 	filter "configurations:Debug"
-		defines "TIEL_DEBUG"
+		defines "SIDEA_DEBUG"
 		runtime "Debug" -- /MDd
 		symbols "on"
 
 	filter "configurations:Release"
-		defines "TIEL_RELEASE"
+		defines "SIDEA_RELEASE"
 		runtime "Release" -- /MD
 		optimize "on"
 
 	filter "configurations:Dist"
-		defines "TIEL_DIST"
+		defines "SIDEA_DIST"
 		runtime "Release" -- /MD
 		optimize "on"
 
-project "TielEditor"
-	location "TielEditor"
+project "SideA-Editor"
+	location "SideA-Editor"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++17"
@@ -115,32 +115,32 @@ project "TielEditor"
 	
 	includedirs
 	{
-		"Tiel/vendor/spdlog/include",
-		"Tiel/src",
-		"Tiel/vendor",
+		"SideA/vendor/spdlog/include",
+		"SideA/src",
+		"SideA/vendor",
 		"%{IncludeDir.glm}"
 	}
 	
 	links
 	{
-		"Tiel"
+		"SideA"
 	}
 	
 	filter "system:windows"
 		systemversion "latest"
 
 	filter "configurations:Debug"
-		defines "TIEL_DEBUG"
+		defines "SIDEA_DEBUG"
 		runtime "Debug" -- /MDd
 		symbols "on"
 
 	filter "configurations:Release"
-		defines "TIEL_RELEASE"
+		defines "SIDEA_RELEASE"
 		runtime "Release" -- /MD
 		optimize "on"
 	
 	filter "configurations:Dist"
-		defines "TIEL_DIST"
+		defines "SIDEA_DIST"
 		runtime "Release" -- /MD
 		optimize "on"
 				
@@ -163,32 +163,32 @@ project "Sandbox"
 
 	includedirs
 	{
-		"Tiel/vendor/spdlog/include",
-		"Tiel/src",
-		"Tiel/vendor",
+		"SideA/vendor/spdlog/include",
+		"SideA/src",
+		"SideA/vendor",
 		"%{IncludeDir.glm}"
 	}
 
 	links
 	{
-		"Tiel"
+		"SideA"
 	}
 
 	filter "system:windows"
 		systemversion "latest"
 
 	filter "configurations:Debug"
-		defines "TIEL_DEBUG"
+		defines "SIDEA_DEBUG"
 		runtime "Debug" -- /MDd
 		symbols "on"
 
 	filter "configurations:Release"
-		defines "TIEL_RELEASE"
+		defines "SIDEA_RELEASE"
 		runtime "Release" -- /MD
 		optimize "on"
 
 	filter "configurations:Dist"
-		defines "TIEL_DIST"
+		defines "SIDEA_DIST"
 		runtime "Release" -- /MD
 		optimize "on"
 		

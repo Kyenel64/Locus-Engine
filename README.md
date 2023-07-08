@@ -1,5 +1,5 @@
-# SIDEA ENGINE
-SideA is a game engine currently in development for Windows using C++ and OpenGL. More platforms and rendering APIs may be implemented in the future.
+# SIDE A ENGINE
+Side A is a game engine currently in development for Windows using C++ and OpenGL. More platforms and rendering APIs may be implemented in the future.
 ***
 ## How to Install
 

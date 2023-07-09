@@ -2,6 +2,8 @@
 
 #include "glm/glm.hpp"
 
+#include "SideA/Renderer/Camera.h"
+
 namespace SideA
 {
 	struct TagComponent
@@ -32,6 +34,16 @@ namespace SideA
 		SpriteRendererComponent() = default;
 		SpriteRendererComponent(const SpriteRendererComponent&) = default;
 		SpriteRendererComponent(const glm::vec4& color) : Color(color) {}
-
 	};
+
+	struct CameraComponent
+	{
+		SideA::Camera Camera;
+		bool Primary = true;
+
+		CameraComponent() = default;
+		CameraComponent(const CameraComponent&) = default;
+		CameraComponent(const glm::mat4& projection) : Camera(projection) {}
+	};
+
 }

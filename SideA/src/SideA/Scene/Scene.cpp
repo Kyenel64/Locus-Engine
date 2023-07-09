@@ -31,12 +31,38 @@ namespace SideA
 
 	void Scene::OnUpdate(Timestep deltaTime)
 	{
-		auto group = m_Registry.group<TransformComponent, SpriteRendererComponent>();
-		for (auto entity : group)
+		// --- Rendering ---
+		Camera* mainCamera = nullptr;
+		glm::mat4* cameraTransform = nullptr;
+
 		{
-			auto& [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-			Renderer2D::DrawQuad(transform, sprite.Color);
+			auto group = m_Registry.view<TransformComponent, CameraComponent>();
+			for (auto entity : group)
+			{
+				auto& [transform, camera] = group.get<TransformComponent, CameraComponent>(entity);
+
+				if (camera.Primary)
+				{
+					mainCamera = &camera.Camera;
+					cameraTransform = &transform.Transform;
+					break;
+				}
+			}
 		}
+
+		// Wont render if we dont have a main camera
+		if (mainCamera)
+		{
+			Renderer2D::BeginScene(mainCamera->GetProjection(), *cameraTransform);
+			auto group = m_Registry.group<TransformComponent, SpriteRendererComponent>();
+			for (auto entity : group)
+			{
+				auto& [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+				Renderer2D::DrawQuad(transform, sprite.Color);
+			}
+			Renderer2D::EndScene();
+		}
+		
 	}
 
 }

@@ -18,6 +18,10 @@
 
 #include "SideA/ImGui/ImGuiLayer.h"
 
+#include "SideA/Scene/Scene.h"
+#include "SideA/Scene/Entity.h"
+#include "SideA/Scene/Components.h"
+
 // --- Renderer ---------------------------------------------------------------
 #include "SideA/Renderer/Renderer.h"
 #include "SideA/Renderer/Renderer2D.h"

@@ -18,6 +18,7 @@ IncludeDir["Glad"] = "SideA/vendor/Glad/include"
 IncludeDir["ImGui"] = "SideA/vendor/imgui"
 IncludeDir["glm"] = "SideA/vendor/glm"
 IncludeDir["stb_image"] = "SideA/vendor/stb_image"
+IncludeDir["entt"] = "SideA/vendor/entt/include"
 
 group "Dependencies"
 	include "SideA/vendor/GLFW"
@@ -63,7 +64,8 @@ project "SideA"
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.stb_image}"
+		"%{IncludeDir.stb_image}",
+		"%{IncludeDir.entt}"
 	}
 
 	links
@@ -118,7 +120,8 @@ project "SideA-Editor"
 		"SideA/vendor/spdlog/include",
 		"SideA/src",
 		"SideA/vendor",
-		"%{IncludeDir.glm}"
+		"%{IncludeDir.glm}",
+		"%{IncludeDir.entt}"
 	}
 	
 	links
@@ -166,7 +169,8 @@ project "Sandbox"
 		"SideA/vendor/spdlog/include",
 		"SideA/src",
 		"SideA/vendor",
-		"%{IncludeDir.glm}"
+		"%{IncludeDir.glm}",
+		"%{IncludeDir.entt}"
 	}
 
 	links

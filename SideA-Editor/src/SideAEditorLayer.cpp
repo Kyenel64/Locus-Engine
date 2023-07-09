@@ -16,14 +16,23 @@ namespace SideA
 	{
 		SIDEA_PROFILE_FUNCTION();
 
+		// Textures
 		m_CheckerboardTexture = Texture2D::Create("assets/textures/Checkerboard.png");
 		m_SpriteSheet = Texture2D::Create("assets/textures/TX_Tileset_Grass.png");
 		m_Grass = SubTexture2D::CreateFromCoords(m_SpriteSheet, { 1, 0 }, { 32, 32 }, { 1, 2 });
 
+		// Framebuffer
 		FramebufferSpecs FramebufferSpecs;
 		FramebufferSpecs.Width = 1920;
 		FramebufferSpecs.Height = 1080;
 		m_Framebuffer = Framebuffer::Create(FramebufferSpecs);
+
+		// Scene
+		m_ActiveScene = CreateRef<Scene>();
+
+		m_SquareEntity = m_ActiveScene->CreateEntity("Green Square");
+		m_SquareEntity.AddComponent<SpriteRendererComponent>(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+
 	}
 
 	void SideAEditorLayer::OnDetach()
@@ -33,6 +42,7 @@ namespace SideA
 
 	void SideAEditorLayer::OnUpdate(Timestep deltaTime)
 	{
+		// Profiling
 		SIDEA_PROFILE_FUNCTION();
 		Renderer2D::StatsStartFrame();
 
@@ -52,42 +62,15 @@ namespace SideA
 
 		// Render
 		Renderer2D::ResetStats();
-		{
-			SIDEA_PROFILE_SCOPE("Renderer Prep");
+		m_Framebuffer->Bind();
+		RenderCommand::SetClearColor({ 0.2f, 0.2f, 0.25f, 1 });
+		RenderCommand::Clear();
 
-			m_Framebuffer->Bind();
+		Renderer2D::BeginScene(m_CameraController.GetCamera());
+		m_ActiveScene->OnUpdate(deltaTime);
+		Renderer2D::EndScene();
 
-			RenderCommand::SetClearColor({ 0.2f, 0.2f, 0.25f, 1 });
-			RenderCommand::Clear();
-		}
-
-		{
-			static float rotation = 0.0f;
-			rotation += deltaTime * 50.0f;
-
-			// TODO: Fix alpha blending
-			SIDEA_PROFILE_SCOPE("Render Draws");
-			Renderer2D::BeginScene(m_CameraController.GetCamera());
-			Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, m_CheckerboardTexture, 10.0f);
-			Renderer2D::DrawQuad({ 0.2f, -0.2f }, { 0.1f, 0.2f }, m_SquareColor);
-			Renderer2D::DrawQuad({ -0.2f, 0.2f }, { 0.3f, 0.3f }, { 0.8f, 0.2f, 0.4f, 1.0f });
-			Renderer2D::DrawRotatedQuad({ -0.2f, -0.2f }, rotation, { 0.3f, 0.1f }, m_SquareColor);
-
-			for (float y = -5.0f; y < 5.0f; y += 0.5f)
-			{
-				for (float x = -5.0f; x < 5.0f; x += 0.5f)
-				{
-					glm::vec4 color = { (x + 5.0f) / 10.0f, 0.4f, (y + 5.0f) / 10.0f, 0.7f };
-					Renderer2D::DrawQuad({ x, y }, { 0.45f, 0.45f }, color);
-				}
-			}
-
-			Renderer2D::DrawQuad({ 1.0f, 0.0f, 0.5f }, { 1.0f, 2.0f }, m_Grass, 1.0f, { 1.0f, 1.0f, 1.0f, 0.5f });
-
-			Renderer2D::EndScene();
-
-			m_Framebuffer->Unbind();
-		}
+		m_Framebuffer->Unbind();
 
 		Renderer2D::StatsEndFrame();
 	}
@@ -170,7 +153,17 @@ namespace SideA
 		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
 		ImGui::Text("Frame Time: %f", stats.FrameTime);
 		ImGui::Text("FPS: %f", stats.FramesPerSecond);
-		ImGui::ColorEdit4("Square Color", glm::value_ptr(m_SquareColor));
+
+		if (m_SquareEntity)
+		{
+			ImGui::Separator();
+			auto& tag = m_SquareEntity.GetComponent<TagComponent>().Tag;
+			ImGui::Text("%s", tag.c_str());
+			auto& squareColor = m_SquareEntity.GetComponent<SpriteRendererComponent>().Color;
+			ImGui::ColorEdit4("Square Color", glm::value_ptr(squareColor));
+			ImGui::Separator();
+		}
+
 		ImGui::End();
 
 		// --- Viewport window ---

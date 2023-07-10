@@ -11,11 +11,12 @@ namespace SideA
 		virtual ~SceneCamera() = default;
 
 		void SetOrthographic(float size, float nearClip, float farClip);
-		void SetViewportSize(uint32_t width, uint32_t height);
 
+		void SetViewportSize(uint32_t width, uint32_t height);
 
 		void SetOrthoSize(float size) { m_OrthoSize = size; RecalculateProjection(); }
 		float GetOrthoSize() const { return m_OrthoSize; }
+
 	private:
 		void RecalculateProjection();
 

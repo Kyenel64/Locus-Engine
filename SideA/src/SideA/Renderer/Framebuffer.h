@@ -4,8 +4,8 @@ namespace SideA
 {
 	struct FramebufferSpecs
 	{
-		uint32_t Width, Height;
-		uint32_t samples;
+		uint32_t Width = 0, Height = 0;
+		uint32_t samples = 1;
 		bool swapChainTarget = false;
 	};
 

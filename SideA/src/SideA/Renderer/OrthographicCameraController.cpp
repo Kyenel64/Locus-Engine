@@ -18,24 +18,24 @@ namespace SideA
 	{
 		SIDEA_PROFILE_FUNCTION();
 
-		if (SideA::Input::IsKeyPressed(SIDEA_KEY_A) || SideA::Input::IsKeyPressed(SIDEA_KEY_LEFT))
+		if (SideA::Input::IsKeyPressed(Key::A) || SideA::Input::IsKeyPressed(Key::Left))
 		{
 			m_CameraPosition.x -= cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * deltaTime;
 			m_CameraPosition.y -= sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * deltaTime;
 		}
-		else if (SideA::Input::IsKeyPressed(SIDEA_KEY_D) || SideA::Input::IsKeyPressed(SIDEA_KEY_RIGHT))
+		else if (SideA::Input::IsKeyPressed(Key::D) || SideA::Input::IsKeyPressed(Key::Right))
 		{
 			m_CameraPosition.x += cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * deltaTime;
 			m_CameraPosition.y += sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * deltaTime;
 		}
 
-		if (SideA::Input::IsKeyPressed(SIDEA_KEY_W) || SideA::Input::IsKeyPressed(SIDEA_KEY_UP))
+		if (SideA::Input::IsKeyPressed(Key::W) || SideA::Input::IsKeyPressed(Key::Up))
 		{
 			m_CameraPosition.x += -sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * deltaTime;
 			m_CameraPosition.y += cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * deltaTime;
 		}
 			
-		else if (SideA::Input::IsKeyPressed(SIDEA_KEY_S) || SideA::Input::IsKeyPressed(SIDEA_KEY_DOWN))
+		else if (SideA::Input::IsKeyPressed(Key::S) || SideA::Input::IsKeyPressed(Key::Down))
 		{
 			m_CameraPosition.x -= -sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * deltaTime;
 			m_CameraPosition.y -= cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * deltaTime;
@@ -43,9 +43,9 @@ namespace SideA
 
 		if (m_Rotation)
 		{
-			if (SideA::Input::IsKeyPressed(SIDEA_KEY_Q))
+			if (SideA::Input::IsKeyPressed(Key::Q))
 				m_CameraRotation += m_CameraRotationSpeed * deltaTime;
-			if (SideA::Input::IsKeyPressed(SIDEA_KEY_E))
+			if (SideA::Input::IsKeyPressed(Key::E))
 				m_CameraRotation -= m_CameraRotationSpeed * deltaTime;
 
 			if (m_CameraRotation > 180.0f)

@@ -3,7 +3,9 @@
 
 #pragma once
 
-#include "SApch.h"
+#include <functional>
+
+#include "SideA/Debug/Instrumentor.h"
 #include "SideA/Core/Core.h"
 
 namespace SideA

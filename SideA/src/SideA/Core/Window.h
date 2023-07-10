@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "SApch.h"
+#include <sstream>
 
 #include "SideA/Core/Core.h"
 #include "SideA/Events/Event.h"

@@ -31,16 +31,16 @@ namespace SideA
 
 	void Scene::OnUpdate(Timestep deltaTime)
 	{
-		// --- Rendering ---
+		// --- Rendering ------------------------------------------------------
+
+		// Check for main camera
 		Camera* mainCamera = nullptr;
 		glm::mat4* cameraTransform = nullptr;
-
 		{
 			auto view = m_Registry.view<TransformComponent, CameraComponent>();
 			for (auto entity : view)
 			{
 				auto& [transform, camera] = view.get<TransformComponent, CameraComponent>(entity);
-
 				if (camera.Primary)
 				{
 					mainCamera = &camera.Camera;
@@ -53,6 +53,7 @@ namespace SideA
 		// Wont render if we dont have a main camera
 		if (mainCamera)
 		{
+			// Main rendering
 			Renderer2D::BeginScene(mainCamera->GetProjection(), *cameraTransform);
 			auto group = m_Registry.group<TransformComponent, SpriteRendererComponent>();
 			for (auto entity : group)

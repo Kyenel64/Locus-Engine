@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Event.h"
+#include "SideA/Core/KeyCodes.h"
 
 namespace SideA
 {

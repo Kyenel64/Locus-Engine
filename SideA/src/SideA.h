@@ -10,7 +10,7 @@
 
 #include "SideA/Core/Input.h"
 #include "SideA/Core/KeyCodes.h"
-#include "SideA/Core/MouseButtonCodes.h"
+#include "SideA/Core/MouseCodes.h"
 
 #include "SideA/Renderer/OrthographicCameraController.h"
 

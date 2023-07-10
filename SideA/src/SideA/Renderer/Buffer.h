@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "SideA/Core/Log.h"
+
 namespace SideA
 {
 

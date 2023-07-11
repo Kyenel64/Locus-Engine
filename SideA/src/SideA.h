@@ -20,6 +20,7 @@
 
 #include "SideA/Scene/Scene.h"
 #include "SideA/Scene/Entity.h"
+#include "SideA/Scene/ScriptableEntity.h"
 #include "SideA/Scene/Components.h"
 
 // --- Renderer ---------------------------------------------------------------

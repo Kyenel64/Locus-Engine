@@ -31,16 +31,32 @@ namespace SideA
 
 	void Scene::OnUpdate(Timestep deltaTime)
 	{
-		// --- Rendering ------------------------------------------------------
+		// --- Update Scripts -------------------------------------------------
+		{
+			auto view = m_Registry.view<NativeScriptComponent>();
+			for (auto entity : view)
+			{
+				auto& nsc = view.get<NativeScriptComponent>(entity);
+				// temp. move this if statement to OnScenePlay
+				if (!nsc.Instance)
+				{
+					nsc.Instance = nsc.InstantiateScript();
+					nsc.Instance->m_Entity = Entity{ entity, this };
+					nsc.Instance->OnCreate();
+				}
+				nsc.Instance->OnUpdate(deltaTime);
+			}
+		}
 
-		// Check for main camera
+		// --- Rendering ------------------------------------------------------
+		// Find first main camera
 		Camera* mainCamera = nullptr;
 		glm::mat4* cameraTransform = nullptr;
 		{
 			auto view = m_Registry.view<TransformComponent, CameraComponent>();
 			for (auto entity : view)
 			{
-				auto& [transform, camera] = view.get<TransformComponent, CameraComponent>(entity);
+				auto [transform, camera] = view.get<TransformComponent, CameraComponent>(entity);
 				if (camera.Primary)
 				{
 					mainCamera = &camera.Camera;
@@ -49,8 +65,7 @@ namespace SideA
 				}
 			}
 		}
-
-		// Wont render if we dont have a main camera
+		// Render if main camera exists
 		if (mainCamera)
 		{
 			// Main rendering
@@ -58,7 +73,7 @@ namespace SideA
 			auto group = m_Registry.group<TransformComponent, SpriteRendererComponent>();
 			for (auto entity : group)
 			{
-				auto& [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+				auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
 				Renderer2D::DrawQuad(transform, sprite.Color);
 			}
 			Renderer2D::EndScene();

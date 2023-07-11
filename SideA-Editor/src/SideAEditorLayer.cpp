@@ -40,6 +40,35 @@ namespace SideA
 		auto& cc = m_SecondCamera.AddComponent<CameraComponent>();
 		cc.Primary = false;
 
+		class CameraControls : public ScriptableEntity
+		{
+		public:
+			void OnCreate()
+			{
+
+			}
+
+			void OnDestroy()
+			{
+
+			}
+
+			void OnUpdate(Timestep deltaTime)
+			{
+				auto& transform = GetComponent<TransformComponent>().Transform;
+				float speed = 5.0f;
+
+				if (Input::IsKeyPressed(Key::A))
+					transform[3][0] -= speed * deltaTime;
+				if (Input::IsKeyPressed(Key::D))
+					transform[3][0] += speed * deltaTime;
+				if (Input::IsKeyPressed(Key::W))
+					transform[3][1] += speed * deltaTime;
+				if (Input::IsKeyPressed(Key::S))
+					transform[3][1] -= speed * deltaTime;
+			}
+		};
+		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraControls>();
 	}
 
 	void SideAEditorLayer::OnDetach()

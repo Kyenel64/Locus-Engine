@@ -3,6 +3,7 @@
 #include "glm/glm.hpp"
 
 #include "SceneCamera.h"
+#include "ScriptableEntity.h"
 
 namespace SideA
 {
@@ -44,6 +45,23 @@ namespace SideA
 
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
+	};
+
+	struct NativeScriptComponent
+	{
+		ScriptableEntity* Instance = nullptr;
+
+		// Creates a function ptr called InstantiateScript that takes no args and returns ScriptableEntity*
+		ScriptableEntity* (*InstantiateScript)();
+		// Creates a void func ptr called DestroyScript that takes in NativeScriptComponent*
+		void (*DestroyScript)(NativeScriptComponent*);
+
+		template <typename T>
+		void Bind()
+		{
+			InstantiateScript = []() { return static_cast<ScriptableEntity*>(new T()); };
+			DestroyScript = [](NativeScriptComponent* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };
+		}
 	};
 
 }

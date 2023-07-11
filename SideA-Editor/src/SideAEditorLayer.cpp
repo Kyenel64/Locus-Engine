@@ -43,17 +43,17 @@ namespace SideA
 		class CameraControls : public ScriptableEntity
 		{
 		public:
-			void OnCreate()
+			virtual void OnCreate() override
 			{
 
 			}
 
-			void OnDestroy()
+			virtual void OnDestroy() override
 			{
 
 			}
 
-			void OnUpdate(Timestep deltaTime)
+			virtual void OnUpdate(Timestep deltaTime) override
 			{
 				auto& transform = GetComponent<TransformComponent>().Transform;
 				float speed = 5.0f;
@@ -69,6 +69,10 @@ namespace SideA
 			}
 		};
 		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraControls>();
+
+		// Panels
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
 	}
 
 	void SideAEditorLayer::OnDetach()
@@ -117,6 +121,7 @@ namespace SideA
 	void SideAEditorLayer::OnImGuiRender()
 	{
 		SIDEA_PROFILE_FUNCTION();
+		ImGui::ShowDemoWindow();
 
 		static bool dockspaceOpen = true;
 		static bool opt_fullscreen_persistant = true;
@@ -176,6 +181,9 @@ namespace SideA
 
 			ImGui::EndMenuBar();
 		}
+
+		// --- Panels ---
+		m_SceneHierarchyPanel.OnImGuiRender();
 
 		// --- Stats window ---
 		ImGui::Begin("Stats");

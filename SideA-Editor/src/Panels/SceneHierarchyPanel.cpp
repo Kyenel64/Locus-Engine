@@ -93,6 +93,81 @@ namespace SideA
 			}
 		}
 
+		// --- Camera Component ---
+		if (entity.HasComponent<CameraComponent>())
+		{
+			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
+			if (ImGui::TreeNodeEx((void*)typeid(CameraComponent).hash_code(), flags, "Camera"))
+			{
+				auto& cameraComponent = entity.GetComponent<CameraComponent>();
+				auto& camera = cameraComponent.Camera;
+
+				// Primary camera check
+				ImGui::Checkbox("Primary", &cameraComponent.Primary);
+
+				// Background color
+				glm::vec4 backgroundColor = camera.GetBackgroundColor();
+				if (ImGui::ColorEdit4("Background Color", glm::value_ptr(backgroundColor)))
+					camera.SetBackgroundColor(backgroundColor);
+
+				// Projection mode
+				const char* projectionTypeString[] = { "Orthographic", "Perspective" };
+				const char* currentProjectionTypeString = projectionTypeString[(int)camera.GetProjectionType()];
+				if (ImGui::BeginCombo("Projection", currentProjectionTypeString))
+				{
+					for (int i = 0; i < 2; i++)
+					{
+						bool isSelected = currentProjectionTypeString == projectionTypeString[i];
+						if (ImGui::Selectable(projectionTypeString[i], isSelected))
+						{
+							currentProjectionTypeString = projectionTypeString[i];
+							camera.SetProjectionType((SceneCamera::ProjectionType)i);
+						}
+
+						if (isSelected)
+							ImGui::SetItemDefaultFocus();
+					}
+					ImGui::EndCombo();
+				}
+
+				// Orthographic settings
+				if (camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic)
+				{
+					// Size
+					float orthoSize = camera.GetOrthographicSize();
+					if (ImGui::DragFloat("Size", &orthoSize))
+						camera.SetOrthographicSize(orthoSize);
+					// Near
+					float nearClip= camera.GetOrthographicNearClip();
+					if (ImGui::DragFloat("Near Clip", &nearClip))
+						camera.SetOrthographicNearClip(nearClip);
+					// Far
+					float farClip = camera.GetOrthographicFarClip();
+					if (ImGui::DragFloat("Far Clip", &farClip))
+						camera.SetOrthographicFarClip(farClip);
+				}
+
+				// Perspective settings
+				if (camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
+				{
+					// FOV
+					float fov = glm::degrees(camera.GetPerspectiveFOV());
+					if (ImGui::DragFloat("FOV", &fov))
+						camera.SetPerspectiveFOV(glm::radians(fov));
+					// Near
+					float nearClip = camera.GetPerspectiveNearClip();
+					if (ImGui::DragFloat("Near Clip", &nearClip))
+						camera.SetPerspectiveNearClip(nearClip);
+					// Far
+					float farClip = camera.GetPerspectiveFarClip();
+					if (ImGui::DragFloat("Far Clip", &farClip))
+						camera.SetPerspectiveFarClip(farClip);
+				}
+
+				ImGui::TreePop();
+			}
+		}
+
 
 		ImGui::End();
 	}

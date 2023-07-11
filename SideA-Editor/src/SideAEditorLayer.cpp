@@ -103,8 +103,8 @@ namespace SideA
 		// Render
 		Renderer2D::ResetStats();
 		m_Framebuffer->Bind();
-		RenderCommand::SetClearColor({ 0.2f, 0.2f, 0.25f, 1 });
-		RenderCommand::Clear();
+		//RenderCommand::SetClearColor({ 0.2f, 0.2f, 0.25f, 1 });
+		//RenderCommand::Clear();
 
 		m_ActiveScene->OnUpdate(deltaTime);
 
@@ -219,9 +219,9 @@ namespace SideA
 			ImGui::Separator();
 			auto& tag = m_CameraEntity.GetComponent<TagComponent>().Tag;
 			ImGui::Text("%s", tag.c_str());
-			float zoom = m_CameraEntity.GetComponent<CameraComponent>().Camera.GetOrthoSize();
+			float zoom = m_CameraEntity.GetComponent<CameraComponent>().Camera.GetOrthographicSize();
 			if (ImGui::DragFloat("Camera Zoom", &zoom))
-				m_CameraEntity.GetComponent<CameraComponent>().Camera.SetOrthoSize(zoom);
+				m_CameraEntity.GetComponent<CameraComponent>().Camera.SetOrthographicSize(zoom);
 
 			ImGui::Separator();
 		}

@@ -6,6 +6,7 @@
 #include "glm/glm.hpp"
 
 #include "SideA/Renderer/Renderer2D.h"
+#include "SideA/Renderer/RenderCommand.h"
 #include "SideA/Scene/Components.h"
 
 
@@ -50,7 +51,7 @@ namespace SideA
 
 		// --- Rendering ------------------------------------------------------
 		// Find first main camera
-		Camera* mainCamera = nullptr;
+		SceneCamera* mainCamera = nullptr; // TODO: Switched Camera to SceneCamera. Change back if problems
 		glm::mat4* cameraTransform = nullptr;
 		{
 			auto view = m_Registry.view<TransformComponent, CameraComponent>();
@@ -69,6 +70,9 @@ namespace SideA
 		if (mainCamera)
 		{
 			// Main rendering
+			RenderCommand::SetClearColor(mainCamera->GetBackgroundColor());
+			RenderCommand::Clear();
+
 			Renderer2D::BeginScene(mainCamera->GetProjection(), *cameraTransform);
 			auto group = m_Registry.group<TransformComponent, SpriteRendererComponent>();
 			for (auto entity : group)

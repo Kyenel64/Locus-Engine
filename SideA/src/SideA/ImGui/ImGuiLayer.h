@@ -30,6 +30,8 @@ namespace SideA
 
 		void BlockEvents(bool block) { m_BlockEvents = block; }
 
+		void SetDarkTheme();
+
 	private:
 		bool m_BlockEvents = true;
 		float m_Time = 0.0f;

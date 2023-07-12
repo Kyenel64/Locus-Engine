@@ -20,7 +20,7 @@ namespace SideA
 	private:
 		void DrawEntityNode(Entity entity);
 		void DrawComponents(Entity entity);
-		void DrawVec3Control(const std::string& name, glm::vec3& values, float columnWidth = 100.0f);
+
 	private:
 		Ref<Scene> m_Context;
 		Entity m_SelectedEntity;

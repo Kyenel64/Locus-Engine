@@ -42,14 +42,14 @@ namespace SideA
 				if (!nsc.Instance)
 				{
 					nsc.Instance = nsc.InstantiateScript();
-					nsc.Instance->m_Entity = Entity{ entity, this };
+					nsc.Instance->m_Entity = Entity(entity, this);
 					nsc.Instance->OnCreate();
 				}
 				nsc.Instance->OnUpdate(deltaTime);
 			}
 		}
 
-		// --- Rendering ------------------------------------------------------
+		// --- Rendering 2D ------------------------------------------------------
 		// Find first main camera
 		SceneCamera* mainCamera = nullptr; // TODO: Switched Camera to SceneCamera. Change back if problems
 		glm::mat4* cameraTransform = nullptr;
@@ -73,7 +73,7 @@ namespace SideA
 			RenderCommand::SetClearColor(mainCamera->GetBackgroundColor());
 			RenderCommand::Clear();
 
-			Renderer2D::BeginScene(mainCamera->GetProjection(), *cameraTransform);
+			Renderer2D::BeginScene(*mainCamera, *cameraTransform);
 			auto group = m_Registry.group<TransformComponent, SpriteRendererComponent>();
 			for (auto entity : group)
 			{
@@ -81,6 +81,11 @@ namespace SideA
 				Renderer2D::DrawQuad(transform, sprite.Color);
 			}
 			Renderer2D::EndScene();
+		}
+		else
+		{
+			RenderCommand::SetClearColor({ 0.2f, 0.2f, 0.25f, 1 });
+			RenderCommand::Clear();
 		}
 		
 	}

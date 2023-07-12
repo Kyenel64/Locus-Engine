@@ -67,7 +67,7 @@ namespace SideA
 	{
 		ImGui::Begin("Properties");
 
-		// --- Tag Component ---
+		// --- Tag Component --------------------------------------------------
 		if (entity.HasComponent<TagComponent>())
 		{
 			auto& tag = entity.GetComponent<TagComponent>().Tag;
@@ -80,7 +80,7 @@ namespace SideA
 			}
 		}
 
-		// --- Transform Component ---
+		// --- Transform Component --------------------------------------------
 		if (entity.HasComponent<TransformComponent>())
 		{
 			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
@@ -93,7 +93,7 @@ namespace SideA
 			}
 		}
 
-		// --- Camera Component ---
+		// --- Camera Component -----------------------------------------------
 		if (entity.HasComponent<CameraComponent>())
 		{
 			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
@@ -168,6 +168,18 @@ namespace SideA
 			}
 		}
 
+		// --- SpriteRenderer Component ---------------------------------------
+		if (entity.HasComponent<SpriteRendererComponent>())
+		{
+			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
+			if (ImGui::TreeNodeEx((void*)typeid(SpriteRendererComponent).hash_code(), flags, "Sprite Renderer"))
+			{
+				auto& src = entity.GetComponent<SpriteRendererComponent>();
+				ImGui::ColorEdit4("Color", glm::value_ptr(src.Color), 0.1f);
+
+				ImGui::TreePop();
+			}
+		}
 
 		ImGui::End();
 	}

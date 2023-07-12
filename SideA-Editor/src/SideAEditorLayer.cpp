@@ -182,10 +182,10 @@ namespace SideA
 			ImGui::EndMenuBar();
 		}
 
-		// --- Panels ---
+		// --- Panels ---------------------------------------------------------
 		m_SceneHierarchyPanel.OnImGuiRender();
 
-		// --- Stats window ---
+		// --- Stats window ---------------------------------------------------
 		ImGui::Begin("Stats");
 		auto stats = Renderer2D::GetStats();
 		ImGui::Text("Renderer2D Stats:");
@@ -195,40 +195,9 @@ namespace SideA
 		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
 		ImGui::Text("Frame Time: %f", stats.FrameTime);
 		ImGui::Text("FPS: %f", stats.FramesPerSecond);
-
-		if (m_SquareEntity)
-		{
-			ImGui::Separator();
-			auto& tag = m_SquareEntity.GetComponent<TagComponent>().Tag;
-			ImGui::Text("%s", tag.c_str());
-			auto& squareColor = m_SquareEntity.GetComponent<SpriteRendererComponent>().Color;
-			ImGui::ColorEdit4("Square Color", glm::value_ptr(squareColor));
-			ImGui::Separator();
-		}
-
-		ImGui::DragFloat3("Camera Transform",
-			glm::value_ptr(m_CameraEntity.GetComponent<TransformComponent>().Transform[3]));
-
-		if (ImGui::Checkbox("Camera A", &m_PrimaryCamera))
-		{
-			m_CameraEntity.GetComponent<CameraComponent>().Primary = m_PrimaryCamera;
-			m_SecondCamera.GetComponent<CameraComponent>().Primary = !m_PrimaryCamera;
-		}
-
-		{
-			ImGui::Separator();
-			auto& tag = m_CameraEntity.GetComponent<TagComponent>().Tag;
-			ImGui::Text("%s", tag.c_str());
-			float zoom = m_CameraEntity.GetComponent<CameraComponent>().Camera.GetOrthographicSize();
-			if (ImGui::DragFloat("Camera Zoom", &zoom))
-				m_CameraEntity.GetComponent<CameraComponent>().Camera.SetOrthographicSize(zoom);
-
-			ImGui::Separator();
-		}
-
 		ImGui::End();
 
-		// --- Viewport window ---
+		// --- Viewport window ------------------------------------------------
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Viewport");
 

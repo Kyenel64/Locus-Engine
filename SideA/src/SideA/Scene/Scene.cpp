@@ -52,7 +52,7 @@ namespace SideA
 		// --- Rendering 2D ------------------------------------------------------
 		// Find first main camera
 		SceneCamera* mainCamera = nullptr; // TODO: Switched Camera to SceneCamera. Change back if problems
-		glm::mat4* cameraTransform = nullptr;
+		glm::mat4 cameraTransform;
 		{
 			auto view = m_Registry.view<TransformComponent, CameraComponent>();
 			for (auto entity : view)
@@ -61,7 +61,7 @@ namespace SideA
 				if (camera.Primary)
 				{
 					mainCamera = &camera.Camera;
-					cameraTransform = &transform.Transform;
+					cameraTransform = transform.GetTransform();
 					break;
 				}
 			}
@@ -73,12 +73,12 @@ namespace SideA
 			RenderCommand::SetClearColor(mainCamera->GetBackgroundColor());
 			RenderCommand::Clear();
 
-			Renderer2D::BeginScene(*mainCamera, *cameraTransform);
+			Renderer2D::BeginScene(*mainCamera, cameraTransform);
 			auto group = m_Registry.group<TransformComponent, SpriteRendererComponent>();
 			for (auto entity : group)
 			{
 				auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-				Renderer2D::DrawQuad(transform, sprite.Color);
+				Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
 			}
 			Renderer2D::EndScene();
 		}

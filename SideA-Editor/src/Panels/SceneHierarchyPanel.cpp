@@ -1,6 +1,7 @@
 #include "SceneHierarchyPanel.h"
 
 #include <ImGui/imgui.h>
+#include <ImGui/imgui_internal.h>
 #include <glm/gtc/type_ptr.hpp>
 
 #include "SideA/Scene/Components.h"
@@ -86,8 +87,17 @@ namespace SideA
 			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
 			if (ImGui::TreeNodeEx((void*)typeid(TransformComponent).hash_code(), flags, "Transform"))
 			{
-				auto& transform = entity.GetComponent<TransformComponent>().Transform;
-				ImGui::DragFloat3("Position", glm::value_ptr(transform[3]), 0.1f);
+				// Translation
+				auto& tc = entity.GetComponent<TransformComponent>();
+				DrawVec3Control("Translation", tc.Translation);
+
+				// Rotation
+				glm::vec3 rotation = glm::degrees(tc.Rotation);
+				DrawVec3Control("Rotation", rotation);
+				tc.Rotation = glm::radians(rotation);
+
+				// Rotation
+				DrawVec3Control("Scale", tc.Scale);
 
 				ImGui::TreePop();
 			}
@@ -184,4 +194,68 @@ namespace SideA
 		ImGui::End();
 	}
 
+	void SceneHierarchyPanel::DrawVec3Control(const std::string& name, glm::vec3& values, float columnWidth)
+	{
+		ImGui::PushID(name.c_str());
+
+		ImGui::Columns(2);
+		ImGui::SetColumnWidth(0, columnWidth);
+		ImGui::Text(name.c_str());
+		ImGui::NextColumn();
+
+		ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
+
+		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+		ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+
+		// X
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.2f, 0.2f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.2f, 0.2f, 1.0f });
+		if (ImGui::Button("X", buttonSize) && ImGui::IsMouseDoubleClicked(0))
+		{
+			// TODO: Button pressed functionality
+		}
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::PopItemWidth();
+		ImGui::SameLine();
+
+		// Y
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.8f, 0.2f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.9f, 0.2f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.8f, 0.2f, 1.0f });
+		if (ImGui::Button("Y", buttonSize) && ImGui::IsMouseDoubleClicked(0))
+		{
+			// TODO: Button pressed functionality
+		}
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::PopItemWidth();
+		ImGui::SameLine();
+
+		// Z
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.2f, 0.8f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.2f, 0.9f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.2f, 0.8f, 1.0f });
+		if (ImGui::Button("Z", buttonSize) && ImGui::IsMouseDoubleClicked(0))
+		{
+			// TODO: Button pressed functionality
+		}
+		ImGui::PopStyleColor(3);
+
+		ImGui::SameLine();
+		ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::PopItemWidth();
+
+		ImGui::PopStyleVar();
+		ImGui::Columns(1);
+
+		ImGui::PopID();
+	}
 }

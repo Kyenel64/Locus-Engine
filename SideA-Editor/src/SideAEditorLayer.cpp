@@ -55,17 +55,17 @@ namespace SideA
 
 			virtual void OnUpdate(Timestep deltaTime) override
 			{
-				auto& transform = GetComponent<TransformComponent>().Transform;
+				auto& translation = GetComponent<TransformComponent>().Translation;
 				float speed = 5.0f;
 
 				if (Input::IsKeyPressed(Key::A))
-					transform[3][0] -= speed * deltaTime;
+					translation.x -= speed * deltaTime;
 				if (Input::IsKeyPressed(Key::D))
-					transform[3][0] += speed * deltaTime;
+					translation.x += speed * deltaTime;
 				if (Input::IsKeyPressed(Key::W))
-					transform[3][1] += speed * deltaTime;
+					translation.y += speed * deltaTime;
 				if (Input::IsKeyPressed(Key::S))
-					transform[3][1] -= speed * deltaTime;
+					translation.y -= speed * deltaTime;
 			}
 		};
 		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraControls>();

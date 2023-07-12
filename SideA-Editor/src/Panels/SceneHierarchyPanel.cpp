@@ -20,22 +20,56 @@ namespace SideA
 
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
-		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-			m_SelectedEntity = {};
-
-		// --- Scene Hierarchy Panel ---
+		// --- Scene Hierarchy Panel ------------------------------------------
 		ImGui::Begin("Scene Hierarchy");
+
+		// Display each entity
 		m_Context->m_Registry.each([&](auto entityID)
 			{
 				Entity entity(entityID, m_Context.get());
 				DrawEntityNode(entity);
 			});
+
+		// Select nothing if clicking in blank space
+		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+			m_SelectedEntity = {};
+
+		// Open pop up menu when right clicking on blank space.
+		if (ImGui::BeginPopupContextWindow(0, 1 | ImGuiPopupFlags_NoOpenOverItems))
+		{
+			if (ImGui::MenuItem("Create Empty Entity"))
+				m_Context->CreateEntity("Empty Entity");
+			ImGui::EndPopup();
+		}
+
 		ImGui::End();
 
-		// --- Properties Panel ---
+		// --- Properties Panel -----------------------------------------------
 		ImGui::Begin("Properties");
 		if (m_SelectedEntity)
+		{
 			DrawComponents(m_SelectedEntity);
+
+			if (ImGui::Button("Add Component"))
+				ImGui::OpenPopup("AddComponent");
+
+			if (ImGui::BeginPopup("AddComponent"))
+			{
+				if (ImGui::MenuItem("Camera"))
+				{
+					m_SelectedEntity.AddComponent<CameraComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+
+				if (ImGui::MenuItem("Sprite Renderer"))
+				{
+					m_SelectedEntity.AddComponent<SpriteRendererComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+
+				ImGui::EndPopup();
+			}
+		}
 		ImGui::End();
 	}
 
@@ -52,6 +86,14 @@ namespace SideA
 			m_SelectedEntity = entity;
 		}
 
+		bool entityDeleted = false;
+		if (ImGui::BeginPopupContextItem())
+		{
+			if (ImGui::MenuItem("Delete Entity"))
+				entityDeleted = true;
+			ImGui::EndPopup();
+		}
+
 		if (opened)
 		{
 			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
@@ -62,11 +104,21 @@ namespace SideA
 
 			ImGui::TreePop();
 		}
+
+		if (entityDeleted)
+		{
+			m_Context->DestroyEntity(entity);
+			if (m_SelectedEntity == entity)
+				m_SelectedEntity = {};
+		}
 	}
 
 	void SceneHierarchyPanel::DrawComponents(Entity entity)
 	{
 		ImGui::Begin("Properties");
+
+		const ImGuiTreeNodeFlags treeNodeFlags = 
+			ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap;
 
 		// --- Tag Component --------------------------------------------------
 		if (entity.HasComponent<TagComponent>())
@@ -84,19 +136,15 @@ namespace SideA
 		// --- Transform Component --------------------------------------------
 		if (entity.HasComponent<TransformComponent>())
 		{
-			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
-			if (ImGui::TreeNodeEx((void*)typeid(TransformComponent).hash_code(), flags, "Transform"))
+			if (ImGui::TreeNodeEx((void*)typeid(TransformComponent).hash_code(), treeNodeFlags, "Transform"))
 			{
-				// Translation
 				auto& tc = entity.GetComponent<TransformComponent>();
 				DrawVec3Control("Translation", tc.Translation);
 
-				// Rotation
 				glm::vec3 rotation = glm::degrees(tc.Rotation);
 				DrawVec3Control("Rotation", rotation);
 				tc.Rotation = glm::radians(rotation);
 
-				// Rotation
 				DrawVec3Control("Scale", tc.Scale);
 
 				ImGui::TreePop();
@@ -106,8 +154,7 @@ namespace SideA
 		// --- Camera Component -----------------------------------------------
 		if (entity.HasComponent<CameraComponent>())
 		{
-			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
-			if (ImGui::TreeNodeEx((void*)typeid(CameraComponent).hash_code(), flags, "Camera"))
+			if (ImGui::TreeNodeEx((void*)typeid(CameraComponent).hash_code(), treeNodeFlags, "Camera"))
 			{
 				auto& cameraComponent = entity.GetComponent<CameraComponent>();
 				auto& camera = cameraComponent.Camera;
@@ -181,14 +228,33 @@ namespace SideA
 		// --- SpriteRenderer Component ---------------------------------------
 		if (entity.HasComponent<SpriteRendererComponent>())
 		{
-			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
-			if (ImGui::TreeNodeEx((void*)typeid(SpriteRendererComponent).hash_code(), flags, "Sprite Renderer"))
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
+			bool open = ImGui::TreeNodeEx((void*)typeid(SpriteRendererComponent).hash_code(), treeNodeFlags, "Sprite Renderer");
+			ImGui::SameLine(ImGui::GetWindowWidth() - 25.0f);
+			if (ImGui::Button("+", ImVec2(20, 20)))
+			{
+				ImGui::OpenPopup("Component Settings");
+			}
+			ImGui::PopStyleVar();
+
+			bool removeComponent = false;
+			if (ImGui::BeginPopup("Component Settings"))
+			{
+				if (ImGui::MenuItem("Remove component"))
+					removeComponent = true;
+				ImGui::EndPopup();
+			}
+
+			if (open)
 			{
 				auto& src = entity.GetComponent<SpriteRendererComponent>();
 				ImGui::ColorEdit4("Color", glm::value_ptr(src.Color), 0.1f);
 
 				ImGui::TreePop();
 			}
+
+			if (removeComponent)
+				entity.RemoveComponent<SpriteRendererComponent>();
 		}
 
 		ImGui::End();

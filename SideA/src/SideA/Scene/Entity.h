@@ -20,7 +20,9 @@ namespace SideA
 		T& AddComponent(Args&&... args)
 		{
 			SIDEA_CORE_ASSERT(!HasComponent<T>(), "Entity already has component!");
-			return m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
+			T& component = m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
+			m_Scene->OnComponentAdded<T>(*this, component);
+			return component;
 		}
 
 		template<typename T>
@@ -40,13 +42,14 @@ namespace SideA
 		void RemoveComponent()
 		{
 			SIDEA_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!");
-			return m_Scene->m_Registry.remove<T>(m_EntityHandle);
+			m_Scene->m_Registry.remove<T>(m_EntityHandle);
 		}
 
 		// --- Overrides ---
 		operator bool() const { return m_EntityHandle != entt::null; }
 
 		operator uint32_t() const { return (uint32_t)m_EntityHandle; }
+		operator entt::entity() const { return m_EntityHandle; }
 
 		bool operator==(const Entity& other) const 
 		{

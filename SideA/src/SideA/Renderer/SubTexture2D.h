@@ -2,7 +2,7 @@
 
 #include "glm/glm.hpp"
 
-#include "Texture.h"
+#include "SideA/Renderer/Texture.h"
 
 namespace SideA
 {

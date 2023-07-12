@@ -5,6 +5,7 @@
 #pragma once
 
 #include "glm/glm.hpp"
+
 namespace SideA
 {
 	class OrthographicCamera

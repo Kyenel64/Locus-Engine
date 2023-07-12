@@ -2,8 +2,8 @@
 
 #include "glm/glm.hpp"
 
-#include "SceneCamera.h"
-#include "ScriptableEntity.h"
+#include "SideA/Scene/SceneCamera.h"
+#include "SideA/Scene/ScriptableEntity.h"
 
 namespace SideA
 {

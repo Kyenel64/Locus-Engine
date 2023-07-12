@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Scene.h"
+#include "SideA/Scene/Scene.h"
 #include "SideA/Core/Log.h"
 
 #include "entt.hpp"

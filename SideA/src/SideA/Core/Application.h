@@ -7,7 +7,7 @@
 
 #include "Core.h"
 
-#include "Window.h"
+#include "SideA/Core/Window.h"
 #include "SideA/Events/Event.h"
 
 #include "SideA/Core/LayerStack.h"
@@ -37,9 +37,9 @@ namespace SideA
 		void Run();
 		void Close();
 
-		inline Window& GetWindow() { return *m_Window; }
+		inline Window& GetWindow() const { return *m_Window; }
 		inline static Application& Get() { return *s_Instance; }
-		ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
+		ImGuiLayer* GetImGuiLayer() const { return m_ImGuiLayer; }
 
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);

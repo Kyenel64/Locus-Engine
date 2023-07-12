@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "RenderCommand.h"
-#include "OrthographicCamera.h"
-#include "Shader.h"
+#include "SideA/Renderer/RenderCommand.h"
+#include "SideA/Renderer/OrthographicCamera.h"
+#include "SideA/Renderer/Shader.h"
 
 namespace SideA
 {

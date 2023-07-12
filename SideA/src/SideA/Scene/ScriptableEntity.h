@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Entity.h"
+#include "SideA/Scene/Entity.h"
 
 namespace SideA
 {

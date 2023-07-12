@@ -4,7 +4,7 @@
 #pragma once
 #include <memory>
 
-#include "PlatformDetection.h"
+#include "SideA/Core/PlatformDetection.h"
 
 // --- Debugs -----------------------------------------------------------------
 #ifdef SIDEA_DEBUG

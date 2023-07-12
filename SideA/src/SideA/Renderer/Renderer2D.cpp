@@ -86,7 +86,7 @@ namespace SideA
 		// --- Initializations ------------------------------------------------
 		// Create a base texture for single color textures.
 		s_Data.WhiteTexture = Texture2D::Create(1, 1);
-		uint32_t whiteTextureData = 0xfffffffff;
+		uint64_t whiteTextureData = 0xfffffffff;
 		s_Data.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
 
 		// Create and initialize textures
@@ -151,8 +151,8 @@ namespace SideA
 	{
 		SIDEA_PROFILE_FUNCTION();
 
-		uint32_t dataSize = (uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase;
-		s_Data.QuadVB->SetData(s_Data.QuadVertexBufferBase, dataSize);
+		uint64_t dataSize = (uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase;
+		s_Data.QuadVB->SetData(s_Data.QuadVertexBufferBase, (uint32_t)dataSize);
 
 		Flush();
 	}

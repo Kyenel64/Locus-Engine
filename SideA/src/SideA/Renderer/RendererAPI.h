@@ -5,7 +5,7 @@
 
 #include "glm/glm.hpp"
 
-#include "VertexArray.h"
+#include "SideA/Renderer/VertexArray.h"
 
 namespace SideA
 {

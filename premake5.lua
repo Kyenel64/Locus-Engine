@@ -19,11 +19,13 @@ IncludeDir["ImGui"] = "SideA/vendor/imgui"
 IncludeDir["glm"] = "SideA/vendor/glm"
 IncludeDir["stb_image"] = "SideA/vendor/stb_image"
 IncludeDir["entt"] = "SideA/vendor/entt/include"
+IncludeDir["yaml_cpp"] = "SideA/vendor/yaml-cpp/include"
 
 group "Dependencies"
 	include "SideA/vendor/GLFW"
 	include "SideA/vendor/Glad"
 	include "SideA/vendor/imgui"
+	include "SideA/vendor/yaml-cpp"
 
 group ""
 
@@ -65,7 +67,8 @@ project "SideA"
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.stb_image}",
-		"%{IncludeDir.entt}"
+		"%{IncludeDir.entt}",
+		"%{IncludeDir.yaml_cpp}"
 	}
 
 	links
@@ -73,7 +76,8 @@ project "SideA"
 		"GLFW",
 		"Glad",
 		"ImGui",
-		"opengl32.lib"	
+		"opengl32.lib",
+		"yaml-cpp"
 	}
 
 	filter "system:windows"

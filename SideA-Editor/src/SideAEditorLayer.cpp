@@ -1,8 +1,9 @@
 #include "SideAEditorLayer.h"
 
 #include "imgui/imgui.h"
-
 #include <glm/gtc/type_ptr.hpp>
+
+#include "SideA/Scene/SceneSerializer.h"
 
 namespace SideA
 {
@@ -30,7 +31,7 @@ namespace SideA
 		// Scene
 		m_ActiveScene = CreateRef<Scene>();
 
-		m_SquareEntity = m_ActiveScene->CreateEntity("Green Square");
+		/*m_SquareEntity = m_ActiveScene->CreateEntity("Green Square");
 		m_SquareEntity.AddComponent<SpriteRendererComponent>(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
 
 		m_CameraEntity = m_ActiveScene->CreateEntity("Camera Entity");
@@ -68,7 +69,7 @@ namespace SideA
 					translation.y -= speed * deltaTime;
 			}
 		};
-		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraControls>();
+		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraControls>();*/
 
 		// Panels
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
@@ -177,8 +178,21 @@ namespace SideA
 				// Disabling fullscreen would allow the window to be moved to the front of other windows, 
 				// which we can't undo at the moment without finer window depth/z control.
 				//ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);
+				if (ImGui::MenuItem("Save"))
+				{
+					SceneSerializer serializer(m_ActiveScene);
+					serializer.Serialize("assets/scenes/Example.sidea");
+				}
 
-				if (ImGui::MenuItem("Exit")) Application::Get().Close();
+				if (ImGui::MenuItem("Load"))
+				{
+					SceneSerializer serializer(m_ActiveScene);
+					serializer.Deserialize("assets/scenes/Example.sidea");
+				}
+
+				if (ImGui::MenuItem("Exit"))
+					Application::Get().Close();
+
 				ImGui::EndMenu();
 			}
 

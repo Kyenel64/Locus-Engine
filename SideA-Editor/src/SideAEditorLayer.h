@@ -18,6 +18,13 @@ namespace SideA
 		virtual void OnImGuiRender() override;
 
 	private:
+		bool OnKeyPressed(KeyPressedEvent& e);
+
+		void NewScene();
+		void OpenScene();
+		void SaveSceneAs();
+
+	private:
 		OrthographicCameraController m_CameraController;
 		Ref<Framebuffer> m_Framebuffer;
 		bool m_ViewportFocused = false; bool m_ViewportHovered = false;

@@ -4,6 +4,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "SideA/Scene/SceneSerializer.h"
+#include "SideA/Utils/PlatformUtils.h"
 
 namespace SideA
 {
@@ -31,17 +32,7 @@ namespace SideA
 		// Scene
 		m_ActiveScene = CreateRef<Scene>();
 
-		/*m_SquareEntity = m_ActiveScene->CreateEntity("Green Square");
-		m_SquareEntity.AddComponent<SpriteRendererComponent>(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-
-		m_CameraEntity = m_ActiveScene->CreateEntity("Camera Entity");
-		m_CameraEntity.AddComponent<CameraComponent>();
-
-		m_SecondCamera = m_ActiveScene->CreateEntity("Clip-Space Entity");
-		auto& cc = m_SecondCamera.AddComponent<CameraComponent>();
-		cc.Primary = false;
-
-		class CameraControls : public ScriptableEntity
+		/*class CameraControls : public ScriptableEntity
 		{
 		public:
 			virtual void OnCreate() override
@@ -68,8 +59,7 @@ namespace SideA
 				if (Input::IsKeyPressed(Key::S))
 					translation.y -= speed * deltaTime;
 			}
-		};
-		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraControls>();*/
+		};*/
 
 		// Panels
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
@@ -117,6 +107,9 @@ namespace SideA
 	void SideAEditorLayer::OnEvent(Event& e)
 	{
 		m_CameraController.OnEvent(e);
+
+		EventDispatcher dispatcher(e);
+		dispatcher.Dispatch<KeyPressedEvent>(SIDEA_BIND_EVENT_FN(SideAEditorLayer::OnKeyPressed));
 	}
 
 	void SideAEditorLayer::OnImGuiRender()
@@ -178,17 +171,14 @@ namespace SideA
 				// Disabling fullscreen would allow the window to be moved to the front of other windows, 
 				// which we can't undo at the moment without finer window depth/z control.
 				//ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);
-				if (ImGui::MenuItem("Save"))
-				{
-					SceneSerializer serializer(m_ActiveScene);
-					serializer.Serialize("assets/scenes/Example.sidea");
-				}
+				if (ImGui::MenuItem("New", "Ctrl+N"))
+					NewScene();
 
-				if (ImGui::MenuItem("Load"))
-				{
-					SceneSerializer serializer(m_ActiveScene);
-					serializer.Deserialize("assets/scenes/Example.sidea");
-				}
+				if (ImGui::MenuItem("Open...", "Ctrl+O"))
+					OpenScene();
+
+				if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
+					SaveSceneAs();
 
 				if (ImGui::MenuItem("Exit"))
 					Application::Get().Close();
@@ -230,8 +220,69 @@ namespace SideA
 		ImGui::End();
 		ImGui::PopStyleVar();
 
-
-
 		ImGui::End();
 	}
+
+	bool SideAEditorLayer::OnKeyPressed(KeyPressedEvent& e)
+	{
+		if (e.GetRepeatCount() > 0)
+			return false;
+
+		bool control = Input::IsKeyPressed(Key::LeftControl) || Input::IsKeyPressed(Key::RightControl);
+		bool shift = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
+
+		switch (e.GetKeyCode())
+		{
+			case Key::N:
+			{
+				if (control)
+					NewScene();
+				break;
+			}
+			case Key::O:
+			{
+				if (control)
+					OpenScene();
+				break;
+			}
+			case Key::S:
+			{
+				if (control && shift)
+					SaveSceneAs();
+				break;
+			}
+		}
+	}
+
+	void SideAEditorLayer::NewScene()
+	{
+		m_ActiveScene = CreateRef<Scene>();
+		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+	}
+
+	void SideAEditorLayer::OpenScene()
+	{
+		std::string path = FileDialogs::OpenFile("SideA Scene (*.sidea)\0*.sidea\0");
+		if (!path.empty())
+		{
+			m_ActiveScene = CreateRef<Scene>();
+			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
+			SceneSerializer serializer(m_ActiveScene);
+			serializer.Deserialize(path);
+		}
+	}
+
+	void SideAEditorLayer::SaveSceneAs()
+	{
+		std::string path = FileDialogs::SaveFile("SideA Scene (*.sidea)\0*.sidea\0");
+		if (!path.empty())
+		{
+			SceneSerializer serializer(m_ActiveScene);
+			serializer.Serialize(path);
+		}
+	}
+
 }

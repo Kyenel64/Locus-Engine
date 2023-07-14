@@ -16,6 +16,7 @@ namespace SideA
 	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
 	{
 		m_Context = context;
+		m_SelectedEntity = {};
 	}
 
 	void SceneHierarchyPanel::OnImGuiRender()
@@ -57,13 +58,19 @@ namespace SideA
 			{
 				if (ImGui::MenuItem("Camera"))
 				{
-					m_SelectedEntity.AddComponent<CameraComponent>();
+					if (!m_SelectedEntity.HasComponent<CameraComponent>())
+						m_SelectedEntity.AddComponent<CameraComponent>();
+					else
+						SIDEA_CORE_WARN("This entity already has a Camera Component");
 					ImGui::CloseCurrentPopup();
 				}
 
 				if (ImGui::MenuItem("Sprite Renderer"))
 				{
-					m_SelectedEntity.AddComponent<SpriteRendererComponent>();
+					if (!m_SelectedEntity.HasComponent<SpriteRendererComponent>())
+						m_SelectedEntity.AddComponent<SpriteRendererComponent>();
+					else
+						SIDEA_CORE_WARN("This entity already has a Sprite Renderer Component");
 					ImGui::CloseCurrentPopup();
 				}
 

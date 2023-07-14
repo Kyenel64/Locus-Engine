@@ -4,8 +4,8 @@ Entities:
     TagComponent:
       Tag: Main Camera
     TransformComponent:
-      Translation: [0, 0, 10.8999996]
-      Rotation: [0, 0, 0]
+      Translation: [2, 1.60000002, 4]
+      Rotation: [-0.247836754, 0.392699093, 0]
       Scale: [1, 1, 1]
     CameraComponent:
       Camera:
@@ -21,10 +21,28 @@ Entities:
       FixedAspectRatio: false
   - Entity: 1283849483838
     TagComponent:
-      Tag: Orange Square
+      Tag: Front
     TransformComponent:
-      Translation: [4, 0, 0]
-      Rotation: [0.0453785583, 0.830776691, 0]
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     SpriteRendererComponent:
-      Color: [1, 0.597864747, 0, 1]
+      Color: [0.629893243, 0.629893243, 0.629893243, 1]
+  - Entity: 1283849483838
+    TagComponent:
+      Tag: Top
+    TransformComponent:
+      Translation: [0, 0.5, -0.5]
+      Rotation: [1.57079637, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [0.743772268, 0.743772268, 0.743772268, 1]
+  - Entity: 1283849483838
+    TagComponent:
+      Tag: Side
+    TransformComponent:
+      Translation: [0.5, 0, -0.5]
+      Rotation: [0, 1.57079637, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [0.444839835, 0.444839835, 0.444839835, 1]

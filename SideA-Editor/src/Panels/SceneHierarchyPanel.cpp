@@ -39,7 +39,10 @@ namespace SideA
 		if (ImGui::BeginPopupContextWindow(0, 1 | ImGuiPopupFlags_NoOpenOverItems))
 		{
 			if (ImGui::MenuItem("Create Empty Entity"))
+			{
 				m_Context->CreateEntity("Empty Entity");
+				m_SavedStatus = false;
+			}
 			ImGui::EndPopup();
 		}
 
@@ -59,18 +62,30 @@ namespace SideA
 				if (ImGui::MenuItem("Camera"))
 				{
 					if (!m_SelectedEntity.HasComponent<CameraComponent>())
+					{
 						m_SelectedEntity.AddComponent<CameraComponent>();
+						m_SavedStatus = false;
+					}
 					else
+					{
 						SIDEA_CORE_WARN("This entity already has a Camera Component");
+					}
+
 					ImGui::CloseCurrentPopup();
 				}
-
+					
 				if (ImGui::MenuItem("Sprite Renderer"))
 				{
 					if (!m_SelectedEntity.HasComponent<SpriteRendererComponent>())
+					{
 						m_SelectedEntity.AddComponent<SpriteRendererComponent>();
+						m_SavedStatus = false;
+					}
 					else
+					{
 						SIDEA_CORE_WARN("This entity already has a Sprite Renderer Component");
+					}
+
 					ImGui::CloseCurrentPopup();
 				}
 
@@ -95,7 +110,10 @@ namespace SideA
 		if (ImGui::BeginPopupContextItem())
 		{
 			if (ImGui::MenuItem("Delete Entity"))
+			{
 				entityDeleted = true;
+				m_SavedStatus = false;
+			}
 			ImGui::EndPopup();
 		}
 
@@ -118,7 +136,7 @@ namespace SideA
 		}
 	}
 
-	static void DrawVec3Control(const std::string& name, glm::vec3& values, float columnWidth = 100.0f)
+	void SceneHierarchyPanel:: DrawVec3Control(const std::string& name, glm::vec3& values, float resetValue, float columnWidth)
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		auto boldFont = io.Fonts->Fonts[0];
@@ -141,15 +159,17 @@ namespace SideA
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.2f, 0.2f, 1.0f });
 		ImGui::PushFont(boldFont);
-		if (ImGui::Button("X", buttonSize) && ImGui::IsMouseDoubleClicked(0))
+		if (ImGui::Button("X", buttonSize)) // TODO: double click
 		{
-			// TODO: Button pressed functionality
+			values.x = resetValue;
+			m_SavedStatus = false;
 		}
 		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
-		ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f");
+		if (ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f"))
+			m_SavedStatus = false;
 		ImGui::PopItemWidth();
 		ImGui::SameLine();
 
@@ -158,15 +178,17 @@ namespace SideA
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.9f, 0.2f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.8f, 0.2f, 1.0f });
 		ImGui::PushFont(boldFont);
-		if (ImGui::Button("Y", buttonSize) && ImGui::IsMouseDoubleClicked(0))
+		if (ImGui::Button("Y", buttonSize))
 		{
-			// TODO: Button pressed functionality
+			values.y = resetValue;
+			m_SavedStatus = false;
 		}
 		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
-		ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f");
+		if (ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f"))
+			m_SavedStatus = false;
 		ImGui::PopItemWidth();
 		ImGui::SameLine();
 
@@ -175,15 +197,17 @@ namespace SideA
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.2f, 0.9f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.2f, 0.8f, 1.0f });
 		ImGui::PushFont(boldFont);
-		if (ImGui::Button("Z", buttonSize) && ImGui::IsMouseDoubleClicked(0))
+		if (ImGui::Button("Z", buttonSize))
 		{
-			// TODO: Button pressed functionality
+			values.z = resetValue;
+			m_SavedStatus = false;
 		}
 		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
-		ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.2f");
+		if (ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.2f"))
+			m_SavedStatus = false;
 		ImGui::PopItemWidth();
 
 		ImGui::PopStyleVar();
@@ -193,7 +217,7 @@ namespace SideA
 	}
 
 	template<typename T, typename UIFunction>
-	static void DrawComponentUI(const std::string& name, Entity entity, UIFunction uiFunction)
+	void SceneHierarchyPanel::DrawComponentUI(const std::string& name, Entity entity, UIFunction uiFunction)
 	{
 		const ImGuiTreeNodeFlags treeNodeFlags =
 			ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed |
@@ -226,7 +250,10 @@ namespace SideA
 				if (name != "Transform")
 				{
 					if (ImGui::MenuItem("Remove component"))
+					{
 						removeComponent = true;
+						m_SavedStatus = false;
+					}
 				}
 				
 				ImGui::EndPopup();
@@ -256,11 +283,12 @@ namespace SideA
 			if (ImGui::InputText("Tag", buffer, sizeof(buffer)))
 			{
 				tag = std::string(buffer);
+				m_SavedStatus = false;
 			}
 		}
 
 		// --- Transform Component --------------------------------------------
-		DrawComponentUI<TransformComponent>("Transform", entity, [](auto& component)
+		DrawComponentUI<TransformComponent>("Transform", entity, [this](auto& component)
 			{
 				DrawVec3Control("Translation", component.Translation);
 
@@ -268,21 +296,27 @@ namespace SideA
 				DrawVec3Control("Rotation", rotation);
 				component.Rotation = glm::radians(rotation);
 
-				DrawVec3Control("Scale", component.Scale);
+				DrawVec3Control("Scale", component.Scale, 1.0f);
 			});
 
 		// --- Camera Component -----------------------------------------------
-		DrawComponentUI<CameraComponent>("Camera", entity, [](auto& component)
+		DrawComponentUI<CameraComponent>("Camera", entity, [this](auto& component)
 			{
 				auto& camera = component.Camera;
 
 				// Primary camera check
-				ImGui::Checkbox("Primary", &component.Primary);
+				if (ImGui::Checkbox("Primary", &component.Primary))
+				{
+					m_SavedStatus = false;
+				}
 
 				// Background color
 				glm::vec4 backgroundColor = camera.GetBackgroundColor();
 				if (ImGui::ColorEdit4("Background Color", glm::value_ptr(backgroundColor)))
+				{
 					camera.SetBackgroundColor(backgroundColor);
+					m_SavedStatus = false;
+				}
 
 				// Projection mode
 				const char* projectionTypeString[] = { "Orthographic", "Perspective" };
@@ -296,6 +330,7 @@ namespace SideA
 						{
 							currentProjectionTypeString = projectionTypeString[i];
 							camera.SetProjectionType((SceneCamera::ProjectionType)i);
+							m_SavedStatus = false;
 						}
 
 						if (isSelected)
@@ -310,17 +345,29 @@ namespace SideA
 					// Size
 					float orthoSize = camera.GetOrthographicSize();
 					if (ImGui::DragFloat("Size", &orthoSize))
+					{
 						camera.SetOrthographicSize(orthoSize);
+						m_SavedStatus = false;
+					}
 					// Near
 					float nearClip = camera.GetOrthographicNearClip();
 					if (ImGui::DragFloat("Near Clip", &nearClip))
+					{
 						camera.SetOrthographicNearClip(nearClip);
+						m_SavedStatus = false;
+					}
 					// Far
 					float farClip = camera.GetOrthographicFarClip();
 					if (ImGui::DragFloat("Far Clip", &farClip))
+					{
 						camera.SetOrthographicFarClip(farClip);
+						m_SavedStatus = false;
+					}
 
-					ImGui::Checkbox("Fixed Aspect Ratio", &component.FixedAspectRatio);
+					if (ImGui::Checkbox("Fixed Aspect Ratio", &component.FixedAspectRatio))
+					{
+						m_SavedStatus = false;
+					}
 				}
 
 				// Perspective settings
@@ -329,22 +376,35 @@ namespace SideA
 					// FOV
 					float fov = glm::degrees(camera.GetPerspectiveFOV());
 					if (ImGui::DragFloat("FOV", &fov))
+					{
 						camera.SetPerspectiveFOV(glm::radians(fov));
+						m_SavedStatus = false;
+					}
 					// Near
 					float nearClip = camera.GetPerspectiveNearClip();
 					if (ImGui::DragFloat("Near Clip", &nearClip))
+					{
 						camera.SetPerspectiveNearClip(nearClip);
+						m_SavedStatus = false;
+					}
 					// Far
 					float farClip = camera.GetPerspectiveFarClip();
 					if (ImGui::DragFloat("Far Clip", &farClip))
+					{
 						camera.SetPerspectiveFarClip(farClip);
+						m_SavedStatus = false;
+					}
 				}
 		});
 
 		// --- SpriteRenderer Component ---------------------------------------
-		DrawComponentUI<SpriteRendererComponent>("Sprite Renderer", entity, [](auto& component)
+		DrawComponentUI<SpriteRendererComponent>("Sprite Renderer", entity, [this](auto& component)
 		{
-			ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
+			if (ImGui::ColorEdit4("Color", glm::value_ptr(component.Color)))
+			{
+				m_SavedStatus = false;
+			}
+
 		});
 	}	
 }

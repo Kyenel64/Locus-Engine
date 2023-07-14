@@ -4,12 +4,12 @@ Entities:
     TagComponent:
       Tag: Main Camera
     TransformComponent:
-      Translation: [2, 1.60000002, 4]
-      Rotation: [-0.247836754, 0.392699093, 0]
+      Translation: [2.0999999, 1.60000002, 4]
+      Rotation: [-0.324631244, 0.392699093, 0]
       Scale: [1, 1, 1]
     CameraComponent:
       Camera:
-        BackgroundColor: [0.25, 0.5, 0.5, 1]
+        BackgroundColor: [0.846975088, 0.671704113, 0.328541934, 1]
         ProjectionType: 1
         OrthographicSize: 18
         OrthographicNearClip: -1
@@ -27,7 +27,7 @@ Entities:
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     SpriteRendererComponent:
-      Color: [0.629893243, 0.629893243, 0.629893243, 1]
+      Color: [0.633451939, 0.234444842, 0.234444842, 1]
   - Entity: 1283849483838
     TagComponent:
       Tag: Top
@@ -36,7 +36,7 @@ Entities:
       Rotation: [1.57079637, 0, 0]
       Scale: [1, 1, 1]
     SpriteRendererComponent:
-      Color: [0.743772268, 0.743772268, 0.743772268, 1]
+      Color: [0.619217038, 0.310710311, 0.310710311, 1]
   - Entity: 1283849483838
     TagComponent:
       Tag: Side
@@ -45,4 +45,4 @@ Entities:
       Rotation: [0, 1.57079637, 0]
       Scale: [1, 1, 1]
     SpriteRendererComponent:
-      Color: [0.444839835, 0.444839835, 0.444839835, 1]
+      Color: [0.540925264, 0.198275104, 0.198275104, 1]

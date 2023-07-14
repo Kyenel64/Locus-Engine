@@ -94,11 +94,7 @@ namespace SideA
 		// Render
 		Renderer2D::ResetStats();
 		m_Framebuffer->Bind();
-		//RenderCommand::SetClearColor({ 0.2f, 0.2f, 0.25f, 1 });
-		//RenderCommand::Clear();
-
 		m_ActiveScene->OnUpdate(deltaTime);
-
 		m_Framebuffer->Unbind();
 
 		Renderer2D::StatsEndFrame();
@@ -115,6 +111,7 @@ namespace SideA
 	void SideAEditorLayer::OnImGuiRender()
 	{
 		SIDEA_PROFILE_FUNCTION();
+		//ImGui::ShowDemoWindow();
 
 		static bool dockspaceOpen = true;
 		static bool opt_fullscreen_persistant = true;
@@ -164,18 +161,19 @@ namespace SideA
 		}
 		style.WindowMinSize.x = minWinSizeX;
 
+		// --- Menu Bar -------------------------------------------------------
 		if (ImGui::BeginMenuBar())
 		{
 			if (ImGui::BeginMenu("File"))
 			{
-				// Disabling fullscreen would allow the window to be moved to the front of other windows, 
-				// which we can't undo at the moment without finer window depth/z control.
-				//ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);
 				if (ImGui::MenuItem("New", "Ctrl+N"))
 					NewScene();
 
 				if (ImGui::MenuItem("Open...", "Ctrl+O"))
 					OpenScene();
+
+				if (ImGui::MenuItem("Save", "Ctrl+S"))
+					SaveScene();
 
 				if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
 					SaveSceneAs();
@@ -205,9 +203,15 @@ namespace SideA
 		ImGui::End();
 
 		// --- Viewport window ------------------------------------------------
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-		ImGui::Begin("Viewport");
+		// saved status
+		m_SavedStatus = m_SceneHierarchyPanel.GetSavedStatus();
+		ImGuiWindowFlags viewportFlags = 0;
+		if (!m_SavedStatus)
+			viewportFlags = ImGuiWindowFlags_UnsavedDocument;
 
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
+		ImGui::Begin("Viewport", 0, viewportFlags);
+	
 		m_ViewportFocused = ImGui::IsWindowFocused();
 		m_ViewportHovered = ImGui::IsWindowHovered();
 		Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused || !m_ViewportHovered);
@@ -230,7 +234,7 @@ namespace SideA
 
 		bool control = Input::IsKeyPressed(Key::LeftControl) || Input::IsKeyPressed(Key::RightControl);
 		bool shift = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
-
+		// TODO: Currently only works within viewport window
 		switch (e.GetKeyCode())
 		{
 			case Key::N:
@@ -249,6 +253,8 @@ namespace SideA
 			{
 				if (control && shift)
 					SaveSceneAs();
+				else if (control)
+					SaveScene();
 				break;
 			}
 		}
@@ -259,6 +265,9 @@ namespace SideA
 		m_ActiveScene = CreateRef<Scene>();
 		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_SavePath = std::string();
+		m_SavedStatus = false;
+		m_SceneHierarchyPanel.SetSavedStatus(false);
 	}
 
 	void SideAEditorLayer::OpenScene()
@@ -272,6 +281,9 @@ namespace SideA
 
 			SceneSerializer serializer(m_ActiveScene);
 			serializer.Deserialize(path);
+			m_SavePath = path;
+			m_SavedStatus = true;
+			m_SceneHierarchyPanel.SetSavedStatus(true);
 		}
 	}
 
@@ -282,7 +294,24 @@ namespace SideA
 		{
 			SceneSerializer serializer(m_ActiveScene);
 			serializer.Serialize(path);
+			m_SavePath = path;
+			m_SavedStatus = true;
+			m_SceneHierarchyPanel.SetSavedStatus(true);
 		}
 	}
 
+	void SideAEditorLayer::SaveScene()
+	{
+		if (m_SavePath.empty())
+		{
+			SaveSceneAs();
+		}
+		else
+		{
+			SceneSerializer serializer(m_ActiveScene);
+			serializer.Serialize(m_SavePath);
+			m_SavedStatus = true;
+			m_SceneHierarchyPanel.SetSavedStatus(true);
+		}
+	}
 }

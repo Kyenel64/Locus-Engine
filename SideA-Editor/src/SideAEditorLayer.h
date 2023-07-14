@@ -23,11 +23,13 @@ namespace SideA
 		void NewScene();
 		void OpenScene();
 		void SaveSceneAs();
+		void SaveScene();
 
 	private:
 		OrthographicCameraController m_CameraController;
 		Ref<Framebuffer> m_Framebuffer;
 		bool m_ViewportFocused = false; bool m_ViewportHovered = false;
+		bool m_SavedStatus = false;
 
 		// Temp
 		Ref<Texture2D> m_CheckerboardTexture;
@@ -35,16 +37,10 @@ namespace SideA
 		Ref<SubTexture2D> m_Grass;
 
 		Ref<Scene> m_ActiveScene;
-		//Temp
-		Entity m_SquareEntity;
-		Entity m_CameraEntity;
-		Entity m_SecondCamera;
-		bool m_PrimaryCamera = true;
-
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
-		glm::vec4 m_SquareColor = { 0.2f, 0.5f, 0.3f, 1.0f };
 
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
+		std::string m_SavePath;
 	};
 }

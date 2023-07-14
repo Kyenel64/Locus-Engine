@@ -53,11 +53,11 @@ namespace SideA
 		dispatcher.Dispatch<WindowResizeEvent>(SIDEA_BIND_EVENT_FN(Application::OnWindowResize));
 
 		// Iterate each layer's events backwards
-		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();)
+		for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it)
 		{
 			if (e.m_Handled)
 				break;
-			(*--it)->OnEvent(e);
+			(*it)->OnEvent(e);
 
 		}
 	}

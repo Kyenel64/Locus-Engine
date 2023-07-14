@@ -216,8 +216,12 @@ namespace SideA
 			bool removeComponent = false;
 			if (ImGui::BeginPopup("Component Settings"))
 			{
-				if (ImGui::MenuItem("Remove component"))
-					removeComponent = true;
+				if (name != "Transform")
+				{
+					if (ImGui::MenuItem("Remove component"))
+						removeComponent = true;
+				}
+				
 				ImGui::EndPopup();
 			}
 

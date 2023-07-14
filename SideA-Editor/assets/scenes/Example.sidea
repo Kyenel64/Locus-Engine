@@ -1,3 +1,30 @@
 Scene: Untitled
 Entities:
-  []
+  - Entity: 1283849483838
+    TagComponent:
+      Tag: Main Camera
+    TransformComponent:
+      Translation: [0, 0, 10.8999996]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        BackgroundColor: [0.25, 0.5, 0.5, 1]
+        ProjectionType: 1
+        OrthographicSize: 18
+        OrthographicNearClip: -1
+        OrthographicFarClip: 1
+        PerspectiveFOV: 0.785398185
+        PerspectiveNearClip: 0.00999999978
+        PerspectiveFarClip: 1000
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 1283849483838
+    TagComponent:
+      Tag: Orange Square
+    TransformComponent:
+      Translation: [4, 0, 0]
+      Rotation: [0.0453785583, 0.830776691, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 0.597864747, 0, 1]

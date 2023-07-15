@@ -20,6 +20,8 @@ namespace SideA
 
 		bool GetSavedStatus() const { return m_SavedStatus; }
 		void SetSavedStatus(bool state) { m_SavedStatus = state; }
+
+		Entity GetSelectedEntity() const { return m_SelectedEntity; }
 	private:
 		void DrawEntityNode(Entity entity);
 		void DrawComponents(Entity entity);

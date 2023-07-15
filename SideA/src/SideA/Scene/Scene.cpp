@@ -111,6 +111,17 @@ namespace SideA
 		}
 	}
 
+	Entity Scene::GetPrimaryCameraEntity()
+	{
+		auto view = m_Registry.view<CameraComponent>();
+		for (auto entity : view)
+		{
+			if (view.get<CameraComponent>(entity).Primary)
+				return Entity(entity, this);
+		}
+		return {};
+	}
+
 	template<typename T>
 	void Scene::OnComponentAdded(Entity entity, T& component)
 	{

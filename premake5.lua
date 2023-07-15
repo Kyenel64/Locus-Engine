@@ -20,6 +20,7 @@ IncludeDir["glm"] = "SideA/vendor/glm"
 IncludeDir["stb_image"] = "SideA/vendor/stb_image"
 IncludeDir["entt"] = "SideA/vendor/entt/include"
 IncludeDir["yaml_cpp"] = "SideA/vendor/yaml-cpp/include"
+IncludeDir["ImGuizmo"] = "SideA/vendor/ImGuizmo"
 
 group "Dependencies"
 	include "SideA/vendor/GLFW"
@@ -50,7 +51,9 @@ project "SideA"
 		"%{prj.name}/vendor/stb_image/**.h",
 		"%{prj.name}/vendor/stb_image/**.cpp",
 		"%{prj.name}/vendor/glm/glm/**.hpp",
-		"%{prj.name}/vendor/glm/glm/**.inl"
+		"%{prj.name}/vendor/glm/glm/**.inl",
+		"%{prj.name}/vendor/ImGuizmo/ImGuizmo.h",
+		"%{prj.name}/vendor/ImGuizmo/ImGuizmo.cpp"
 	}
 
 	defines
@@ -68,7 +71,8 @@ project "SideA"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.entt}",
-		"%{IncludeDir.yaml_cpp}"
+		"%{IncludeDir.yaml_cpp}",
+		"%{IncludeDir.ImGuizmo}"
 	}
 
 	links
@@ -125,7 +129,8 @@ project "SideA-Editor"
 		"SideA/src",
 		"SideA/vendor",
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.entt}"
+		"%{IncludeDir.entt}",
+		"%{IncludeDir.ImGuizmo}"
 	}
 	
 	links

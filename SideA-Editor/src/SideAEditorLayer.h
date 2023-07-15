@@ -42,5 +42,7 @@ namespace SideA
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 		std::string m_SavePath;
+
+		int m_GizmoType = -1;
 	};
 }

@@ -2,6 +2,7 @@
 #include "ImGuiLayer.h"
 
 #include "imgui.h"
+#include "ImGuizmo.h"
 #include "GLFW/glfw3.h"
 
 #include "SideA/Core/Application.h"
@@ -82,6 +83,7 @@ namespace SideA
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+		ImGuizmo::BeginFrame();
 	}
 
 	void ImGuiLayer::End()

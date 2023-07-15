@@ -17,3 +17,6 @@
 [submodule "SideA/vendor/yaml-cpp"]
 	path = SideA/vendor/yaml-cpp
 	url = https://github.com/kyenel64/yaml-cpp
+[submodule "SideA/vendor/ImGuizmo"]
+	path = SideA/vendor/ImGuizmo
+	url = https://github.com/kyenel64/imguizmo

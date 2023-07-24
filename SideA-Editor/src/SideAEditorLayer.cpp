@@ -232,44 +232,7 @@ namespace SideA
 		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
 
 		if (selectedEntity && m_GizmoType != -1)
-		{
-			ImGuizmo::SetOrthographic(false);
-			ImGuizmo::SetDrawlist();
-			float windowWidth = (float)ImGui::GetWindowWidth();
-			float windowHeight = (float)ImGui::GetWindowHeight();
-			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
-
-			// Camera
-			auto cameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
-			const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
-			const glm::mat4& cameraProjection = camera.GetProjection();
-			glm::mat4 cameraView = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());
-
-			// Entity transform
-			auto& tc = selectedEntity.GetComponent<TransformComponent>();
-			glm::mat4& transform = tc.GetTransform();
-
-			// Snapping
-			bool snap = Input::IsKeyPressed(Key::LeftControl);
-			float snapValue = 0.5f; // Snap 0.5m for translation & scale
-			if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
-				snapValue = 45.0f; // Snap to 45 degrees for rotation
-			float snapValues[3] = { snapValue, snapValue, snapValue };
-
-			ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), 
-				(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform), 
-				nullptr, snap ? snapValues : nullptr);
-
-			if (ImGuizmo::IsUsing)
-			{
-				glm::vec3 translation, rotation, scale;
-				Math::DecomposeTransform(transform, translation, rotation, scale); // TODO: fix quaternion issue
-				glm::vec3 deltaRotation = rotation - tc.Rotation;
-				tc.Translation = translation;
-				tc.Rotation += deltaRotation;
-				tc.Scale = scale;
-			}
-		}
+			showGizmoUI();
 		
 		ImGui::End();
 		ImGui::PopStyleVar();
@@ -376,6 +339,78 @@ namespace SideA
 			serializer.Serialize(m_SavePath);
 			m_SavedStatus = true;
 			m_SceneHierarchyPanel.SetSavedStatus(true);
+		}
+	}
+
+	void SideAEditorLayer::showGizmoUI()
+	{
+		ImGuizmo::SetOrthographic(false);
+		ImGuizmo::SetDrawlist();
+		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
+
+		// Camera
+		auto cameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
+		const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
+		const glm::mat4& cameraProjection = camera.GetProjection();
+		glm::mat4 cameraView = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());
+
+		// Entity transform
+		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+		auto& tc = selectedEntity.GetComponent<TransformComponent>();
+		glm::mat4& transform = tc.GetTransform();
+
+		// Snapping
+		bool snap = Input::IsKeyPressed(Key::LeftControl);
+		float snapValue = 0.5f; // Snap 0.5m for translation & scale
+		if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
+			snapValue = 45.0f; // Snap to 45 degrees for rotation
+		float snapValues[3] = { snapValue, snapValue, snapValue };
+
+		ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
+			(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform),
+			nullptr, snap ? snapValues : nullptr);
+
+		glm::vec3 translation, scale;
+		glm::quat rotation;
+		//Math::DecomposeTransform(transform, scale, rotation, translation);
+		glm::decompose(transform, scale, rotation, translation, glm::vec3(1.0f), glm::vec4(1.0f));
+
+		if (ImGuizmo::IsUsing)
+		{
+			switch (m_GizmoType)
+			{
+			case ImGuizmo::TRANSLATE:
+			{
+				tc.Translation = translation;
+				break;
+			}
+			case ImGuizmo::ROTATE:
+			{
+				// TODO: fix rotation
+				// Do this in Euler in an attempt to preserve any full revolutions (> 360)
+				glm::vec3 originalRotationEuler = tc.GetRotationEuler();
+
+				// Map original rotation to range [-180, 180] which is what ImGuizmo gives us
+				originalRotationEuler.x = fmodf(originalRotationEuler.x + glm::pi<float>(), glm::two_pi<float>()) - glm::pi<float>();
+				originalRotationEuler.y = fmodf(originalRotationEuler.y + glm::pi<float>(), glm::two_pi<float>()) - glm::pi<float>();
+				originalRotationEuler.z = fmodf(originalRotationEuler.z + glm::pi<float>(), glm::two_pi<float>()) - glm::pi<float>();
+
+				glm::vec3 deltaRotationEuler = glm::eulerAngles(rotation) - originalRotationEuler;
+
+				// Try to avoid drift due numeric precision
+				if (fabs(deltaRotationEuler.x) < 0.001) deltaRotationEuler.x = 0.0f;
+				if (fabs(deltaRotationEuler.y) < 0.001) deltaRotationEuler.y = 0.0f;
+				if (fabs(deltaRotationEuler.z) < 0.001) deltaRotationEuler.z = 0.0f;
+
+				tc.SetRotationEuler(tc.GetRotationEuler() += deltaRotationEuler);
+				break;
+			}
+			case ImGuizmo::SCALE:
+			{
+				tc.Scale = scale;
+				break;
+			}
+			}
 		}
 	}
 }

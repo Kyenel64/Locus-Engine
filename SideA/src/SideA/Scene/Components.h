@@ -23,20 +23,44 @@ namespace SideA
 	struct TransformComponent
 	{
 		glm::vec3 Translation = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
 
+	private:
+		// Setting rotations to private forces the use of setters to avoid being able to 
+		// modify one rotation without modifing the other.
+		glm::vec3 RotationEuler = { 0.0f, 0.0f, 0.0f };
+		glm::quat RotationQuat = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+	public:
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent&) = default;
 		TransformComponent(const glm::vec3& translation) : Translation(translation) {}
 
 		glm::mat4 GetTransform() const
 		{
-			glm::mat4 rotation = glm::toMat4(glm::quat(Rotation));
+			glm::mat4 rotation = glm::toMat4(RotationQuat);
 			return glm::translate(glm::mat4(1.0f), Translation)
 				* rotation
 				* glm::scale(glm::mat4(1.0f), Scale);
 		}
+
+		glm::vec3 GetRotationEuler() const { return RotationEuler; }
+
+		void SetRotationEuler(const glm::vec3& euler)
+		{
+			RotationEuler = euler;
+			RotationQuat = glm::quat(RotationEuler);
+		}
+
+		glm::quat GetRotationQuat() const { return RotationQuat; }
+
+		void SetRotationQuat(const glm::quat& quat)
+		{
+			RotationQuat = quat;
+			RotationEuler = glm::eulerAngles(RotationQuat);
+		}
+
+		friend class SceneSerializer;
 	};
 
 	struct SpriteRendererComponent

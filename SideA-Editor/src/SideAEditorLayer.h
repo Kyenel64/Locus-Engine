@@ -25,6 +25,8 @@ namespace SideA
 		void SaveSceneAs();
 		void SaveScene();
 
+		void showGizmoUI();
+
 	private:
 		OrthographicCameraController m_CameraController;
 		Ref<Framebuffer> m_Framebuffer;

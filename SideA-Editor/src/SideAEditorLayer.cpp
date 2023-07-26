@@ -14,7 +14,7 @@
 namespace SideA
 {
 	SideAEditorLayer::SideAEditorLayer()
-		: Layer("SideAEditorLayer"), m_CameraController(1920.0f / 1080.0f)
+		: Layer("SideAEditorLayer")
 	{
 
 	}
@@ -91,15 +91,11 @@ namespace SideA
 			(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
 		{
 			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-			m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
 			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 
 		// Update
-		if (m_ViewportFocused)
-			m_CameraController.OnUpdate(deltaTime);
-
 		m_EditorCamera.OnUpdate(deltaTime); // These are camera specific update commands. Actual rendering is in scene object.
 
 		// Render
@@ -113,7 +109,6 @@ namespace SideA
 
 	void SideAEditorLayer::OnEvent(Event& e)
 	{
-		m_CameraController.OnEvent(e);
 		m_EditorCamera.OnEvent(e);
 
 		EventDispatcher dispatcher(e);
@@ -221,6 +216,8 @@ namespace SideA
 		if (!m_SavedStatus)
 			viewportFlags = ImGuiWindowFlags_UnsavedDocument;
 
+		viewportFlags |= ImGuiWindowFlags_MenuBar;
+
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Viewport", 0, viewportFlags);
 	
@@ -234,12 +231,28 @@ namespace SideA
 		uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
 		ImGui::Image((void*)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 
-		// viewport gizmo
+		// --- viewport menu ---
+		if (ImGui::BeginMenuBar())
+		{
+			m_ViewportMenuHeight = ImGui::GetFrameHeight();
+			if (ImGui::MenuItem("Mouse", "q"))
+				m_GizmoType = -1;
+			if (ImGui::MenuItem("Translate", "w"))
+				m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+			if (ImGui::MenuItem("Rotate", "e"))
+				m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+			if (ImGui::MenuItem("Scale", "r"))
+				m_GizmoType = ImGuizmo::OPERATION::SCALE;
+
+			ImGui::EndMenuBar();
+		}
+
+		// --- viewport gizmo ---
 		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
 		if (selectedEntity && m_GizmoType != -1)
 			showGizmoUI();
 		
-		ImGui::End();
+		ImGui::End(); // End viewport
 		ImGui::PopStyleVar();
 
 
@@ -353,7 +366,7 @@ namespace SideA
 	{
 		ImGuizmo::SetOrthographic(false);
 		ImGuizmo::SetDrawlist();
-		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
+		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y + m_ViewportMenuHeight, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
 
 		// Camera
 		const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();

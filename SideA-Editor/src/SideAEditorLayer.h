@@ -29,20 +29,24 @@ namespace SideA
 		void showGizmoUI();
 
 	private:
-		OrthographicCameraController m_CameraController;
-		Ref<Framebuffer> m_Framebuffer;
-		bool m_ViewportFocused = false; bool m_ViewportHovered = false;
 		bool m_SavedStatus = false;
+		std::string m_SavePath;
 
 		Ref<Scene> m_ActiveScene;
+
+		// Viewport
+		Ref<Framebuffer> m_Framebuffer;
+		EditorCamera m_EditorCamera;
+		bool m_ViewportFocused = false; bool m_ViewportHovered = false;
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
+		float m_ViewportMenuHeight;
+
+
+		// Viewport Gizmo
+		int m_GizmoType = -1;
 
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
-		std::string m_SavePath;
 
-		int m_GizmoType = -1;
-
-		EditorCamera m_EditorCamera;
 	};
 }

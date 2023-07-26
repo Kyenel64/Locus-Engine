@@ -61,13 +61,13 @@ namespace SideA
 	void EditorCamera::MouseRotate(const glm::vec2& delta)
 	{
 		float yawSign = GetUpDirection().y < 0 ? -1.0f : 1.0f;
-		m_Yaw += yawSign * delta.x * 0.01f;
+		m_Yaw += yawSign * delta.x * 0.01f; // TODO:: better speed
 		m_Pitch += delta.y * 0.01f;
 	}
 
 	void EditorCamera::MousePan(const glm::vec2& delta)
 	{
-		m_FocalPoint += -GetRightDirection() * delta.x * 0.01f; // TODO:
+		m_FocalPoint += -GetRightDirection() * delta.x * 0.01f; // TODO: better speed
 		m_FocalPoint += GetUpDirection() * delta.y * 0.01f;
 	}
 

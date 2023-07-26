@@ -8,6 +8,7 @@
 #include "SideA/Renderer/Texture.h"
 #include "SideA/Renderer/SubTexture2D.h"
 #include "SideA/Renderer/Camera.h"
+#include "SideA/Renderer/EditorCamera.h"
 
 
 namespace SideA
@@ -20,8 +21,10 @@ namespace SideA
 
 		static void BeginScene(const Camera& camera, const glm::mat4& transform);
 		static void BeginScene(const OrthographicCamera& camera);
+		static void BeginScene(const EditorCamera& camera);
 		static void EndScene();
 
+		static void StartBatch();
 		static void Flush();
 
 		static void DrawQuad(const glm::mat4& transform, const glm::vec4& color);

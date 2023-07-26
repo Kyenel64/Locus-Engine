@@ -3,7 +3,6 @@
 #include <SideA/Core/EntryPoint.h>
 
 #include "SideAEditorLayer.h"
-#include "SideAExport.h"
 
 //#define SIDEA_EXPORT
 
@@ -14,11 +13,7 @@ namespace SideA
 	public:
 		SideAEditorApp() : Application("SideA Editor")
 		{
-			#ifdef SIDEA_EXPORT
-				PushLayer(new SideAExport());
-			#else
-				PushLayer(new SideAEditorLayer());
-			#endif
+			PushLayer(new SideAEditorLayer());
 		}
 
 		~SideAEditorApp() {}

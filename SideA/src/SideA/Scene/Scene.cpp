@@ -7,6 +7,7 @@
 
 #include "SideA/Renderer/Renderer2D.h"
 #include "SideA/Renderer/RenderCommand.h"
+#include "SideA/Renderer/EditorCamera.h"
 #include "SideA/Scene/Components.h"
 
 
@@ -35,7 +36,7 @@ namespace SideA
 		m_Registry.destroy(entity);
 	}
 
-	void Scene::OnUpdate(Timestep deltaTime)
+	void Scene::OnUpdateRuntime(Timestep deltaTime)
 	{
 		// --- Update Scripts -------------------------------------------------
 		{
@@ -92,7 +93,22 @@ namespace SideA
 			RenderCommand::SetClearColor({ 0.2f, 0.2f, 0.25f, 1 });
 			RenderCommand::Clear();
 		}
-		
+	}
+
+	void Scene::OnUpdateEditor(Timestep deltaTime, EditorCamera& camera)
+	{
+		// Main rendering
+		RenderCommand::SetClearColor(camera.GetBackgroundColor());
+		RenderCommand::Clear();
+
+		Renderer2D::BeginScene(camera);
+		auto group = m_Registry.group<TransformComponent, SpriteRendererComponent>();
+		for (auto entity : group)
+		{
+			auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+			Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
+		}
+		Renderer2D::EndScene();
 	}
 
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)

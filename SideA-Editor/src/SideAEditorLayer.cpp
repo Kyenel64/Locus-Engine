@@ -24,9 +24,9 @@ namespace SideA
 		SIDEA_PROFILE_FUNCTION();
 
 		// Textures
-		m_CheckerboardTexture = Texture2D::Create("assets/textures/Checkerboard.png");
-		m_SpriteSheet = Texture2D::Create("assets/textures/TX_Tileset_Grass.png");
-		m_Grass = SubTexture2D::CreateFromCoords(m_SpriteSheet, { 1, 0 }, { 32, 32 }, { 1, 2 });
+		//m_CheckerboardTexture = Texture2D::Create("assets/textures/Checkerboard.png");
+		//m_SpriteSheet = Texture2D::Create("assets/textures/TX_Tileset_Grass.png");
+		//m_Grass = SubTexture2D::CreateFromCoords(m_SpriteSheet, { 1, 0 }, { 32, 32 }, { 1, 2 });
 
 		// Framebuffer
 		FramebufferSpecs FramebufferSpecs;
@@ -69,6 +69,9 @@ namespace SideA
 		// Panels
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 
+		// Editor Camera
+		m_EditorCamera = EditorCamera(30.0f, 1920.0f / 1080.0f, 0.1f, 1000.0f);
+
 	}
 
 	void SideAEditorLayer::OnDetach()
@@ -89,6 +92,7 @@ namespace SideA
 		{
 			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
+			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 
@@ -96,10 +100,12 @@ namespace SideA
 		if (m_ViewportFocused)
 			m_CameraController.OnUpdate(deltaTime);
 
+		m_EditorCamera.OnUpdate(deltaTime); // These are camera specific update commands. Actual rendering is in scene object.
+
 		// Render
 		Renderer2D::ResetStats();
 		m_Framebuffer->Bind();
-		m_ActiveScene->OnUpdate(deltaTime);
+		m_ActiveScene->OnUpdateEditor(deltaTime, m_EditorCamera);
 		m_Framebuffer->Unbind();
 
 		Renderer2D::StatsEndFrame();
@@ -108,6 +114,7 @@ namespace SideA
 	void SideAEditorLayer::OnEvent(Event& e)
 	{
 		m_CameraController.OnEvent(e);
+		m_EditorCamera.OnEvent(e);
 
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<KeyPressedEvent>(SIDEA_BIND_EVENT_FN(SideAEditorLayer::OnKeyPressed));
@@ -208,7 +215,6 @@ namespace SideA
 		ImGui::End();
 
 		// --- Viewport window ------------------------------------------------
-		
 		// saved status
 		m_SavedStatus = m_SceneHierarchyPanel.GetSavedStatus();
 		ImGuiWindowFlags viewportFlags = 0;
@@ -228,16 +234,17 @@ namespace SideA
 		uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
 		ImGui::Image((void*)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 
-		// --- Viewport Gizmo -------------------------------------------------
+		// viewport gizmo
 		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
-
 		if (selectedEntity && m_GizmoType != -1)
 			showGizmoUI();
 		
 		ImGui::End();
 		ImGui::PopStyleVar();
 
-		ImGui::End();
+
+
+		ImGui::End(); // End ImGui
 	}
 
 	bool SideAEditorLayer::OnKeyPressed(KeyPressedEvent& e)
@@ -349,10 +356,8 @@ namespace SideA
 		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
 
 		// Camera
-		auto cameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
-		const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
-		const glm::mat4& cameraProjection = camera.GetProjection();
-		glm::mat4 cameraView = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());
+		const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
+		glm::mat4 cameraView = m_EditorCamera.GetViewMatrix();
 
 		// Entity transform
 		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();

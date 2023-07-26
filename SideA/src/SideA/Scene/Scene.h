@@ -3,6 +3,7 @@
 #include "entt.hpp"
 
 #include "SideA/Core/Timestep.h"
+#include "SideA/Renderer/EditorCamera.h"
 
 namespace SideA
 {
@@ -17,7 +18,9 @@ namespace SideA
 		Entity CreateEntity(const std::string& name = std::string());
 		void DestroyEntity(Entity entity);
 
-		void OnUpdate(Timestep deltaTime);
+		void OnUpdateRuntime(Timestep deltaTime);
+		void OnUpdateEditor(Timestep deltaTime, EditorCamera& camera);
+
 		void OnViewportResize(uint32_t width, uint32_t height);
 
 		Entity GetPrimaryCameraEntity();

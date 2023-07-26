@@ -4,7 +4,7 @@ Entities:
     TagComponent:
       Tag: Camera
     TransformComponent:
-      Translation: [1.5, 0.899999976, 3.9000001]
+      Translation: [0, 0, 0]
       Rotation: [-0.158824965, 0.397935063, 0]
       Scale: [1, 1, 1]
     CameraComponent:
@@ -24,7 +24,7 @@ Entities:
       Tag: Square
     TransformComponent:
       Translation: [0, 0, 0]
-      Rotation: [0, 1.57079637, 0]
+      Rotation: [0, 0, 0]
       Scale: [0.999991894, 0.999997258, 0.999999881]
     SpriteRendererComponent:
       Color: [0.583629906, 0.367624521, 0.367624521, 1]

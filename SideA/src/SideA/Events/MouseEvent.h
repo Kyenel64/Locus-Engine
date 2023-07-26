@@ -2,6 +2,7 @@
 
 #include "SideA/Events/Event.h"
 #include "SideA/Core/MouseCodes.h"
+#include <sstream>
 
 namespace SideA
 {

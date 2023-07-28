@@ -6,7 +6,7 @@
 
 namespace SideA
 {
-	Ref<Framebuffer> Framebuffer::Create(const FramebufferSpecs& specs)
+	Ref<Framebuffer> Framebuffer::Create(const FramebufferSpecification& specs)
 	{
 		switch (Renderer::GetAPI())
 		{

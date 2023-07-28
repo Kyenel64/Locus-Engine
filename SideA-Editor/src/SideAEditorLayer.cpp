@@ -29,10 +29,11 @@ namespace SideA
 		//m_Grass = SubTexture2D::CreateFromCoords(m_SpriteSheet, { 1, 0 }, { 32, 32 }, { 1, 2 });
 
 		// Framebuffer
-		FramebufferSpecs FramebufferSpecs;
-		FramebufferSpecs.Width = 1920;
-		FramebufferSpecs.Height = 1080;
-		m_Framebuffer = Framebuffer::Create(FramebufferSpecs);
+		FramebufferSpecification framebufferSpecs;
+		framebufferSpecs.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth };
+		framebufferSpecs.Width = 1920;
+		framebufferSpecs.Height = 1080;
+		m_Framebuffer = Framebuffer::Create(framebufferSpecs);
 
 		// Scene
 		m_ActiveScene = CreateRef<Scene>();
@@ -86,7 +87,7 @@ namespace SideA
 		Renderer2D::StatsStartFrame();
 
 		// Resize
-		if (FramebufferSpecs spec = m_Framebuffer->GetSpecification();
+		if (FramebufferSpecification spec = m_Framebuffer->GetSpecification();
 			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f &&
 			(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
 		{
@@ -229,7 +230,7 @@ namespace SideA
 		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
 
 		uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
-		ImGui::Image((void*)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+		ImGui::Image((void*)(uintptr_t)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 
 		// --- viewport menu ---
 		if (ImGui::BeginMenuBar())
@@ -305,6 +306,8 @@ namespace SideA
 				m_GizmoType = ImGuizmo::OPERATION::SCALE;
 				break;
 		}
+
+		return true;
 	}
 
 	void SideAEditorLayer::NewScene()
@@ -393,7 +396,7 @@ namespace SideA
 		//Math::DecomposeTransform(transform, scale, rotation, translation);
 		glm::decompose(transform, scale, rotation, translation, glm::vec3(1.0f), glm::vec4(1.0f));
 
-		if (ImGuizmo::IsUsing)
+		if (ImGuizmo::IsUsing())
 		{
 			switch (m_GizmoType)
 			{

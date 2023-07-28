@@ -39,7 +39,8 @@ namespace SideA
 		EditorCamera m_EditorCamera;
 		bool m_ViewportFocused = false; bool m_ViewportHovered = false;
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
-		float m_ViewportMenuHeight;
+		glm::vec2 m_ViewportBounds[2];
+		uint32_t m_ViewportMenuHeight;
 
 
 		// Viewport Gizmo

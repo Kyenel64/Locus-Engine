@@ -30,7 +30,7 @@ namespace SideA
 
 		// Framebuffer
 		FramebufferSpecification framebufferSpecs;
-		framebufferSpecs.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth };
+		framebufferSpecs.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INT, FramebufferTextureFormat::Depth };
 		framebufferSpecs.Width = 1920;
 		framebufferSpecs.Height = 1080;
 		m_Framebuffer = Framebuffer::Create(framebufferSpecs);
@@ -99,12 +99,30 @@ namespace SideA
 		// Update
 		m_EditorCamera.OnUpdate(deltaTime); // These are camera specific update commands. Actual rendering is in scene object.
 
-		// Render
+		// --- Render ---------------------------------------------------------
 		Renderer2D::ResetStats();
 		m_Framebuffer->Bind();
-		m_ActiveScene->OnUpdateEditor(deltaTime, m_EditorCamera);
-		m_Framebuffer->Unbind();
 
+		m_ActiveScene->OnUpdateEditor(deltaTime, m_EditorCamera);
+
+		// Read pixel
+		auto [mx, my] = ImGui::GetMousePos();
+		mx -= m_ViewportBounds[0].x;
+		my -= m_ViewportBounds[0].y;
+		glm::vec2 viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
+		my = viewportSize.y - my;
+		int mouseX = (int)mx;
+		int mouseY = (int)my;
+
+		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
+		{
+			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY);
+			SIDEA_CORE_WARN("Pixel data = {0}", pixelData);
+		}
+
+		
+		m_Framebuffer->Unbind();
+		// --- Render End -----------------------------------------------------
 		Renderer2D::StatsEndFrame();
 	}
 
@@ -231,6 +249,9 @@ namespace SideA
 
 		uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
 		ImGui::Image((void*)(uintptr_t)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+
+		m_ViewportBounds[0].x = ImGui::GetItemRectMin().x, m_ViewportBounds[0].y = ImGui::GetItemRectMin().y;
+		m_ViewportBounds[1].x = ImGui::GetItemRectMax().x, m_ViewportBounds[1].y = ImGui::GetItemRectMax().y;
 
 		// --- viewport menu ---
 		if (ImGui::BeginMenuBar())
@@ -369,7 +390,7 @@ namespace SideA
 	{
 		ImGuizmo::SetOrthographic(false);
 		ImGuizmo::SetDrawlist();
-		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y + m_ViewportMenuHeight, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
+		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y + m_ViewportMenuHeight, ImGui::GetWindowWidth(), ImGui::GetWindowHeight()); // TODO: Fix menu bar and tab bar offset
 
 		// Camera
 		const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();

@@ -102,6 +102,11 @@ namespace SideA
 		// --- Render ---------------------------------------------------------
 		Renderer2D::ResetStats();
 		m_Framebuffer->Bind();
+		
+		// Clears
+		RenderCommand::SetClearColor(m_EditorCamera.GetBackgroundColor());
+		RenderCommand::Clear();
+		m_Framebuffer->ClearAttachmentInt(1, -1);
 
 		m_ActiveScene->OnUpdateEditor(deltaTime, m_EditorCamera);
 
@@ -117,7 +122,7 @@ namespace SideA
 		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
 		{
 			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY);
-			SIDEA_CORE_WARN("Pixel data = {0}", pixelData);
+			m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 		}
 
 		
@@ -218,6 +223,7 @@ namespace SideA
 
 		// --- Stats window ---------------------------------------------------
 		ImGui::Begin("Stats");
+
 		auto stats = Renderer2D::GetStats();
 		ImGui::Text("Renderer2D Stats:");
 		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
@@ -226,6 +232,12 @@ namespace SideA
 		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
 		ImGui::Text("Frame Time: %f", stats.FrameTime);
 		ImGui::Text("FPS: %f", stats.FramesPerSecond);
+
+		std::string name = "None";
+		if (m_HoveredEntity)
+			name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
+		ImGui::Text("Hovered Entity: %s", name.c_str());
+
 		ImGui::End();
 
 		// --- Viewport window ------------------------------------------------
@@ -256,7 +268,7 @@ namespace SideA
 		// --- viewport menu ---
 		if (ImGui::BeginMenuBar())
 		{
-			m_ViewportMenuHeight = ImGui::GetFrameHeight();
+			m_ViewportMenuHeight = (uint32_t)ImGui::GetFrameHeight();
 			if (ImGui::MenuItem("Mouse", "q"))
 				m_GizmoType = -1;
 			if (ImGui::MenuItem("Translate", "w"))

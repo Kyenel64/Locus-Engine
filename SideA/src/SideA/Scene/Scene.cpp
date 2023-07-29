@@ -84,7 +84,7 @@ namespace SideA
 			for (auto entity : group)
 			{
 				auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-				Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
+				Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
 			}
 			Renderer2D::EndScene();
 		}
@@ -98,15 +98,13 @@ namespace SideA
 	void Scene::OnUpdateEditor(Timestep deltaTime, EditorCamera& camera)
 	{
 		// Main rendering
-		RenderCommand::SetClearColor(camera.GetBackgroundColor());
-		RenderCommand::Clear();
 
 		Renderer2D::BeginScene(camera);
 		auto group = m_Registry.group<TransformComponent, SpriteRendererComponent>();
 		for (auto entity : group)
 		{
 			auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-			Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
+			Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
 		}
 		Renderer2D::EndScene();
 	}

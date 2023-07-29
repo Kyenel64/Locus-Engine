@@ -41,6 +41,7 @@ namespace SideA
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
 		glm::vec2 m_ViewportBounds[2];
 		uint32_t m_ViewportMenuHeight;
+		Entity m_HoveredEntity;
 
 
 		// Viewport Gizmo

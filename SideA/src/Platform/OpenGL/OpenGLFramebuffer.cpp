@@ -143,6 +143,20 @@ namespace SideA
 		return pixelData;
 	}
 
+	void OpenGLFramebuffer::ClearAttachmentInt(uint32_t attachmentIndex, int value)
+	{
+		SIDEA_CORE_ASSERT(attachmentIndex < m_ColorAttachments.size(), "Attachment index out of bounds!");
+
+		glClearTexImage(m_ColorAttachments[attachmentIndex], 0, GL_RED_INTEGER, GL_INT, &value);
+	}
+
+	void OpenGLFramebuffer::ClearAttachmentColor(uint32_t attachmentIndex, const glm::vec4& value)
+	{
+		SIDEA_CORE_ASSERT(attachmentIndex < m_ColorAttachments.size(), "Attachment index out of bounds!");
+
+		glClearTexImage(m_ColorAttachments[attachmentIndex], 0, GL_RGBA, GL_FLOAT , &value);
+	}
+
 	void OpenGLFramebuffer::Bind()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);

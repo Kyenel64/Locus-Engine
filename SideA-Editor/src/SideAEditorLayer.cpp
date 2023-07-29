@@ -137,6 +137,7 @@ namespace SideA
 
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<KeyPressedEvent>(SIDEA_BIND_EVENT_FN(SideAEditorLayer::OnKeyPressed));
+		dispatcher.Dispatch<MouseButtonPressedEvent>(SIDEA_BIND_EVENT_FN(SideAEditorLayer::OnMouseButtonPressed));
 	}
 
 	void SideAEditorLayer::OnImGuiRender()
@@ -247,8 +248,6 @@ namespace SideA
 		if (!m_SavedStatus)
 			viewportFlags = ImGuiWindowFlags_UnsavedDocument;
 
-		viewportFlags |= ImGuiWindowFlags_MenuBar;
-
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Viewport", 0, viewportFlags);
 	
@@ -264,22 +263,6 @@ namespace SideA
 
 		m_ViewportBounds[0].x = ImGui::GetItemRectMin().x, m_ViewportBounds[0].y = ImGui::GetItemRectMin().y;
 		m_ViewportBounds[1].x = ImGui::GetItemRectMax().x, m_ViewportBounds[1].y = ImGui::GetItemRectMax().y;
-
-		// --- viewport menu ---
-		if (ImGui::BeginMenuBar())
-		{
-			m_ViewportMenuHeight = (uint32_t)ImGui::GetFrameHeight();
-			if (ImGui::MenuItem("Mouse", "q"))
-				m_GizmoType = -1;
-			if (ImGui::MenuItem("Translate", "w"))
-				m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
-			if (ImGui::MenuItem("Rotate", "e"))
-				m_GizmoType = ImGuizmo::OPERATION::ROTATE;
-			if (ImGui::MenuItem("Scale", "r"))
-				m_GizmoType = ImGuizmo::OPERATION::SCALE;
-
-			ImGui::EndMenuBar();
-		}
 
 		// --- viewport gizmo ---
 		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
@@ -343,6 +326,17 @@ namespace SideA
 		return true;
 	}
 
+	bool SideAEditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& e)
+	{
+		if (e.GetMouseButton() == Mouse::ButtonLeft)
+		{
+			if (m_ViewportHovered && !ImGuizmo::IsOver())
+				m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
+		}
+
+		return false;
+	}
+
 	void SideAEditorLayer::NewScene()
 	{
 		m_ActiveScene = CreateRef<Scene>();
@@ -402,7 +396,8 @@ namespace SideA
 	{
 		ImGuizmo::SetOrthographic(false);
 		ImGuizmo::SetDrawlist();
-		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y + m_ViewportMenuHeight, ImGui::GetWindowWidth(), ImGui::GetWindowHeight()); // TODO: Fix menu bar and tab bar offset
+		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y + 17.0f, ImGui::GetWindowWidth(), ImGui::GetWindowHeight()); // TODO: set tab bar offset
+		ImGuizmo::AllowAxisFlip(false);
 
 		// Camera
 		const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();

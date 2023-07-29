@@ -22,6 +22,7 @@ namespace SideA
 		void SetSavedStatus(bool state) { m_SavedStatus = state; }
 
 		Entity GetSelectedEntity() const { return m_SelectedEntity; }
+		void SetSelectedEntity(Entity entity) { m_SelectedEntity = entity; }
 	private:
 		void DrawEntityNode(Entity entity);
 		void DrawComponents(Entity entity);

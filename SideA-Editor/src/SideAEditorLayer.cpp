@@ -143,7 +143,7 @@ namespace SideA
 	void SideAEditorLayer::OnImGuiRender()
 	{
 		SIDEA_PROFILE_FUNCTION();
-		//ImGui::ShowDemoWindow();
+		ImGui::ShowDemoWindow();
 
 		static bool dockspaceOpen = true;
 		static bool opt_fullscreen_persistant = true;
@@ -186,6 +186,7 @@ namespace SideA
 		ImGuiStyle& style = ImGui::GetStyle();
 		float minWinSizeX = style.WindowMinSize.x;
 		style.WindowMinSize.x = 400.0f;
+		style.WindowMenuButtonPosition = ImGuiDir_None;
 		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		{
 			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
@@ -211,7 +212,12 @@ namespace SideA
 					SaveSceneAs();
 
 				if (ImGui::MenuItem("Exit"))
-					Application::Get().Close();
+				{
+					if (Application::Get().GetIsSavedStatus())
+						Application::Get().Close();
+					else
+						Application::Get().SetSaveEnginePopupStatus(true);
+				}
 
 				ImGui::EndMenu();
 			}
@@ -222,8 +228,8 @@ namespace SideA
 		// --- Panels ---------------------------------------------------------
 		m_SceneHierarchyPanel.OnImGuiRender();
 
-		// --- Stats window ---------------------------------------------------
-		ImGui::Begin("Stats");
+		// --- Debug panel ---------------------------------------------------
+		ImGui::Begin("Debug");
 
 		auto stats = Renderer2D::GetStats();
 		ImGui::Text("Renderer2D Stats:");
@@ -243,10 +249,10 @@ namespace SideA
 
 		// --- Viewport window ------------------------------------------------
 		// saved status
-		m_SavedStatus = m_SceneHierarchyPanel.GetSavedStatus();
-		ImGuiWindowFlags viewportFlags = 0;
-		if (!m_SavedStatus)
-			viewportFlags = ImGuiWindowFlags_UnsavedDocument;
+		ImGuiWindowFlags viewportFlags = ImGuiWindowFlags_MenuBar;
+
+		if (!Application::Get().GetIsSavedStatus())
+			viewportFlags |= ImGuiWindowFlags_UnsavedDocument;
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Viewport", 0, viewportFlags);
@@ -268,11 +274,50 @@ namespace SideA
 		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
 		if (selectedEntity && m_GizmoType != -1)
 			showGizmoUI();
+
+		// --- viewport menu ---
+		if (ImGui::BeginMenuBar())
+		{
+			if (ImGui::MenuItem("P", "q"))
+				m_GizmoType = -1;
+			if (ImGui::MenuItem("T", "w"))
+				m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+			if (ImGui::MenuItem("R", "e"))
+				m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+			if (ImGui::MenuItem("S", "r"))
+				m_GizmoType = ImGuizmo::OPERATION::SCALE;
+
+			ImGui::EndMenuBar();
+		}
 		
 		ImGui::End(); // End viewport
 		ImGui::PopStyleVar();
 
+		// --- Save Project Popup ---------------------------------------------
+		if (Application::Get().GetSaveEnginePopupStatus())
+			ImGui::OpenPopup("Save?");
 
+		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+		ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+		if (ImGui::BeginPopupModal("Save?", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+		{
+			ImGui::Text("Save Current Project?");
+			if (ImGui::Button("Save")) // TODO: Keep on popup modal when clicking cancel
+			{
+				SaveScene();
+				Application::Get().Close();
+			}
+			if (ImGui::Button("Don't Save"))
+			{
+				Application::Get().Close();
+			}
+			if (ImGui::Button("Close"))
+			{
+				Application::Get().SetSaveEnginePopupStatus(false);
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
 
 		ImGui::End(); // End ImGui
 	}
@@ -343,8 +388,7 @@ namespace SideA
 		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 		m_SavePath = std::string();
-		m_SavedStatus = false;
-		m_SceneHierarchyPanel.SetSavedStatus(false);
+		Application::Get().SetIsSavedStatus(false);
 	}
 
 	void SideAEditorLayer::OpenScene()
@@ -359,8 +403,7 @@ namespace SideA
 			SceneSerializer serializer(m_ActiveScene);
 			serializer.Deserialize(path);
 			m_SavePath = path;
-			m_SavedStatus = true;
-			m_SceneHierarchyPanel.SetSavedStatus(true);
+			Application::Get().SetIsSavedStatus(true);
 		}
 	}
 
@@ -372,8 +415,7 @@ namespace SideA
 			SceneSerializer serializer(m_ActiveScene);
 			serializer.Serialize(path);
 			m_SavePath = path;
-			m_SavedStatus = true;
-			m_SceneHierarchyPanel.SetSavedStatus(true);
+			Application::Get().SetIsSavedStatus(true);
 		}
 	}
 
@@ -387,8 +429,7 @@ namespace SideA
 		{
 			SceneSerializer serializer(m_ActiveScene);
 			serializer.Serialize(m_SavePath);
-			m_SavedStatus = true;
-			m_SceneHierarchyPanel.SetSavedStatus(true);
+			Application::Get().SetIsSavedStatus(true);
 		}
 	}
 
@@ -396,7 +437,7 @@ namespace SideA
 	{
 		ImGuizmo::SetOrthographic(false);
 		ImGuizmo::SetDrawlist();
-		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y + 17.0f, ImGui::GetWindowWidth(), ImGui::GetWindowHeight()); // TODO: set tab bar offset
+		ImGuizmo::SetRect(ImGui::GetItemRectMin().x, ImGui::GetItemRectMin().y, ImGui::GetItemRectSize().x, ImGui::GetItemRectSize().y);
 		ImGuizmo::AllowAxisFlip(false);
 
 		// Camera
@@ -426,39 +467,40 @@ namespace SideA
 
 		if (ImGuizmo::IsUsing())
 		{
+			Application::Get().SetIsSavedStatus(false);
 			switch (m_GizmoType)
 			{
-			case ImGuizmo::TRANSLATE:
-			{
-				tc.Translation = translation;
-				break;
-			}
-			case ImGuizmo::ROTATE:
-			{
-				// TODO: fix rotation
-				// Do this in Euler in an attempt to preserve any full revolutions (> 360)
-				glm::vec3 originalRotationEuler = tc.GetRotationEuler();
+				case ImGuizmo::TRANSLATE:
+				{
+					tc.Translation = translation;
+					break;
+				}
+				case ImGuizmo::ROTATE:
+				{
+					// TODO: fix rotation
+					// Do this in Euler in an attempt to preserve any full revolutions (> 360)
+					glm::vec3 originalRotationEuler = tc.GetRotationEuler();
 
-				// Map original rotation to range [-180, 180] which is what ImGuizmo gives us
-				originalRotationEuler.x = fmodf(originalRotationEuler.x + glm::pi<float>(), glm::two_pi<float>()) - glm::pi<float>();
-				originalRotationEuler.y = fmodf(originalRotationEuler.y + glm::pi<float>(), glm::two_pi<float>()) - glm::pi<float>();
-				originalRotationEuler.z = fmodf(originalRotationEuler.z + glm::pi<float>(), glm::two_pi<float>()) - glm::pi<float>();
+					// Map original rotation to range [-180, 180] which is what ImGuizmo gives us
+					originalRotationEuler.x = fmodf(originalRotationEuler.x + glm::pi<float>(), glm::two_pi<float>()) - glm::pi<float>();
+					originalRotationEuler.y = fmodf(originalRotationEuler.y + glm::pi<float>(), glm::two_pi<float>()) - glm::pi<float>();
+					originalRotationEuler.z = fmodf(originalRotationEuler.z + glm::pi<float>(), glm::two_pi<float>()) - glm::pi<float>();
 
-				glm::vec3 deltaRotationEuler = glm::eulerAngles(rotation) - originalRotationEuler;
+					glm::vec3 deltaRotationEuler = glm::eulerAngles(rotation) - originalRotationEuler;
 
-				// Try to avoid drift due numeric precision
-				if (fabs(deltaRotationEuler.x) < 0.001) deltaRotationEuler.x = 0.0f;
-				if (fabs(deltaRotationEuler.y) < 0.001) deltaRotationEuler.y = 0.0f;
-				if (fabs(deltaRotationEuler.z) < 0.001) deltaRotationEuler.z = 0.0f;
+					// Try to avoid drift due numeric precision
+					if (fabs(deltaRotationEuler.x) < 0.001) deltaRotationEuler.x = 0.0f;
+					if (fabs(deltaRotationEuler.y) < 0.001) deltaRotationEuler.y = 0.0f;
+					if (fabs(deltaRotationEuler.z) < 0.001) deltaRotationEuler.z = 0.0f;
 
-				tc.SetRotationEuler(tc.GetRotationEuler() += deltaRotationEuler);
-				break;
-			}
-			case ImGuizmo::SCALE:
-			{
-				tc.Scale = scale;
-				break;
-			}
+					tc.SetRotationEuler(tc.GetRotationEuler() += deltaRotationEuler);
+					break;
+				}
+				case ImGuizmo::SCALE:
+				{
+					tc.Scale = scale;
+					break;
+				}
 			}
 		}
 	}

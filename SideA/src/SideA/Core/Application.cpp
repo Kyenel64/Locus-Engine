@@ -106,7 +106,10 @@ namespace SideA
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)
 	{
-		m_Running = false;
+		if (m_IsSaved)
+			Close();
+		else
+			m_OpenSavePopup = true;
 		return true;
 	}
 

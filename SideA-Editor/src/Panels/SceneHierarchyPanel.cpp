@@ -5,6 +5,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "SideA/Scene/Components.h"
+#include "SideA/Core/Application.h"
 
 namespace SideA
 {
@@ -41,7 +42,7 @@ namespace SideA
 			if (ImGui::MenuItem("Create Empty Entity"))
 			{
 				m_Context->CreateEntity("Empty Entity");
-				m_SavedStatus = false;
+				Application::Get().SetIsSavedStatus(false);
 			}
 			ImGui::EndPopup();
 		}
@@ -64,7 +65,7 @@ namespace SideA
 					if (!m_SelectedEntity.HasComponent<CameraComponent>())
 					{
 						m_SelectedEntity.AddComponent<CameraComponent>();
-						m_SavedStatus = false;
+						Application::Get().SetIsSavedStatus(false);
 					}
 					else
 					{
@@ -79,7 +80,7 @@ namespace SideA
 					if (!m_SelectedEntity.HasComponent<SpriteRendererComponent>())
 					{
 						m_SelectedEntity.AddComponent<SpriteRendererComponent>();
-						m_SavedStatus = false;
+						Application::Get().SetIsSavedStatus(false);
 					}
 					else
 					{
@@ -112,7 +113,7 @@ namespace SideA
 			if (ImGui::MenuItem("Delete Entity"))
 			{
 				entityDeleted = true;
-				m_SavedStatus = false;
+				Application::Get().SetIsSavedStatus(false);
 			}
 			ImGui::EndPopup();
 		}
@@ -162,14 +163,14 @@ namespace SideA
 		if (ImGui::Button("X", buttonSize)) // TODO: double click
 		{
 			values.x = resetValue;
-			m_SavedStatus = false;
+			Application::Get().SetIsSavedStatus(false);
 		}
 		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
 		if (ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f"))
-			m_SavedStatus = false;
+			Application::Get().SetIsSavedStatus(false);
 		ImGui::PopItemWidth();
 		ImGui::SameLine();
 
@@ -181,14 +182,14 @@ namespace SideA
 		if (ImGui::Button("Y", buttonSize))
 		{
 			values.y = resetValue;
-			m_SavedStatus = false;
+			Application::Get().SetIsSavedStatus(false);
 		}
 		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
 		if (ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f"))
-			m_SavedStatus = false;
+			Application::Get().SetIsSavedStatus(false);
 		ImGui::PopItemWidth();
 		ImGui::SameLine();
 
@@ -200,14 +201,14 @@ namespace SideA
 		if (ImGui::Button("Z", buttonSize))
 		{
 			values.z = resetValue;
-			m_SavedStatus = false;
+			Application::Get().SetIsSavedStatus(false);
 		}
 		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
 		if (ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.2f"))
-			m_SavedStatus = false;
+			Application::Get().SetIsSavedStatus(false);
 		ImGui::PopItemWidth();
 
 		ImGui::PopStyleVar();
@@ -252,7 +253,7 @@ namespace SideA
 					if (ImGui::MenuItem("Remove component"))
 					{
 						removeComponent = true;
-						m_SavedStatus = false;
+						Application::Get().SetIsSavedStatus(false);
 					}
 				}
 				
@@ -283,7 +284,7 @@ namespace SideA
 			if (ImGui::InputText("Tag", buffer, sizeof(buffer)))
 			{
 				tag = std::string(buffer);
-				m_SavedStatus = false;
+				Application::Get().SetIsSavedStatus(false);
 			}
 		}
 
@@ -307,7 +308,7 @@ namespace SideA
 				// Primary camera check
 				if (ImGui::Checkbox("Primary", &component.Primary))
 				{
-					m_SavedStatus = false;
+					Application::Get().SetIsSavedStatus(false);
 				}
 
 				// Background color
@@ -315,7 +316,7 @@ namespace SideA
 				if (ImGui::ColorEdit4("Background Color", glm::value_ptr(backgroundColor)))
 				{
 					camera.SetBackgroundColor(backgroundColor);
-					m_SavedStatus = false;
+					Application::Get().SetIsSavedStatus(false);
 				}
 
 				// Projection mode
@@ -330,7 +331,7 @@ namespace SideA
 						{
 							currentProjectionTypeString = projectionTypeString[i];
 							camera.SetProjectionType((SceneCamera::ProjectionType)i);
-							m_SavedStatus = false;
+							Application::Get().SetIsSavedStatus(false);
 						}
 
 						if (isSelected)
@@ -347,26 +348,26 @@ namespace SideA
 					if (ImGui::DragFloat("Size", &orthoSize))
 					{
 						camera.SetOrthographicSize(orthoSize);
-						m_SavedStatus = false;
+						Application::Get().SetIsSavedStatus(false);
 					}
 					// Near
 					float nearClip = camera.GetOrthographicNearClip();
 					if (ImGui::DragFloat("Near Clip", &nearClip))
 					{
 						camera.SetOrthographicNearClip(nearClip);
-						m_SavedStatus = false;
+						Application::Get().SetIsSavedStatus(false);
 					}
 					// Far
 					float farClip = camera.GetOrthographicFarClip();
 					if (ImGui::DragFloat("Far Clip", &farClip))
 					{
 						camera.SetOrthographicFarClip(farClip);
-						m_SavedStatus = false;
+						Application::Get().SetIsSavedStatus(false);
 					}
 
 					if (ImGui::Checkbox("Fixed Aspect Ratio", &component.FixedAspectRatio))
 					{
-						m_SavedStatus = false;
+						Application::Get().SetIsSavedStatus(false);
 					}
 				}
 
@@ -378,21 +379,21 @@ namespace SideA
 					if (ImGui::DragFloat("FOV", &fov))
 					{
 						camera.SetPerspectiveFOV(glm::radians(fov));
-						m_SavedStatus = false;
+						Application::Get().SetIsSavedStatus(false);
 					}
 					// Near
 					float nearClip = camera.GetPerspectiveNearClip();
 					if (ImGui::DragFloat("Near Clip", &nearClip))
 					{
 						camera.SetPerspectiveNearClip(nearClip);
-						m_SavedStatus = false;
+						Application::Get().SetIsSavedStatus(false);
 					}
 					// Far
 					float farClip = camera.GetPerspectiveFarClip();
 					if (ImGui::DragFloat("Far Clip", &farClip))
 					{
 						camera.SetPerspectiveFarClip(farClip);
-						m_SavedStatus = false;
+						Application::Get().SetIsSavedStatus(false);
 					}
 				}
 		});
@@ -402,7 +403,7 @@ namespace SideA
 		{
 			if (ImGui::ColorEdit4("Color", glm::value_ptr(component.Color)))
 			{
-				m_SavedStatus = false;
+				Application::Get().SetIsSavedStatus(false);
 			}
 
 		});

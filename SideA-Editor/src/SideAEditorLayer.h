@@ -19,6 +19,7 @@ namespace SideA
 		virtual void OnImGuiRender() override;
 
 	private:
+		// Events
 		bool OnKeyPressed(KeyPressedEvent& e);
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 
@@ -30,7 +31,6 @@ namespace SideA
 		void showGizmoUI();
 
 	private:
-		bool m_SavedStatus = false;
 		std::string m_SavePath;
 
 		Ref<Scene> m_ActiveScene;

@@ -18,8 +18,6 @@ namespace SideA
 
 		void OnImGuiRender();
 
-		bool GetSavedStatus() const { return m_SavedStatus; }
-		void SetSavedStatus(bool state) { m_SavedStatus = state; }
 
 		Entity GetSelectedEntity() const { return m_SelectedEntity; }
 		void SetSelectedEntity(Entity entity) { m_SelectedEntity = entity; }
@@ -34,6 +32,5 @@ namespace SideA
 	private:
 		Ref<Scene> m_Context;
 		Entity m_SelectedEntity;
-		bool m_SavedStatus = false;
 	};
 }

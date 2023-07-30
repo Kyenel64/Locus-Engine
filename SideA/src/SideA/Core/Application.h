@@ -41,8 +41,8 @@ namespace SideA
 		inline static Application& Get() { return *s_Instance; }
 		ImGuiLayer* GetImGuiLayer() const { return m_ImGuiLayer; }
 
-		void SetSaveEnginePopupStatus(bool status) { m_OpenSavePopup = status; }
-		bool GetSaveEnginePopupStatus() const { return m_OpenSavePopup; }
+		void SetSaveChangesPopupStatus(bool status) { m_OpenSaveChangesPopup = status; }
+		bool GetSaveChangesPopupStatus() const { return m_OpenSaveChangesPopup; }
 
 		void SetIsSavedStatus(bool isSaved) { m_IsSaved = isSaved; }
 		bool GetIsSavedStatus() const { return m_IsSaved; }
@@ -60,7 +60,7 @@ namespace SideA
 		bool m_Minimized = false;
 		LayerStack m_LayerStack;
 
-		bool m_OpenSavePopup = false;
+		bool m_OpenSaveChangesPopup = false;
 		bool m_IsSaved = false;
 
 		float m_LastFrameTime = 0.0f;

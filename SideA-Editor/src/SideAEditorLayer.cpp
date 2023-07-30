@@ -122,6 +122,7 @@ namespace SideA
 		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
 		{
 			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY);
+			SIDEA_CORE_INFO("{0}, {1}", mouseX, mouseY);
 			m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 		}
 
@@ -143,7 +144,7 @@ namespace SideA
 	void SideAEditorLayer::OnImGuiRender()
 	{
 		SIDEA_PROFILE_FUNCTION();
-		ImGui::ShowDemoWindow();
+		//ImGui::ShowDemoWindow();
 
 		static bool dockspaceOpen = true;
 		static bool opt_fullscreen_persistant = true;
@@ -216,7 +217,7 @@ namespace SideA
 					if (Application::Get().GetIsSavedStatus())
 						Application::Get().Close();
 					else
-						Application::Get().SetSaveEnginePopupStatus(true);
+						Application::Get().SetSaveChangesPopupStatus(true);
 				}
 
 				ImGui::EndMenu();
@@ -248,19 +249,13 @@ namespace SideA
 		ImGui::End();
 
 		// --- Viewport window ------------------------------------------------
-		// saved status
 		ImGuiWindowFlags viewportFlags = ImGuiWindowFlags_MenuBar;
-
 		if (!Application::Get().GetIsSavedStatus())
 			viewportFlags |= ImGuiWindowFlags_UnsavedDocument;
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Viewport", 0, viewportFlags);
 	
-		m_ViewportFocused = ImGui::IsWindowFocused();
-		m_ViewportHovered = ImGui::IsWindowHovered();
-		Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused && !m_ViewportHovered);
-
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
 
@@ -269,6 +264,9 @@ namespace SideA
 
 		m_ViewportBounds[0].x = ImGui::GetItemRectMin().x, m_ViewportBounds[0].y = ImGui::GetItemRectMin().y;
 		m_ViewportBounds[1].x = ImGui::GetItemRectMax().x, m_ViewportBounds[1].y = ImGui::GetItemRectMax().y;
+		m_ViewportHovered = ImGui::IsMouseHoveringRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+		m_ViewportFocused = ImGui::IsWindowFocused();
+		Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused && !m_ViewportHovered);
 
 		// --- viewport gizmo ---
 		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
@@ -294,7 +292,7 @@ namespace SideA
 		ImGui::PopStyleVar();
 
 		// --- Save Project Popup ---------------------------------------------
-		if (Application::Get().GetSaveEnginePopupStatus())
+		if (Application::Get().GetSaveChangesPopupStatus())
 			ImGui::OpenPopup("Save?");
 
 		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
@@ -313,7 +311,7 @@ namespace SideA
 			}
 			if (ImGui::Button("Close"))
 			{
-				Application::Get().SetSaveEnginePopupStatus(false);
+				Application::Get().SetSaveChangesPopupStatus(false);
 				ImGui::CloseCurrentPopup();
 			}
 			ImGui::EndPopup();

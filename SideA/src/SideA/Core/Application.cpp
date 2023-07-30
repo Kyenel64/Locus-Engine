@@ -109,7 +109,7 @@ namespace SideA
 		if (m_IsSaved)
 			Close();
 		else
-			m_OpenSavePopup = true;
+			m_OpenSaveChangesPopup = true;
 		return true;
 	}
 

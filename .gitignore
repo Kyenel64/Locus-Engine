@@ -371,3 +371,7 @@ bin-int/
 *.vcxproj.user
 **/imgui.ini
 *.log
+
+SideA/vendor/VulkanSDK
+SideA-Editor/assets/cache
+scripts/__pycache__

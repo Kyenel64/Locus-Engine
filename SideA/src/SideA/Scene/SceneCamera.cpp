@@ -30,6 +30,7 @@ namespace SideA
 
 	void SceneCamera::SetViewportSize(uint32_t width, uint32_t height)
 	{
+		SIDEA_CORE_ASSERT(width > 0 && height > 0, "SceneCamera viewport size < 0");
 		m_AspectRatio = (float)width / (float)height;
 		RecalculateProjection();
 	}

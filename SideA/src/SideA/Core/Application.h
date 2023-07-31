@@ -22,6 +22,7 @@
 
 namespace SideA
 {
+	// TODO: Command Line Args "New Shader System..." commit
 	class Application
 	{
 	public:

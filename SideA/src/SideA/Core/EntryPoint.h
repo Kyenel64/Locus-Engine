@@ -10,10 +10,12 @@
 // We dont want any connection with the client app so we cant link a header.
 extern SideA::Application* SideA::CreateApplication();
 
-int main(int argc, char** argv)
+int main(int argc, char** argv) // *argv is program path, *argv[0+n] are command line arguments
 {
 	// --- Initialize Log ---
 	SideA::Log::Init();
+
+	SIDEA_CORE_WARN(*argv);
 
 	// --- Create project application ---
 	SIDEA_PROFILE_BEGIN_SESSION("Startup", "SideAProfile-Startup.log");

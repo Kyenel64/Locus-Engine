@@ -61,7 +61,7 @@ namespace SideA
 		LayerStack m_LayerStack;
 
 		bool m_OpenSaveChangesPopup = false;
-		bool m_IsSaved = false;
+		bool m_IsSaved = true;
 
 		float m_LastFrameTime = 0.0f;
 	};

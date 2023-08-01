@@ -22,12 +22,23 @@
 
 namespace SideA
 {
-	// TODO: Command Line Args "New Shader System..." commit
+	struct ApplicationCommandLineArgs
+	{
+		int Count = 0;
+		char** Args = nullptr;
+
+		const char* operator[](int index) const
+		{
+			SIDEA_CORE_ASSERT(index < Count, "CommandLineArgs failed");
+			return Args[index];
+		}
+	};
+
 	class Application
 	{
 	public:
 		// Creates window, sets event callbacks, and creates ImGui layer.
-		Application(const std::string& name = "SideA App");
+		Application(const std::string& name = "SideA App", ApplicationCommandLineArgs args = ApplicationCommandLineArgs());
 		virtual ~Application() {}
 
 		void PushLayer(Layer* layer);
@@ -48,12 +59,15 @@ namespace SideA
 		void SetIsSavedStatus(bool isSaved) { m_IsSaved = isSaved; }
 		bool GetIsSavedStatus() const { return m_IsSaved; }
 
+		ApplicationCommandLineArgs GetCommandLineArgs() const { return m_CommandLineArgs; }
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
 
 	private:
 		static Application* s_Instance;
+
+		ApplicationCommandLineArgs m_CommandLineArgs;
 
 		Scope<Window> m_Window;
 		ImGuiLayer* m_ImGuiLayer;
@@ -68,5 +82,5 @@ namespace SideA
 	};
 
 	// To be defined in client
-	Application* CreateApplication();
+	Application* CreateApplication(ApplicationCommandLineArgs args);
 }

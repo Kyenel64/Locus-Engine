@@ -6,19 +6,25 @@
 #include "ExampleLayer.h"
 
 
-class Sandbox : public SideA::Application
+namespace SideA
 {
-public:
-	Sandbox()
+	class Sandbox : public Application
 	{
-		//PushLayer(new ExampleLayer());
-		PushLayer(new Sandbox2D());
+	public:
+		Sandbox(ApplicationCommandLineArgs args)
+			: Application("Sandbox", args)
+		{
+			//PushLayer(new ExampleLayer());
+			PushLayer(new Sandbox2D());
+		}
+
+		~Sandbox() {}
+	};
+
+	Application* CreateApplication(ApplicationCommandLineArgs args)
+	{
+		return new Sandbox(args);
 	}
-
-	~Sandbox() {}
-};
-
-SideA::Application* SideA::CreateApplication()
-{
-	return new Sandbox();
 }
+
+

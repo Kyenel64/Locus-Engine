@@ -38,6 +38,15 @@ namespace SideA
 		// Scene
 		m_ActiveScene = CreateRef<Scene>();
 
+		// Open startup project given through args
+		auto commandLineArgs = Application::Get().GetCommandLineArgs();
+		if (commandLineArgs.Count > 1)
+		{
+			auto sceneFilePath = commandLineArgs[1];
+			SceneSerializer serializer(m_ActiveScene);
+			serializer.Deserialize(sceneFilePath);
+		}
+
 		/*class CameraControls : public ScriptableEntity
 		{
 		public:

@@ -4,14 +4,13 @@
 
 #include "SideAEditorLayer.h"
 
-//#define SIDEA_EXPORT
-
 namespace SideA
 {
 	class SideAEditorApp : public Application
 	{
 	public:
-		SideAEditorApp() : Application("SideA Editor")
+		SideAEditorApp(ApplicationCommandLineArgs args) 
+			: Application("SideA Editor", args)
 		{
 			PushLayer(new SideAEditorLayer());
 		}
@@ -19,8 +18,8 @@ namespace SideA
 		~SideAEditorApp() {}
 	};
 
-	Application* CreateApplication()
+	Application* CreateApplication(ApplicationCommandLineArgs args)
 	{
-		return new SideAEditorApp();
+		return new SideAEditorApp(args);
 	}
 }

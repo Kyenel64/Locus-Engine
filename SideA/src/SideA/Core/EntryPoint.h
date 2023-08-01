@@ -5,10 +5,12 @@
 
 #pragma once
 
+#include "SideA/Core/Application.h"
+
 #ifdef SIDEA_PLATFORM_WINDOWS
 
 // We dont want any connection with the client app so we cant link a header.
-extern SideA::Application* SideA::CreateApplication();
+extern SideA::Application* SideA::CreateApplication(ApplicationCommandLineArgs args);
 
 int main(int argc, char** argv) // *argv is program path, *argv[0+n] are command line arguments
 {
@@ -19,7 +21,7 @@ int main(int argc, char** argv) // *argv is program path, *argv[0+n] are command
 
 	// --- Create project application ---
 	SIDEA_PROFILE_BEGIN_SESSION("Startup", "SideAProfile-Startup.log");
-	auto app = SideA::CreateApplication();
+	auto app = SideA::CreateApplication({ argc, argv });
 	SIDEA_PROFILE_END_SESSION();
 
 	SIDEA_PROFILE_BEGIN_SESSION("Runtime", "SideAProfile-Runtime.log");

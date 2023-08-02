@@ -36,6 +36,11 @@ project "SideA-Editor"
 		runtime "Debug" -- /MDd
 		symbols "on"
 
+		linkoptions
+		{
+			"/ignore:4099"
+		}
+
 	filter "configurations:Release"
 		defines "SIDEA_RELEASE"
 		runtime "Release" -- /MD

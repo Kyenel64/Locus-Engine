@@ -375,3 +375,4 @@ bin-int/
 SideA/vendor/VulkanSDK
 SideA-Editor/assets/cache
 scripts/__pycache__
+vendor/

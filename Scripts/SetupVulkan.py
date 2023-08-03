@@ -10,21 +10,32 @@ from io import BytesIO
 from urllib.request import urlopen
 from zipfile import ZipFile
 
+
 VULKAN_SDK = os.environ.get('VULKAN_SDK')
 VULKAN_SDK_INSTALLER_URL = 'https://sdk.lunarg.com/sdk/download/1.3.250.1/windows/VulkanSDK-1.3.250.1-Installer.exe'
 SIDEA_VULKAN_VERSION = '1.3.250.1'
 VULKAN_SDK_EXE_PATH = 'SideA/vendor/VulkanSDK/VulkanSDK.exe'
+
+def ValidatePackages():
+    if (not CheckVulkanSDK()):
+        print("Vulkan SDK not installed.")
+
+    if (not CheckVulkanSDKDebugLibs()):
+        print("Vulkan SDK debug libs not found.")
 
 def InstallVulkanSDK():
     print('Downloading {} to {}'.format(VULKAN_SDK_INSTALLER_URL, VULKAN_SDK_EXE_PATH))
     Utils.DownloadFile(VULKAN_SDK_INSTALLER_URL, VULKAN_SDK_EXE_PATH)
     print("Done!")
     print("Running Vulkan SDK installer...")
+    print("MAKE SURE TO SELECT & INSTALL 'Shader Toolchain Debug Symbols - 64-bit")
     os.startfile(os.path.abspath(VULKAN_SDK_EXE_PATH))
     print("Re-run this script after installation")
 
 
 def InstallVulkanPrompt():
+    if not os.path.exists('SideA/vendor/VulkanSDK'):
+        os.makedirs('SideA/vendor/VulkanSDK')
     print("Would you like to install the Vulkan SDK?")
     install = Utils.YesOrNo()
     if (install):
@@ -50,9 +61,10 @@ OutputDirectory = "SideA/vendor/VulkanSDK"
 TempZipFile = f"{OutputDirectory}/VulkanSDK.zip"
 
 def CheckVulkanSDKDebugLibs():
-    origin = f"{VULKAN_SDK}/Lib"
-    target = f"{OutputDirectory}/Lib"
-    shutil.copytree(origin, target)
+    if not os.path.exists("SideA/vendor/VulkanSDK/Lib"):
+        origin = f"{VULKAN_SDK}/Lib"
+        target = f"{OutputDirectory}/Lib"
+        shutil.copytree(origin, target)
 
     shadercdLib = Path(f"{OutputDirectory}/Lib/shaderc_sharedd.lib")
     if (not shadercdLib.exists()):

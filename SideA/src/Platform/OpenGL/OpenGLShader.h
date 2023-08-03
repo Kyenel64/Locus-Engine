@@ -21,8 +21,6 @@ namespace SideA
 		virtual void Bind() const override;
 		virtual void Unbind() const override;
 
-		
-
 		virtual const std::string& GetName() const override { return m_Name; }
 
 		virtual void SetInt(const std::string& name, int value) override;
@@ -57,7 +55,7 @@ namespace SideA
 		std::unordered_map<GLenum, std::vector<uint32_t>> m_VulkanSPIRV;
 		std::unordered_map<GLenum, std::vector<uint32_t>> m_OpenGLSPIRV;
 
-		std::unordered_map<GLenum, std::string> m_OpenGLSourceCode;
+		std::unordered_map<GLenum, std::string> m_OpenGLSourceCode; // Debug purpose
 	};
 	
 }

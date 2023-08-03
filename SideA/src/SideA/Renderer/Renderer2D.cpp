@@ -24,7 +24,7 @@ namespace SideA
 	struct Renderer2DData
 	{
 		static const uint32_t QuadVertexCount = 4;
-		static const uint32_t MaxQuads = 10000;
+		static const uint32_t MaxQuads = 20000;
 		static const uint32_t MaxVertices = MaxQuads * 4;
 		static const uint32_t MaxIndices = MaxQuads * 6;
 		static const uint32_t MaxTextureSlots = 32; //TODO: GPU dependent

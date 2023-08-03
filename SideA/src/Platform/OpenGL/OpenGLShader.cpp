@@ -14,7 +14,6 @@
 
 namespace SideA
 {
-
 	namespace Utils
 	{
 		static GLenum ShaderTypeFromString(const std::string& type)
@@ -190,14 +189,12 @@ namespace SideA
 		shaderc::Compiler compiler;
 		shaderc::CompileOptions options;
 		options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_2);
-		const bool optimize = true;
-		if (optimize)
-			options.SetOptimizationLevel(shaderc_optimization_level_performance);
+		//options.AddMacroDefinition("OPENGL");
+		options.SetOptimizationLevel(shaderc_optimization_level_performance);
 
 		std::filesystem::path cacheDirectory = Utils::GetCacheDirectory();
 
-		auto& shaderData = m_VulkanSPIRV;
-		shaderData.clear();
+		m_VulkanSPIRV.clear();
 		for (auto&& [stage, source] : shaderSources)
 		{
 			std::filesystem::path shaderFilePath = m_FilePath;
@@ -210,7 +207,7 @@ namespace SideA
 				auto size = in.tellg();
 				in.seekg(0, std::ios::beg);
 
-				auto& data = shaderData[stage];
+				auto& data = m_VulkanSPIRV[stage];
 				data.resize(size / sizeof(uint32_t));
 				in.read((char*)data.data(), size);
 			}
@@ -223,12 +220,12 @@ namespace SideA
 					SIDEA_CORE_ASSERT(false, "ShaderC compilation failed!");
 				}
 
-				shaderData[stage] = std::vector<uint32_t>(module.cbegin(), module.cend());
+				m_VulkanSPIRV[stage] = std::vector<uint32_t>(module.cbegin(), module.cend());
 
 				std::ofstream out(cachedPath, std::ios::out | std::ios::binary);
 				if (out.is_open())
 				{
-					auto& data = shaderData[stage];
+					auto& data = m_VulkanSPIRV[stage];
 					out.write((char*)data.data(), data.size() * sizeof(uint32_t));
 					out.flush();
 					out.close();
@@ -236,24 +233,20 @@ namespace SideA
 			}
 		}
 
-		for (auto&& [stage, data] : shaderData)
+		for (auto&& [stage, data] : m_VulkanSPIRV)
 			Reflect(stage, data);
 	}
 
 	void OpenGLShader::CompileOrGetOpenGLBinaries()
 	{
-		auto& shaderData = m_OpenGLSPIRV;
-
 		shaderc::Compiler compiler;
 		shaderc::CompileOptions options;
 		options.SetTargetEnvironment(shaderc_target_env_opengl, shaderc_env_version_opengl_4_5);
-		const bool optimize = false;
-		if (optimize)
-			options.SetOptimizationLevel(shaderc_optimization_level_performance);
+		options.SetOptimizationLevel(shaderc_optimization_level_performance);
 
 		std::filesystem::path cacheDirectory = Utils::GetCacheDirectory();
 
-		shaderData.clear();
+		m_OpenGLSPIRV.clear();
 		m_OpenGLSourceCode.clear();
 		for (auto&& [stage, spirv] : m_VulkanSPIRV)
 		{
@@ -267,7 +260,7 @@ namespace SideA
 				auto size = in.tellg();
 				in.seekg(0, std::ios::beg);
 
-				auto& data = shaderData[stage];
+				auto& data = m_OpenGLSPIRV[stage];
 				data.resize(size / sizeof(uint32_t));
 				in.read((char*)data.data(), size);
 			}
@@ -284,12 +277,12 @@ namespace SideA
 					SIDEA_CORE_ASSERT(false, "ShaderC compilation failed!");
 				}
 
-				shaderData[stage] = std::vector<uint32_t>(module.cbegin(), module.cend());
+				m_OpenGLSPIRV[stage] = std::vector<uint32_t>(module.cbegin(), module.cend());
 
 				std::ofstream out(cachedPath, std::ios::out | std::ios::binary);
 				if (out.is_open())
 				{
-					auto& data = shaderData[stage];
+					auto& data = m_OpenGLSPIRV[stage];
 					out.write((char*)data.data(), data.size() * sizeof(uint32_t));
 					out.flush();
 					out.close();

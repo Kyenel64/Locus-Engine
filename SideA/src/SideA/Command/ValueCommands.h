@@ -13,7 +13,7 @@ namespace SideA
 	public:
 		ChangeValueCommand() = default;
 
-		ChangeValueCommand(T& newValue, T& valueToChange)
+		ChangeValueCommand(const T& newValue, T& valueToChange)
 			: m_NewValue(newValue), m_ValueToChange(valueToChange)
 		{
 		}
@@ -28,6 +28,7 @@ namespace SideA
 		virtual void Undo() override
 		{
 			m_ValueToChange = m_OldValue;
+			Application::Get().SetIsSavedStatus(false);
 		}
 
 	private:

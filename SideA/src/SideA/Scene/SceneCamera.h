@@ -21,27 +21,35 @@ namespace SideA
 
 		void SetProjectionType(ProjectionType type) { m_ProjectionType = type; RecalculateProjection(); }
 		ProjectionType GetProjectionType() const { return m_ProjectionType; }
+		ProjectionType& GetProjectionType() { return m_ProjectionType; }
 
 		void SetBackgroundColor(const glm::vec4& backgroundColor) { m_BackgroundColor = backgroundColor; }
 		const glm::vec4& GetBackgroundColor() const { return m_BackgroundColor; }
+		glm::vec4& GetBackgroundColor() { return m_BackgroundColor; }
 
 
 		// --- Perspective ----------------------------------------------------
 		void SetPerspectiveFOV(float verticalFOV) { m_PerspectiveFOV = verticalFOV; RecalculateProjection(); }
 		float GetPerspectiveFOV() const { return m_PerspectiveFOV; }
+		float& GetPerspectiveFOV() { return m_PerspectiveFOV; }
 		void SetPerspectiveNearClip(float nearClip) { m_PerspectiveNear = nearClip; RecalculateProjection(); }
 		float GetPerspectiveNearClip() const { return m_PerspectiveNear; }
+		float& GetPerspectiveNearClip() { return m_PerspectiveNear; }
 		void SetPerspectiveFarClip(float farClip) { m_PerspectiveFar = farClip; RecalculateProjection(); }
 		float GetPerspectiveFarClip() const { return m_PerspectiveFar; }
+		float& GetPerspectiveFarClip() { return m_PerspectiveFar; }
 
 
 		// --- Orthographic ---------------------------------------------------
 		void SetOrthographicSize(float size) { m_OrthographicSize = size; RecalculateProjection(); }
 		float GetOrthographicSize() const { return m_OrthographicSize; }
+		float& GetOrthographicSize() { return m_OrthographicSize; }
 		void SetOrthographicNearClip(float nearClip) { m_OrthographicNear = nearClip; RecalculateProjection(); }
 		float GetOrthographicNearClip() const { return m_OrthographicNear; }
+		float& GetOrthographicNearClip() { return m_OrthographicNear; }
 		void SetOrthographicFarClip(float farClip) { m_OrthographicFar = farClip; RecalculateProjection(); }
 		float GetOrthographicFarClip() const { return m_OrthographicFar; }
+		float& GetOrthographicFarClip() { return m_OrthographicFar; }
 
 	private:
 		void RecalculateProjection();

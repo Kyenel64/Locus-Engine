@@ -30,10 +30,11 @@ namespace SideA
 	void CommandHistory::Redo()
 	{
 		uint32_t redoCommandPtr = m_CommandPtr + 1;
-		if (redoCommandPtr < m_CommandSize && redoCommandPtr >= 0)
+		if (redoCommandPtr <= m_CommandSize && redoCommandPtr >= 0)
 		{
 			m_Commands[redoCommandPtr]->Execute();
 			m_CommandPtr++;
+			SIDEA_CORE_INFO("REDO COMMAND. Ptr Position: {0}", m_CommandPtr);
 		}
 	}
 

@@ -4,10 +4,13 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "ImGuizmo.h"
 
+#include "SideA/Core/Application.h"
 #include "SideA/Scene/SceneSerializer.h"
 #include "SideA/Utils/PlatformUtils.h"
 #include "SideA/Math/Math.h"
+
 #include "SideA/Command/CommandHistory.h"
+#include "SideA/Command/ValueCommands.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
@@ -489,12 +492,11 @@ namespace SideA
 
 		if (ImGuizmo::IsUsing())
 		{
-			Application::Get().SetIsSavedStatus(false);
 			switch (m_GizmoType)
 			{
 				case ImGuizmo::TRANSLATE:
 				{
-					tc.Translation = translation;
+					CommandHistory::AddCommand(new ChangeValueCommand(translation, tc.Translation));
 					break;
 				}
 				case ImGuizmo::ROTATE:
@@ -514,12 +516,13 @@ namespace SideA
 					if (fabs(deltaRotationEuler.y) < 0.001) deltaRotationEuler.y = 0.0f;
 					if (fabs(deltaRotationEuler.z) < 0.001) deltaRotationEuler.z = 0.0f;
 
-					tc.SetRotationEuler(tc.GetRotationEuler() += deltaRotationEuler);
+					glm::vec3 rotationEuler = tc.GetRotationEuler();
+					CommandHistory::AddCommand(new ChangeValueCommand(rotationEuler + deltaRotationEuler, tc.GetRotationEuler()));
 					break;
 				}
 				case ImGuizmo::SCALE:
 				{
-					tc.Scale = scale;
+					CommandHistory::AddCommand(new ChangeValueCommand(scale, tc.Scale));
 					break;
 				}
 			}

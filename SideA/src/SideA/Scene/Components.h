@@ -45,6 +45,7 @@ namespace SideA
 		}
 
 		glm::vec3 GetRotationEuler() const { return RotationEuler; }
+		glm::vec3& GetRotationEuler() { return RotationEuler; }
 
 		void SetRotationEuler(const glm::vec3& euler)
 		{

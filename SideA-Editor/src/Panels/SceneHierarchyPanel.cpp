@@ -5,10 +5,10 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "SideA/Scene/Components.h"
-#include "SideA/Core/Application.h"
 
 #include "SideA/Command/CommandHistory.h"
-#include "SideA/Command/ChangeValueCommand.h"
+#include "SideA/Command/ValueCommands.h"
+#include "SideA/Command/EntityCommands.h"
 
 namespace SideA
 {
@@ -43,11 +43,7 @@ namespace SideA
 		if (ImGui::BeginPopupContextWindow(0, 1 | ImGuiPopupFlags_NoOpenOverItems))
 		{
 			if (ImGui::MenuItem("Create Empty Entity"))
-			{
-				//CommandHistory::AddCommand(new CreateEntityCommand(m_ActiveScene->CreateEntity("Empty Entity")));
-				m_ActiveScene->CreateEntity("Empty Entity");
-				Application::Get().SetIsSavedStatus(false);
-			}
+				CommandHistory::AddCommand(new CreateEntityCommand(m_ActiveScene, "Empty Entity"));
 			ImGui::EndPopup();
 		}
 
@@ -67,30 +63,18 @@ namespace SideA
 				if (ImGui::MenuItem("Camera"))
 				{
 					if (!m_SelectedEntity.HasComponent<CameraComponent>())
-					{
-						m_SelectedEntity.AddComponent<CameraComponent>();
-						Application::Get().SetIsSavedStatus(false);
-					}
+						CommandHistory::AddCommand(new AddComponentCommand<CameraComponent>(m_SelectedEntity));
 					else
-					{
 						SIDEA_CORE_WARN("This entity already has a Camera Component");
-					}
-
 					ImGui::CloseCurrentPopup();
 				}
 					
 				if (ImGui::MenuItem("Sprite Renderer"))
 				{
 					if (!m_SelectedEntity.HasComponent<SpriteRendererComponent>())
-					{
-						m_SelectedEntity.AddComponent<SpriteRendererComponent>();
-						Application::Get().SetIsSavedStatus(false);
-					}
+						CommandHistory::AddCommand(new AddComponentCommand<SpriteRendererComponent>(m_SelectedEntity));
 					else
-					{
 						SIDEA_CORE_WARN("This entity already has a Sprite Renderer Component");
-					}
-
 					ImGui::CloseCurrentPopup();
 				}
 
@@ -115,10 +99,7 @@ namespace SideA
 		if (ImGui::BeginPopupContextItem())
 		{
 			if (ImGui::MenuItem("Delete Entity"))
-			{
 				entityDeleted = true;
-				Application::Get().SetIsSavedStatus(false);
-			}
 			ImGui::EndPopup();
 		}
 
@@ -135,7 +116,7 @@ namespace SideA
 
 		if (entityDeleted)
 		{
-			m_ActiveScene->DestroyEntity(entity);
+			CommandHistory::AddCommand(new DestroyEntityCommand(m_ActiveScene, entity));
 			if (m_SelectedEntity == entity)
 				m_SelectedEntity = {};
 		}
@@ -255,10 +236,8 @@ namespace SideA
 					if (ImGui::MenuItem("Remove component"))
 					{
 						removeComponent = true;
-						Application::Get().SetIsSavedStatus(false);
 					}
 				}
-				
 				ImGui::EndPopup();
 			}
 
@@ -269,7 +248,7 @@ namespace SideA
 			}
 
 			if (removeComponent)
-				entity.RemoveComponent<T>();
+				CommandHistory::AddCommand(new RemoveComponentCommand<T>(entity));
 		}
 	}
 
@@ -285,8 +264,7 @@ namespace SideA
 			strcpy_s(buffer, sizeof(buffer), tag.c_str());
 			if (ImGui::InputText("Tag", buffer, sizeof(buffer)))
 			{
-				tag = std::string(buffer);
-				Application::Get().SetIsSavedStatus(false);
+				CommandHistory::AddCommand(new ChangeValueCommand(std::string(buffer), tag));
 			}
 		}
 
@@ -305,20 +283,20 @@ namespace SideA
 		// --- Camera Component -----------------------------------------------
 		DrawComponentUI<CameraComponent>("Camera", entity, [this](auto& component)
 			{
-				auto& camera = component.Camera;
+				SceneCamera& camera = component.Camera;
 
 				// Primary camera check
-				if (ImGui::Checkbox("Primary", &component.Primary))
+				bool primaryCheck = component.Primary;
+				if (ImGui::Checkbox("Primary", &primaryCheck))
 				{
-					Application::Get().SetIsSavedStatus(false);
+					CommandHistory::AddCommand(new ChangeValueCommand(primaryCheck, component.Primary));
 				}
 
 				// Background color
 				glm::vec4 backgroundColor = camera.GetBackgroundColor();
 				if (ImGui::ColorEdit4("Background Color", glm::value_ptr(backgroundColor)))
 				{
-					camera.SetBackgroundColor(backgroundColor);
-					Application::Get().SetIsSavedStatus(false);
+					CommandHistory::AddCommand(new ChangeValueCommand(backgroundColor, camera.GetBackgroundColor()));
 				}
 
 				// Projection mode
@@ -330,11 +308,7 @@ namespace SideA
 					{
 						bool isSelected = currentProjectionTypeString == projectionTypeString[i];
 						if (ImGui::Selectable(projectionTypeString[i], isSelected))
-						{
-							currentProjectionTypeString = projectionTypeString[i];
-							camera.SetProjectionType((SceneCamera::ProjectionType)i);
-							Application::Get().SetIsSavedStatus(false);
-						}
+							CommandHistory::AddCommand(new ChangeValueCommand((SceneCamera::ProjectionType)i, camera.GetProjectionType()));
 
 						if (isSelected)
 							ImGui::SetItemDefaultFocus();
@@ -348,29 +322,22 @@ namespace SideA
 					// Size
 					float orthoSize = camera.GetOrthographicSize();
 					if (ImGui::DragFloat("Size", &orthoSize))
-					{
-						camera.SetOrthographicSize(orthoSize);
-						Application::Get().SetIsSavedStatus(false);
-					}
+						CommandHistory::AddCommand(new ChangeValueCommand(orthoSize, camera.GetOrthographicSize()));
+
 					// Near
 					float nearClip = camera.GetOrthographicNearClip();
 					if (ImGui::DragFloat("Near Clip", &nearClip))
-					{
-						camera.SetOrthographicNearClip(nearClip);
-						Application::Get().SetIsSavedStatus(false);
-					}
+						CommandHistory::AddCommand(new ChangeValueCommand(nearClip, camera.GetOrthographicNearClip()));
+
 					// Far
 					float farClip = camera.GetOrthographicFarClip();
 					if (ImGui::DragFloat("Far Clip", &farClip))
-					{
-						camera.SetOrthographicFarClip(farClip);
-						Application::Get().SetIsSavedStatus(false);
-					}
+						CommandHistory::AddCommand(new ChangeValueCommand(farClip, camera.GetOrthographicFarClip()));
 
-					if (ImGui::Checkbox("Fixed Aspect Ratio", &component.FixedAspectRatio))
-					{
-						Application::Get().SetIsSavedStatus(false);
-					}
+					// Fixed Aspect Ratio
+					bool fixedAspectRatio = component.FixedAspectRatio;
+					if (ImGui::Checkbox("Fixed Aspect Ratio", &fixedAspectRatio))
+						CommandHistory::AddCommand(new ChangeValueCommand(fixedAspectRatio, component.FixedAspectRatio));
 				}
 
 				// Perspective settings
@@ -379,35 +346,28 @@ namespace SideA
 					// FOV
 					float fov = glm::degrees(camera.GetPerspectiveFOV());
 					if (ImGui::DragFloat("FOV", &fov))
-					{
-						camera.SetPerspectiveFOV(glm::radians(fov));
-						Application::Get().SetIsSavedStatus(false);
-					}
+						CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(fov), camera.GetPerspectiveFOV()));
+
 					// Near
 					float nearClip = camera.GetPerspectiveNearClip();
 					if (ImGui::DragFloat("Near Clip", &nearClip))
-					{
-						camera.SetPerspectiveNearClip(nearClip);
-						Application::Get().SetIsSavedStatus(false);
-					}
+						CommandHistory::AddCommand(new ChangeValueCommand(nearClip, camera.GetPerspectiveNearClip()));
+
 					// Far
 					float farClip = camera.GetPerspectiveFarClip();
 					if (ImGui::DragFloat("Far Clip", &farClip))
-					{
-						camera.SetPerspectiveFarClip(farClip);
-						Application::Get().SetIsSavedStatus(false);
-					}
+						CommandHistory::AddCommand(new ChangeValueCommand(farClip, camera.GetPerspectiveFarClip()));
 				}
 		});
 
 		// --- SpriteRenderer Component ---------------------------------------
 		DrawComponentUI<SpriteRendererComponent>("Sprite Renderer", entity, [this](auto& component)
 		{
-			if (ImGui::ColorEdit4("Color", glm::value_ptr(component.Color)))
+			glm::vec4 color = component.Color;
+			if (ImGui::ColorEdit4("Color", glm::value_ptr(color)))
 			{
-				Application::Get().SetIsSavedStatus(false);
+				CommandHistory::AddCommand(new ChangeValueCommand(color, component.Color));
 			}
-
 		});
 	}	
 }

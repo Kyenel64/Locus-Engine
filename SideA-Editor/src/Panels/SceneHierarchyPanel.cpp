@@ -145,9 +145,7 @@ namespace SideA
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.2f, 0.2f, 1.0f });
 		ImGui::PushFont(boldFont);
 		if (ImGui::Button("X", buttonSize)) // TODO: double click
-		{
 			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.x));
-		}
 		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
@@ -163,9 +161,7 @@ namespace SideA
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.8f, 0.2f, 1.0f });
 		ImGui::PushFont(boldFont);
 		if (ImGui::Button("Y", buttonSize))
-		{
 			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.y));
-		}
 		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
@@ -181,9 +177,7 @@ namespace SideA
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.2f, 0.8f, 1.0f });
 		ImGui::PushFont(boldFont);
 		if (ImGui::Button("Z", buttonSize))
-		{
 			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.z));
-		}
 		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
@@ -222,9 +216,7 @@ namespace SideA
 
 			ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
 			if (ImGui::Button("+", ImVec2(lineHeight, lineHeight)))
-			{
 				ImGui::OpenPopup("Component Settings");
-			}
 
 			bool removeComponent = false;
 			if (ImGui::BeginPopup("Component Settings"))
@@ -252,7 +244,6 @@ namespace SideA
 
 	void SceneHierarchyPanel::DrawComponents(Entity entity)
 	{
-
 		// --- Tag Component --------------------------------------------------
 		if (entity.HasComponent<TagComponent>())
 		{
@@ -260,10 +251,10 @@ namespace SideA
 			char buffer[256];
 			memset(buffer, 0, sizeof(buffer));
 			strcpy_s(buffer, sizeof(buffer), tag.c_str());
-			if (ImGui::InputText("Tag", buffer, sizeof(buffer)))
-			{
+			ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
+
+			if (ImGui::InputText("Tag", buffer, sizeof(buffer), flags))
 				CommandHistory::AddCommand(new ChangeValueCommand(std::string(buffer), tag));
-			}
 		}
 
 		// --- Transform Component --------------------------------------------
@@ -286,16 +277,12 @@ namespace SideA
 				// Primary camera check
 				bool primaryCheck = component.Primary;
 				if (ImGui::Checkbox("Primary", &primaryCheck))
-				{
 					CommandHistory::AddCommand(new ChangeValueCommand(primaryCheck, component.Primary));
-				}
 
 				// Background color
 				glm::vec4 backgroundColor = camera.GetBackgroundColor();
 				if (ImGui::ColorEdit4("Background Color", glm::value_ptr(backgroundColor)))
-				{
 					CommandHistory::AddCommand(new ChangeValueCommand(backgroundColor, camera.GetBackgroundColor()));
-				}
 
 				// Projection mode
 				const char* projectionTypeString[] = { "Orthographic", "Perspective" };
@@ -363,9 +350,7 @@ namespace SideA
 		{
 			glm::vec4 color = component.Color;
 			if (ImGui::ColorEdit4("Color", glm::value_ptr(color)))
-			{
 				CommandHistory::AddCommand(new ChangeValueCommand(color, component.Color));
-			}
 		});
 	}	
 }

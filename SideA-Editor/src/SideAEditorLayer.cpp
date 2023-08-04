@@ -407,7 +407,6 @@ namespace SideA
 
 	bool SideAEditorLayer::OnMouseButtonReleased(MouseButtonReleasedEvent& e)
 	{
-		SIDEA_CORE_INFO("Mouse button released");
 		CommandHistory::SetNoMergeMostRecent();
 		return false;
 	}

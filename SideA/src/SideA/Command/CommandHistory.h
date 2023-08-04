@@ -12,11 +12,13 @@ namespace SideA
 		static void Undo();
 		static void Redo();
 
+		static void SetNoMergeMostRecent();
+
 		static void Reset();
 
 	private:
 		static Command* m_Commands[1000];
-		static uint32_t m_CommandSize;
-		static uint32_t m_CommandPtr;
+		static int32_t m_CommandSize;
+		static int32_t m_CommandPtr;
 	};
 }

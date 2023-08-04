@@ -22,6 +22,7 @@ namespace SideA
 		// Events
 		bool OnKeyPressed(KeyPressedEvent& e);
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
+		bool OnMouseButtonReleased(MouseButtonReleasedEvent& e);
 
 		void NewScene();
 		void OpenScene();

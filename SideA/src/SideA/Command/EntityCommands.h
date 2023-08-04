@@ -6,6 +6,8 @@
 #include "SideA/Scene/Scene.h"
 #include "SideA/Core/Application.h"
 
+#include "SideA/Scene/Components.h"
+
 namespace SideA
 {
 	struct ComponentsList
@@ -40,6 +42,11 @@ namespace SideA
 		{
 			m_ActiveScene->DestroyEntity(m_Entity);
 			Application::Get().SetIsSavedStatus(false);
+		}
+
+		virtual bool Merge(Command* other) override
+		{
+			return false;
 		}
 
 	private:
@@ -113,6 +120,11 @@ namespace SideA
 			Application::Get().SetIsSavedStatus(false);
 		}
 
+		virtual bool Merge(Command* other) override
+		{
+			return false;
+		}
+
 	private:
 		Ref<Scene> m_ActiveScene;
 		ComponentsList m_Components;
@@ -145,6 +157,11 @@ namespace SideA
 			Application::Get().SetIsSavedStatus(false);
 		}
 
+		virtual bool Merge(Command* other) override
+		{
+			return false;
+		}
+
 	private:
 		Entity m_Entity;
 		std::function<void()> m_AddFunction;
@@ -173,6 +190,11 @@ namespace SideA
 		{
 			m_Entity.AddComponent<T>(m_Component);
 			Application::Get().SetIsSavedStatus(false);
+		}
+
+		virtual bool Merge(Command* other) override
+		{
+			return false;
 		}
 
 	private:

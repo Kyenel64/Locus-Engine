@@ -9,8 +9,7 @@
 #include "SideA/Utils/PlatformUtils.h"
 #include "SideA/Math/Math.h"
 
-#include "SideA/Command/CommandHistory.h"
-#include "SideA/Command/ValueCommands.h"
+#include "SideA/Command/Command.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
@@ -151,6 +150,7 @@ namespace SideA
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<KeyPressedEvent>(SIDEA_BIND_EVENT_FN(SideAEditorLayer::OnKeyPressed));
 		dispatcher.Dispatch<MouseButtonPressedEvent>(SIDEA_BIND_EVENT_FN(SideAEditorLayer::OnMouseButtonPressed));
+		dispatcher.Dispatch<MouseButtonReleasedEvent>(SIDEA_BIND_EVENT_FN(SideAEditorLayer::OnMouseButtonReleased));
 	}
 
 	void SideAEditorLayer::OnImGuiRender()
@@ -402,6 +402,13 @@ namespace SideA
 				m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
 		}
 
+		return false;
+	}
+
+	bool SideAEditorLayer::OnMouseButtonReleased(MouseButtonReleasedEvent& e)
+	{
+		SIDEA_CORE_INFO("Mouse button released");
+		CommandHistory::SetNoMergeMostRecent();
 		return false;
 	}
 

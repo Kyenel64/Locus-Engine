@@ -31,6 +31,21 @@ namespace SideA
 			Application::Get().SetIsSavedStatus(false);
 		}
 
+		virtual bool Merge(Command* other) override
+		{
+			ChangeValueCommand* otherCommand = dynamic_cast<ChangeValueCommand*>(other);
+			if (otherCommand != nullptr)
+			{
+				if (&otherCommand->m_ValueToChange == &this->m_ValueToChange)
+				{
+					otherCommand->m_NewValue = this->m_NewValue;
+					return true;
+				}
+			}
+				
+			return false;
+		}
+
 	private:
 		T m_NewValue;
 		T m_OldValue;

@@ -6,9 +6,7 @@
 
 #include "SideA/Scene/Components.h"
 
-#include "SideA/Command/CommandHistory.h"
-#include "SideA/Command/ValueCommands.h"
-#include "SideA/Command/EntityCommands.h"
+#include "SideA/Command/Command.h"
 
 namespace SideA
 {
@@ -122,7 +120,7 @@ namespace SideA
 		}
 	}
 
-	void SceneHierarchyPanel:: DrawVec3Control(const std::string& name, glm::vec3& values, float resetValue, float columnWidth)
+	void SceneHierarchyPanel::DrawVec3Control(const std::string& name, glm::vec3& values, float resetValue, float columnWidth)
 	{
 		glm::vec3 dragValues = values;
 		ImGuiIO& io = ImGui::GetIO();

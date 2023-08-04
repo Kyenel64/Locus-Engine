@@ -7,6 +7,7 @@
 #include "SideA/Scene/SceneSerializer.h"
 #include "SideA/Utils/PlatformUtils.h"
 #include "SideA/Math/Math.h"
+#include "SideA/Command/CommandHistory.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
@@ -358,6 +359,19 @@ namespace SideA
 					SaveScene();
 				break;
 			}
+			case Key::Z:
+			{
+				if (control)
+					CommandHistory::Undo();
+				break;
+			}
+			case Key::Y:
+			{
+				if (control)
+					CommandHistory::Redo();
+				break;
+			}
+				
 
 			// Gizmos
 			case Key::Q:
@@ -395,6 +409,7 @@ namespace SideA
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 		m_SavePath = std::string();
 		Application::Get().SetIsSavedStatus(false);
+		CommandHistory::Reset();
 	}
 
 	void SideAEditorLayer::OpenScene()
@@ -410,6 +425,7 @@ namespace SideA
 			serializer.Deserialize(path);
 			m_SavePath = path;
 			Application::Get().SetIsSavedStatus(true);
+			CommandHistory::Reset();
 		}
 	}
 
@@ -483,7 +499,6 @@ namespace SideA
 				}
 				case ImGuizmo::ROTATE:
 				{
-					// TODO: fix rotation
 					// Do this in Euler in an attempt to preserve any full revolutions (> 360)
 					glm::vec3 originalRotationEuler = tc.GetRotationEuler();
 

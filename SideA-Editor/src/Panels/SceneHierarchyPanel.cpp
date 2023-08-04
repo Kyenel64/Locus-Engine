@@ -7,6 +7,9 @@
 #include "SideA/Scene/Components.h"
 #include "SideA/Core/Application.h"
 
+#include "SideA/Command/CommandHistory.h"
+#include "SideA/Command/ChangeValueCommand.h"
+
 namespace SideA
 {
 	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& context)
@@ -16,7 +19,7 @@ namespace SideA
 
 	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
 	{
-		m_Context = context;
+		m_ActiveScene = context;
 		m_SelectedEntity = {};
 	}
 
@@ -26,9 +29,9 @@ namespace SideA
 		ImGui::Begin("Scene Hierarchy");
 
 		// Display each entity
-		m_Context->m_Registry.each([&](auto entityID)
+		m_ActiveScene->m_Registry.each([&](auto entityID)
 		{
-			Entity entity(entityID, m_Context.get());
+			Entity entity(entityID, m_ActiveScene.get());
 			DrawEntityNode(entity);
 		});
 
@@ -41,7 +44,8 @@ namespace SideA
 		{
 			if (ImGui::MenuItem("Create Empty Entity"))
 			{
-				m_Context->CreateEntity("Empty Entity");
+				//CommandHistory::AddCommand(new CreateEntityCommand(m_ActiveScene->CreateEntity("Empty Entity")));
+				m_ActiveScene->CreateEntity("Empty Entity");
 				Application::Get().SetIsSavedStatus(false);
 			}
 			ImGui::EndPopup();
@@ -131,7 +135,7 @@ namespace SideA
 
 		if (entityDeleted)
 		{
-			m_Context->DestroyEntity(entity);
+			m_ActiveScene->DestroyEntity(entity);
 			if (m_SelectedEntity == entity)
 				m_SelectedEntity = {};
 		}
@@ -139,6 +143,7 @@ namespace SideA
 
 	void SceneHierarchyPanel:: DrawVec3Control(const std::string& name, glm::vec3& values, float resetValue, float columnWidth)
 	{
+		glm::vec3 dragValues = values;
 		ImGuiIO& io = ImGui::GetIO();
 		auto boldFont = io.Fonts->Fonts[0];
 
@@ -162,15 +167,14 @@ namespace SideA
 		ImGui::PushFont(boldFont);
 		if (ImGui::Button("X", buttonSize)) // TODO: double click
 		{
-			values.x = resetValue;
-			Application::Get().SetIsSavedStatus(false);
+			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.x));
 		}
 		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
-		if (ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f"))
-			Application::Get().SetIsSavedStatus(false);
+		if (ImGui::DragFloat("##X", &dragValues.x, 0.1f, 0.0f, 0.0f, "%.2f"))
+			CommandHistory::AddCommand(new ChangeValueCommand(dragValues.x, values.x));
 		ImGui::PopItemWidth();
 		ImGui::SameLine();
 
@@ -181,15 +185,14 @@ namespace SideA
 		ImGui::PushFont(boldFont);
 		if (ImGui::Button("Y", buttonSize))
 		{
-			values.y = resetValue;
-			Application::Get().SetIsSavedStatus(false);
+			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.y));
 		}
 		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
-		if (ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f"))
-			Application::Get().SetIsSavedStatus(false);
+		if (ImGui::DragFloat("##Y", &dragValues.y, 0.1f, 0.0f, 0.0f, "%.2f"))
+			CommandHistory::AddCommand(new ChangeValueCommand(dragValues.y, values.y));
 		ImGui::PopItemWidth();
 		ImGui::SameLine();
 
@@ -200,15 +203,14 @@ namespace SideA
 		ImGui::PushFont(boldFont);
 		if (ImGui::Button("Z", buttonSize))
 		{
-			values.z = resetValue;
-			Application::Get().SetIsSavedStatus(false);
+			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.z));
 		}
 		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
-		if (ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.2f"))
-			Application::Get().SetIsSavedStatus(false);
+		if (ImGui::DragFloat("##Z", &dragValues.z, 0.1f, 0.0f, 0.0f, "%.2f"))
+			CommandHistory::AddCommand(new ChangeValueCommand(dragValues.z, values.z));
 		ImGui::PopItemWidth();
 
 		ImGui::PopStyleVar();

@@ -30,7 +30,7 @@ namespace SideA
 		void DrawVec3Control(const std::string& name, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f);
 
 	private:
-		Ref<Scene> m_Context;
+		Ref<Scene> m_ActiveScene;
 		Entity m_SelectedEntity;
 	};
 }

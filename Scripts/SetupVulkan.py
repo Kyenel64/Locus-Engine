@@ -28,7 +28,7 @@ def InstallVulkanSDK():
     Utils.DownloadFile(VULKAN_SDK_INSTALLER_URL, VULKAN_SDK_EXE_PATH)
     print("Done!")
     print("Running Vulkan SDK installer...")
-    print("MAKE SURE TO SELECT & INSTALL 'Shader Toolchain Debug Symbols - 64-bit")
+    print("MAKE SURE 'Shader Toolchain Debug Symbols - 64-bit' IS SELECTED")
     os.startfile(os.path.abspath(VULKAN_SDK_EXE_PATH))
     print("Re-run this script after installation")
 

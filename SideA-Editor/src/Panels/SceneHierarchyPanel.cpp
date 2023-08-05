@@ -34,7 +34,7 @@ namespace SideA
 		});
 
 		// Select nothing if clicking in blank space
-		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered() || !m_SelectedEntity.IsValid())
 			m_SelectedEntity = {};
 
 		// Open pop up menu when right clicking on blank space.

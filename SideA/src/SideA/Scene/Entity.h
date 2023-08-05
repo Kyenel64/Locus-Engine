@@ -47,6 +47,14 @@ namespace SideA
 			m_Scene->m_Registry.remove<T>(m_EntityHandle);
 		}
 
+		bool IsValid()
+		{
+			if (m_EntityHandle == entt::null)
+				return false;
+			else
+				return m_Scene->m_Registry.valid(m_EntityHandle);
+		}
+
 		// --- Overrides ---
 		operator bool() const { return m_EntityHandle != entt::null; }
 

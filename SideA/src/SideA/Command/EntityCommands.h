@@ -7,6 +7,7 @@
 #include "SideA/Core/Application.h"
 
 #include "SideA/Scene/Components.h"
+#include "SideA/Scene/Entity.h"
 
 namespace SideA
 {

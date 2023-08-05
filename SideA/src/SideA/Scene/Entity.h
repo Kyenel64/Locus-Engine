@@ -1,7 +1,9 @@
 #pragma once
 
+#include "SideA/Core/UUID.h"
 #include "SideA/Scene/Scene.h"
 #include "SideA/Core/Log.h"
+#include "Components.h"
 
 #include "entt.hpp"
 
@@ -50,6 +52,8 @@ namespace SideA
 
 		operator uint32_t() const { return (uint32_t)m_EntityHandle; }
 		operator entt::entity() const { return m_EntityHandle; }
+
+		UUID GetUUID() { return GetComponent<IDComponent>().ID; }
 
 		bool operator==(const Entity& other) const 
 		{

@@ -88,8 +88,9 @@ namespace SideA
 
 	static void SerializeEntity(YAML::Emitter& out, Entity entity)
 	{
+		SIDEA_CORE_ASSERT(entity.HasComponent<IDComponent>(), "Entity does not have ID!");
 		out << YAML::BeginMap; // Begin Entity
-		out << YAML::Key << "Entity" << YAML::Value << "1283849483838";
+		out << YAML::Key << "Entity" << YAML::Value << entity.GetUUID();
 
 		// --- Tag Component --------------------------------------------------
 		if (entity.HasComponent<TagComponent>())
@@ -210,7 +211,7 @@ namespace SideA
 					name = tagComponent["Tag"].as<std::string>();
 
 				SIDEA_CORE_TRACE("Deserializing Entity: {0}, ID: {1}", name, uuid);
-				Entity deserializedEntity = m_Scene->CreateEntity(name);
+				Entity deserializedEntity = m_Scene->CreateEntityWithUUID(uuid, name);
 
 				// --- Transform Component ------------------------------------
 				auto transformComponent = entity["TransformComponent"];

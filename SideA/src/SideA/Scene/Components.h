@@ -1,16 +1,24 @@
 #pragma once
 
+#include "SideA/Core/UUID.h"
+#include "SideA/Scene/SceneCamera.h"
+
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
-
-#include "SideA/Scene/SceneCamera.h"
-#include "SideA/Scene/ScriptableEntity.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
 namespace SideA
 {
+	struct IDComponent
+	{
+		UUID ID;
+
+		IDComponent() = default;
+		IDComponent(const IDComponent&) = default;
+	};
+
 	struct TagComponent
 	{
 		std::string Tag;
@@ -83,6 +91,8 @@ namespace SideA
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
 	};
+
+	class ScriptableEntity;
 
 	struct NativeScriptComponent
 	{

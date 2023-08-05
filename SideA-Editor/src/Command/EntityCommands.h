@@ -4,10 +4,9 @@
 #include "SideA/Core/Log.h"
 
 #include "SideA/Scene/Scene.h"
-#include "SideA/Core/Application.h"
-
 #include "SideA/Scene/Components.h"
 #include "SideA/Scene/Entity.h"
+#include "SideA/Core/Application.h"
 
 namespace SideA
 {
@@ -29,13 +28,14 @@ namespace SideA
 		CreateEntityCommand() = default;
 
 		CreateEntityCommand(Ref<Scene> activeScene, const std::string& name)
-			: m_ActiveScene(activeScene), m_EntityName(name)
+			: m_ActiveScene(activeScene), m_EntityName(name), m_UUID(UUID())
 		{
 		}
 
 		virtual void Execute() override
 		{
-			m_Entity = m_ActiveScene->CreateEntity(m_EntityName);
+			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_Entity, m_UUID, m_EntityName);
+			SIDEA_CORE_INFO("Entity ID: {0}", (uint32_t)m_Entity);
 			Application::Get().SetIsSavedStatus(false);
 		}
 
@@ -53,6 +53,7 @@ namespace SideA
 	private:
 		Ref<Scene> m_ActiveScene;
 		Entity m_Entity;
+		UUID m_UUID;
 		std::string m_EntityName;
 	};
 
@@ -65,7 +66,7 @@ namespace SideA
 		DestroyEntityCommand() = default;
 
 		DestroyEntityCommand(Ref<Scene> activeScene, Entity entity)
-			: m_ActiveScene(activeScene), m_Entity(entity)
+			: m_ActiveScene(activeScene), m_Entity(entity), m_UUID(UUID())
 		{
 		}
 
@@ -106,7 +107,7 @@ namespace SideA
 		{
 			// TODO: UUIDs. Currently this will create a new entity id and wont be able to add
 			//				components to this when undoing/redoing.
-			m_Entity = m_ActiveScene->CreateEntity(m_Components.Tag.Tag);
+			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_Entity, m_UUID, m_Components.Tag.Tag);
 
 			m_Entity.GetComponent<TransformComponent>().Translation = m_Components.Transform.Translation;
 			m_Entity.GetComponent<TransformComponent>().Scale = m_Components.Transform.Scale;
@@ -131,6 +132,7 @@ namespace SideA
 		ComponentsList m_Components;
 		std::unordered_map<std::string, bool> m_AvailableComponents;
 		Entity m_Entity;
+		UUID m_UUID;
 	};
 
 

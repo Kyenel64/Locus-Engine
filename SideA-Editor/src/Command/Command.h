@@ -19,6 +19,6 @@ namespace SideA
 	};
 }
 
-#include "SideA/Command/CommandHistory.h"
-#include "SideA/Command/EntityCommands.h"
-#include "SideA/Command/ValueCommands.h"
+#include "Command/CommandHistory.h"
+#include "Command/EntityCommands.h"
+#include "Command/ValueCommands.h"

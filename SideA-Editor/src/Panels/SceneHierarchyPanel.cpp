@@ -6,7 +6,7 @@
 
 #include "SideA/Scene/Components.h"
 
-#include "SideA/Command/Command.h"
+#include "Command/Command.h"
 
 namespace SideA
 {

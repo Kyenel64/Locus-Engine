@@ -9,7 +9,7 @@
 #include "SideA/Utils/PlatformUtils.h"
 #include "SideA/Math/Math.h"
 
-#include "SideA/Command/Command.h"
+#include "Command/Command.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
@@ -136,6 +136,7 @@ namespace SideA
 			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY);
 			m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 		}
+		m_SelectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
 
 		
 		m_Framebuffer->Unbind();

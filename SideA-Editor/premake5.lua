@@ -15,9 +15,10 @@ project "SideA-Editor"
 	
 	includedirs
 	{
+		"%{wks.location}/SideA-Editor/src",
 		"%{wks.location}/SideA/vendor/spdlog/include",
-		"%{wks.location}/SideA/src",
 		"%{wks.location}/SideA/vendor",
+		"%{wks.location}/SideA/src",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.ImGuizmo}"

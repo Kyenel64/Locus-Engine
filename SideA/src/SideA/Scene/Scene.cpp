@@ -39,6 +39,16 @@ namespace SideA
 		return entity;
 	}
 
+	Entity Scene::CreateEntityWithUUID(Entity entity, UUID uuid, const std::string& name)
+	{
+		entity = { m_Registry.create(entity), this };
+		entity.AddComponent<IDComponent>(uuid);
+		entity.AddComponent<TransformComponent>();
+		auto& tag = entity.AddComponent<TagComponent>();
+		tag.Tag = name.empty() ? "Entity" : name;
+		return entity;
+	}
+
 	void Scene::DestroyEntity(Entity entity)
 	{
 		m_Registry.destroy(entity);

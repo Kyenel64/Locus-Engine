@@ -16,6 +16,8 @@
 
 namespace SideA
 {
+	extern const std::filesystem::path g_ProjectPath;
+
 	SideAEditorLayer::SideAEditorLayer()
 		: Layer("SideAEditorLayer")
 	{
@@ -286,6 +288,16 @@ namespace SideA
 		m_ViewportHovered = ImGui::IsMouseHoveringRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
 		m_ViewportFocused = ImGui::IsWindowFocused();
 		//Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused);
+
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ITEM_PATH"))
+			{
+				const wchar_t* path = (const wchar_t*)payload->Data;
+				OpenScene(std::filesystem::path(g_ProjectPath) / path);
+			}
+			ImGui::EndDragDropTarget();
+		}
 		
 		// --- viewport gizmo ---
 		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
@@ -431,17 +443,20 @@ namespace SideA
 	{
 		std::string path = FileDialogs::OpenFile("SideA Scene (*.sidea)\0*.sidea\0");
 		if (!path.empty())
-		{
-			m_ActiveScene = CreateRef<Scene>();
-			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+			OpenScene(path);
+	}
 
-			SceneSerializer serializer(m_ActiveScene);
-			serializer.Deserialize(path);
-			m_SavePath = path;
-			Application::Get().SetIsSavedStatus(true);
-			CommandHistory::Reset();
-		}
+	void SideAEditorLayer::OpenScene(const std::filesystem::path& path)
+	{
+		m_ActiveScene = CreateRef<Scene>();
+		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
+		SceneSerializer serializer(m_ActiveScene);
+		serializer.Deserialize(path.string());
+		m_SavePath = path.string();
+		Application::Get().SetIsSavedStatus(true);
+		CommandHistory::Reset();
 	}
 
 	void SideAEditorLayer::SaveSceneAs()

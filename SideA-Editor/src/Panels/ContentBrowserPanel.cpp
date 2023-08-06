@@ -9,10 +9,10 @@ namespace SideA
 {
 
 	// TODO: move to project folder in the future when we create project folders
-	static const std::filesystem::path s_ProjectPath = "assets";
+	extern const std::filesystem::path g_ProjectPath = "assets";
 
 	ContentBrowserPanel::ContentBrowserPanel()
-		: m_CurrentDirectory(s_ProjectPath)
+		: m_CurrentDirectory(g_ProjectPath)
 	{
 		m_FolderIcon = Texture2D::Create("resources/icons/FolderIcon.png");
 		m_FileIcon = Texture2D::Create("resources/icons/FileIcon.png");
@@ -25,7 +25,8 @@ namespace SideA
 		ImGuiStyle& style = ImGui::GetStyle();
 		style.WindowMinSize.y = 300.0f;
 
-		static ImGuiTableFlags flags = ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ContextMenuInBody;
+		static ImGuiTableFlags flags = ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Resizable
+			| ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg;
 		if (ImGui::BeginTable("CBTable", 2, flags))
 		{
 			ImGui::TableNextColumn();
@@ -34,7 +35,7 @@ namespace SideA
 			//ImGui::Text("TestLeft");
 
 			ImGui::TableNextColumn();
-			ImGui::Separator();
+
 			// --- Directory view -------------------------------------------------
 			DrawDirectoryView();
 			//ImGui::Text("TestRight");
@@ -47,7 +48,7 @@ namespace SideA
 
 	void ContentBrowserPanel::DrawDirectoryView()
 	{
-		if (m_CurrentDirectory != s_ProjectPath)
+		if (m_CurrentDirectory != g_ProjectPath)
 		{
 			if (ImGui::Button("<-"))
 			{
@@ -62,37 +63,57 @@ namespace SideA
 		ImGui::PushItemWidth(-1);
 		float panelWidth = ImGui::GetContentRegionAvail().x;
 		ImGui::PopItemWidth();
-		SIDEA_CORE_TRACE(panelWidth);
 		int columnCount = (int)(panelWidth / cellSize);
 		if (columnCount < 1)
 			columnCount = 1;
-		ImGui::Columns(columnCount, 0, false);
 
-		for (auto& entry : std::filesystem::directory_iterator(m_CurrentDirectory))
+		static ImGuiTableFlags flags = ImGuiTableFlags_RowBg;
+		ImGui::PushStyleColor(ImGuiCol_TableRowBg, { 0.2f, 0.2f, 0.2f, 1.0f });
+		if (ImGui::BeginTable("DVTable", columnCount, flags))
 		{
-			const auto& path = entry.path();
-			auto relativePath = std::filesystem::relative(path, s_ProjectPath);
-			std::string filenameString = relativePath.filename().string();
-
-			Ref<Texture2D> icon = entry.is_directory() ? m_FolderIcon : m_FileIcon;
-
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-			ImGui::ImageButton((ImTextureID)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
-			ImGui::PopStyleColor();
-
-			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+			for (auto& entry : std::filesystem::directory_iterator(m_CurrentDirectory))
 			{
-				if (entry.is_directory())
-				{
-					m_CurrentDirectory /= path.filename();
-				}
-			}
-			ImGui::TextWrapped(filenameString.c_str());
+				ImGui::TableNextColumn();
 
-			ImGui::NextColumn();
+				const auto& path = entry.path();
+				auto relativePath = std::filesystem::relative(path, g_ProjectPath);
+				std::string filenameString = relativePath.filename().string();
+
+				Ref<Texture2D> icon = entry.is_directory() ? m_FolderIcon : m_FileIcon;
+
+				ImGui::PushID(filenameString.c_str());
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+				ImGui::ImageButton((ImTextureID)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+
+				if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+				{
+					const wchar_t* itemPath = relativePath.c_str();
+					ImGui::SetDragDropPayload("ITEM_PATH", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
+
+					ImGui::EndDragDropSource();
+				}
+
+				ImGui::PopID();
+				ImGui::PopStyleColor();
+
+				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+				{
+					if (entry.is_directory())
+					{
+						m_CurrentDirectory /= path.filename();
+					}
+				}
+				ImGui::TextWrapped(filenameString.c_str());
+			}
+			ImGui::TableNextRow();
+			ImGui::DragFloat("Thumbnail Size", &thumbnailSize);
+
+			ImGui::EndTable();
 		}
-		ImGui::Columns(1);
-		ImGui::SliderFloat("ThumbnailSize", &thumbnailSize, 16, 512);
+		ImGui::PopStyleColor();
+		
+		//ImGui::TableNextColumn();
+		//ImGui::SliderFloat("ThumbnailSize", &thumbnailSize, 16, 512);
 	}
 
 	void ContentBrowserPanel::DrawProjectView()

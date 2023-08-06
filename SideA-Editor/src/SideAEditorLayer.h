@@ -5,6 +5,8 @@
 #include "Panels/ContentBrowserPanel.h"
 #include "SideA/Renderer/EditorCamera.h"
 
+#include <filesystem>
+
 namespace SideA
 {
 	class SideAEditorLayer : public Layer
@@ -27,6 +29,7 @@ namespace SideA
 
 		void NewScene();
 		void OpenScene();
+		void OpenScene(const std::filesystem::path& path);
 		void SaveSceneAs();
 		void SaveScene();
 

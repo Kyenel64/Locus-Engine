@@ -14,6 +14,8 @@ namespace SideA
 	ContentBrowserPanel::ContentBrowserPanel()
 		: m_CurrentDirectory(s_ProjectPath)
 	{
+		m_FolderIcon = Texture2D::Create("resources/icons/FolderIcon.png");
+		m_FileIcon = Texture2D::Create("resources/icons/FileIcon.png");
 	}
 
 	void ContentBrowserPanel::OnImGuiRender()
@@ -23,6 +25,28 @@ namespace SideA
 		ImGuiStyle& style = ImGui::GetStyle();
 		style.WindowMinSize.y = 300.0f;
 
+		static ImGuiTableFlags flags = ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ContextMenuInBody;
+		if (ImGui::BeginTable("CBTable", 2, flags))
+		{
+			ImGui::TableNextColumn();
+			// --- Project view ---------------------------------------------------
+			DrawProjectView();
+			//ImGui::Text("TestLeft");
+
+			ImGui::TableNextColumn();
+			ImGui::Separator();
+			// --- Directory view -------------------------------------------------
+			DrawDirectoryView();
+			//ImGui::Text("TestRight");
+
+			ImGui::EndTable();
+		}
+
+		ImGui::End(); // End Content Browser
+	}
+
+	void ContentBrowserPanel::DrawDirectoryView()
+	{
 		if (m_CurrentDirectory != s_ProjectPath)
 		{
 			if (ImGui::Button("<-"))
@@ -31,28 +55,48 @@ namespace SideA
 			}
 		}
 
+		static float padding = 16.0f;
+		static float thumbnailSize = 64.0f;
+		float cellSize = thumbnailSize + padding;
+
+		ImGui::PushItemWidth(-1);
+		float panelWidth = ImGui::GetContentRegionAvail().x;
+		ImGui::PopItemWidth();
+		SIDEA_CORE_TRACE(panelWidth);
+		int columnCount = (int)(panelWidth / cellSize);
+		if (columnCount < 1)
+			columnCount = 1;
+		ImGui::Columns(columnCount, 0, false);
 
 		for (auto& entry : std::filesystem::directory_iterator(m_CurrentDirectory))
 		{
 			const auto& path = entry.path();
 			auto relativePath = std::filesystem::relative(path, s_ProjectPath);
 			std::string filenameString = relativePath.filename().string();
-			if (entry.is_directory())
+
+			Ref<Texture2D> icon = entry.is_directory() ? m_FolderIcon : m_FileIcon;
+
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+			ImGui::ImageButton((ImTextureID)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+			ImGui::PopStyleColor();
+
+			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 			{
-				if (ImGui::Button(filenameString.c_str()))
+				if (entry.is_directory())
 				{
 					m_CurrentDirectory /= path.filename();
 				}
 			}
-			else
-			{
-				if (ImGui::Button(filenameString.c_str()))
-				{
-				}
-			}
+			ImGui::TextWrapped(filenameString.c_str());
+
+			ImGui::NextColumn();
 		}
+		ImGui::Columns(1);
+		ImGui::SliderFloat("ThumbnailSize", &thumbnailSize, 16, 512);
+	}
 
-
-		ImGui::End(); // End Content Browser
+	void ContentBrowserPanel::DrawProjectView()
+	{
+		ImGui::Text("Test");
 	}
 }

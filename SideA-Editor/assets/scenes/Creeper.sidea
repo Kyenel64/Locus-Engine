@@ -1,0 +1,164 @@
+Scene: Untitled
+Entities:
+  - Entity: 14045870999735754367
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [4, -4, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [0, 0, 0, 1]
+  - Entity: 3989270650447908729
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [1, -4, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [0, 0, 0, 1]
+  - Entity: 270588519508301685
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [4, -3, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [0, 0, 0, 1]
+  - Entity: 6490640108019811670
+    TagComponent:
+      Tag: Block
+    TransformComponent:
+      Translation: [4, -2, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [0, 0, 0, 1]
+  - Entity: 2946835232642034004
+    TagComponent:
+      Tag: Block
+    TransformComponent:
+      Translation: [1, -3, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [0, 0, 0, 1]
+  - Entity: 1625098740818102801
+    TagComponent:
+      Tag: Block
+    TransformComponent:
+      Translation: [1, -2, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [0, 0, 0, 1]
+  - Entity: 2293709950834063508
+    TagComponent:
+      Tag: Block
+    TransformComponent:
+      Translation: [3, -1, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [0, 0, 0, 1]
+  - Entity: 11495875985972253886
+    TagComponent:
+      Tag: Block
+    TransformComponent:
+      Translation: [2, -1, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [0, 0, 0, 1]
+  - Entity: 16136556965123454012
+    TagComponent:
+      Tag: Block
+    TransformComponent:
+      Translation: [2.5, -2.5, 0]
+      Rotation: [0, 0, 0]
+      Scale: [2, 2, 2]
+    SpriteRendererComponent:
+      Color: [0, 0, 0, 1]
+  - Entity: 10197706673209595188
+    TagComponent:
+      Tag: Block
+    TransformComponent:
+      Translation: [5, 1, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [0, 0, 0, 1]
+  - Entity: 25782919323777719
+    TagComponent:
+      Tag: Block
+    TransformComponent:
+      Translation: [5, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [0, 0, 0, 1]
+  - Entity: 1808221510631269175
+    TagComponent:
+      Tag: Block
+    TransformComponent:
+      Translation: [4, 1, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [0, 0, 0, 1]
+  - Entity: 16401303514589184128
+    TagComponent:
+      Tag: Block
+    TransformComponent:
+      Translation: [4, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [0, 0, 0, 1]
+  - Entity: 6322228021359766201
+    TagComponent:
+      Tag: Block
+    TransformComponent:
+      Translation: [1, 1, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [0, 0, 0, 1]
+  - Entity: 12426198098046135859
+    TagComponent:
+      Tag: Block
+    TransformComponent:
+      Translation: [0, 1, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [0, 0, 0, 1]
+  - Entity: 12412527922150818912
+    TagComponent:
+      Tag: Block
+    TransformComponent:
+      Translation: [1, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [0, 0, 0, 1]
+  - Entity: 13866361817368385640
+    TagComponent:
+      Tag: Block
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [0, 0, 0, 1]
+  - Entity: 5443919326288074413
+    TagComponent:
+      Tag: Background
+    TransformComponent:
+      Translation: [2.5, -1.5, -0.5]
+      Rotation: [0, 0, 0]
+      Scale: [10, 10, 2.45079994]
+    SpriteRendererComponent:
+      Color: [0.0969592556, 0.469750881, 0.203092113, 1]

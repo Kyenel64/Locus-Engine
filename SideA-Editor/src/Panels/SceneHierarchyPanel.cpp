@@ -127,6 +127,8 @@ namespace SideA
 	void SceneHierarchyPanel::DrawVec3Control(const std::string& name, glm::vec3& values, float resetValue, float columnWidth)
 	{
 		glm::vec3 dragValues = values;
+		if (name == "Rotation")
+			dragValues = glm::degrees(dragValues);
 		ImGuiIO& io = ImGui::GetIO();
 		auto boldFont = io.Fonts->Fonts[0];
 
@@ -155,7 +157,12 @@ namespace SideA
 
 		ImGui::SameLine();
 		if (ImGui::DragFloat("##X", &dragValues.x, 0.1f, 0.0f, 0.0f, "%.2f"))
-			CommandHistory::AddCommand(new ChangeValueCommand(dragValues.x, values.x));
+		{
+			if (name == "Rotation")
+				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.x), values.x));
+			else
+				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.x, values.x));
+		}
 		ImGui::PopItemWidth();
 		ImGui::SameLine();
 
@@ -171,7 +178,12 @@ namespace SideA
 
 		ImGui::SameLine();
 		if (ImGui::DragFloat("##Y", &dragValues.y, 0.1f, 0.0f, 0.0f, "%.2f"))
-			CommandHistory::AddCommand(new ChangeValueCommand(dragValues.y, values.y));
+		{
+			if (name == "Rotation")
+				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.y), values.y));
+			else
+				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.y, values.y));
+		}
 		ImGui::PopItemWidth();
 		ImGui::SameLine();
 
@@ -187,7 +199,12 @@ namespace SideA
 
 		ImGui::SameLine();
 		if (ImGui::DragFloat("##Z", &dragValues.z, 0.1f, 0.0f, 0.0f, "%.2f"))
-			CommandHistory::AddCommand(new ChangeValueCommand(dragValues.z, values.z));
+		{
+			if (name == "Rotation")
+				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.z), values.z));
+			else
+				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.z, values.z));
+		}
 		ImGui::PopItemWidth();
 
 		ImGui::PopStyleVar();

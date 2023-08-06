@@ -25,6 +25,9 @@ namespace SideA
 		// --- Scene Hierarchy Panel ------------------------------------------
 		ImGui::Begin("Scene Hierarchy");
 
+		ImGuiStyle& style = ImGui::GetStyle();
+		style.WindowMinSize.x = 400.0f;
+
 		// Display each entity
 		m_ActiveScene->m_Registry.each([&](auto entityID)
 		{

@@ -2,6 +2,7 @@
 
 #include "SideA.h"
 #include "Panels/SceneHierarchyPanel.h"
+#include "Panels/ContentBrowserPanel.h"
 #include "SideA/Renderer/EditorCamera.h"
 
 namespace SideA
@@ -51,6 +52,6 @@ namespace SideA
 
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
-
+		ContentBrowserPanel m_ContentBrowserPanel;
 	};
 }

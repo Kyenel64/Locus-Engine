@@ -33,7 +33,7 @@ namespace SideA
 		void SetDarkTheme();
 
 	private:
-		bool m_BlockEvents = true;
+		bool m_BlockEvents = false;
 	};
 }
 

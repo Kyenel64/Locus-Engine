@@ -5,7 +5,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "SideA/Scene/Components.h"
-
 #include "Command/Command.h"
 
 namespace SideA
@@ -79,6 +78,11 @@ namespace SideA
 				ImGui::EndPopup();
 			}
 		}
+		else
+		{
+			Application::Get().GetImGuiLayer()->BlockEvents(false);
+		}
+		
 		ImGui::End();
 	}
 
@@ -255,6 +259,11 @@ namespace SideA
 
 			if (ImGui::InputText("Tag", buffer, sizeof(buffer), flags))
 				CommandHistory::AddCommand(new ChangeValueCommand(std::string(buffer), tag));
+
+			if (!ImGui::TempInputIsActive(ImGui::GetActiveID()))
+				Application::Get().GetImGuiLayer()->BlockEvents(true);
+			else
+				Application::Get().GetImGuiLayer()->BlockEvents(false);
 		}
 
 		// --- Transform Component --------------------------------------------
@@ -262,9 +271,8 @@ namespace SideA
 			{
 				DrawVec3Control("Translation", component.Translation);
 
-				glm::vec3 rotation = glm::degrees(component.GetRotationEuler());
-				DrawVec3Control("Rotation", rotation);
-				component.SetRotationEuler(glm::radians(rotation));
+				DrawVec3Control("Rotation", component.GetRotationEuler());
+				component.SetRotationEuler(component.GetRotationEuler());
 
 				DrawVec3Control("Scale", component.Scale, 1.0f);
 			});

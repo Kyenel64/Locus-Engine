@@ -27,6 +27,7 @@ namespace SideA
 
 		template<typename T, typename UIFunction>
 		void DrawComponentUI(const std::string& name, Entity entity, UIFunction uiFunction);
+
 		void DrawVec3Control(const std::string& name, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f);
 
 	private:

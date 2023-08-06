@@ -102,6 +102,7 @@ namespace SideA
 
 	void Application::Close()
 	{
+		Renderer::Shutdown();
 		m_Running = false;
 	}
 

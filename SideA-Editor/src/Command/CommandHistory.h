@@ -12,6 +12,8 @@ namespace SideA
 		static void Undo();
 		static void Redo();
 
+		static void Shutdown();
+
 		static void SetNoMergeMostRecent();
 
 		static void Reset();

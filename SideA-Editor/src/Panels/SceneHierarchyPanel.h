@@ -13,6 +13,7 @@ namespace SideA
 	public:
 		SceneHierarchyPanel() = default;
 		SceneHierarchyPanel(const Ref<Scene>& context);
+		~SceneHierarchyPanel() = default;
 
 		void SetContext(const Ref<Scene>& context);
 

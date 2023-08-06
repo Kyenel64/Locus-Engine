@@ -22,6 +22,11 @@ namespace SideA
 
 	}
 
+	SideAEditorLayer::~SideAEditorLayer()
+	{
+		CommandHistory::Shutdown();
+	}
+
 	void SideAEditorLayer::OnAttach()
 	{
 		SIDEA_PROFILE_FUNCTION();
@@ -341,7 +346,6 @@ namespace SideA
 
 		bool control = Input::IsKeyPressed(Key::LeftControl) || Input::IsKeyPressed(Key::RightControl);
 		bool shift = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
-		// TODO: Currently only works within viewport window
 		switch (e.GetKeyCode())
 		{
 			case Key::N:

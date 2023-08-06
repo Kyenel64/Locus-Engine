@@ -11,7 +11,7 @@ namespace SideA
 	{
 	public:
 		SideAEditorLayer();
-		virtual ~SideAEditorLayer() {}
+		virtual ~SideAEditorLayer();
 
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;

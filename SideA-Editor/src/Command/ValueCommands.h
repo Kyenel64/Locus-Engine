@@ -18,6 +18,8 @@ namespace SideA
 		{
 		}
 
+		~ChangeValueCommand() = default;
+
 		virtual void Execute() override
 		{
 			m_OldValue = m_ValueToChange;

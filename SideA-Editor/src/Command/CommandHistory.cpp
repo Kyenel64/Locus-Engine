@@ -62,6 +62,12 @@ namespace SideA
 		}
 	}
 
+	void CommandHistory::Shutdown()
+	{
+		for (int i = 0; i < m_CommandSize; i++)
+			delete m_Commands[i];
+	}
+
 	void CommandHistory::Reset()
 	{
 		m_CommandSize = 0;

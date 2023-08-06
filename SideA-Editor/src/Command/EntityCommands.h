@@ -26,6 +26,7 @@ namespace SideA
 	{
 	public:
 		CreateEntityCommand() = default;
+		~CreateEntityCommand() = default;
 
 		CreateEntityCommand(Ref<Scene> activeScene, const std::string& name)
 			: m_ActiveScene(activeScene), m_EntityName(name), m_UUID(UUID())
@@ -64,6 +65,7 @@ namespace SideA
 	{
 	public:
 		DestroyEntityCommand() = default;
+		~DestroyEntityCommand() = default;
 
 		DestroyEntityCommand(Ref<Scene> activeScene, Entity entity)
 			: m_ActiveScene(activeScene), m_Entity(entity), m_UUID(UUID())
@@ -147,6 +149,7 @@ namespace SideA
 		{
 			m_AddFunction = [=]() { m_Entity.AddComponent<T>(args...); };
 		}
+		~AddComponentCommand() = default;
 
 		virtual void Execute() override
 		{
@@ -181,6 +184,8 @@ namespace SideA
 			: m_Entity(selectedEntity)
 		{
 		}
+
+		~RemoveComponentCommand() = default;
 
 		virtual void Execute() override
 		{

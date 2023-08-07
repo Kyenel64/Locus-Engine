@@ -14,8 +14,8 @@ namespace SideA
 		void OnImGuiRender();
 
 	private:
-		void DrawDirectoryView();
-		void DrawProjectView();
+		void DrawCurrentDirectoryView();
+		void DrawRootDirectoryView();
 
 	private:
 		std::filesystem::path m_CurrentDirectory;

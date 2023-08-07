@@ -393,9 +393,7 @@ namespace SideA
 					{
 						const wchar_t* path = (const wchar_t*)payload->Data;
 						std::filesystem::path texturePath = std::filesystem::path(g_ProjectPath) / path;
-						//CommandHistory::AddCommand(new ChangeTextureCommand(Texture2D::Create(texturePath.string()), component.Texture, component));
-						Ref<Texture2D> newTexture = Texture2D::Create(texturePath.string());
-						CommandHistory::AddCommand(new ChangeTextureCommand(newTexture, component.Texture, component.TexturePath));
+						CommandHistory::AddCommand(new ChangeTextureCommand(Texture2D::Create(texturePath.string()), component.Texture, component.TexturePath));
 					}
 					ImGui::EndDragDropTarget();
 				}

@@ -22,7 +22,6 @@ namespace SideA
 		virtual uint32_t GetRendererID() const override { return m_RendererID; }
 
 		virtual const std::string GetTexturePath() const override { return m_Path; }
-		virtual void SetTexturePath(const std::string& path) override { m_Path = path; }
 
 		virtual void SetData(void* data, uint32_t size) override;
 

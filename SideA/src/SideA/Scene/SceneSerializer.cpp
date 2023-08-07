@@ -163,7 +163,7 @@ namespace SideA
 	{
 		YAML::Emitter out;
 		out << YAML::BeginMap; // Scene
-		out << YAML::Key << "Scene" << YAML::Value << "Untitled"; 
+		out << YAML::Key << "Scene" << YAML::Value << m_Scene->GetSceneName(); 
 
 		// Array of Entities
 		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
@@ -195,6 +195,7 @@ namespace SideA
 
 		// Deserialize scene data
 		std::string sceneName = data["Scene"].as<std::string>();
+		m_Scene->SetSceneName(sceneName);
 		SIDEA_CORE_TRACE("Deserializing scene '{0}'", sceneName);
 
 		// Deserialize every entity data

@@ -27,26 +27,29 @@ namespace SideA
 
 		static ImGuiTableFlags flags = ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Resizable
 			| ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg;
+		ImGui::PushStyleColor(ImGuiCol_TableRowBg, { 0.2f, 0.2f, 0.2f, 1.0f });
 		if (ImGui::BeginTable("CBTable", 2, flags))
 		{
+			ImGui::TableNextRow(ImGuiTableRowFlags_None, ImGui::GetContentRegionAvail().y);
 			ImGui::TableNextColumn();
 			// --- Project view ---------------------------------------------------
-			DrawProjectView();
+			DrawRootDirectoryView();
 			//ImGui::Text("TestLeft");
 
 			ImGui::TableNextColumn();
 
 			// --- Directory view -------------------------------------------------
-			DrawDirectoryView();
+			DrawCurrentDirectoryView();
 			//ImGui::Text("TestRight");
 
 			ImGui::EndTable();
 		}
+		ImGui::PopStyleColor();
 
 		ImGui::End(); // End Content Browser
 	}
 
-	void ContentBrowserPanel::DrawDirectoryView()
+	void ContentBrowserPanel::DrawCurrentDirectoryView()
 	{
 		if (m_CurrentDirectory != g_ProjectPath)
 		{
@@ -60,9 +63,9 @@ namespace SideA
 		static float thumbnailSize = 64.0f;
 		float cellSize = thumbnailSize + padding;
 
-		ImGui::PushItemWidth(-1);
+		//ImGui::PushItemWidth(-1);
 		float panelWidth = ImGui::GetContentRegionAvail().x;
-		ImGui::PopItemWidth();
+		//ImGui::PopItemWidth();
 		int columnCount = (int)(panelWidth / cellSize);
 		if (columnCount < 1)
 			columnCount = 1;
@@ -71,6 +74,7 @@ namespace SideA
 		ImGui::PushStyleColor(ImGuiCol_TableRowBg, { 0.2f, 0.2f, 0.2f, 1.0f });
 		if (ImGui::BeginTable("DVTable", columnCount, flags))
 		{
+			ImGui::TableNextRow(ImGuiTableRowFlags_None, ImGui::GetContentRegionAvail().y - 40.0f);
 			for (auto& entry : std::filesystem::directory_iterator(m_CurrentDirectory))
 			{
 				ImGui::TableNextColumn();
@@ -116,18 +120,17 @@ namespace SideA
 				}
 				ImGui::TextWrapped(filenameString.c_str());
 			}
-			ImGui::TableNextRow();
-			ImGui::DragFloat("Thumbnail Size", &thumbnailSize);
+			ImGui::TableNextRow(ImGuiTableRowFlags_None, 40.0f);
+			ImGui::Text("Testing Rowfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+			//ImGui::DragFloat("Thumbnail Size", &thumbnailSize);
 
 			ImGui::EndTable();
 		}
 		ImGui::PopStyleColor();
 		
-		//ImGui::TableNextColumn();
-		//ImGui::SliderFloat("ThumbnailSize", &thumbnailSize, 16, 512);
 	}
 
-	void ContentBrowserPanel::DrawProjectView()
+	void ContentBrowserPanel::DrawRootDirectoryView()
 	{
 		ImGui::Text("Test");
 	}

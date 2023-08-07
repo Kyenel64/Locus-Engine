@@ -15,5 +15,5 @@ import SetupPremake
 SetupPremake.ValidatePackages()
 
 print("Running premake...")
-subprocess.call(["vendor/premake/bin/premake5.exe", "vs2022"])
+subprocess.call(["premake/bin/premake5.exe", "vs2022"])
 print("Finished setting up SideA Engine.")

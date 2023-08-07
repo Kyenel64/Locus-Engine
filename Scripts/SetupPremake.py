@@ -9,8 +9,8 @@ from zipfile import ZipFile
 PREMAKE_VERSION = "5.0.0-beta2"
 PREMAKE_ZIP_URL = f"https://github.com/premake/premake-core/releases/download/v{PREMAKE_VERSION}/premake-{PREMAKE_VERSION}-windows.zip"
 PREMAKE_LICENSE_URL = "https://raw.githubusercontent.com/premake/premake-core/master/LICENSE.txt"
-PREMAKE_DIR_PATH = "vendor/premake/bin"
-PREMAKE_EXE_PATH = "vendor/premake/bin/premake5.exe"
+PREMAKE_DIR_PATH = "premake/bin"
+PREMAKE_EXE_PATH = "premake/bin/premake5.exe"
 
 def ValidatePackages():
     if not CheckIfPremakeInstalled():

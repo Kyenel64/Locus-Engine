@@ -375,4 +375,4 @@ bin-int/
 Locus/vendor/VulkanSDK
 Locus-Editor/assets/cache
 scripts/__pycache__
-vendor/
+premake/

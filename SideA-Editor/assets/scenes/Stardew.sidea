@@ -1,0 +1,35 @@
+Scene: Untitled
+Entities:
+  - Entity: 5965506621362657831
+    TagComponent:
+      Tag: Dirt
+    TransformComponent:
+      Translation: [0, 0, -0.488379478]
+      Rotation: [0, 0, 0]
+      Scale: [70, 70, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\textures\Stardew\Dirt-1.png
+      TilingFactor: 68
+  - Entity: 490095026470437529
+    TagComponent:
+      Tag: Barn
+    TransformComponent:
+      Translation: [0, 2.5, -0.400000006]
+      Rotation: [0, 0, 0]
+      Scale: [7, 7, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\textures\Stardew\Big Shed.png
+      TilingFactor: 1
+  - Entity: 3229359211062717934
+    TagComponent:
+      Tag: Emily
+    TransformComponent:
+      Translation: [0.130719781, 3.7252903e-09, -0.361578107]
+      Rotation: [0, 0, 0]
+      Scale: [1, 2, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\textures\Stardew\Emily-1.png
+      TilingFactor: 1

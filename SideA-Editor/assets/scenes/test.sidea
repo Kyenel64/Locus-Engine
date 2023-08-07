@@ -1,0 +1,24 @@
+Scene: Untitled
+Entities:
+  - Entity: 579853986864415248
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [1.89999998, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [3.29999995, 3.4000001, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\textures\TX_Tileset_Stone_Ground.png
+      TilingFactor: 1
+  - Entity: 9816015098341099506
+    TagComponent:
+      Tag: Empty Entity
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\textures\MissingTexture.png
+      TilingFactor: 1

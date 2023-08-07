@@ -119,11 +119,13 @@ namespace SideA
 		// --- Sprite Renderer Component --------------------------------------
 		if (entity.HasComponent<SpriteRendererComponent>())
 		{
+			auto& src = entity.GetComponent<SpriteRendererComponent>();
 			out << YAML::Key << "SpriteRendererComponent";
 
 			out << YAML::BeginMap; // Sprite Renderer Component
-			auto& color = entity.GetComponent<SpriteRendererComponent>().Color;
-			out << YAML::Key << "Color" << YAML::Value << color;
+			out << YAML::Key << "Color" << YAML::Value << src.Color;
+			out << YAML::Key << "TexturePath" << YAML::Value << src.TexturePath;
+			out << YAML::Key << "TilingFactor" << YAML::Value << src.TilingFactor;
 			out << YAML::EndMap; // End Sprite Renderer Component
 		}
 
@@ -229,6 +231,9 @@ namespace SideA
 				{
 					auto& src = deserializedEntity.AddComponent<SpriteRendererComponent>();
 					src.Color = spriteRendererComponent["Color"].as<glm::vec4>();
+					src.TexturePath = spriteRendererComponent["TexturePath"].as<std::string>();
+					src.Texture = Texture2D::Create(src.TexturePath);
+					src.TilingFactor = spriteRendererComponent["TilingFactor"].as<float>();
 				}
 
 				// --- Camera Component ------------------------------

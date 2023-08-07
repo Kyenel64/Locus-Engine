@@ -1,5 +1,7 @@
 #include "SceneHierarchyPanel.h"
 
+#include <filesystem>
+
 #include <ImGui/imgui.h>
 #include <ImGui/imgui_internal.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -9,6 +11,8 @@
 
 namespace SideA
 {
+	extern const std::filesystem::path g_ProjectPath;
+
 	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& context)
 	{
 		SetContext(context);
@@ -375,10 +379,29 @@ namespace SideA
 
 		// --- SpriteRenderer Component ---------------------------------------
 		DrawComponentUI<SpriteRendererComponent>("Sprite Renderer", entity, [this](auto& component)
-		{
-			glm::vec4 color = component.Color;
-			if (ImGui::ColorEdit4("Color", glm::value_ptr(color)))
-				CommandHistory::AddCommand(new ChangeValueCommand(color, component.Color));
-		});
+			{
+				// Color
+				glm::vec4 color = component.Color;
+				if (ImGui::ColorEdit4("Color", glm::value_ptr(color)))
+					CommandHistory::AddCommand(new ChangeValueCommand(color, component.Color));
+				
+				// Texture
+				ImGui::Button("Texture", ImVec2(100.0f, 0.0f));
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TEXTURE_ITEM_PATH"))
+					{
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						std::filesystem::path texturePath = std::filesystem::path(g_ProjectPath) / path;
+						//CommandHistory::AddCommand(new ChangeTextureCommand(Texture2D::Create(texturePath.string()), component.Texture, component));
+						Ref<Texture2D> newTexture = Texture2D::Create(texturePath.string());
+						CommandHistory::AddCommand(new ChangeTextureCommand(newTexture, component.Texture, component.TexturePath));
+					}
+					ImGui::EndDragDropTarget();
+				}
+
+				// Texture Tiling
+				ImGui::DragFloat("Tiling", &component.TilingFactor);
+			});
 	}	
 }

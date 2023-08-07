@@ -78,13 +78,15 @@ namespace SideA
 				const auto& path = entry.path();
 				auto relativePath = std::filesystem::relative(path, g_ProjectPath);
 				std::string filenameString = relativePath.filename().string();
-				std::size_t pos = filenameString.find(".sidea");
+
+				// Find extension
+				size_t containsDot = filenameString.find(".");
+				size_t pos = filenameString.find_last_of(".") + 1;
 				std::string extension;
-				if (pos != std::string::npos)
-					extension = filenameString.substr(pos);
+				if (containsDot != std::string::npos)
+					extension = filenameString.substr(filenameString.find_last_of(".") + 1);
 
 				Ref<Texture2D> icon = entry.is_directory() ? m_FolderIcon : m_FileIcon;
-
 				ImGui::PushID(filenameString.c_str());
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 				ImGui::ImageButton((ImTextureID)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
@@ -92,10 +94,12 @@ namespace SideA
 				if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
 				{
 					const wchar_t* itemPath = relativePath.c_str();
-					SIDEA_CORE_INFO(extension);
 
-					if (extension == ".sidea")
+					if (extension == "sidea")
 						ImGui::SetDragDropPayload("SCENE_ITEM_PATH", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
+					else if (extension == "png" || extension == "jpg" || extension == "tiff" || extension == "tif"
+						|| extension == "bmp" || extension == "tga")
+						ImGui::SetDragDropPayload("TEXTURE_ITEM_PATH", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
 
 					ImGui::EndDragDropSource();
 				}

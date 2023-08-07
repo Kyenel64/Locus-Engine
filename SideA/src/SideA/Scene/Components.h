@@ -2,6 +2,7 @@
 
 #include "SideA/Core/UUID.h"
 #include "SideA/Scene/SceneCamera.h"
+#include "SideA/Renderer/Texture.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -76,6 +77,9 @@ namespace SideA
 	{
 		// TODO: Take in a material
 		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
+		Ref<Texture2D> Texture;
+		std::string TexturePath;
+		float TilingFactor = 1.0f;
 
 		SpriteRendererComponent() = default;
 		SpriteRendererComponent(const SpriteRendererComponent&) = default;

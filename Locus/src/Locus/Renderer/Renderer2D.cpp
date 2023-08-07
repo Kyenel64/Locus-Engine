@@ -163,9 +163,6 @@ namespace Locus
 	{
 		LOCUS_PROFILE_FUNCTION();
 
-		uint64_t dataSize = (uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase;
-		s_Data.QuadVB->SetData(s_Data.QuadVertexBufferBase, (uint32_t)dataSize);
-
 		Flush();
 	}
 
@@ -181,6 +178,10 @@ namespace Locus
 	{
 		if (s_Data.QuadIndexCount == 0)
 			return;
+
+		uint64_t dataSize = (uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase;
+		s_Data.QuadVB->SetData(s_Data.QuadVertexBufferBase, (uint32_t)dataSize);
+
 		// Bind textures
 		for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
 			s_Data.TextureSlots[i]->Bind(i);

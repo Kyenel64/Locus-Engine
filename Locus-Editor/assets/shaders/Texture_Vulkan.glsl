@@ -2,13 +2,6 @@
 #type vertex
 #version 450 core
 
-struct VertexOutput
-{
-	vec4 Color;
-	vec2 TexCoord;
-	float TilingFactor;
-};
-
 layout(location = 0) in vec3 a_Position;
 layout(location = 1) in vec4 a_Color;
 layout(location = 2) in vec2 a_TexCoord;
@@ -16,14 +9,21 @@ layout(location = 3) in float a_TexIndex;
 layout(location = 4) in float a_TilingFactor;
 layout(location = 5) in int a_EntityID;
 
-layout(location = 0) out VertexOutput Output;
-layout(location = 3) out flat float TexIndex;
-layout(location = 4) out flat int EntityID;
-
 layout(std140, binding = 0) uniform Camera
 {
 	mat4 u_ViewProjection;
 };
+
+struct VertexOutput
+{
+	vec4 Color;
+	vec2 TexCoord;
+	float TilingFactor;
+};
+
+layout(location = 0) out VertexOutput Output;
+layout(location = 3) out flat float TexIndex;
+layout(location = 4) out flat int EntityID;
 
 void main()
 {
@@ -99,6 +99,10 @@ void main()
 		case 30: texColor *= texture(u_Textures[30], Input.TexCoord * Input.TilingFactor); break;
 		case 31: texColor *= texture(u_Textures[31], Input.TexCoord * Input.TilingFactor); break;
 	}
+
+	if (texColor.a == 0.0) // TOOD: Implement order independent transparency
+		discard;
+
 	color = texColor;
 
 	entityID = EntityID;

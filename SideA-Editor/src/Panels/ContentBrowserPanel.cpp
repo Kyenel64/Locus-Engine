@@ -78,6 +78,10 @@ namespace SideA
 				const auto& path = entry.path();
 				auto relativePath = std::filesystem::relative(path, g_ProjectPath);
 				std::string filenameString = relativePath.filename().string();
+				std::size_t pos = filenameString.find(".sidea");
+				std::string extension;
+				if (pos != std::string::npos)
+					extension = filenameString.substr(pos);
 
 				Ref<Texture2D> icon = entry.is_directory() ? m_FolderIcon : m_FileIcon;
 
@@ -88,7 +92,10 @@ namespace SideA
 				if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
 				{
 					const wchar_t* itemPath = relativePath.c_str();
-					ImGui::SetDragDropPayload("ITEM_PATH", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
+					SIDEA_CORE_INFO(extension);
+
+					if (extension == ".sidea")
+						ImGui::SetDragDropPayload("SCENE_ITEM_PATH", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
 
 					ImGui::EndDragDropSource();
 				}

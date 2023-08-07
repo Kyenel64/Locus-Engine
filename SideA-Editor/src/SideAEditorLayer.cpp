@@ -287,17 +287,8 @@ namespace SideA
 		m_ViewportBounds[1].x = ImGui::GetItemRectMax().x, m_ViewportBounds[1].y = ImGui::GetItemRectMax().y;
 		m_ViewportHovered = ImGui::IsMouseHoveringRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
 		m_ViewportFocused = ImGui::IsWindowFocused();
-		//Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused);
 
-		if (ImGui::BeginDragDropTarget())
-		{
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ITEM_PATH"))
-			{
-				const wchar_t* path = (const wchar_t*)payload->Data;
-				OpenScene(std::filesystem::path(g_ProjectPath) / path);
-			}
-			ImGui::EndDragDropTarget();
-		}
+		ProcessViewportDragDrop();
 		
 		// --- viewport gizmo ---
 		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
@@ -553,6 +544,19 @@ namespace SideA
 					break;
 				}
 			}
+		}
+	}
+
+	void SideAEditorLayer::ProcessViewportDragDrop()
+	{
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SCENE_ITEM_PATH"))
+			{
+				const wchar_t* path = (const wchar_t*)payload->Data;
+				OpenScene(std::filesystem::path(g_ProjectPath) / path);
+			}
+			ImGui::EndDragDropTarget();
 		}
 	}
 }

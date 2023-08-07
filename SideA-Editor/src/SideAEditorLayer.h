@@ -34,6 +34,7 @@ namespace SideA
 		void SaveScene();
 
 		void showGizmoUI();
+		void ProcessViewportDragDrop();
 
 	private:
 		std::string m_SavePath;

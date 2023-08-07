@@ -369,7 +369,6 @@ bin-int/
 *.vcxproj
 *.vcxproj.filters
 *.vcxproj.user
-**/imgui.ini
 *.log
 
 Locus/vendor/VulkanSDK

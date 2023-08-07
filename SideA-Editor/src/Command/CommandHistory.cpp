@@ -6,6 +6,7 @@ namespace SideA
 	Command* CommandHistory::m_Commands[1000] = {};
 	int32_t CommandHistory::m_CommandSize = 0;
 	int32_t CommandHistory::m_CommandPtr = 0;
+	bool CommandHistory::m_FirstCommand = true;
 
 	void CommandHistory::AddCommand(Command* cmd)
 	{
@@ -31,6 +32,7 @@ namespace SideA
 		}
 
 		m_CommandPtr = m_CommandSize - 1;
+		m_FirstCommand = false;
 
 		SIDEA_CORE_INFO("ADDED COMMAND. Ptr Position: {0}", m_CommandPtr);
 	}
@@ -43,22 +45,24 @@ namespace SideA
 
 	void CommandHistory::Undo()
 	{
-		if (m_CommandPtr >= 0)
+		if (m_CommandPtr >= 0 && m_Commands[m_CommandPtr] != nullptr && !m_FirstCommand)
 		{
 			SIDEA_CORE_INFO("UNDO COMMAND. Ptr Position: {0}", m_CommandPtr);
 			m_Commands[m_CommandPtr]->Undo();
 			m_CommandPtr--;
+			m_FirstCommand = false;
 		}
 	}
 
 	void CommandHistory::Redo()
 	{
 		int32_t redoCommandPtr = m_CommandPtr + 1;
-		if (redoCommandPtr < m_CommandSize && redoCommandPtr >= 0)
+		if (redoCommandPtr < m_CommandSize && redoCommandPtr >= 0 && !m_FirstCommand)
 		{
 			SIDEA_CORE_INFO("REDO COMMAND. Ptr Position: {0}", m_CommandPtr);
 			m_Commands[redoCommandPtr]->Execute();
 			m_CommandPtr++;
+			m_FirstCommand = false;
 		}
 	}
 
@@ -70,8 +74,11 @@ namespace SideA
 
 	void CommandHistory::Reset()
 	{
+		for (int i = 0; i < m_CommandSize; i++)
+			delete m_Commands[i];
 		m_CommandSize = 0;
 		m_CommandPtr = 0;
+		m_FirstCommand = true;
 	}
 
 }

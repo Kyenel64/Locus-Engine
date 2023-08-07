@@ -22,5 +22,6 @@ namespace SideA
 		static Command* m_Commands[1000];
 		static int32_t m_CommandSize;
 		static int32_t m_CommandPtr;
+		static bool m_FirstCommand;
 	};
 }

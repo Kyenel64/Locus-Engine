@@ -5,6 +5,7 @@
 #include "Locus/Core/Log.h"
 #include "Locus/Renderer/Texture.h"
 
+#include <iostream>
 
 namespace Locus
 {
@@ -53,6 +54,61 @@ namespace Locus
 		T m_NewValue;
 		T m_OldValue;
 		T& m_ValueToChange;
+	};
+
+	template<typename T>
+	class ChangeFunctionValueCommand : public Command
+	{
+	public:
+		ChangeFunctionValueCommand() = default;
+
+		ChangeFunctionValueCommand(std::function<void(const T&)> function, const T newValue, T& valueToChange)
+			: m_NewValue(newValue), m_ValueToChange(valueToChange), m_Function(function)
+		{
+		}
+
+		ChangeFunctionValueCommand(std::function<void(T)> function, const T newValue, T& valueToChange)
+			: m_NewValue(newValue), m_ValueToChange(valueToChange), m_Function(function)
+		{
+		}
+
+		~ChangeFunctionValueCommand() = default;
+
+		virtual void Execute() override
+		{
+			m_OldValue = m_ValueToChange;
+			m_ValueToChange = m_NewValue;
+			m_Function(m_ValueToChange);
+			Application::Get().SetIsSavedStatus(false);
+		}
+
+		virtual void Undo() override
+		{
+			m_ValueToChange = m_OldValue;
+			m_Function(m_ValueToChange);
+			Application::Get().SetIsSavedStatus(false);
+		}
+
+		virtual bool Merge(Command* other) override
+		{
+			ChangeFunctionValueCommand* otherCommand = dynamic_cast<ChangeFunctionValueCommand*>(other);
+			if (otherCommand != nullptr)
+			{
+				if (&otherCommand->m_ValueToChange == &this->m_ValueToChange)
+				{
+					otherCommand->m_NewValue = this->m_NewValue;
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+	private:
+		T m_NewValue;
+		T m_OldValue;
+		T& m_ValueToChange;
+		std::function<void(const T&)> m_Function;
 	};
 
 	class ChangeTextureCommand : public Command

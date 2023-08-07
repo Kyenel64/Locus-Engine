@@ -51,7 +51,6 @@ namespace Locus
 		float GetOrthographicFarClip() const { return m_OrthographicFar; }
 		float& GetOrthographicFarClip() { return m_OrthographicFar; }
 
-	private:
 		void RecalculateProjection();
 
 	private:

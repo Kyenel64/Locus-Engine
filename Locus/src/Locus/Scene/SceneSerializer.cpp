@@ -233,7 +233,8 @@ namespace Locus
 					auto& src = deserializedEntity.AddComponent<SpriteRendererComponent>();
 					src.Color = spriteRendererComponent["Color"].as<glm::vec4>();
 					src.TexturePath = spriteRendererComponent["TexturePath"].as<std::string>();
-					src.Texture = Texture2D::Create(src.TexturePath);
+					if (src.TexturePath != std::string())
+						src.Texture = Texture2D::Create(src.TexturePath);
 					src.TilingFactor = spriteRendererComponent["TilingFactor"].as<float>();
 				}
 

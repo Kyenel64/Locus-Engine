@@ -314,7 +314,10 @@ namespace Locus
 				// Background color
 				glm::vec4 backgroundColor = camera.GetBackgroundColor();
 				if (ImGui::ColorEdit4("Background Color", glm::value_ptr(backgroundColor)))
-					CommandHistory::AddCommand(new ChangeValueCommand(backgroundColor, camera.GetBackgroundColor()));
+				{
+					std::function<void(const glm::vec4&)> func = std::bind(&SceneCamera::SetBackgroundColor, &camera, std::placeholders::_1);
+					CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, backgroundColor, camera.GetBackgroundColor()));
+				}
 
 				// Projection mode
 				const char* projectionTypeString[] = { "Orthographic", "Perspective" };
@@ -325,7 +328,10 @@ namespace Locus
 					{
 						bool isSelected = currentProjectionTypeString == projectionTypeString[i];
 						if (ImGui::Selectable(projectionTypeString[i], isSelected))
-							CommandHistory::AddCommand(new ChangeValueCommand((SceneCamera::ProjectionType)i, camera.GetProjectionType()));
+						{
+							std::function<void(SceneCamera::ProjectionType)> func = std::bind(&SceneCamera::SetProjectionType, &camera, std::placeholders::_1);
+							CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, (SceneCamera::ProjectionType)i, camera.GetProjectionType()));
+						}
 
 						if (isSelected)
 							ImGui::SetItemDefaultFocus();
@@ -339,7 +345,10 @@ namespace Locus
 					// Size
 					float orthoSize = camera.GetOrthographicSize();
 					if (ImGui::DragFloat("Size", &orthoSize))
-						CommandHistory::AddCommand(new ChangeValueCommand(orthoSize, camera.GetOrthographicSize()));
+					{
+						std::function<void(float)> func = std::bind(&SceneCamera::SetOrthographicSize, &camera, std::placeholders::_1);
+						CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, orthoSize, camera.GetOrthographicSize()));
+					}
 
 					// Near
 					float nearClip = camera.GetOrthographicNearClip();

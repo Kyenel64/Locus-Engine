@@ -33,3 +33,26 @@ Entities:
       Color: [1, 1, 1, 1]
       TexturePath: assets\textures\Stardew\Emily-1.png
       TilingFactor: 1
+  - Entity: 5224661992595902727
+    TagComponent:
+      Tag: Camera
+    TransformComponent:
+      Translation: [0, 0, 9.44157696]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: ""
+      TilingFactor: 1
+    CameraComponent:
+      Camera:
+        BackgroundColor: [0.25, 0.5, 0.5, 1]
+        ProjectionType: 0
+        OrthographicSize: 5
+        OrthographicNearClip: -1
+        OrthographicFarClip: 1
+        PerspectiveFOV: 0.785398185
+        PerspectiveNearClip: 0.00999999978
+        PerspectiveFarClip: 1000
+      Primary: true
+      FixedAspectRatio: false

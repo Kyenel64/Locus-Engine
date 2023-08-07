@@ -115,19 +115,25 @@ namespace Locus
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 
-		// Update
-		m_EditorCamera.OnUpdate(deltaTime); // These are camera specific update commands. Actual rendering is in scene object.
-
 		// --- Render ---------------------------------------------------------
 		Renderer2D::ResetStats();
 		m_Framebuffer->Bind();
 		
 		// Clears
-		RenderCommand::SetClearColor(m_EditorCamera.GetBackgroundColor());
-		RenderCommand::Clear();
 		m_Framebuffer->ClearAttachmentInt(1, -1);
 
-		m_ActiveScene->OnUpdateEditor(deltaTime, m_EditorCamera);
+		bool editor = false;
+		if (editor)
+		{
+			RenderCommand::SetClearColor(m_EditorCamera.GetBackgroundColor());
+			RenderCommand::Clear();
+			m_ActiveScene->OnUpdateEditor(deltaTime, m_EditorCamera);
+			m_EditorCamera.OnUpdate(deltaTime); // These are camera specific update commands. Actual rendering is in scene object.
+		}
+		else
+		{
+			m_ActiveScene->OnUpdateRuntime(deltaTime);
+		}
 
 		// Read pixel
 		auto [mx, my] = ImGui::GetMousePos();
@@ -153,7 +159,8 @@ namespace Locus
 
 	void LocusEditorLayer::OnEvent(Event& e)
 	{
-		m_EditorCamera.OnEvent(e);
+		if (m_ViewportHovered)
+			m_EditorCamera.OnEvent(e);
 
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<KeyPressedEvent>(LOCUS_BIND_EVENT_FN(LocusEditorLayer::OnKeyPressed));
@@ -260,7 +267,8 @@ namespace Locus
 
 		std::string name = "None";
 		if (m_HoveredEntity)
-			name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
+			if (m_HoveredEntity.HasComponent<TagComponent>())
+				name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
 		ImGui::Text("Hovered Entity: %s", name.c_str());
 
 		ImGui::End();

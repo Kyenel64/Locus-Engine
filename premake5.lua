@@ -1,8 +1,8 @@
 include "Dependencies.lua"
 
-workspace "SideA"
+workspace "Locus"
 	architecture "x86_64"
-	startproject "SideA-Editor"
+	startproject "Locus-Editor"
 
 	configurations
 	{
@@ -19,13 +19,13 @@ workspace "SideA"
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 group "Dependencies"
-	include "SideA/vendor/GLFW"
-	include "SideA/vendor/Glad"
-	include "SideA/vendor/imgui"
-	include "SideA/vendor/yaml-cpp"
+	include "Locus/vendor/GLFW"
+	include "Locus/vendor/Glad"
+	include "Locus/vendor/imgui"
+	include "Locus/vendor/yaml-cpp"
 
 group ""
 
-include "SideA"
+include "Locus"
 include "Sandbox"
-include "SideA-Editor"
+include "Locus-Editor"

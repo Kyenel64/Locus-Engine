@@ -13,8 +13,8 @@ from zipfile import ZipFile
 
 VULKAN_SDK = os.environ.get('VULKAN_SDK')
 VULKAN_SDK_INSTALLER_URL = 'https://sdk.lunarg.com/sdk/download/1.3.250.1/windows/VulkanSDK-1.3.250.1-Installer.exe'
-SIDEA_VULKAN_VERSION = '1.3.250.1'
-VULKAN_SDK_EXE_PATH = 'SideA/vendor/VulkanSDK/VulkanSDK.exe'
+LOCUS_VULKAN_VERSION = '1.3.250.1'
+VULKAN_SDK_EXE_PATH = 'Locus/vendor/VulkanSDK/VulkanSDK.exe'
 
 def ValidatePackages():
     if (not CheckVulkanSDK()):
@@ -34,8 +34,8 @@ def InstallVulkanSDK():
 
 
 def InstallVulkanPrompt():
-    if not os.path.exists('SideA/vendor/VulkanSDK'):
-        os.makedirs('SideA/vendor/VulkanSDK')
+    if not os.path.exists('Locus/vendor/VulkanSDK'):
+        os.makedirs('Locus/vendor/VulkanSDK')
     print("Would you like to install the Vulkan SDK?")
     install = Utils.YesOrNo()
     if (install):
@@ -47,9 +47,9 @@ def CheckVulkanSDK():
         print("You don't have the Vulkan SDK installed!")
         InstallVulkanPrompt()
         return False
-    elif (SIDEA_VULKAN_VERSION not in VULKAN_SDK):
+    elif (LOCUS_VULKAN_VERSION not in VULKAN_SDK):
         print(f"Located Vulkan SDK at {VULKAN_SDK}")
-        print(f"You don't have the correct Vulkan SDK version! (SideA requires {SIDEA_VULKAN_VERSION})")
+        print(f"You don't have the correct Vulkan SDK version! (Locus requires {LOCUS_VULKAN_VERSION})")
         InstallVulkanPrompt()
         return False
 
@@ -57,11 +57,11 @@ def CheckVulkanSDK():
     return True
 
 VulkanSDKDebugLibsURL = 'https://files.lunarg.com/SDK-1.2.170.0/VulkanSDK-1.2.170.0-DebugLibs.zip'
-OutputDirectory = "SideA/vendor/VulkanSDK"
+OutputDirectory = "Locus/vendor/VulkanSDK"
 TempZipFile = f"{OutputDirectory}/VulkanSDK.zip"
 
 def CheckVulkanSDKDebugLibs():
-    if not os.path.exists("SideA/vendor/VulkanSDK/Lib"):
+    if not os.path.exists("Locus/vendor/VulkanSDK/Lib"):
         origin = f"{VULKAN_SDK}/Lib"
         target = f"{OutputDirectory}/Lib"
         shutil.copytree(origin, target)

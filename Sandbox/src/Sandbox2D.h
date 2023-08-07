@@ -1,8 +1,8 @@
 #pragma once
 
-#include "SideA.h"
+#include "Locus.h"
 
-class Sandbox2D : public SideA::Layer
+class Sandbox2D : public Locus::Layer
 {
 public:
 	Sandbox2D();
@@ -10,18 +10,18 @@ public:
 
 	virtual void OnAttach() override;
 	virtual void OnDetach() override;
-	virtual void OnUpdate(SideA::Timestep deltaTime) override;
-	virtual void OnEvent(SideA::Event& event) override;
+	virtual void OnUpdate(Locus::Timestep deltaTime) override;
+	virtual void OnEvent(Locus::Event& event) override;
 	virtual void OnImGuiRender() override;
 
 private:
-	SideA::OrthographicCameraController m_CameraController;
+	Locus::OrthographicCameraController m_CameraController;
 
 	// Temp
-	SideA::Ref<SideA::Shader> m_FlatColorShader;
-	SideA::Ref<SideA::Texture2D> m_CheckerboardTexture;
-	SideA::Ref<SideA::Texture2D> m_SpriteSheet;
-	SideA::Ref<SideA::SubTexture2D> m_Grass;
+	Locus::Ref<Locus::Shader> m_FlatColorShader;
+	Locus::Ref<Locus::Texture2D> m_CheckerboardTexture;
+	Locus::Ref<Locus::Texture2D> m_SpriteSheet;
+	Locus::Ref<Locus::SubTexture2D> m_Grass;
 
 	glm::vec4 m_SquareColor = { 0.2f, 0.5f, 0.3f, 1.0f };
 };

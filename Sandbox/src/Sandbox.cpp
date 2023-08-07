@@ -1,11 +1,11 @@
-#include <SideA.h>
+#include <Locus.h>
 // --- Entry Point ------------------------------------------------------------
-#include <SideA/Core/EntryPoint.h>
+#include <Locus/Core/EntryPoint.h>
 
 #include "Sandbox2D.h"
 
 
-namespace SideA
+namespace Locus
 {
 	class Sandbox : public Application
 	{

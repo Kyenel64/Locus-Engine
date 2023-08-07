@@ -1,24 +1,24 @@
--- SideA Dependencies
+-- Locus Dependencies
 
 VULKAN_SDK = os.getenv("VULKAN_SDK")
 
 IncludeDir = {}
-IncludeDir["GLFW"] = "%{wks.location}/SideA/vendor/GLFW/include"
-IncludeDir["Glad"] = "%{wks.location}/SideA/vendor/Glad/include"
-IncludeDir["ImGui"] = "%{wks.location}/SideA/vendor/imgui"
-IncludeDir["glm"] = "%{wks.location}/SideA/vendor/glm"
-IncludeDir["stb_image"] = "%{wks.location}/SideA/vendor/stb_image"
-IncludeDir["entt"] = "%{wks.location}/SideA/vendor/entt/include"
-IncludeDir["yaml_cpp"] = "%{wks.location}/SideA/vendor/yaml-cpp/include"
-IncludeDir["ImGuizmo"] = "%{wks.location}/SideA/vendor/ImGuizmo"
-IncludeDir["shaderc"] = "%{wks.location}/SideA/vendor/shaderc/include"
-IncludeDir["SPIRV_Cross"] = "%{wks.location}/SideA/vendor/SPIRV-Cross"
+IncludeDir["GLFW"] = "%{wks.location}/Locus/vendor/GLFW/include"
+IncludeDir["Glad"] = "%{wks.location}/Locus/vendor/Glad/include"
+IncludeDir["ImGui"] = "%{wks.location}/Locus/vendor/imgui"
+IncludeDir["glm"] = "%{wks.location}/Locus/vendor/glm"
+IncludeDir["stb_image"] = "%{wks.location}/Locus/vendor/stb_image"
+IncludeDir["entt"] = "%{wks.location}/Locus/vendor/entt/include"
+IncludeDir["yaml_cpp"] = "%{wks.location}/Locus/vendor/yaml-cpp/include"
+IncludeDir["ImGuizmo"] = "%{wks.location}/Locus/vendor/ImGuizmo"
+IncludeDir["shaderc"] = "%{wks.location}/Locus/vendor/shaderc/include"
+IncludeDir["SPIRV_Cross"] = "%{wks.location}/Locus/vendor/SPIRV-Cross"
 IncludeDir["VulkanSDK"] = "%{VULKAN_SDK}/Include"
 
 LibraryDir = {}
 
 LibraryDir["VulkanSDK"] = "%{VULKAN_SDK}/Lib"
-LibraryDir["VulkanSDK_Debug"] = "%{wks.location}/SideA/vendor/VulkanSDK/Lib"
+LibraryDir["VulkanSDK_Debug"] = "%{wks.location}/Locus/vendor/VulkanSDK/Lib"
 
 Library = {}
 Library["Vulkan"] = "%{LibraryDir.VulkanSDK}/vulkan-1.lib"

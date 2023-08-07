@@ -15,23 +15,23 @@ project "Sandbox"
 
 	includedirs
 	{
-		"%{wks.location}/SideA/vendor/spdlog/include",
-		"%{wks.location}/SideA/src",
-		"%{wks.location}/SideA/vendor",
+		"%{wks.location}/Locus/vendor/spdlog/include",
+		"%{wks.location}/Locus/src",
+		"%{wks.location}/Locus/vendor",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.entt}"
 	}
 
 	links
 	{
-		"SideA"
+		"Locus"
 	}
 
 	filter "system:windows"
 		systemversion "latest"
 
 	filter "configurations:Debug"
-		defines "SIDEA_DEBUG"
+		defines "LOCUS_DEBUG"
 		runtime "Debug" -- /MDd
 		symbols "on"
 
@@ -41,12 +41,12 @@ project "Sandbox"
 		}
 
 	filter "configurations:Release"
-		defines "SIDEA_RELEASE"
+		defines "LOCUS_RELEASE"
 		runtime "Release" -- /MD
 		optimize "on"
 
 	filter "configurations:Dist"
-		defines "SIDEA_DIST"
+		defines "LOCUS_DIST"
 		runtime "Release" -- /MD
 		optimize "on"
 		

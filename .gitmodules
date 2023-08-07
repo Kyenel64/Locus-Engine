@@ -1,22 +1,22 @@
-[submodule "SideA/vendor/glm"]
-	path = SideA/vendor/glm
+[submodule "Locus/vendor/glm"]
+	path = Locus/vendor/glm
 	url = https://github.com/g-truc/glm
 	branch = master
-[submodule "SideA/vendor/ImGui"]
-	path = SideA/vendor/ImGui
+[submodule "Locus/vendor/ImGui"]
+	path = Locus/vendor/ImGui
 	url = https://github.com/kyenel64/imgui
 	branch = docking
-[submodule "SideA/vendor/GLFW"]
-	path = SideA/vendor/GLFW
+[submodule "Locus/vendor/GLFW"]
+	path = Locus/vendor/GLFW
 	url = https://github.com/kyenel64/glfw
 	branch = master
-[submodule "SideA/vendor/spdlog"]
-	path = SideA/vendor/spdlog
+[submodule "Locus/vendor/spdlog"]
+	path = Locus/vendor/spdlog
 	url = https://github.com/kyenel64/spdlog
 	branch = v1.x
-[submodule "SideA/vendor/yaml-cpp"]
-	path = SideA/vendor/yaml-cpp
+[submodule "Locus/vendor/yaml-cpp"]
+	path = Locus/vendor/yaml-cpp
 	url = https://github.com/kyenel64/yaml-cpp
-[submodule "SideA/vendor/ImGuizmo"]
-	path = SideA/vendor/ImGuizmo
+[submodule "Locus/vendor/ImGuizmo"]
+	path = Locus/vendor/ImGuizmo
 	url = https://github.com/kyenel64/imguizmo

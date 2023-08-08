@@ -10,6 +10,7 @@ namespace Locus
 	{
 	public:
 		SubTexture2D(const Ref<Texture2D>& texture, const glm::vec2& min, const glm::vec2& max);
+		~SubTexture2D() = default;
 
 		const Ref<Texture2D> GetTexture() const { return m_Texture; }
 		const glm::vec2* GetTexCoords() const { return m_TexCoords; }

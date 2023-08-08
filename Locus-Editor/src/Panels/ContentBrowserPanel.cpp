@@ -22,8 +22,6 @@ namespace Locus
 	{
 		ImGui::Begin("Content Browser");
 
-		ImGuiStyle& style = ImGui::GetStyle();
-		style.WindowMinSize.y = 300.0f;
 
 		static ImGuiTableFlags flags = ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Resizable
 			| ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg;

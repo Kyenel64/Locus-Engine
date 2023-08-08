@@ -29,9 +29,6 @@ namespace Locus
 		// --- Scene Hierarchy Panel ------------------------------------------
 		ImGui::Begin("Scene Hierarchy");
 
-		ImGuiStyle& style = ImGui::GetStyle();
-		style.WindowMinSize.x = 400.0f;
-
 		// Display each entity
 		m_ActiveScene->m_Registry.each([&](auto entityID)
 		{
@@ -50,7 +47,7 @@ namespace Locus
 				CommandHistory::AddCommand(new CreateEntityCommand(m_ActiveScene, "Empty Entity"));
 			ImGui::EndPopup();
 		}
-
+		
 		ImGui::End();
 
 		// --- Properties Panel -----------------------------------------------
@@ -314,10 +311,7 @@ namespace Locus
 				// Background color
 				glm::vec4 backgroundColor = camera.GetBackgroundColor();
 				if (ImGui::ColorEdit4("Background Color", glm::value_ptr(backgroundColor)))
-				{
-					std::function<void(const glm::vec4&)> func = std::bind(&SceneCamera::SetBackgroundColor, &camera, std::placeholders::_1);
-					CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, backgroundColor, camera.GetBackgroundColor()));
-				}
+					CommandHistory::AddCommand(new ChangeFunctionValueCommand(LOCUS_BIND_FN(camera.SetBackgroundColor, const glm::vec4&), backgroundColor, camera.GetBackgroundColor()));
 
 				// Projection mode
 				const char* projectionTypeString[] = { "Orthographic", "Perspective" };
@@ -328,10 +322,7 @@ namespace Locus
 					{
 						bool isSelected = currentProjectionTypeString == projectionTypeString[i];
 						if (ImGui::Selectable(projectionTypeString[i], isSelected))
-						{
-							std::function<void(SceneCamera::ProjectionType)> func = std::bind(&SceneCamera::SetProjectionType, &camera, std::placeholders::_1);
-							CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, (SceneCamera::ProjectionType)i, camera.GetProjectionType()));
-						}
+							CommandHistory::AddCommand(new ChangeFunctionValueCommand(LOCUS_BIND_FN(camera.SetProjectionType, SceneCamera::ProjectionType), (SceneCamera::ProjectionType)i, camera.GetProjectionType()));
 
 						if (isSelected)
 							ImGui::SetItemDefaultFocus();
@@ -345,20 +336,17 @@ namespace Locus
 					// Size
 					float orthoSize = camera.GetOrthographicSize();
 					if (ImGui::DragFloat("Size", &orthoSize))
-					{
-						std::function<void(float)> func = std::bind(&SceneCamera::SetOrthographicSize, &camera, std::placeholders::_1);
-						CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, orthoSize, camera.GetOrthographicSize()));
-					}
+						CommandHistory::AddCommand(new ChangeFunctionValueCommand(LOCUS_BIND_FN(camera.SetOrthographicSize, float), orthoSize, camera.GetOrthographicSize()));
 
 					// Near
 					float nearClip = camera.GetOrthographicNearClip();
 					if (ImGui::DragFloat("Near Clip", &nearClip))
-						CommandHistory::AddCommand(new ChangeValueCommand(nearClip, camera.GetOrthographicNearClip()));
+						CommandHistory::AddCommand(new ChangeFunctionValueCommand(LOCUS_BIND_FN(camera.SetOrthographicNearClip, float), nearClip, camera.GetOrthographicNearClip()));
 
 					// Far
 					float farClip = camera.GetOrthographicFarClip();
 					if (ImGui::DragFloat("Far Clip", &farClip))
-						CommandHistory::AddCommand(new ChangeValueCommand(farClip, camera.GetOrthographicFarClip()));
+						CommandHistory::AddCommand(new ChangeFunctionValueCommand(LOCUS_BIND_FN(camera.SetOrthographicFarClip, float), farClip, camera.GetOrthographicFarClip()));
 
 					// Fixed Aspect Ratio
 					bool fixedAspectRatio = component.FixedAspectRatio;
@@ -372,17 +360,17 @@ namespace Locus
 					// FOV
 					float fov = glm::degrees(camera.GetPerspectiveFOV());
 					if (ImGui::DragFloat("FOV", &fov))
-						CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(fov), camera.GetPerspectiveFOV()));
+						CommandHistory::AddCommand(new ChangeFunctionValueCommand(LOCUS_BIND_FN(camera.SetPerspectiveFOV, float), glm::radians(fov), camera.GetPerspectiveFOV()));
 
 					// Near
 					float nearClip = camera.GetPerspectiveNearClip();
 					if (ImGui::DragFloat("Near Clip", &nearClip))
-						CommandHistory::AddCommand(new ChangeValueCommand(nearClip, camera.GetPerspectiveNearClip()));
+						CommandHistory::AddCommand(new ChangeFunctionValueCommand(LOCUS_BIND_FN(camera.SetPerspectiveNearClip, float), nearClip, camera.GetPerspectiveNearClip()));
 
 					// Far
 					float farClip = camera.GetPerspectiveFarClip();
 					if (ImGui::DragFloat("Far Clip", &farClip))
-						CommandHistory::AddCommand(new ChangeValueCommand(farClip, camera.GetPerspectiveFarClip()));
+						CommandHistory::AddCommand(new ChangeFunctionValueCommand(LOCUS_BIND_FN(camera.SetPerspectiveFarClip, float), farClip, camera.GetPerspectiveFarClip()));
 				}
 		});
 

@@ -7,6 +7,8 @@
 
 #include <iostream>
 
+class SceneCamera;
+
 namespace Locus
 {
 	template<typename T>

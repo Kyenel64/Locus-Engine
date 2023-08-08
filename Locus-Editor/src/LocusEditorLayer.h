@@ -33,13 +33,21 @@ namespace Locus
 		void SaveSceneAs();
 		void SaveScene();
 
+		void OnScenePlay();
+		void OnSceneStop();
+
 		void showGizmoUI();
 		void ProcessViewportDragDrop();
+		void EditorToolbar();
 
 	private:
 		std::string m_SavePath;
 
 		Ref<Scene> m_ActiveScene;
+
+		// Textures
+		Ref<Texture2D> m_PlayButton;
+		Ref<Texture2D> m_PauseButton;
 
 		// Viewport
 		Ref<Framebuffer> m_Framebuffer;
@@ -53,6 +61,9 @@ namespace Locus
 
 		// Viewport Gizmo
 		int m_GizmoType = -1;
+
+		enum class SceneState { Edit = 0, Play = 1 };
+		SceneState m_SceneState = SceneState::Edit;
 
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;

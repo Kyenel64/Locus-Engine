@@ -25,6 +25,9 @@
 
 #define LOCUS_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
 
+// Binds function into std::function. Works with member functions.
+// Pass in function and types of parameters.
+#define LOCUS_BIND_FN(func, ...) std::function([&](__VA_ARGS__ val) { func(val); })
 
 // --- Memory Management ------------------------------------------------------
 namespace Locus

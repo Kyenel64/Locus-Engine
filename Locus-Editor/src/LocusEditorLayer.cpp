@@ -1,6 +1,7 @@
 #include "LocusEditorLayer.h"
 
 #include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
 #include <glm/gtc/type_ptr.hpp>
 #include "ImGuizmo.h"
 
@@ -21,7 +22,8 @@ namespace Locus
 	LocusEditorLayer::LocusEditorLayer()
 		: Layer("LocusEditorLayer")
 	{
-
+		m_PlayButton = Texture2D::Create("resources/icons/PlayButton.png");
+		m_PauseButton = Texture2D::Create("resources/icons/PauseButton.png");
 	}
 
 	LocusEditorLayer::~LocusEditorLayer()
@@ -122,17 +124,21 @@ namespace Locus
 		// Clears
 		m_Framebuffer->ClearAttachmentInt(1, -1);
 
-		bool editor = false;
-		if (editor)
+		switch (m_SceneState)
 		{
-			RenderCommand::SetClearColor(m_EditorCamera.GetBackgroundColor());
-			RenderCommand::Clear();
-			m_ActiveScene->OnUpdateEditor(deltaTime, m_EditorCamera);
-			m_EditorCamera.OnUpdate(deltaTime); // These are camera specific update commands. Actual rendering is in scene object.
-		}
-		else
-		{
-			m_ActiveScene->OnUpdateRuntime(deltaTime);
+			case SceneState::Edit:
+			{
+				RenderCommand::SetClearColor(m_EditorCamera.GetBackgroundColor());
+				RenderCommand::Clear();
+				m_ActiveScene->OnUpdateEditor(deltaTime, m_EditorCamera);
+				m_EditorCamera.OnUpdate(deltaTime); // These are camera specific update commands. Actual rendering is in scene object.
+				break;
+			}
+			case SceneState::Play:
+			{
+				m_ActiveScene->OnUpdateRuntime(deltaTime);
+				break;
+			}
 		}
 
 		// Read pixel
@@ -144,6 +150,7 @@ namespace Locus
 		int mouseX = (int)mx;
 		int mouseY = (int)my;
 
+		m_HoveredEntity = {};
 		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
 		{
 			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY);
@@ -212,8 +219,8 @@ namespace Locus
 		// DockSpace
 		ImGuiIO& io = ImGui::GetIO();
 		ImGuiStyle& style = ImGui::GetStyle();
-		//float minWinSizeX = style.WindowMinSize.x;
-		//style.WindowMinSize.x = 400.0f;
+		style.WindowMinSize.x = 400.0f;
+		//style.WindowMinSize.y = 300.0f; // TODO: WindowMinSize only works globally. Figure out how to set for each window
 		style.WindowMenuButtonPosition = ImGuiDir_None;
 		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		{
@@ -267,7 +274,7 @@ namespace Locus
 
 		std::string name = "None";
 		if (m_HoveredEntity)
-			if (m_HoveredEntity.HasComponent<TagComponent>())
+			if (m_HoveredEntity.HasComponent<IDComponent>())
 				name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
 		ImGui::Text("Hovered Entity: %s", name.c_str());
 
@@ -276,6 +283,7 @@ namespace Locus
 		// --- Panels ---------------------------------------------------------
 		m_SceneHierarchyPanel.OnImGuiRender();
 		m_ContentBrowserPanel.OnImGuiRender();
+		EditorToolbar();
 
 		// --- Viewport window ------------------------------------------------
 		ImGuiWindowFlags viewportFlags = ImGuiWindowFlags_MenuBar;
@@ -566,5 +574,44 @@ namespace Locus
 			}
 			ImGui::EndDragDropTarget();
 		}
+	}
+
+	void LocusEditorLayer::EditorToolbar()
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 2));
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 0));
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+		auto& colors = ImGui::GetStyle().Colors;
+		const auto& buttonHovered = colors[ImGuiCol_ButtonHovered];
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(buttonHovered.x, buttonHovered.y, buttonHovered.z, 0.5f));
+		const auto& buttonActive = colors[ImGuiCol_ButtonActive];
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(buttonActive.x, buttonActive.y, buttonActive.z, 0.5f));
+
+		ImGui::Begin("##toolbar", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+		
+		float size = ImGui::GetWindowHeight() - 4.0f;
+		ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f));
+
+		uint32_t iconID = m_SceneState == SceneState::Edit ? m_PlayButton->GetRendererID() : m_PauseButton->GetRendererID();
+		if (ImGui::ImageButton((ImTextureID)iconID, ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0))
+		{
+			if (m_SceneState == SceneState::Edit)
+				OnScenePlay();
+			else if (m_SceneState == SceneState::Play)
+				OnSceneStop();
+		}
+		ImGui::PopStyleVar(2);
+		ImGui::PopStyleColor(3);
+		ImGui::End();
+	}
+
+	void LocusEditorLayer::OnScenePlay()
+	{
+		m_SceneState = SceneState::Play;
+	}
+
+	void LocusEditorLayer::OnSceneStop()
+	{
+		m_SceneState = SceneState::Edit;
 	}
 }

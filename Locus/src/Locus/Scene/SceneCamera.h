@@ -60,7 +60,7 @@ namespace Locus
 		
 		// Orthographics
 		float m_OrthographicSize = 5.0f;
-		float m_OrthographicNear = -1.0f, m_OrthographicFar = 1.0f;
+		float m_OrthographicNear = -1.0f, m_OrthographicFar = 1000.0f;
 
 		// Perspective
 		float m_PerspectiveFOV = glm::radians(45.0f);

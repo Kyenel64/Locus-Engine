@@ -13,6 +13,7 @@ IncludeDir["yaml_cpp"] = "%{wks.location}/Locus/vendor/yaml-cpp/include"
 IncludeDir["ImGuizmo"] = "%{wks.location}/Locus/vendor/ImGuizmo"
 IncludeDir["shaderc"] = "%{wks.location}/Locus/vendor/shaderc/include"
 IncludeDir["SPIRV_Cross"] = "%{wks.location}/Locus/vendor/SPIRV-Cross"
+IncludeDir["Box2D"] = "%{wks.location}/Locus/vendor/Box2D/include"
 IncludeDir["VulkanSDK"] = "%{VULKAN_SDK}/Include"
 
 LibraryDir = {}

@@ -18,3 +18,6 @@
 [submodule "Locus/vendor/ImGuizmo"]
 	path = Locus/vendor/ImGuizmo
 	url = https://github.com/kyenel64/imguizmo
+[submodule "Locus/vendor/Box2D"]
+	path = Locus/vendor/Box2D
+	url = https://github.com/kyenel64/box2d

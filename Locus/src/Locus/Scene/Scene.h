@@ -6,6 +6,8 @@
 #include "Locus/Core/UUID.h"
 #include "Locus/Renderer/EditorCamera.h"
 
+class b2World; // Forward declare here because we dont want files including Scene.h to also include b2World
+
 namespace Locus
 {
 	class Entity;
@@ -24,6 +26,9 @@ namespace Locus
 		void OnUpdateRuntime(Timestep deltaTime);
 		void OnUpdateEditor(Timestep deltaTime, EditorCamera& camera);
 
+		void OnRuntimeStart();
+		void OnRuntimeStop();
+
 		void OnViewportResize(uint32_t width, uint32_t height);
 
 		Entity GetPrimaryCameraEntity();
@@ -37,6 +42,8 @@ namespace Locus
 		std::string m_SceneName = "Untitled";
 		entt::registry m_Registry;
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
+
+		b2World* m_Box2DWorld = nullptr;
 
 		friend class Entity;
 		friend class SceneSerializer;

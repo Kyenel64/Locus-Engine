@@ -23,6 +23,7 @@ group "Dependencies"
 	include "Locus/vendor/Glad"
 	include "Locus/vendor/imgui"
 	include "Locus/vendor/yaml-cpp"
+	include "Locus/vendor/Box2D"
 
 group ""
 

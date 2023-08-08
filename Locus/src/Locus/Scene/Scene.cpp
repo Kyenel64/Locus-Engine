@@ -12,6 +12,7 @@
 #include "Locus/Renderer/RenderCommand.h"
 #include "Locus/Renderer/EditorCamera.h"
 
+#include "box2d/b2_world.h"
 
 namespace Locus
 {
@@ -125,6 +126,17 @@ namespace Locus
 			Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
 		}
 		Renderer2D::EndScene();
+	}
+
+	void Scene::OnRuntimeStart()
+	{
+		m_Box2DWorld = new b2World({ 0.0f, -9.8f });
+	}
+
+	void Scene::OnRuntimeStop()
+	{
+		delete m_Box2DWorld;
+		m_Box2DWorld = nullptr;
 	}
 
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)

@@ -20,13 +20,13 @@ namespace Locus
 
 	void ContentBrowserPanel::OnImGuiRender()
 	{
-		ImGui::Begin("Content Browser");
+		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar;
+		ImGui::Begin("Content Browser", false, windowFlags);
 
-
-		static ImGuiTableFlags flags = ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Resizable
+		static ImGuiTableFlags tableFlags = ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Resizable
 			| ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg;
 		ImGui::PushStyleColor(ImGuiCol_TableRowBg, { 0.2f, 0.2f, 0.2f, 1.0f });
-		if (ImGui::BeginTable("CBTable", 2, flags))
+		if (ImGui::BeginTable("CBTable", 2, tableFlags))
 		{
 			ImGui::TableNextRow(ImGuiTableRowFlags_None, ImGui::GetContentRegionAvail().y);
 			ImGui::TableNextColumn();
@@ -120,7 +120,6 @@ namespace Locus
 			}
 			ImGui::TableNextRow(ImGuiTableRowFlags_None, 40.0f);
 			ImGui::Text("Testing Rowfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-			//ImGui::DragFloat("Thumbnail Size", &thumbnailSize);
 
 			ImGui::EndTable();
 		}

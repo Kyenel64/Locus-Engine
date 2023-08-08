@@ -219,8 +219,8 @@ namespace Locus
 		// DockSpace
 		ImGuiIO& io = ImGui::GetIO();
 		ImGuiStyle& style = ImGui::GetStyle();
-		style.WindowMinSize.x = 400.0f;
-		//style.WindowMinSize.y = 300.0f; // TODO: WindowMinSize only works globally. Figure out how to set for each window
+		style.WindowMinSize.x = 100.0f;
+		style.WindowMinSize.y = 100.0f;
 		style.WindowMenuButtonPosition = ImGuiDir_None;
 		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		{
@@ -587,6 +587,11 @@ namespace Locus
 		const auto& buttonActive = colors[ImGuiCol_ButtonActive];
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(buttonActive.x, buttonActive.y, buttonActive.z, 0.5f));
 
+		// Sets docknode flags for individual windows
+		ImGuiWindowClass windowClass;
+		windowClass.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
+		windowClass.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoResize;
+		ImGui::SetNextWindowClass(&windowClass);
 		ImGui::Begin("##toolbar", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 		
 		float size = ImGui::GetWindowHeight() - 4.0f;

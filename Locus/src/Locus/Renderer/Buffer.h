@@ -1,7 +1,6 @@
 // --- VertexBuffer & IndexBuffer ---------------------------------------------
 // Interface classes for vertex buffer and index buffer.
 // Create function checks system and returns renderer API specific buffer class
-
 #pragma once
 
 #include "Locus/Core/Log.h"

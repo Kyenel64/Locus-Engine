@@ -1,11 +1,10 @@
 // --- OpenGLRendererAPI ------------------------------------------------------
 // OpenGL rendering class. Calls OpenGL commands
-
 #pragma once
 
-#include "Locus/Renderer/RendererAPI.h"
+#include <glad/glad.h>
 
-#include "glad/glad.h"
+#include "Locus/Renderer/RendererAPI.h"
 
 namespace Locus
 {

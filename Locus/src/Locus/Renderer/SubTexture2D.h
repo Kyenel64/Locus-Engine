@@ -1,6 +1,9 @@
+// --- SubTexture2D -----------------------------------------------------------
+// Creates a 2D texture from a texture atlas. Doesn't hold an ID since the
+//    subtexture doesnt actually hold its own texture but references the atlas.
 #pragma once
 
-#include "glm/glm.hpp"
+#include <glm/glm.hpp>
 
 #include "Locus/Renderer/Texture.h"
 

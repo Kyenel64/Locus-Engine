@@ -1,5 +1,5 @@
-#include <Locus.h>
 // --- Entry Point ------------------------------------------------------------
+#include <Locus.h>
 #include <Locus/Core/EntryPoint.h>
 
 #include "LocusEditorLayer.h"

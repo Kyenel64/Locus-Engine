@@ -1,3 +1,5 @@
+// --- Timestep ---------------------------------------------------------------
+// Holds deltaTime data
 #pragma once
 
 namespace Locus

@@ -1,7 +1,7 @@
 // --- Core -------------------------------------------------------------------
-// Includes all the macros used across Locus.
-
+// Macros and memory management
 #pragma once
+
 #include <memory>
 
 #include "Locus/Core/PlatformDetection.h"

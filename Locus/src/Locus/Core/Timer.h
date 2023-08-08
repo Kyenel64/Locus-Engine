@@ -1,3 +1,5 @@
+// --- Timer ------------------------------------------------------------------
+// Uses chrono for timing.
 #pragma once
 
 #include <chrono>

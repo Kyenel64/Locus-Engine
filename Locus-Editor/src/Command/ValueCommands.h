@@ -1,10 +1,6 @@
 #pragma once
 #include "Command.h"
 
-#include "Locus/Core/Application.h"
-#include "Locus/Core/Log.h"
-#include "Locus/Renderer/Texture.h"
-
 #include <iostream>
 
 class SceneCamera;

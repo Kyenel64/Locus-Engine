@@ -1,10 +1,12 @@
+// --- Intrumentor ------------------------------------------------------------
+// Outputs a LocusProfile-Type.log file to app directory that can be viewed 
+// on Google Chrome at: "chrome://tracing".
 #pragma once
 
 #include <string>
 #include <chrono>
 #include <algorithm>
 #include <fstream>
-
 #include <thread>
 
 namespace Locus {

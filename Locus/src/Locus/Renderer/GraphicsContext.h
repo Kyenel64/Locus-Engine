@@ -1,6 +1,5 @@
 // --- GraphicsContext --------------------------------------------------------
-// Graphics context interface. Must implement render api specific subclasses.
-
+// Graphics context interface. Must implement render api specific context.
 #pragma once
 
 namespace Locus

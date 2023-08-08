@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Locus/Events/Event.h"
 #include "Locus/Core/KeyCodes.h"
+#include "Locus/Events/Event.h"
 
 namespace Locus
 {

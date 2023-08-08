@@ -1,12 +1,11 @@
 // --- Log --------------------------------------------------------------------
 // Logging class for Locus. Uses spdlog and includes macros for logging.
-
 #pragma once
-
-#include "Locus/Core/Core.h"
 
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
+
+#include "Locus/Core/Core.h"
 
 namespace Locus
 {

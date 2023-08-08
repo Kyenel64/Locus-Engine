@@ -1,14 +1,12 @@
 // --- WindowsWindow ----------------------------------------------------------
 // Window class for Windows. Handles GLFW actions
 // Sets and calls callback functions from GLFW to the application class.
-
 #pragma once
 
-#include "Locus/Core/Window.h"
-
-#include "Locus/Renderer/GraphicsContext.h"
-
 #include <GLFW/glfw3.h>
+
+#include "Locus/Core/Window.h"
+#include "Locus/Renderer/GraphicsContext.h"
 
 namespace Locus
 {

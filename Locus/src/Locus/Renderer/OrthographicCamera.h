@@ -1,10 +1,9 @@
 // --- OrthographicCamera -----------------------------------------------------
 // Stores projection, view, and a combined ViewProjection matrix.
 // Recalculates view matrix when modifying position or rotation.
-
 #pragma once
 
-#include "glm/glm.hpp"
+#include <glm/glm.hpp>
 
 namespace Locus
 {

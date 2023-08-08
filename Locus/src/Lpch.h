@@ -1,6 +1,5 @@
 // --- tpch -------------------------------------------------------------------
 // Pre-compiled header for Locus.
-
 #pragma once
 
 #include <iostream>

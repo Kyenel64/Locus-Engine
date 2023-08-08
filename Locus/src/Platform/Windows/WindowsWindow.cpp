@@ -5,7 +5,6 @@
 #include "Locus/Events/MouseEvent.h"
 #include "Locus/Events/KeyEvent.h"
 #include "Locus/Events/Event.h"
-
 #include "Locus/Renderer/Renderer.h"
 
 namespace Locus

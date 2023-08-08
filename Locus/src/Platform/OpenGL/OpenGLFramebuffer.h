@@ -1,4 +1,7 @@
+// --- OpenGLFramebuffer ------------------------------------------------------
+// OpenGL framebuffer class.
 #pragma once
+
 #include "Locus/Renderer/Framebuffer.h"
 
 namespace Locus

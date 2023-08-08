@@ -1,11 +1,11 @@
 // --- Shader -----------------------------------------------------------------
 // Interface for shaders. Creates platform specific shader class.
-
 #pragma once
+
 #include <string>
 #include <unordered_map>
 
-#include "glm/glm.hpp"
+#include <glm/glm.hpp>
 
 namespace Locus
 {

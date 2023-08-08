@@ -2,7 +2,6 @@
 // OpenGL buffer classes. 
 // VertexBuffer has a layout to define layout for vertex array.
 // IndexBuffer has a count to keep track of number of indices.
-
 #pragma once
 
 #include "Locus/Renderer/Buffer.h"

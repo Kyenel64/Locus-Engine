@@ -1,7 +1,6 @@
 #include "Lpch.h"
 #include "ContentBrowserPanel.h"
 
-
 #include <ImGui/imgui.h>
 #include <ImGui/imgui_internal.h>
 

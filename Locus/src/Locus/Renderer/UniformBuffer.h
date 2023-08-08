@@ -1,3 +1,5 @@
+// --- UniformBuffer ----------------------------------------------------------
+// SpirV shaders instantiate uniform buffers differently than OpenGL GLSL.
 #pragma once
 
 namespace Locus

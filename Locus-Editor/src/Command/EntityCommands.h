@@ -1,13 +1,6 @@
 #pragma once
 #include "Command.h"
 
-#include "Locus/Core/Log.h"
-
-#include "Locus/Scene/Scene.h"
-#include "Locus/Scene/Components.h"
-#include "Locus/Scene/Entity.h"
-#include "Locus/Core/Application.h"
-
 namespace Locus
 {
 	struct ComponentsList

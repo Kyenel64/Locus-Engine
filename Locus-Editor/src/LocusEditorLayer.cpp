@@ -1,19 +1,13 @@
 #include "LocusEditorLayer.h"
 
-#include "imgui/imgui.h"
-#include "imgui/imgui_internal.h"
+#include <imgui/imgui.h>
+#include <imgui/imgui_internal.h>
 #include <glm/gtc/type_ptr.hpp>
-#include "ImGuizmo.h"
-
-#include "Locus/Core/Application.h"
-#include "Locus/Scene/SceneSerializer.h"
-#include "Locus/Utils/PlatformUtils.h"
-#include "Locus/Math/Math.h"
-
-#include "Command/Command.h"
-
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
+#include <ImGuizmo.h>
+
+#include "Command/Command.h"
 
 namespace Locus
 {

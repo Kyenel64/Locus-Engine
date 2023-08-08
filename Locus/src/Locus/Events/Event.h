@@ -1,12 +1,11 @@
 // --- Event ------------------------------------------------------------------
 // Contains abstract class for events and the event dispatcher.
-
 #pragma once
 
 #include <functional>
 
-#include "Locus/Debug/Instrumentor.h"
 #include "Locus/Core/Core.h"
+#include "Locus/Debug/Instrumentor.h"
 
 namespace Locus
 {

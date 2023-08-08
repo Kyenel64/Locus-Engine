@@ -1,6 +1,7 @@
 #include "Lpch.h"
 #include "Renderer.h"
-#include "Renderer2D.h"
+
+#include "Locus/Renderer/Renderer2D.h"
 
 namespace Locus
 {

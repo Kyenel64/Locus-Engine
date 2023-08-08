@@ -1,3 +1,5 @@
+// --- OpenGLUniformBuffer ----------------------------------------------------
+// OpenGL uniform buffer class.
 #pragma once
 
 #include "Locus/Renderer/UniformBuffer.h"

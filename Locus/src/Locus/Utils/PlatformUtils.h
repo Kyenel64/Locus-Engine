@@ -1,3 +1,7 @@
+// --- PlatformUtils ----------------------------------------------------------
+// Utils for platform dependent apis.
+// Implementation for this will be handled in:
+//    Platform/{Platform}/{Platform}PlatformUtils.cpp
 #pragma once
 
 #include <string>

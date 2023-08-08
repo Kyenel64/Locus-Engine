@@ -1,7 +1,6 @@
 // --- OpenGLVertexArray ------------------------------------------------------
 // Implementation for OpenGL vertex array. 
 // Holds an array of VertexBuffers and a single IndexBuffer. 
-
 #pragma once
 
 #include "Locus/Renderer/VertexArray.h"

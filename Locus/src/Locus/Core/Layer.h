@@ -1,6 +1,6 @@
 // --- Layer ------------------------------------------------------------------
-// Layer interface. Handles attached, detached, updates and events.
-
+// Locus iterates through Layers to render to the application window.
+// For example, Locus-Editor derives the Layer class.
 #pragma once
 
 #include "Locus/Core/Core.h"

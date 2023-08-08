@@ -1,3 +1,5 @@
+// --- ScriptableEntity -------------------------------------------------------
+// Scriptable entity class.
 #pragma once
 
 #include "Locus/Scene/Entity.h"

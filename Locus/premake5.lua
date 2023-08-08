@@ -49,7 +49,8 @@ project "Locus"
 		"Glad",
 		"ImGui",
 		"opengl32.lib",
-		"yaml-cpp"
+		"yaml-cpp",
+		"Box2D"
 	}
 
 	filter "system:windows"

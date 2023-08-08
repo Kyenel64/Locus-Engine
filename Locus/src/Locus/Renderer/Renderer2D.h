@@ -1,7 +1,6 @@
 // --- Renderer2D -------------------------------------------------------------
 // Renderer2D handles all 2D rendering commands including UI elements.
 // Init and Shutdown acts like a constructor/destructor for this static class.
-
 #pragma once
 
 #include "Locus/Renderer/OrthographicCamera.h"

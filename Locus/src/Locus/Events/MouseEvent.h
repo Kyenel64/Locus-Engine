@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Locus/Events/Event.h"
-#include "Locus/Core/MouseCodes.h"
 #include <sstream>
+
+#include "Locus/Core/MouseCodes.h"
+#include "Locus/Events/Event.h"
 
 namespace Locus
 {

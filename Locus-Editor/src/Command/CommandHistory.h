@@ -1,8 +1,6 @@
 #pragma once
 #include "Command.h"
 
-#include "Locus/Core/Core.h"
-
 namespace Locus
 {
 	class CommandHistory

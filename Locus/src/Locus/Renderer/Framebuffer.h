@@ -1,3 +1,5 @@
+// --- Framebuffer ------------------------------------------------------------
+// Framebuffer interface class.
 #pragma once
 
 #include <glm/glm.hpp>

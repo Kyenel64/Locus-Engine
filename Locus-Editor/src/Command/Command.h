@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Locus.h>
+
 namespace Locus
 {
 	class Command

@@ -1,9 +1,9 @@
 #include "Lpch.h"
 #include "Shader.h"
-#include "Renderer.h"
+
+#include "Locus/Renderer/Renderer.h"
 
 #include "Platform/OpenGL/OpenGLShader.h"
-
 
 namespace Locus
 {

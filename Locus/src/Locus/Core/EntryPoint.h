@@ -1,8 +1,5 @@
 // --- Entrypoint -------------------------------------------------------------
-// Contains main function. Creates a project application where the 
-// CreateApplication() is contained in the project (eg. Sandbox) application.
-// Calls the run-loop.
-
+// Entrypoint of Locus.
 #pragma once
 
 #include "Locus/Core/Application.h"

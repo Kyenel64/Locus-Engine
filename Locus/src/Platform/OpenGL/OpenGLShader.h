@@ -6,7 +6,6 @@
 
 #include "Locus/Renderer/Shader.h"
 
-// TODO: remove
 typedef unsigned int GLenum;
 
 namespace Locus

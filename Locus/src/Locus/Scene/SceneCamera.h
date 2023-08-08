@@ -1,3 +1,6 @@
+// --- SceneCamera ------------------------------------------------------------
+// Runtime camera. There can be multiple scene cameras within a scene but only
+//    one can be the primary.
 #pragma once
 
 #include "Locus/Renderer/Camera.h"

@@ -1,3 +1,5 @@
+// --- Math -------------------------------------------------------------------
+// Locus math class
 #pragma once
 
 #include <glm/glm.hpp>

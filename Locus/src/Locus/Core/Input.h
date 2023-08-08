@@ -1,13 +1,13 @@
 // --- Input ------------------------------------------------------------------
-// Input interface for input polling.
-// Input polling checks for input every frame. Events are called whenever there
-// is an event.
-
+// Application input class. The Locus-Editor also handles ImGui inputs. See if
+//    it is better to use Locus inputs for ImGui as well.
+// Implementation for this will be handled in:
+//    Platform/{Platform}/{Platform}Input.cpp
 #pragma once
 
-#include "Locus/Core/Core.h"
+#include <glm/glm.hpp>
 
-#include "glm/glm.hpp"
+#include "Locus/Core/Core.h"
 
 namespace Locus
 {

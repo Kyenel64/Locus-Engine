@@ -1,8 +1,9 @@
 #include "Lpch.h"
 #include "Locus/Core/Input.h"
 
+#include <GLFW/glfw3.h>
+
 #include "Locus/Core/Application.h"
-#include "GLFW/glfw3.h"
 
 namespace Locus
 {

@@ -1,7 +1,7 @@
 #include "Lpch.h"
 #include "RendererAPI.h"
 
-#include "Renderer.h"
+#include "Locus/Renderer/Renderer.h"
 
 #include "Platform/OpenGL/OpenGLRendererAPI.h"
 

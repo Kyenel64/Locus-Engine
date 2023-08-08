@@ -1,12 +1,11 @@
 // --- OpenGLTexture ----------------------------------------------------------
 // OpenGL specific texure class. Handles initial setup and binding.
 // 2D. 3D in the future.
-
 #pragma once
 
-#include "Locus/Renderer/Texture.h"
-
 #include <glad/glad.h>
+
+#include "Locus/Renderer/Texture.h"
 
 namespace Locus
 {

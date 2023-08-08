@@ -1,10 +1,11 @@
+// --- SceneHierarchyPanel ----------------------------------------------------
+// Scene hierarchy and entity properties panels.
 #pragma once
 
-#include "Locus/Core/Core.h"
-#include "Locus/Scene/Scene.h"
-#include "Locus/Scene/Entity.h"
+#include <glm/glm.hpp>
 
-#include "glm/glm.hpp"
+#include <Locus/Core/Core.h>
+#include <Locus.h>
 
 namespace Locus
 {

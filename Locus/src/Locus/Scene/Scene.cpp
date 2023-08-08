@@ -1,18 +1,15 @@
 #include "Lpch.h"
 #include "Scene.h"
 
-#include "Locus/Scene/Components.h"
-#include "Locus/Scene/ScriptableEntity.h"
-
-#include "Entity.h"
-
-#include "glm/glm.hpp"
+#include <glm/glm.hpp>
+#include <box2d/b2_world.h>
 
 #include "Locus/Renderer/Renderer2D.h"
 #include "Locus/Renderer/RenderCommand.h"
 #include "Locus/Renderer/EditorCamera.h"
-
-#include "box2d/b2_world.h"
+#include "Locus/Scene/Components.h"
+#include "Locus/Scene/ScriptableEntity.h"
+#include "Locus/Scene/Entity.h"
 
 namespace Locus
 {

@@ -1,10 +1,8 @@
 // -- ImGuiLayer --------------------------------------------------------------
 // ImGui layer. Displays gui. Handles ImGui events
-
 #pragma once
 
 #include "Locus/Core/Layer.h"
-
 #include "Locus/Events/ApplicationEvent.h"
 #include "Locus/Events/KeyEvent.h"
 #include "Locus/Events/MouseEvent.h"

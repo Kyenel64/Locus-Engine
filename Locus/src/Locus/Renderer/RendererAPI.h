@@ -1,9 +1,8 @@
 // --- RendererAPI ------------------------------------------------------------
 // RendererAPI interface.
-
 #pragma once
 
-#include "glm/glm.hpp"
+#include <glm/glm.hpp>
 
 #include "Locus/Renderer/VertexArray.h"
 

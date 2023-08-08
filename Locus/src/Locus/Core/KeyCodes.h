@@ -1,3 +1,5 @@
+// --- KeyCodes ---------------------------------------------------------------
+// Keycodes matches GLFW3 keycodes.
 #pragma once
 
 namespace Locus

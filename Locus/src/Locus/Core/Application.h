@@ -1,23 +1,20 @@
 // --- Application ------------------------------------------------------------
-// Main application class for the game engine.
-// Contains pointer to window class. Contains core run loop.
-// Contains a layer stack for executing layers.
+// Main program application. 
+// Handles command line arguments.
+// Keeps track of saved status.
 
 #pragma once
 
 #include "Core.h"
 
 #include "Locus/Core/Window.h"
-#include "Locus/Events/Event.h"
-
 #include "Locus/Core/LayerStack.h"
+#include "Locus/Events/Event.h"
 #include "Locus/Events/ApplicationEvent.h"
 #include "Locus/ImGui/ImGuiLayer.h"
-
 #include "Locus/Renderer/Shader.h"
 #include "Locus/Renderer/Buffer.h"
 #include "Locus/Renderer/VertexArray.h"
-
 #include "Locus/Renderer/OrthographicCamera.h"
 
 namespace Locus

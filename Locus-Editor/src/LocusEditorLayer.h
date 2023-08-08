@@ -1,11 +1,13 @@
+// --- LocusEditorLayer -------------------------------------------------------
+// Locus's editor. Uses dockspace ImGui.
 #pragma once
 
-#include "Locus.h"
+#include <filesystem>
+
+#include <Locus.h>
+
 #include "Panels/SceneHierarchyPanel.h"
 #include "Panels/ContentBrowserPanel.h"
-#include "Locus/Renderer/EditorCamera.h"
-
-#include <filesystem>
 
 namespace Locus
 {

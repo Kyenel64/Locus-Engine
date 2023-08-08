@@ -1,7 +1,6 @@
 // --- LayerStack -------------------------------------------------------------
 // Layer stack. Layers are contained in first half of stack, overlays are
 // contained in the second half.
-
 #pragma once
 
 #include "Locus/Core/Core.h"

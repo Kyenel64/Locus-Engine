@@ -1,8 +1,11 @@
+// --- ContentBrowserPanel ----------------------------------------------------
+// Content browser panel. Includes root directory view and current directory 
+//    view.
 #pragma once
 
 #include <filesystem>
 
-#include "Locus/Renderer/Texture.h"
+#include <Locus.h>
 
 namespace Locus
 {

@@ -1,14 +1,15 @@
+// --- Components -------------------------------------------------------------
+// Holds all component classes for Locus's ECS.
 #pragma once
 
-#include "Locus/Core/UUID.h"
-#include "Locus/Scene/SceneCamera.h"
-#include "Locus/Renderer/Texture.h"
-
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
+
+#include "Locus/Core/UUID.h"
+#include "Locus/Renderer/Texture.h"
+#include "Locus/Scene/SceneCamera.h"
 
 namespace Locus
 {

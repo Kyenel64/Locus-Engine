@@ -1,3 +1,5 @@
+// --- SceneSerializer --------------------------------------------------------
+// Serializes and deserializes scene to a given .locus file.
 #pragma once
 
 #include "Locus/Scene/Scene.h"

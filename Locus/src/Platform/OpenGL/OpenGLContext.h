@@ -1,8 +1,8 @@
 // --- OpenGLContext ----------------------------------------------------------
 // OpenGL rendering context. Uses glad.
 // Contains all opengl rendering code.
-
 #pragma once
+
 #include "Locus/Renderer/GraphicsContext.h"
 
 struct GLFWwindow;

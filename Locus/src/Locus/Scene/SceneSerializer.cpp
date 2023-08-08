@@ -1,12 +1,13 @@
 #include "Lpch.h"
 #include "SceneSerializer.h"
 
+#include <fstream>
+
+#define YAML_CPP_STATIC_DEFINE
+#include <yaml-cpp/yaml.h>
+
 #include "Locus/Scene/Entity.h"
 #include "Locus/Scene/Components.h"
-
-#include <fstream>
-#define YAML_CPP_STATIC_DEFINE
-#include "yaml-cpp/yaml.h"
 
 // Needed to decode and encode custom datatypes
 namespace YAML {

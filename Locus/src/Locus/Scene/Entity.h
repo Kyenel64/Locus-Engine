@@ -1,11 +1,13 @@
+// --- Entity -----------------------------------------------------------------
+// Entity class for Locus's ECS.
 #pragma once
 
+#include <entt.hpp>
+
+#include "Locus/Core/Log.h"
 #include "Locus/Core/UUID.h"
 #include "Locus/Scene/Scene.h"
-#include "Locus/Core/Log.h"
-#include "Components.h"
-
-#include "entt.hpp"
+#include "Locus/Scene/Components.h"
 
 namespace Locus
 {

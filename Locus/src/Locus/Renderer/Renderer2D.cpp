@@ -1,13 +1,13 @@
 #include "Lpch.h"
 #include "Renderer2D.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "Locus/Renderer/RenderCommand.h"
 #include "Locus/Renderer/VertexArray.h"
 #include "Locus/Renderer/Shader.h"
 #include "Locus/Renderer/UniformBuffer.h"
-
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
 
 namespace Locus
 {

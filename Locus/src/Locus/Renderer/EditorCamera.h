@@ -1,12 +1,14 @@
+// --- EditorCamera -----------------------------------------------------------
+// The editor camera is only used in the editor. 
 #pragma once
-
-#include "Locus/Renderer/Camera.h"
-#include "Locus/Core/Timestep.h"
-#include "Locus/Events/Event.h"
-#include "Locus/Events/MouseEvent.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
+
+#include "Locus/Core/Timestep.h"
+#include "Locus/Events/Event.h"
+#include "Locus/Events/MouseEvent.h"
+#include "Locus/Renderer/Camera.h"
 
 namespace Locus
 {
@@ -27,7 +29,7 @@ namespace Locus
 
 		inline void SetViewportSize(float width, float height) { m_ViewportWidth = width; m_ViewportHeight = height; CalculateProjection(); }
 
-		const glm::mat4 GetViewMatrix() const { return m_ViewMatrix; } // Note: Usually only use const& as return if the returning value is a member or static variable.
+		const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; } // Note: Usually only use const& as return if the returning value is a member or static variable.
 		glm::mat4 GetViewProjectionMatrix() const { return m_Projection * m_ViewMatrix; } // Returning by value since returning value is not member or static.
 
 		glm::vec3 GetForwardDirection() const;

@@ -8,7 +8,6 @@
 #include "Locus/Core/KeyCodes.h"
 #include "Locus/Core/MouseCodes.h"
 
-
 namespace Locus
 {
 	EditorCamera::EditorCamera(float fov, float aspectRatio, float nearClip, float farClip)

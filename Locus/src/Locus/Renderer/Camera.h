@@ -1,6 +1,8 @@
+// --- Camera -----------------------------------------------------------------
+// Base camera class. Only handles projection
 #pragma once
 
-#include "glm/glm.hpp"
+#include <glm/glm.hpp>
 
 namespace Locus
 {

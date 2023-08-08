@@ -1,3 +1,5 @@
+// --- MouseCodes -------------------------------------------------------------
+// Locus mouse button codes matches GLFW3 format
 #pragma once
 
 // From glfw3.h keycodes

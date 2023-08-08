@@ -2,7 +2,6 @@
 // Main high-level renderer class. 
 // Submit draws Vertex Arrays with given shader class.
 // Stores a SceneData struct that holds scene specific data.
-
 #pragma once
 
 #include "Locus/Renderer/RenderCommand.h"

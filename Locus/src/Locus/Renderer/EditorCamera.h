@@ -24,8 +24,8 @@ namespace Locus
 
 		const glm::vec4& GetBackgroundColor() const { return m_BackgroundColor; }
 
-		inline float GetZoom() const { return m_Zoom; }
-		inline void SetZoom(float zoom) { m_Zoom = zoom; }
+		inline float GetDistance() const { return m_Distance; }
+		inline void SetDistance(float distance) { m_Distance = distance; }
 
 		inline void SetViewportSize(float width, float height) { m_ViewportWidth = width; m_ViewportHeight = height; CalculateProjection(); }
 
@@ -59,12 +59,14 @@ namespace Locus
 		glm::vec3 m_Position = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 m_FocalPoint = { 0.0f, 0.0f, 0.0f };
 
-		float m_Zoom = 10.0f;
+		float m_Distance = 10.0f;
 		float m_Pitch = 0.0f, m_Yaw = 0.0f;
 
 		float m_ViewportWidth = 1920.0f, m_ViewportHeight = 1080.0f;
 		glm::vec2 m_InitialMousePosition = { 0.0f, 0.0f };
 
 		glm::vec4 m_BackgroundColor = { 0.25f, 0.5f, 0.5f, 1.0f };
+
+		float m_MouseRotateSpeed = 10.0f, m_MousePanSpeed = 10.0f, m_MouseScrollSpeed = 10.0f;
 	};
 }

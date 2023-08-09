@@ -592,7 +592,7 @@ namespace Locus
 		ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f));
 
 		uint32_t iconID = m_SceneState == SceneState::Edit ? m_PlayButton->GetRendererID() : m_PauseButton->GetRendererID();
-		if (ImGui::ImageButton((ImTextureID)iconID, ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0))
+		if (ImGui::ImageButton((ImTextureID)(uint64_t)iconID, ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0))
 		{
 			if (m_SceneState == SceneState::Edit)
 				OnScenePlay();

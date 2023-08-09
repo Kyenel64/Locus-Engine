@@ -60,23 +60,23 @@ namespace Locus
 	void EditorCamera::MouseRotate(const glm::vec2& delta)
 	{
 		float yawSign = GetUpDirection().y < 0 ? -1.0f : 1.0f;
-		m_Yaw += yawSign * delta.x * 0.01f; // TODO:: better speed
-		m_Pitch += delta.y * 0.01f;
+		m_Yaw += yawSign * delta.x * m_MouseRotateSpeed * 0.0005f; // TODO:: better speed
+		m_Pitch += delta.y * m_MouseRotateSpeed * 0.0005f;
 	}
 
 	void EditorCamera::MousePan(const glm::vec2& delta)
 	{
-		m_FocalPoint += -GetRightDirection() * delta.x * 0.01f; // TODO: better speed
-		m_FocalPoint += GetUpDirection() * delta.y * 0.01f;
+		m_FocalPoint += -GetRightDirection() * delta.x * m_MousePanSpeed * m_Distance * 0.00005f; // TODO: better speed
+		m_FocalPoint += GetUpDirection() * delta.y * m_MousePanSpeed * m_Distance * 0.00005f;
 	}
 
 	void EditorCamera::MouseZoom(float delta)
 	{
-		m_Zoom -= delta * 5.0f;
-		if (m_Zoom < 0.3f)
+		m_Distance -= delta * m_Distance;
+		if (m_Distance < 0.3f)
 		{
 			//m_FocalPoint += GetForwardDirection();
-			m_Zoom = 0.3f;
+			m_Distance = 0.3f;
 		}
 	}
 
@@ -110,7 +110,6 @@ namespace Locus
 
 	glm::vec3 EditorCamera::CalculatePosition() const
 	{
-		return m_FocalPoint - GetForwardDirection() * m_Zoom;
+		return m_FocalPoint - GetForwardDirection() * m_Distance;
 	}
-
 }

@@ -90,7 +90,7 @@ namespace Locus
 				Ref<Texture2D> icon = entry.is_directory() ? m_FolderIcon : m_FileIcon;
 				ImGui::PushID(filenameString.c_str());
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-				ImGui::ImageButton((ImTextureID)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+				ImGui::ImageButton((ImTextureID)(uint64_t)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
 
 				if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
 				{

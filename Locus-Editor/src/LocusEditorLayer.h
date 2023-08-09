@@ -49,7 +49,7 @@ namespace Locus
 
 		// Textures
 		Ref<Texture2D> m_PlayButton;
-		Ref<Texture2D> m_PauseButton;
+		Ref<Texture2D> m_StopButton;
 
 		// Viewport
 		Ref<Framebuffer> m_Framebuffer;

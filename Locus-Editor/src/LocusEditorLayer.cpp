@@ -17,7 +17,7 @@ namespace Locus
 		: Layer("LocusEditorLayer")
 	{
 		m_PlayButton = Texture2D::Create("resources/icons/PlayButton.png");
-		m_PauseButton = Texture2D::Create("resources/icons/PauseButton.png");
+		m_StopButton = Texture2D::Create("resources/icons/StopButton.png");
 	}
 
 	LocusEditorLayer::~LocusEditorLayer()
@@ -591,7 +591,7 @@ namespace Locus
 		float size = ImGui::GetWindowHeight() - 4.0f;
 		ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f));
 
-		uint32_t iconID = m_SceneState == SceneState::Edit ? m_PlayButton->GetRendererID() : m_PauseButton->GetRendererID();
+		uint32_t iconID = m_SceneState == SceneState::Edit ? m_PlayButton->GetRendererID() : m_StopButton->GetRendererID();
 		if (ImGui::ImageButton((ImTextureID)(uint64_t)iconID, ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0))
 		{
 			if (m_SceneState == SceneState::Edit)

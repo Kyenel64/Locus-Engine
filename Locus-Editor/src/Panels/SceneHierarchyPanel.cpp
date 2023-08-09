@@ -78,6 +78,24 @@ namespace Locus
 					ImGui::CloseCurrentPopup();
 				}
 
+				if (ImGui::MenuItem("RigidBody2D"))
+				{
+					if (!m_SelectedEntity.HasComponent<RigidBody2DComponent>())
+						CommandHistory::AddCommand(new AddComponentCommand<RigidBody2DComponent>(m_SelectedEntity));
+					else
+						LOCUS_CORE_WARN("This entity already has a RigidBody2D Component");
+					ImGui::CloseCurrentPopup();
+				}
+
+				if (ImGui::MenuItem("BoxCollider2D"))
+				{
+					if (!m_SelectedEntity.HasComponent<BoxCollider2DComponent>())
+						CommandHistory::AddCommand(new AddComponentCommand<BoxCollider2DComponent>(m_SelectedEntity));
+					else
+						LOCUS_CORE_WARN("This entity already has a BoxCollider2D Component");
+					ImGui::CloseCurrentPopup();
+				}
+
 				ImGui::EndPopup();
 			}
 		}
@@ -395,7 +413,56 @@ namespace Locus
 				}
 
 				// Texture Tiling
-				ImGui::DragFloat("Tiling", &component.TilingFactor);
+				float tilingFactor = component.TilingFactor;
+				if (ImGui::DragFloat("Tiling", &tilingFactor))
+					CommandHistory::AddCommand(new ChangeValueCommand(tilingFactor, component.TilingFactor));
+
+			});
+
+		// --- RigidBody2D Component ------------------------------------------
+		DrawComponentUI<RigidBody2DComponent>("RigidBody2D", entity, [this](auto& component)
+			{
+				// Body type
+				const char* RigidBodyTypeString[] = { "Static", "Dynamic", "Kinematic" };
+				const char* currentRigidBodyTypeString = RigidBodyTypeString[(int)component.BodyType];
+				if (ImGui::BeginCombo("Body Type", currentRigidBodyTypeString))
+				{
+					for (int i = 0; i < 2; i++)
+					{
+						bool isSelected = currentRigidBodyTypeString == RigidBodyTypeString[i];
+						if (ImGui::Selectable(RigidBodyTypeString[i], isSelected))
+							CommandHistory::AddCommand(new ChangeValueCommand((RigidBody2DComponent::RigidBody2DType)i, component.BodyType));
+
+						if (isSelected)
+							ImGui::SetItemDefaultFocus();
+					}
+					ImGui::EndCombo();
+				}
+
+				// Mass
+				float mass = component.Mass;
+				if (ImGui::DragFloat("Mass", &mass))
+					CommandHistory::AddCommand(new ChangeValueCommand(mass, component.Mass));
+
+				// Linear Drag
+				float linearDrag = component.LinearDrag;
+				if (ImGui::DragFloat("Linear Drag", &linearDrag))
+					CommandHistory::AddCommand(new ChangeValueCommand(linearDrag, component.LinearDrag));
+
+				// Angular Drag
+				float angularDrag = component.AngularDrag;
+				if (ImGui::DragFloat("Angular Drag", &angularDrag))
+					CommandHistory::AddCommand(new ChangeValueCommand(angularDrag, component.AngularDrag));
+
+				// Gravity Scale
+				float gravityScale = component.GravityScale;
+				if (ImGui::DragFloat("Gravity Scale", &gravityScale))
+					CommandHistory::AddCommand(new ChangeValueCommand(gravityScale, component.GravityScale));
+
+				// Fixed Rotation
+				bool fixedRotation = component.FixedRotation;
+				if (ImGui::Checkbox("Fixed Rotation", &fixedRotation))
+					CommandHistory::AddCommand(new ChangeValueCommand(fixedRotation, component.FixedRotation));
 			});
 	}	
 }

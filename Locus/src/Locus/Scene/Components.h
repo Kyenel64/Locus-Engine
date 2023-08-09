@@ -97,6 +97,41 @@ namespace Locus
 		CameraComponent(const CameraComponent&) = default;
 	};
 
+	struct RigidBody2DComponent
+	{
+		enum class RigidBody2DType { Static = 0, Dynamic = 1, Kinematic = 2};
+		RigidBody2DType BodyType = RigidBody2DType::Static;
+
+		// Fixture
+		float Mass = 1.0f; // Density
+		float Friction = 0.5f; // 0 - 1
+		float Restitution = 0.0f; // 0 - 1
+		float RestitutionThreshold = 0.5f;
+
+		// Body
+		float LinearDrag = 1.0f;
+		float AngularDrag = 0.05f;
+		float GravityScale = 1.0f;
+		bool FixedRotation = false;
+
+		void* RuntimeBody = nullptr;
+
+		RigidBody2DComponent() = default;
+		RigidBody2DComponent(const RigidBody2DComponent&) = default;
+	};
+
+	struct BoxCollider2DComponent
+	{
+		// Polygon shape
+		glm::vec2 Offset = { 0.0f, 0.0f };
+		glm::vec2 Size = { 0.5f, 0.5f };
+
+		void* RuntimeFixture = nullptr;
+
+		BoxCollider2DComponent() = default;
+		BoxCollider2DComponent(const BoxCollider2DComponent&) = default;
+	};
+
 	class ScriptableEntity;
 
 	struct NativeScriptComponent

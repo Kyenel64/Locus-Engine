@@ -3,6 +3,9 @@
 
 #include <glm/glm.hpp>
 #include <box2d/b2_world.h>
+#include <box2d/b2_body.h>
+#include <box2d/b2_polygon_shape.h>
+#include <box2d/b2_fixture.h>
 
 #include "Locus/Renderer/Renderer2D.h"
 #include "Locus/Renderer/RenderCommand.h"
@@ -13,6 +16,18 @@
 
 namespace Locus
 {
+	static b2BodyType RigidBody2DTypeToBox2DType(RigidBody2DComponent::RigidBody2DType bodyType)
+	{
+		switch (bodyType)
+		{
+		case RigidBody2DComponent::RigidBody2DType::Static: return b2_staticBody;
+		case RigidBody2DComponent::RigidBody2DType::Dynamic: return b2_dynamicBody;
+		case RigidBody2DComponent::RigidBody2DType::Kinematic: return b2_kinematicBody;
+		}
+
+		LOCUS_CORE_ASSERT(false, "Unknown RigidBody2DType");
+		return b2_staticBody;
+	}
 
 	Scene::Scene()
 	{
@@ -71,7 +86,25 @@ namespace Locus
 			}
 		}
 
-		// --- Rendering 2D ------------------------------------------------------
+		// --- Physics --------------------------------------------------------
+
+		m_Box2DWorld->Step(deltaTime, 6, 2); // TODO: paremeterize
+
+		auto view = m_Registry.view<RigidBody2DComponent>();
+		for (auto e : view)
+		{
+			Entity entity = Entity(e, this);
+			auto& transform = entity.GetComponent<TransformComponent>();
+			auto& rb2d = entity.GetComponent<RigidBody2DComponent>();
+			
+			b2Body* body = (b2Body*)rb2d.RuntimeBody;
+			const b2Vec2& position = body->GetPosition();
+			transform.Translation.x = position.x;
+			transform.Translation.y = position.y;
+			transform.SetRotationEuler({ 0, 0, body->GetAngle()});
+		}
+
+		// --- Rendering 2D ---------------------------------------------------
 		// Find first main camera
 		SceneCamera* mainCamera = nullptr; // TODO: Switched Camera to SceneCamera. Change back if problems
 		glm::mat4 cameraTransform;
@@ -128,6 +161,50 @@ namespace Locus
 	void Scene::OnRuntimeStart()
 	{
 		m_Box2DWorld = new b2World({ 0.0f, -9.8f });
+
+		auto view = m_Registry.view<RigidBody2DComponent>();
+		for (auto e : view)
+		{
+			Entity entity = Entity(e, this);
+			auto& transform = entity.GetComponent<TransformComponent>();
+			auto& rb2D = entity.GetComponent<RigidBody2DComponent>();
+
+			// Body
+			b2BodyDef bodyDef;
+			bodyDef.type = RigidBody2DTypeToBox2DType(rb2D.BodyType);
+			bodyDef.position.Set(transform.Translation.x, transform.Translation.y);
+			bodyDef.angle = transform.GetRotationEuler().z;
+			bodyDef.linearDamping = rb2D.LinearDrag;
+			bodyDef.angularDamping = rb2D.AngularDrag;
+			bodyDef.fixedRotation = rb2D.FixedRotation;
+			bodyDef.gravityScale = rb2D.GravityScale;
+			b2Body* entityBody = m_Box2DWorld->CreateBody(&bodyDef);
+			rb2D.RuntimeBody = entityBody;
+
+			b2FixtureDef fixtureDef;
+			fixtureDef.density = rb2D.Mass;
+			fixtureDef.friction = rb2D.Friction;
+			fixtureDef.restitution = rb2D.Restitution;
+			fixtureDef.restitutionThreshold = rb2D.RestitutionThreshold;
+
+			// Box Collider
+			b2PolygonShape box;
+			b2Vec2 size = { transform.Scale.x, transform.Scale.y };
+			b2Vec2 offset = { 0.0f, 0.0f };
+			float angle = 0.0f;
+			if (entity.HasComponent<BoxCollider2DComponent>())
+			{
+				auto& b2D = entity.GetComponent<BoxCollider2DComponent>();
+
+				size.x = b2D.Size.x;
+				size.y = b2D.Size.y;
+				offset.x = b2D.Offset.x;
+				offset.y = b2D.Offset.y;
+			}
+			box.SetAsBox(size.x, size.y, offset, angle);
+			fixtureDef.shape = &box;
+			entityBody->CreateFixture(&fixtureDef);
+		}
 	}
 
 	void Scene::OnRuntimeStop()
@@ -198,6 +275,18 @@ namespace Locus
 	{
 		if (m_ViewportWidth > 0 && m_ViewportHeight > 0)
 			component.Camera.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
+	}
+
+	template<>
+	void Scene::OnComponentAdded<RigidBody2DComponent>(Entity entity, RigidBody2DComponent& component)
+	{
+
+	}
+
+	template<>
+	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& component)
+	{
+
 	}
 
 	template<>

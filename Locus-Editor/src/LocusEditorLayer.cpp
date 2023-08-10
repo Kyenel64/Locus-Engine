@@ -111,7 +111,6 @@ namespace Locus
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 
-		// --- Render ---------------------------------------------------------
 		Renderer2D::ResetStats();
 		m_Framebuffer->Bind();
 		
@@ -152,9 +151,14 @@ namespace Locus
 		}
 		m_SelectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
 
+		if (m_SelectedEntity == Entity::Null)
+			ImGuizmo::Enable(false);
+		else
+			ImGuizmo::Enable(true);
 		
 		m_Framebuffer->Unbind();
-		// --- Render End -----------------------------------------------------
+
+
 		Renderer2D::StatsEndFrame();
 	}
 
@@ -221,7 +225,6 @@ namespace Locus
 			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
 			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 		}
-		//style.WindowMinSize.x = minWinSizeX;
 
 		// --- Menu Bar -------------------------------------------------------
 		if (ImGui::BeginMenuBar())
@@ -305,7 +308,7 @@ namespace Locus
 		m_ViewportFocused = ImGui::IsWindowFocused();
 
 		ProcessViewportDragDrop();
-		
+
 		// --- viewport gizmo ---
 		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
 		if (selectedEntity && m_GizmoType != -1)
@@ -569,6 +572,7 @@ namespace Locus
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SCENE_ITEM_PATH"))
 			{
+				OnSceneStop();
 				const wchar_t* path = (const wchar_t*)payload->Data;
 				OpenScene(std::filesystem::path(g_ProjectPath) / path);
 			}
@@ -612,13 +616,13 @@ namespace Locus
 
 	void LocusEditorLayer::OnScenePlay()
 	{
-		m_ActiveScene->OnRuntimeStart();
 		m_SceneState = SceneState::Play;
+		m_ActiveScene->OnRuntimeStart();
 	}
 
 	void LocusEditorLayer::OnSceneStop()
 	{
-		m_ActiveScene->OnRuntimeStop();
 		m_SceneState = SceneState::Edit;
+		m_ActiveScene->OnRuntimeStop();
 	}
 }

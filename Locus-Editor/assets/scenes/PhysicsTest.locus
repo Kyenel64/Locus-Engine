@@ -4,8 +4,8 @@ Entities:
     TagComponent:
       Tag: Box
     TransformComponent:
-      Translation: [2.38867415e-05, 3.96000004, 0]
-      Rotation: [0, 0, 4.36895711e-08]
+      Translation: [2.83163081e-05, 3.6099999, 0]
+      Rotation: [0, 0, 4.40595862e-08]
       Scale: [1, 1, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
@@ -31,7 +31,7 @@ Entities:
     TransformComponent:
       Translation: [0, 0, 0]
       Rotation: [0, 0, 0]
-      Scale: [13.6000004, 0.699999988, 1]
+      Scale: [13.6000004, 1, 1]
     SpriteRendererComponent:
       Color: [0.494661927, 0.49162358, 0.32390672, 1]
       TexturePath: ""

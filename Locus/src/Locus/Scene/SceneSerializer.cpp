@@ -13,6 +13,29 @@
 namespace YAML {
 
 	template<>
+	struct convert<glm::vec2>
+	{
+		static Node encode(const glm::vec2& rhs)
+		{
+			Node node;
+			node.push_back(rhs.x);
+			node.push_back(rhs.y);
+			node.SetStyle(EmitterStyle::Flow);
+			return node;
+		}
+
+		static bool decode(const Node& node, glm::vec2& rhs)
+		{
+			if (!node.IsSequence() || node.size() != 2)
+				return false;
+
+			rhs.x = node[0].as<float>();
+			rhs.y = node[1].as<float>();
+			return true;
+		}
+	};
+
+	template<>
 	struct convert<glm::vec3>
 	{
 		static Node encode(const glm::vec3& rhs)
@@ -68,6 +91,13 @@ namespace YAML {
 
 namespace Locus
 {
+	YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec2& v)
+	{
+		out << YAML::Flow;
+		out << YAML::BeginSeq << v.x << v.y << YAML::EndSeq;
+		return out;
+	}
+
 	YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec3& v)
 	{
 		out << YAML::Flow;
@@ -157,6 +187,38 @@ namespace Locus
 			out << YAML::EndMap; // End Camera Component
 		}
 
+		// --- RigidBody2D Component ------------------------------------------
+		if (entity.HasComponent<RigidBody2DComponent>())
+		{
+			out << YAML::Key << "RigidBody2DComponent";
+			auto& rb2D = entity.GetComponent<RigidBody2DComponent>();
+
+			out << YAML::BeginMap; // RigidBody2D Component
+			out << YAML::Key << "BodyType" << YAML::Value << (int)rb2D.BodyType;
+			out << YAML::Key << "Mass" << YAML::Value << rb2D.Mass;
+			out << YAML::Key << "GravityScale" << YAML::Value << rb2D.GravityScale;
+			out << YAML::Key << "LinearDrag" << YAML::Value << rb2D.LinearDrag;
+			out << YAML::Key << "AngularDrag" << YAML::Value << rb2D.AngularDrag;
+			out << YAML::Key << "FixedRotation" << YAML::Value << rb2D.FixedRotation;
+			out << YAML::Key << "Friction" << YAML::Value << rb2D.Friction;
+			out << YAML::Key << "Restitution" << YAML::Value << rb2D.Restitution;
+			out << YAML::Key << "RestitutionThreshold" << YAML::Value << rb2D.RestitutionThreshold;
+			out << YAML::EndMap; // End RigidBody2D Component
+		}
+
+		// --- BoxCollider2D Component ----------------------------------------
+		if (entity.HasComponent<BoxCollider2DComponent>())
+		{
+			out << YAML::Key << "BoxCollider2DComponent";
+			auto& bc2D = entity.GetComponent<BoxCollider2DComponent>();
+
+			out << YAML::BeginMap; // BoxCollider2D Component
+			out << YAML::Key << "CollisionLayer" << YAML::Value << bc2D.CollisionLayer;
+			out << YAML::Key << "Offset" << YAML::Value << bc2D.Offset;
+			out << YAML::Key << "Size" << YAML::Value << bc2D.Size;
+			out << YAML::EndMap; // BoxCollider2D Component
+		}
+
 		out << YAML::EndMap; // End Entity
 	}
 
@@ -239,7 +301,7 @@ namespace Locus
 					src.TilingFactor = spriteRendererComponent["TilingFactor"].as<float>();
 				}
 
-				// --- Camera Component ------------------------------
+				// --- Camera Component ---------------------------------------
 				auto cameraComponent = entity["CameraComponent"];
 				if (cameraComponent)
 				{
@@ -257,6 +319,32 @@ namespace Locus
 
 					cc.Primary = cameraComponent["Primary"].as<bool>();
 					cc.FixedAspectRatio = cameraComponent["FixedAspectRatio"].as<bool>();
+				}
+
+				// --- RigidBody2D Component ----------------------------------
+				auto rigidBody2DComponent = entity["RigidBody2DComponent"];
+				if (rigidBody2DComponent)
+				{
+					auto& rb2D = deserializedEntity.AddComponent<RigidBody2DComponent>();
+					rb2D.BodyType = (RigidBody2DComponent::RigidBody2DType)rigidBody2DComponent["BodyType"].as<int>();
+					rb2D.Mass = rigidBody2DComponent["Mass"].as<float>();
+					rb2D.GravityScale = rigidBody2DComponent["GravityScale"].as<float>();
+					rb2D.LinearDrag = rigidBody2DComponent["LinearDrag"].as<float>();
+					rb2D.AngularDrag = rigidBody2DComponent["AngularDrag"].as<float>();
+					rb2D.FixedRotation = rigidBody2DComponent["FixedRotation"].as<bool>();
+					rb2D.Friction = rigidBody2DComponent["Friction"].as<float>();
+					rb2D.Restitution = rigidBody2DComponent["Restitution"].as<float>();
+					rb2D.RestitutionThreshold = rigidBody2DComponent["RestitutionThreshold"].as<float>();
+				}
+
+				// --- BoxCollider2D Component --------------------------------
+				auto boxCollider2DComponent = entity["BoxCollider2DComponent"];
+				if (boxCollider2DComponent)
+				{
+					auto& bc2D = deserializedEntity.AddComponent<BoxCollider2DComponent>();
+					bc2D.CollisionLayer = boxCollider2DComponent["CollisionLayer"].as<int>();
+					bc2D.Offset = boxCollider2DComponent["Offset"].as<glm::vec2>();
+					bc2D.Size = boxCollider2DComponent["Size"].as<glm::vec2>();
 				}
 			}
 		}

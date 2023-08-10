@@ -272,6 +272,12 @@ namespace Locus
 				name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
 		ImGui::Text("Hovered Entity: %s", name.c_str());
 
+		std::string collisionLayer = "None";
+		if (m_HoveredEntity)
+			if (m_HoveredEntity.HasComponent<BoxCollider2DComponent>())
+				collisionLayer = std::to_string(m_HoveredEntity.GetComponent<BoxCollider2DComponent>().CollisionLayer);
+		ImGui::Text("Hovered Collision Layer: %s", collisionLayer.c_str());
+
 		ImGui::End();
 
 		// --- Panels ---------------------------------------------------------

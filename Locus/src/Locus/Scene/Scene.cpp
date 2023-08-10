@@ -180,28 +180,33 @@ namespace Locus
 			bodyDef.gravityScale = rb2D.GravityScale;
 			b2Body* entityBody = m_Box2DWorld->CreateBody(&bodyDef);
 			rb2D.RuntimeBody = entityBody;
+			b2MassData massData;
+			massData.mass = rb2D.Mass;
+			entityBody->SetMassData(&massData);
 
 			b2FixtureDef fixtureDef;
 			fixtureDef.density = rb2D.Mass;
 			fixtureDef.friction = rb2D.Friction;
 			fixtureDef.restitution = rb2D.Restitution;
 			fixtureDef.restitutionThreshold = rb2D.RestitutionThreshold;
+			fixtureDef.filter.categoryBits = 0;
 
 			// Box Collider
 			b2PolygonShape box;
-			b2Vec2 size = { transform.Scale.x, transform.Scale.y };
+			b2Vec2 size = { transform.Scale.x, transform.Scale.y};
 			b2Vec2 offset = { 0.0f, 0.0f };
 			float angle = 0.0f;
-			if (entity.HasComponent<BoxCollider2DComponent>())
+			if (entity.HasComponent<BoxCollider2DComponent>()) // TODO: Reformat this
 			{
 				auto& b2D = entity.GetComponent<BoxCollider2DComponent>();
 
-				size.x = b2D.Size.x;
-				size.y = b2D.Size.y;
+				fixtureDef.filter.categoryBits = b2D.CollisionLayer;
+				size.x = b2D.Size.x * size.x;
+				size.y = b2D.Size.y * size.y;
 				offset.x = b2D.Offset.x;
 				offset.y = b2D.Offset.y;
 			}
-			box.SetAsBox(size.x, size.y, offset, angle);
+			box.SetAsBox(size.x / 2, size.y / 2, offset, angle);
 			fixtureDef.shape = &box;
 			entityBody->CreateFixture(&fixtureDef);
 		}

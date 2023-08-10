@@ -100,19 +100,19 @@ namespace Locus
 	struct RigidBody2DComponent
 	{
 		enum class RigidBody2DType { Static = 0, Dynamic = 1, Kinematic = 2};
-		RigidBody2DType BodyType = RigidBody2DType::Static;
-
-		// Fixture
-		float Mass = 1.0f; // Density
-		float Friction = 0.5f; // 0 - 1
-		float Restitution = 0.0f; // 0 - 1
-		float RestitutionThreshold = 0.5f;
+		RigidBody2DType BodyType = RigidBody2DType::Dynamic;
 
 		// Body
+		float Mass = 1.0f;
+		float GravityScale = 1.0f;
 		float LinearDrag = 1.0f;
 		float AngularDrag = 0.05f;
-		float GravityScale = 1.0f;
 		bool FixedRotation = false;
+
+		// Fixture. TODO: Put in physics material
+		float Friction = 0.2f; // 0 - 1
+		float Restitution = 0.0f; // 0 - 1
+		float RestitutionThreshold = 1.0f;
 
 		void* RuntimeBody = nullptr;
 
@@ -123,8 +123,9 @@ namespace Locus
 	struct BoxCollider2DComponent
 	{
 		// Polygon shape
+		uint16_t CollisionLayer = 1;
 		glm::vec2 Offset = { 0.0f, 0.0f };
-		glm::vec2 Size = { 0.5f, 0.5f };
+		glm::vec2 Size = { 1.0f, 1.0f };
 
 		void* RuntimeFixture = nullptr;
 

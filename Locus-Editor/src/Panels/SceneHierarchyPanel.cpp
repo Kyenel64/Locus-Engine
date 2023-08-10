@@ -78,7 +78,7 @@ namespace Locus
 					ImGui::CloseCurrentPopup();
 				}
 
-				if (ImGui::MenuItem("RigidBody2D"))
+				if (ImGui::MenuItem("Rigidbody 2D"))
 				{
 					if (!m_SelectedEntity.HasComponent<RigidBody2DComponent>())
 						CommandHistory::AddCommand(new AddComponentCommand<RigidBody2DComponent>(m_SelectedEntity));
@@ -87,7 +87,7 @@ namespace Locus
 					ImGui::CloseCurrentPopup();
 				}
 
-				if (ImGui::MenuItem("BoxCollider2D"))
+				if (ImGui::MenuItem("Box Collider 2D"))
 				{
 					if (!m_SelectedEntity.HasComponent<BoxCollider2DComponent>())
 						CommandHistory::AddCommand(new AddComponentCommand<BoxCollider2DComponent>(m_SelectedEntity));
@@ -420,7 +420,7 @@ namespace Locus
 			});
 
 		// --- RigidBody2D Component ------------------------------------------
-		DrawComponentUI<RigidBody2DComponent>("RigidBody2D", entity, [this](auto& component)
+		DrawComponentUI<RigidBody2DComponent>("Rigidbody 2D", entity, [this](auto& component)
 			{
 				// Body type
 				const char* RigidBodyTypeString[] = { "Static", "Dynamic", "Kinematic" };
@@ -444,6 +444,11 @@ namespace Locus
 				if (ImGui::DragFloat("Mass", &mass))
 					CommandHistory::AddCommand(new ChangeValueCommand(mass, component.Mass));
 
+				// Gravity Scale
+				float gravityScale = component.GravityScale;
+				if (ImGui::DragFloat("Gravity Scale", &gravityScale))
+					CommandHistory::AddCommand(new ChangeValueCommand(gravityScale, component.GravityScale));
+
 				// Linear Drag
 				float linearDrag = component.LinearDrag;
 				if (ImGui::DragFloat("Linear Drag", &linearDrag))
@@ -454,15 +459,49 @@ namespace Locus
 				if (ImGui::DragFloat("Angular Drag", &angularDrag))
 					CommandHistory::AddCommand(new ChangeValueCommand(angularDrag, component.AngularDrag));
 
-				// Gravity Scale
-				float gravityScale = component.GravityScale;
-				if (ImGui::DragFloat("Gravity Scale", &gravityScale))
-					CommandHistory::AddCommand(new ChangeValueCommand(gravityScale, component.GravityScale));
-
 				// Fixed Rotation
 				bool fixedRotation = component.FixedRotation;
 				if (ImGui::Checkbox("Fixed Rotation", &fixedRotation))
 					CommandHistory::AddCommand(new ChangeValueCommand(fixedRotation, component.FixedRotation));
+
+				// Friction
+				float friction = component.Friction;
+				if (ImGui::DragFloat("Friction", &friction))
+					CommandHistory::AddCommand(new ChangeValueCommand(friction, component.Friction));
+
+				// Restitution
+				float restitution = component.Restitution;
+				if (ImGui::DragFloat("Restitution", &restitution))
+					CommandHistory::AddCommand(new ChangeValueCommand(restitution, component.Restitution));
+
+				// Restitution Threshold
+				float restitutionThreshold = component.RestitutionThreshold;
+				if (ImGui::DragFloat("Restitution Threshold", &restitutionThreshold))
+					CommandHistory::AddCommand(new ChangeValueCommand(restitutionThreshold, component.RestitutionThreshold));
+			});
+
+		DrawComponentUI<BoxCollider2DComponent>("Box Collider 2D", entity, [this](auto& component)
+			{
+				// Collision Layer
+				int collisionLayer = component.CollisionLayer;
+				if (ImGui::DragInt("Collision Layer", &collisionLayer, 1.0f, 1, 16))
+					CommandHistory::AddCommand(new ChangeValueCommand((uint16_t)collisionLayer, component.CollisionLayer));
+
+				// Size
+				float size[2] = { component.Size.x, component.Size.y };
+				if (ImGui::DragFloat2("Size", (float*)&size, 0.1f))
+				{
+					glm::vec2 sizeVec = { size[0], size[1] };
+					CommandHistory::AddCommand(new ChangeValueCommand(sizeVec, component.Size));
+				}
+
+				// Offset
+				float offset[2] = { component.Offset.x, component.Offset.y };
+				if (ImGui::DragFloat2("Offset", (float*)&offset, 0.1f))
+				{
+					glm::vec2 offsetVec = { offset[0], offset[1] };
+					CommandHistory::AddCommand(new ChangeValueCommand(offsetVec, component.Offset));
+				}
 			});
 	}	
 }

@@ -29,15 +29,6 @@ namespace Locus
 		return b2_staticBody;
 	}
 
-	Scene::Scene()
-	{
-	}
-
-	Scene::~Scene()
-	{
-		LOCUS_CORE_INFO("Scene Destroyed");
-	}
-
 	Ref<Scene> Scene::Copy(Ref<Scene> other)
 	{
 		Ref<Scene> newScene = CreateRef<Scene>();

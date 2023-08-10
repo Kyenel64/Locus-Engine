@@ -28,6 +28,7 @@ namespace Locus
 		// --- Scene Hierarchy Panel ------------------------------------------
 		ImGui::Begin("Scene Hierarchy");
 
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 1.0f });
 		if (m_ActiveScene)
 		{
 			// Display each entity
@@ -35,6 +36,16 @@ namespace Locus
 				{
 					Entity entity(entityID, m_ActiveScene.get());
 					DrawEntityNode(entity);
+
+					ImGui::InvisibleButton("##Spacing", { -1.0f, 3.0f });
+					if (ImGui::BeginDragDropTarget())
+					{
+						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_NODE"))
+						{
+							LOCUS_CORE_INFO(payload->Data);
+						}
+						ImGui::EndDragDropTarget();
+					}
 				});
 
 			// Select nothing if clicking in blank space
@@ -49,6 +60,7 @@ namespace Locus
 				ImGui::EndPopup();
 			}
 		}
+		ImGui::PopStyleVar();
 		
 		ImGui::End();
 
@@ -117,6 +129,14 @@ namespace Locus
 		ImGuiTreeNodeFlags flags = ((m_SelectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0)
 			| ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
 		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
+
+		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+		{
+			const char* entityName = entity.GetComponent<TagComponent>().Tag.c_str();
+			ImGui::SetDragDropPayload("ENTITY_NODE", entityName, sizeof(entityName));
+
+			ImGui::EndDragDropSource();
+		}
 
 		if (ImGui::IsItemClicked())
 			m_SelectedEntity = entity;

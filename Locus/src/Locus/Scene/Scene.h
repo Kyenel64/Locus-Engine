@@ -17,8 +17,8 @@ namespace Locus
 	class Scene
 	{
 	public:
-		Scene();
-		~Scene();
+		Scene() = default;
+		~Scene() = default;
 
 		static Ref<Scene> Copy(Ref<Scene> other);
 

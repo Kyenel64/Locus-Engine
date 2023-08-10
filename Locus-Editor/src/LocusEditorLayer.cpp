@@ -42,7 +42,8 @@ namespace Locus
 		m_Framebuffer = Framebuffer::Create(framebufferSpecs);
 
 		// Scene
-		m_ActiveScene = CreateRef<Scene>();
+		m_EditorScene = CreateRef<Scene>();
+		m_ActiveScene = m_EditorScene;
 
 		// Open startup project given through args
 		auto commandLineArgs = Application::Get().GetCommandLineArgs();
@@ -176,7 +177,7 @@ namespace Locus
 	void LocusEditorLayer::OnImGuiRender()
 	{
 		LOCUS_PROFILE_FUNCTION();
-		//ImGui::ShowDemoWindow();
+		ImGui::ShowDemoWindow();
 
 		static bool dockspaceOpen = true;
 		static bool opt_fullscreen_persistant = true;

@@ -59,7 +59,7 @@ namespace Locus
 		glm::vec3 m_Position = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 m_FocalPoint = { 0.0f, 0.0f, 0.0f };
 
-		float m_Distance = 10.0f;
+		float m_Distance = 30.0f;
 		float m_Pitch = 0.0f, m_Yaw = 0.0f;
 
 		float m_ViewportWidth = 1920.0f, m_ViewportHeight = 1080.0f;

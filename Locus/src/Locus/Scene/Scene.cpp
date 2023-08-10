@@ -35,6 +35,40 @@ namespace Locus
 
 	Scene::~Scene()
 	{
+		LOCUS_CORE_INFO("Scene Destroyed");
+	}
+
+	Ref<Scene> Scene::Copy(Ref<Scene> other)
+	{
+		Ref<Scene> newScene = CreateRef<Scene>();
+		newScene->m_SceneName = other->m_SceneName;
+		newScene->m_ViewportWidth = other->m_ViewportWidth;
+		newScene->m_ViewportHeight = other->m_ViewportHeight;
+
+		auto& otherRegistry = other->m_Registry;
+
+		auto view = otherRegistry.view<IDComponent>();
+		for (auto entity : view)
+		{
+			UUID uuid = otherRegistry.get<IDComponent>(entity).ID;
+			const auto& tag = otherRegistry.get<TagComponent>(entity).Tag;
+
+			Entity newEntity = newScene->CreateEntityWithUUID(uuid, tag);
+			if (otherRegistry.any_of<TransformComponent>(entity))
+				newEntity.AddOrReplaceComponent<TransformComponent>(otherRegistry.get<TransformComponent>(entity));
+			if (otherRegistry.any_of<SpriteRendererComponent>(entity))
+				newEntity.AddOrReplaceComponent<SpriteRendererComponent>(otherRegistry.get<SpriteRendererComponent>(entity));
+			if (otherRegistry.any_of<CameraComponent>(entity))
+				newEntity.AddOrReplaceComponent<CameraComponent>(otherRegistry.get<CameraComponent>(entity));
+			if (otherRegistry.any_of<RigidBody2DComponent>(entity))
+				newEntity.AddOrReplaceComponent<RigidBody2DComponent>(otherRegistry.get<RigidBody2DComponent>(entity));
+			if (otherRegistry.any_of<BoxCollider2DComponent>(entity))
+				newEntity.AddOrReplaceComponent<BoxCollider2DComponent>(otherRegistry.get<BoxCollider2DComponent>(entity));
+			if (otherRegistry.any_of<NativeScriptComponent>(entity))
+				newEntity.AddOrReplaceComponent<NativeScriptComponent>(otherRegistry.get<NativeScriptComponent>(entity));
+		}
+
+		return newScene;
 	}
 
 	Entity Scene::CreateEntity(const std::string& name)

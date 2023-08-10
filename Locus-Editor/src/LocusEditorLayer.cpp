@@ -458,11 +458,13 @@ namespace Locus
 
 	void LocusEditorLayer::OpenScene(const std::filesystem::path& path)
 	{
-		m_ActiveScene = CreateRef<Scene>();
-		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_EditorScene = CreateRef<Scene>();
+		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_SceneHierarchyPanel.SetContext(m_EditorScene);
 
-		SceneSerializer serializer(m_ActiveScene);
+		m_ActiveScene = m_EditorScene;
+
+		SceneSerializer serializer(m_EditorScene);
 		serializer.Deserialize(path.string());
 		m_SavePath = path.string();
 		Application::Get().SetIsSavedStatus(true);
@@ -572,7 +574,8 @@ namespace Locus
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SCENE_ITEM_PATH"))
 			{
-				OnSceneStop();
+				if (m_SceneState == SceneState::Play)
+					OnSceneStop();
 				const wchar_t* path = (const wchar_t*)payload->Data;
 				OpenScene(std::filesystem::path(g_ProjectPath) / path);
 			}
@@ -617,12 +620,18 @@ namespace Locus
 	void LocusEditorLayer::OnScenePlay()
 	{
 		m_SceneState = SceneState::Play;
-		m_ActiveScene->OnRuntimeStart();
+		m_ActiveScene = Scene::Copy(m_EditorScene);
+		m_ActiveScene->OnRuntimeStart(); // Remember we call this after we copy editor scene since editor scene will never call runtime functions.
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
 	}
 
 	void LocusEditorLayer::OnSceneStop()
 	{
 		m_SceneState = SceneState::Edit;
 		m_ActiveScene->OnRuntimeStop();
+
+		m_ActiveScene = m_EditorScene;
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 }

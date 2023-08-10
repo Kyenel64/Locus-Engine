@@ -46,6 +46,7 @@ namespace Locus
 		std::string m_SavePath;
 
 		Ref<Scene> m_ActiveScene;
+		Ref<Scene> m_EditorScene;
 
 		// Textures
 		Ref<Texture2D> m_PlayButton;

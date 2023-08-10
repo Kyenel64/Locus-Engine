@@ -28,23 +28,26 @@ namespace Locus
 		// --- Scene Hierarchy Panel ------------------------------------------
 		ImGui::Begin("Scene Hierarchy");
 
-		// Display each entity
-		m_ActiveScene->m_Registry.each([&](auto entityID)
+		if (m_ActiveScene)
 		{
-			Entity entity(entityID, m_ActiveScene.get());
-			DrawEntityNode(entity);
-		});
+			// Display each entity
+			m_ActiveScene->m_Registry.each([&](auto entityID)
+				{
+					Entity entity(entityID, m_ActiveScene.get());
+					DrawEntityNode(entity);
+				});
 
-		// Select nothing if clicking in blank space
-		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered() || !m_SelectedEntity.IsValid())
-			m_SelectedEntity = {};
+			// Select nothing if clicking in blank space
+			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered() || !m_SelectedEntity.IsValid())
+				m_SelectedEntity = {};
 
-		// Open pop up menu when right clicking on blank space.
-		if (ImGui::BeginPopupContextWindow(0, 1 | ImGuiPopupFlags_NoOpenOverItems))
-		{
-			if (ImGui::MenuItem("Create Empty Entity"))
-				CommandHistory::AddCommand(new CreateEntityCommand(m_ActiveScene, "Empty Entity"));
-			ImGui::EndPopup();
+			// Open pop up menu when right clicking on blank space.
+			if (ImGui::BeginPopupContextWindow(0, 1 | ImGuiPopupFlags_NoOpenOverItems))
+			{
+				if (ImGui::MenuItem("Create Empty Entity"))
+					CommandHistory::AddCommand(new CreateEntityCommand(m_ActiveScene, "Empty Entity"));
+				ImGui::EndPopup();
+			}
 		}
 		
 		ImGui::End();

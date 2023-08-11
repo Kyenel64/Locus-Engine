@@ -61,7 +61,7 @@ namespace Locus
 
 		virtual void Execute() override
 		{
-			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_Entity, m_UUID, m_EntityName);
+			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_UUID, m_EntityName);
 			LOCUS_CORE_INFO("Entity ID: {0}", (uint32_t)m_Entity);
 			Application::Get().SetIsSavedStatus(false);
 		}

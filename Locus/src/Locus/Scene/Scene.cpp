@@ -39,24 +39,25 @@ namespace Locus
 		auto& otherRegistry = other->m_Registry;
 
 		auto view = otherRegistry.view<IDComponent>();
-		for (auto entity : view)
+		for (auto e : view)
 		{
+			Entity entity = Entity(e, other.get());
 			UUID uuid = otherRegistry.get<IDComponent>(entity).ID;
 			const auto& tag = otherRegistry.get<TagComponent>(entity).Tag;
 
 			Entity newEntity = newScene->CreateEntityWithUUID(uuid, tag);
-			if (otherRegistry.any_of<TransformComponent>(entity))
-				newEntity.AddOrReplaceComponent<TransformComponent>(otherRegistry.get<TransformComponent>(entity));
-			if (otherRegistry.any_of<SpriteRendererComponent>(entity))
-				newEntity.AddOrReplaceComponent<SpriteRendererComponent>(otherRegistry.get<SpriteRendererComponent>(entity));
-			if (otherRegistry.any_of<CameraComponent>(entity))
-				newEntity.AddOrReplaceComponent<CameraComponent>(otherRegistry.get<CameraComponent>(entity));
-			if (otherRegistry.any_of<Rigidbody2DComponent>(entity))
-				newEntity.AddOrReplaceComponent<Rigidbody2DComponent>(otherRegistry.get<Rigidbody2DComponent>(entity));
-			if (otherRegistry.any_of<BoxCollider2DComponent>(entity))
-				newEntity.AddOrReplaceComponent<BoxCollider2DComponent>(otherRegistry.get<BoxCollider2DComponent>(entity));
-			if (otherRegistry.any_of<NativeScriptComponent>(entity))
-				newEntity.AddOrReplaceComponent<NativeScriptComponent>(otherRegistry.get<NativeScriptComponent>(entity));
+			if (entity.HasComponent<TransformComponent>())
+				newEntity.AddOrReplaceComponent<TransformComponent>(entity.GetComponent<TransformComponent>());
+			if (entity.HasComponent<SpriteRendererComponent>())
+				newEntity.AddOrReplaceComponent<SpriteRendererComponent>(entity.GetComponent<SpriteRendererComponent>());
+			if (entity.HasComponent<CameraComponent>())
+				newEntity.AddOrReplaceComponent<CameraComponent>(entity.GetComponent<CameraComponent>());
+			if (entity.HasComponent<Rigidbody2DComponent>())
+				newEntity.AddOrReplaceComponent<Rigidbody2DComponent>(entity.GetComponent<Rigidbody2DComponent>());
+			if (entity.HasComponent<BoxCollider2DComponent>())
+				newEntity.AddOrReplaceComponent<BoxCollider2DComponent>(entity.GetComponent<BoxCollider2DComponent>());
+			if (entity.HasComponent<NativeScriptComponent>())
+				newEntity.AddOrReplaceComponent<NativeScriptComponent>(entity.GetComponent<NativeScriptComponent>());
 		}
 
 		return newScene;
@@ -69,7 +70,7 @@ namespace Locus
 
 	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name)
 	{
-		Entity entity = { m_Registry.create(), this };
+		Entity entity = Entity(m_Registry.create(), this);
 		entity.AddComponent<IDComponent>(uuid);
 		entity.AddComponent<TransformComponent>();
 		auto& tag = entity.AddComponent<TagComponent>();
@@ -79,7 +80,7 @@ namespace Locus
 
 	Entity Scene::CreateEntityWithUUID(Entity entity, UUID uuid, const std::string& name)
 	{
-		entity = { m_Registry.create(entity), this };
+		entity = Entity(m_Registry.create(entity), this);
 		entity.AddComponent<IDComponent>(uuid);
 		entity.AddComponent<TransformComponent>();
 		auto& tag = entity.AddComponent<TagComponent>();

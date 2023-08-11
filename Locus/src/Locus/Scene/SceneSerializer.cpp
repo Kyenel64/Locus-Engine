@@ -232,7 +232,7 @@ namespace Locus
 		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
 		m_Scene->m_Registry.each([&](auto entityID)
 		{
-				Entity entity = { entityID, m_Scene.get() };
+				Entity entity = Entity(entityID, m_Scene.get());
 				if (!entity)
 					return;
 				SerializeEntity(out, entity);

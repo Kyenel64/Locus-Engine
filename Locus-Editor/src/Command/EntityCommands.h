@@ -101,16 +101,12 @@ namespace Locus
 		virtual void Execute() override
 		{
 			// Hold component data. Try to make this scalable and not hard coded.
-			if (m_Entity.HasComponent<TagComponent>())
-			{
-				m_Components.Tag = m_Entity.GetComponent<TagComponent>();
-				m_AvailableComponents["Tag"] = true;
-			}
-			if (m_Entity.HasComponent<TransformComponent>())
-			{
-				m_Components.Transform = m_Entity.GetComponent<TransformComponent>();
-				m_AvailableComponents["Transform"] = true;
-			}
+			m_Components.Tag = m_Entity.GetComponent<TagComponent>();
+			m_AvailableComponents["Tag"] = true;
+
+			m_Components.Transform = m_Entity.GetComponent<TransformComponent>();
+			m_AvailableComponents["Transform"] = true;
+
 			if (m_Entity.HasComponent<SpriteRendererComponent>())
 			{
 				m_Components.SpriteRenderer = m_Entity.GetComponent<SpriteRendererComponent>();
@@ -144,7 +140,7 @@ namespace Locus
 		virtual void Undo() override
 		{
 			// TODO: Move all this to CreateEntityWithUUID
-			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_Entity, m_UUID, m_Components.Tag.Tag);
+			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_UUID, m_Components.Tag.Tag);
 
 			m_Entity.GetComponent<TransformComponent>().Translation = m_Components.Transform.Translation;
 			m_Entity.GetComponent<TransformComponent>().Scale = m_Components.Transform.Scale;

@@ -46,18 +46,6 @@ namespace Locus
 			const auto& tag = otherRegistry.get<TagComponent>(entity).Tag;
 
 			Entity newEntity = newScene->CreateEntityWithUUID(uuid, tag);
-			if (entity.HasComponent<TransformComponent>())
-				newEntity.AddOrReplaceComponent<TransformComponent>(entity.GetComponent<TransformComponent>());
-			if (entity.HasComponent<SpriteRendererComponent>())
-				newEntity.AddOrReplaceComponent<SpriteRendererComponent>(entity.GetComponent<SpriteRendererComponent>());
-			if (entity.HasComponent<CameraComponent>())
-				newEntity.AddOrReplaceComponent<CameraComponent>(entity.GetComponent<CameraComponent>());
-			if (entity.HasComponent<Rigidbody2DComponent>())
-				newEntity.AddOrReplaceComponent<Rigidbody2DComponent>(entity.GetComponent<Rigidbody2DComponent>());
-			if (entity.HasComponent<BoxCollider2DComponent>())
-				newEntity.AddOrReplaceComponent<BoxCollider2DComponent>(entity.GetComponent<BoxCollider2DComponent>());
-			if (entity.HasComponent<NativeScriptComponent>())
-				newEntity.AddOrReplaceComponent<NativeScriptComponent>(entity.GetComponent<NativeScriptComponent>());
 		}
 
 		return newScene;
@@ -78,13 +66,25 @@ namespace Locus
 		return entity;
 	}
 
+	// Used to copy EXISTING entites.
 	Entity Scene::CreateEntityWithUUID(Entity entity, UUID uuid, const std::string& name)
 	{
-		entity = Entity(m_Registry.create(entity), this);
-		entity.AddComponent<IDComponent>(uuid);
-		entity.AddComponent<TransformComponent>();
-		auto& tag = entity.AddComponent<TagComponent>();
-		tag.Tag = name.empty() ? "Entity" : name;
+		Entity newEntity = Entity(m_Registry.create(entity), this);
+		newEntity.AddComponent<IDComponent>(uuid);
+		newEntity.AddComponent<TagComponent>(name);
+
+		if (entity.HasComponent<TransformComponent>())
+			newEntity.AddOrReplaceComponent<TransformComponent>(entity.GetComponent<TransformComponent>());
+		if (entity.HasComponent<SpriteRendererComponent>())
+			newEntity.AddOrReplaceComponent<SpriteRendererComponent>(entity.GetComponent<SpriteRendererComponent>());
+		if (entity.HasComponent<CameraComponent>())
+			newEntity.AddOrReplaceComponent<CameraComponent>(entity.GetComponent<CameraComponent>());
+		if (entity.HasComponent<Rigidbody2DComponent>())
+			newEntity.AddOrReplaceComponent<Rigidbody2DComponent>(entity.GetComponent<Rigidbody2DComponent>());
+		if (entity.HasComponent<BoxCollider2DComponent>())
+			newEntity.AddOrReplaceComponent<BoxCollider2DComponent>(entity.GetComponent<BoxCollider2DComponent>());
+		if (entity.HasComponent<NativeScriptComponent>())
+			newEntity.AddOrReplaceComponent<NativeScriptComponent>(entity.GetComponent<NativeScriptComponent>());
 		return entity;
 	}
 

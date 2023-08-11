@@ -416,6 +416,19 @@ namespace Locus
 				break;
 			}
 
+			case Key::D:
+			{
+				if (control)
+				{
+					if (m_SelectedEntity)
+					{
+						std::string& tag = m_SelectedEntity.GetComponent<TagComponent>().Tag;
+						CommandHistory::AddCommand(new CreateEntityCommand(m_ActiveScene, tag, m_SelectedEntity));
+					}
+				}
+				break;
+			}
+
 			// Command History
 			case Key::Y:
 			{

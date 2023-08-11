@@ -187,13 +187,13 @@ namespace Locus
 			out << YAML::EndMap; // End Camera Component
 		}
 
-		// --- RigidBody2D Component ------------------------------------------
-		if (entity.HasComponent<RigidBody2DComponent>())
+		// --- Rigidbody2D Component ------------------------------------------
+		if (entity.HasComponent<Rigidbody2DComponent>())
 		{
-			out << YAML::Key << "RigidBody2DComponent";
-			auto& rb2D = entity.GetComponent<RigidBody2DComponent>();
+			out << YAML::Key << "Rigidbody2DComponent";
+			auto& rb2D = entity.GetComponent<Rigidbody2DComponent>();
 
-			out << YAML::BeginMap; // RigidBody2D Component
+			out << YAML::BeginMap; // Rigidbody2D Component
 			out << YAML::Key << "BodyType" << YAML::Value << (int)rb2D.BodyType;
 			out << YAML::Key << "Mass" << YAML::Value << rb2D.Mass;
 			out << YAML::Key << "GravityScale" << YAML::Value << rb2D.GravityScale;
@@ -203,7 +203,7 @@ namespace Locus
 			out << YAML::Key << "Friction" << YAML::Value << rb2D.Friction;
 			out << YAML::Key << "Restitution" << YAML::Value << rb2D.Restitution;
 			out << YAML::Key << "RestitutionThreshold" << YAML::Value << rb2D.RestitutionThreshold;
-			out << YAML::EndMap; // End RigidBody2D Component
+			out << YAML::EndMap; // End Rigidbody2D Component
 		}
 
 		// --- BoxCollider2D Component ----------------------------------------
@@ -321,12 +321,12 @@ namespace Locus
 					cc.FixedAspectRatio = cameraComponent["FixedAspectRatio"].as<bool>();
 				}
 
-				// --- RigidBody2D Component ----------------------------------
-				auto rigidBody2DComponent = entity["RigidBody2DComponent"];
+				// --- Rigidbody2D Component ----------------------------------
+				auto rigidBody2DComponent = entity["Rigidbody2DComponent"];
 				if (rigidBody2DComponent)
 				{
-					auto& rb2D = deserializedEntity.AddComponent<RigidBody2DComponent>();
-					rb2D.BodyType = (RigidBody2DComponent::RigidBody2DType)rigidBody2DComponent["BodyType"].as<int>();
+					auto& rb2D = deserializedEntity.AddComponent<Rigidbody2DComponent>();
+					rb2D.BodyType = (Rigidbody2DComponent::Rigidbody2DType)rigidBody2DComponent["BodyType"].as<int>();
 					rb2D.Mass = rigidBody2DComponent["Mass"].as<float>();
 					rb2D.GravityScale = rigidBody2DComponent["GravityScale"].as<float>();
 					rb2D.LinearDrag = rigidBody2DComponent["LinearDrag"].as<float>();

@@ -97,10 +97,10 @@ namespace Locus
 		CameraComponent(const CameraComponent&) = default;
 	};
 
-	struct RigidBody2DComponent
+	struct Rigidbody2DComponent
 	{
-		enum class RigidBody2DType { Static = 0, Dynamic = 1, Kinematic = 2};
-		RigidBody2DType BodyType = RigidBody2DType::Dynamic;
+		enum class Rigidbody2DType { Static = 0, Dynamic = 1, Kinematic = 2};
+		Rigidbody2DType BodyType = Rigidbody2DType::Dynamic;
 
 		// Body
 		float Mass = 1.0f;
@@ -116,8 +116,8 @@ namespace Locus
 
 		void* RuntimeBody = nullptr;
 
-		RigidBody2DComponent() = default;
-		RigidBody2DComponent(const RigidBody2DComponent&) = default;
+		Rigidbody2DComponent() = default;
+		Rigidbody2DComponent(const Rigidbody2DComponent&) = default;
 	};
 
 	struct BoxCollider2DComponent

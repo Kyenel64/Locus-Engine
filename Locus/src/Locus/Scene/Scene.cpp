@@ -16,16 +16,16 @@
 
 namespace Locus
 {
-	static b2BodyType RigidBody2DTypeToBox2DType(RigidBody2DComponent::RigidBody2DType bodyType)
+	static b2BodyType Rigidbody2DTypeToBox2DType(Rigidbody2DComponent::Rigidbody2DType bodyType)
 	{
 		switch (bodyType)
 		{
-		case RigidBody2DComponent::RigidBody2DType::Static: return b2_staticBody;
-		case RigidBody2DComponent::RigidBody2DType::Dynamic: return b2_dynamicBody;
-		case RigidBody2DComponent::RigidBody2DType::Kinematic: return b2_kinematicBody;
+		case Rigidbody2DComponent::Rigidbody2DType::Static: return b2_staticBody;
+		case Rigidbody2DComponent::Rigidbody2DType::Dynamic: return b2_dynamicBody;
+		case Rigidbody2DComponent::Rigidbody2DType::Kinematic: return b2_kinematicBody;
 		}
 
-		LOCUS_CORE_ASSERT(false, "Unknown RigidBody2DType");
+		LOCUS_CORE_ASSERT(false, "Unknown Rigidbody2DType");
 		return b2_staticBody;
 	}
 
@@ -51,8 +51,8 @@ namespace Locus
 				newEntity.AddOrReplaceComponent<SpriteRendererComponent>(otherRegistry.get<SpriteRendererComponent>(entity));
 			if (otherRegistry.any_of<CameraComponent>(entity))
 				newEntity.AddOrReplaceComponent<CameraComponent>(otherRegistry.get<CameraComponent>(entity));
-			if (otherRegistry.any_of<RigidBody2DComponent>(entity))
-				newEntity.AddOrReplaceComponent<RigidBody2DComponent>(otherRegistry.get<RigidBody2DComponent>(entity));
+			if (otherRegistry.any_of<Rigidbody2DComponent>(entity))
+				newEntity.AddOrReplaceComponent<Rigidbody2DComponent>(otherRegistry.get<Rigidbody2DComponent>(entity));
 			if (otherRegistry.any_of<BoxCollider2DComponent>(entity))
 				newEntity.AddOrReplaceComponent<BoxCollider2DComponent>(otherRegistry.get<BoxCollider2DComponent>(entity));
 			if (otherRegistry.any_of<NativeScriptComponent>(entity))
@@ -115,12 +115,12 @@ namespace Locus
 
 		m_Box2DWorld->Step(deltaTime, 6, 2); // TODO: paremeterize
 
-		auto view = m_Registry.view<RigidBody2DComponent>();
+		auto view = m_Registry.view<Rigidbody2DComponent>();
 		for (auto e : view)
 		{
 			Entity entity = Entity(e, this);
 			auto& transform = entity.GetComponent<TransformComponent>();
-			auto& rb2d = entity.GetComponent<RigidBody2DComponent>();
+			auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
 			
 			b2Body* body = (b2Body*)rb2d.RuntimeBody;
 			const b2Vec2& position = body->GetPosition();
@@ -187,16 +187,16 @@ namespace Locus
 	{
 		m_Box2DWorld = new b2World({ 0.0f, -9.8f });
 
-		auto view = m_Registry.view<RigidBody2DComponent>();
+		auto view = m_Registry.view<Rigidbody2DComponent>();
 		for (auto e : view)
 		{
 			Entity entity = Entity(e, this);
 			auto& transform = entity.GetComponent<TransformComponent>();
-			auto& rb2D = entity.GetComponent<RigidBody2DComponent>();
+			auto& rb2D = entity.GetComponent<Rigidbody2DComponent>();
 
 			// Body
 			b2BodyDef bodyDef;
-			bodyDef.type = RigidBody2DTypeToBox2DType(rb2D.BodyType);
+			bodyDef.type = Rigidbody2DTypeToBox2DType(rb2D.BodyType);
 			bodyDef.position.Set(transform.Translation.x, transform.Translation.y);
 			bodyDef.angle = transform.GetRotationEuler().z;
 			bodyDef.linearDamping = rb2D.LinearDrag;
@@ -308,7 +308,7 @@ namespace Locus
 	}
 
 	template<>
-	void Scene::OnComponentAdded<RigidBody2DComponent>(Entity entity, RigidBody2DComponent& component)
+	void Scene::OnComponentAdded<Rigidbody2DComponent>(Entity entity, Rigidbody2DComponent& component)
 	{
 
 	}

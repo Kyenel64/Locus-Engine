@@ -371,6 +371,7 @@ namespace Locus
 		bool shift = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
 		switch (e.GetKeyCode())
 		{
+			// Scene
 			case Key::N:
 			{
 				if (control)
@@ -391,19 +392,43 @@ namespace Locus
 					SaveScene();
 				break;
 			}
-			case Key::Z:
+
+			case Key::C:
 			{
 				if (control)
-					CommandHistory::Undo();
+				{
+					if (m_SelectedEntity)
+						m_ClipboardEntity = m_SelectedEntity;
+				}
 				break;
 			}
+
+			case Key::V:
+			{
+				if (control)
+				{
+					if (m_ClipboardEntity)
+					{
+						std::string& tag = m_ClipboardEntity.GetComponent<TagComponent>().Tag;
+						CommandHistory::AddCommand(new CreateEntityCommand(m_ActiveScene, tag, m_ClipboardEntity));
+					}
+				}
+				break;
+			}
+
+			// Command History
 			case Key::Y:
 			{
 				if (control)
 					CommandHistory::Redo();
 				break;
 			}
-				
+			case Key::Z:
+			{
+				if (control)
+					CommandHistory::Undo();
+				break;
+			}
 
 			// Gizmos
 			case Key::Q:

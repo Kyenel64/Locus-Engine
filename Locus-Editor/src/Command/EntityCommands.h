@@ -1,6 +1,8 @@
 #pragma once
 #include "Command.h"
 
+#include <iomanip>
+
 namespace Locus
 {
 	struct ComponentsList
@@ -10,6 +12,8 @@ namespace Locus
 		SpriteRendererComponent SpriteRenderer;
 		CameraComponent Camera;
 		NativeScriptComponent NativeScript;
+		Rigidbody2DComponent Rigidbody2D;
+		BoxCollider2DComponent BoxCollider2D;
 	};
 
 
@@ -24,6 +28,35 @@ namespace Locus
 		CreateEntityCommand(Ref<Scene> activeScene, const std::string& name)
 			: m_ActiveScene(activeScene), m_EntityName(name), m_UUID(UUID())
 		{
+		}
+
+		CreateEntityCommand(Ref<Scene> activeScene, const std::string& name, Entity copyEntity)
+			: m_ActiveScene(activeScene), m_EntityName(name), m_UUID(UUID()), m_Entity(copyEntity)
+		{
+			auto view = m_ActiveScene->m_Registry.view<TagComponent>();
+			int dupAmount = 0;
+
+			size_t entityNameDupPos = m_EntityName.find_last_of('.'); // TODO: Work with multiple .'s
+
+			if (entityNameDupPos != std::string::npos)
+				m_EntityName = m_EntityName.substr(0, entityNameDupPos);
+
+			LOCUS_CORE_INFO(m_EntityName);
+			for (auto entity : view)
+			{
+				std::string tagWithDup = m_ActiveScene->m_Registry.get<TagComponent>(entity).Tag;
+				size_t dupExtensionPos = tagWithDup.find_last_of('.');
+				std::string tag = tagWithDup.substr(0, dupExtensionPos);
+				if (tag.find(m_EntityName) != std::string::npos)
+					dupAmount++;
+			}
+			if (dupAmount)
+			{
+				std::stringstream ss;
+				ss << std::setw(3) << std::setfill('0') << dupAmount;
+				m_EntityName.append(".");
+				m_EntityName.append(ss.str());
+			}
 		}
 
 		virtual void Execute() override
@@ -93,6 +126,16 @@ namespace Locus
 				m_Components.NativeScript = m_Entity.GetComponent<NativeScriptComponent>();
 				m_AvailableComponents["NativeScript"] = true;
 			}
+			if (m_Entity.HasComponent<Rigidbody2DComponent>())
+			{
+				m_Components.Rigidbody2D = m_Entity.GetComponent<Rigidbody2DComponent>();
+				m_AvailableComponents["Rigidbody2D"] = true;
+			}
+			if (m_Entity.HasComponent<BoxCollider2DComponent>())
+			{
+				m_Components.BoxCollider2D = m_Entity.GetComponent<BoxCollider2DComponent>();
+				m_AvailableComponents["BoxCollider2D"] = true;
+			}
 
 			m_ActiveScene->DestroyEntity(m_Entity);
 			Application::Get().SetIsSavedStatus(false);
@@ -100,8 +143,7 @@ namespace Locus
 
 		virtual void Undo() override
 		{
-			// TODO: UUIDs. Currently this will create a new entity id and wont be able to add
-			//				components to this when undoing/redoing.
+			// TODO: Move all this to CreateEntityWithUUID
 			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_Entity, m_UUID, m_Components.Tag.Tag);
 
 			m_Entity.GetComponent<TransformComponent>().Translation = m_Components.Transform.Translation;
@@ -114,6 +156,10 @@ namespace Locus
 				m_Entity.AddComponent<CameraComponent>(m_Components.Camera);
 			if (m_AvailableComponents["NativeScript"])
 				m_Entity.AddComponent<NativeScriptComponent>(m_Components.NativeScript);
+			if (m_AvailableComponents["Rigidbody2D"])
+				m_Entity.AddComponent<Rigidbody2DComponent>(m_Components.Rigidbody2D);
+			if (m_AvailableComponents["BoxCollider2D"])
+				m_Entity.AddComponent<BoxCollider2DComponent>(m_Components.BoxCollider2D);
 			Application::Get().SetIsSavedStatus(false);
 		}
 

@@ -95,10 +95,10 @@ namespace Locus
 
 				if (ImGui::MenuItem("Rigidbody 2D"))
 				{
-					if (!m_SelectedEntity.HasComponent<RigidBody2DComponent>())
-						CommandHistory::AddCommand(new AddComponentCommand<RigidBody2DComponent>(m_SelectedEntity));
+					if (!m_SelectedEntity.HasComponent<Rigidbody2DComponent>())
+						CommandHistory::AddCommand(new AddComponentCommand<Rigidbody2DComponent>(m_SelectedEntity));
 					else
-						LOCUS_CORE_WARN("This entity already has a RigidBody2D Component");
+						LOCUS_CORE_WARN("This entity already has a Rigidbody2D Component");
 					ImGui::CloseCurrentPopup();
 				}
 
@@ -442,19 +442,19 @@ namespace Locus
 
 			});
 
-		// --- RigidBody2D Component ------------------------------------------
-		DrawComponentUI<RigidBody2DComponent>("Rigidbody 2D", entity, [this](auto& component)
+		// --- Rigidbody2D Component ------------------------------------------
+		DrawComponentUI<Rigidbody2DComponent>("Rigidbody 2D", entity, [this](auto& component)
 			{
 				// Body type
-				const char* RigidBodyTypeString[] = { "Static", "Dynamic", "Kinematic" };
-				const char* currentRigidBodyTypeString = RigidBodyTypeString[(int)component.BodyType];
-				if (ImGui::BeginCombo("Body Type", currentRigidBodyTypeString))
+				const char* RigidbodyTypeString[] = { "Static", "Dynamic", "Kinematic" };
+				const char* currentRigidbodyTypeString = RigidbodyTypeString[(int)component.BodyType];
+				if (ImGui::BeginCombo("Body Type", currentRigidbodyTypeString))
 				{
 					for (int i = 0; i < 2; i++)
 					{
-						bool isSelected = currentRigidBodyTypeString == RigidBodyTypeString[i];
-						if (ImGui::Selectable(RigidBodyTypeString[i], isSelected))
-							CommandHistory::AddCommand(new ChangeValueCommand((RigidBody2DComponent::RigidBody2DType)i, component.BodyType));
+						bool isSelected = currentRigidbodyTypeString == RigidbodyTypeString[i];
+						if (ImGui::Selectable(RigidbodyTypeString[i], isSelected))
+							CommandHistory::AddCommand(new ChangeValueCommand((Rigidbody2DComponent::Rigidbody2DType)i, component.BodyType));
 
 						if (isSelected)
 							ImGui::SetItemDefaultFocus();

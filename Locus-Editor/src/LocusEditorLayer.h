@@ -43,10 +43,12 @@ namespace Locus
 		void EditorToolbar();
 
 	private:
+		// Scene
 		std::string m_SavePath;
-
 		Ref<Scene> m_ActiveScene;
 		Ref<Scene> m_EditorScene;
+		enum class SceneState { Edit = 0, Play = 1 };
+		SceneState m_SceneState = SceneState::Edit;
 
 		// Textures
 		Ref<Texture2D> m_PlayButton;
@@ -58,15 +60,14 @@ namespace Locus
 		bool m_ViewportFocused = false, m_ViewportHovered = false;
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
 		glm::vec2 m_ViewportBounds[2];
+
+		// Entity
 		Entity m_HoveredEntity;
 		Entity m_SelectedEntity;
-
+		Entity m_ClipboardEntity;
 
 		// Viewport Gizmo
 		int m_GizmoType = -1;
-
-		enum class SceneState { Edit = 0, Play = 1 };
-		SceneState m_SceneState = SceneState::Edit;
 
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;

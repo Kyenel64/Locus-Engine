@@ -15,6 +15,7 @@ namespace Locus
 		CreateEntityCommand(Ref<Scene> activeScene, const std::string& name)
 			: m_ActiveScene(activeScene), m_EntityName(name), m_UUID(UUID())
 		{
+			// TODO:Creating multiple empty entities should also add .### at the end
 		}
 
 		// Used for duplicating existing entities

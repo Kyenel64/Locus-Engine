@@ -52,6 +52,7 @@ namespace Locus
 			auto sceneFilePath = commandLineArgs[1];
 			SceneSerializer serializer(m_ActiveScene);
 			serializer.Deserialize(sceneFilePath);
+			m_SavePath = sceneFilePath;
 		}
 
 		/*class CameraControls : public ScriptableEntity

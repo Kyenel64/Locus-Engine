@@ -177,7 +177,7 @@ namespace Locus
 	void LocusEditorLayer::OnImGuiRender()
 	{
 		LOCUS_PROFILE_FUNCTION();
-		ImGui::ShowDemoWindow();
+		//ImGui::ShowDemoWindow();
 
 		static bool dockspaceOpen = true;
 		static bool opt_fullscreen_persistant = true;

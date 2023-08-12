@@ -17,8 +17,9 @@ namespace Locus
 		{
 		}
 
+		// Used for copying existing entities
 		CreateEntityCommand(Ref<Scene> activeScene, const std::string& name, Entity copyEntity)
-			: m_ActiveScene(activeScene), m_EntityName(name), m_UUID(UUID()), m_Entity(copyEntity)
+			: m_ActiveScene(activeScene), m_EntityName(name), m_UUID(UUID()), m_CopyEntity(copyEntity)
 		{
 			auto view = m_ActiveScene->m_Registry.view<TagComponent>();
 			int dupAmount = 0;
@@ -49,7 +50,7 @@ namespace Locus
 		virtual void Execute() override
 		{
 			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_UUID, m_EntityName);
-			LOCUS_CORE_INFO("Entity ID: {0}", (uint32_t)m_Entity);
+			m_ActiveScene->CopyComponents(m_CopyEntity, m_Entity);
 			Application::Get().SetIsSavedStatus(false);
 		}
 
@@ -67,6 +68,7 @@ namespace Locus
 	private:
 		Ref<Scene> m_ActiveScene;
 		Entity m_Entity;
+		Entity m_CopyEntity;
 		UUID m_UUID;
 		std::string m_EntityName;
 	};

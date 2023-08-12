@@ -46,27 +46,27 @@ namespace Locus
 			const auto& tag = otherRegistry.get<TagComponent>(entity).Tag;
 
 			Entity newEntity = newScene->CreateEntityWithUUID(uuid, tag);
-			CopyEntityComponents(entity, newEntity);
+			CopyComponents(entity, newEntity);
 		}
 
 		return newScene;
 	}
 
-	// Not sure if this is needed
-	void Scene::CopyEntityComponents(Entity from, Entity to)
+	template<typename T>
+	void Scene::CopyComponent(Entity from, Entity to)
 	{
-		if (from.HasComponent<TransformComponent>())
-			to.AddOrReplaceComponent<TransformComponent>(from.GetComponent<TransformComponent>());
-		if (from.HasComponent<SpriteRendererComponent>())
-			to.AddOrReplaceComponent<SpriteRendererComponent>(from.GetComponent<SpriteRendererComponent>());
-		if (from.HasComponent<CameraComponent>())
-			to.AddOrReplaceComponent<CameraComponent>(from.GetComponent<CameraComponent>());
-		if (from.HasComponent<Rigidbody2DComponent>())
-			to.AddOrReplaceComponent<Rigidbody2DComponent>(from.GetComponent<Rigidbody2DComponent>());
-		if (from.HasComponent<BoxCollider2DComponent>())
-			to.AddOrReplaceComponent<BoxCollider2DComponent>(from.GetComponent<BoxCollider2DComponent>());
-		if (from.HasComponent<NativeScriptComponent>())
-			to.AddOrReplaceComponent<NativeScriptComponent>(from.GetComponent<NativeScriptComponent>());
+		if (from.HasComponent<T>())
+			to.AddOrReplaceComponent<T>(from.GetComponent<T>());
+	}
+
+	void Scene::CopyComponents(Entity from, Entity to)
+	{
+		CopyComponent<TransformComponent>(from, to);
+		CopyComponent<SpriteRendererComponent>(from, to);
+		CopyComponent<CameraComponent>(from, to);
+		CopyComponent<Rigidbody2DComponent>(from, to);
+		CopyComponent<BoxCollider2DComponent>(from, to);
+		CopyComponent<SpriteRendererComponent>(from, to);
 	}
 
 	Entity Scene::CreateEntity(const std::string& name)

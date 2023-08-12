@@ -21,7 +21,9 @@ namespace Locus
 		~Scene() = default;
 
 		static Ref<Scene> Copy(Ref<Scene> other);
-		static void CopyEntityComponents(Entity from, Entity to);
+		template<typename T>
+		static void CopyComponent(Entity from, Entity to);
+		static void CopyComponents(Entity from, Entity to);
 
 		Entity CreateEntity(const std::string& name = std::string());
 		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = std::string());

@@ -5,19 +5,6 @@
 
 namespace Locus
 {
-	struct ComponentsList
-	{
-		TagComponent Tag;
-		TransformComponent Transform;
-		SpriteRendererComponent SpriteRenderer;
-		CameraComponent Camera;
-		NativeScriptComponent NativeScript;
-		Rigidbody2DComponent Rigidbody2D;
-		BoxCollider2DComponent BoxCollider2D;
-	};
-
-
-
 	// --- CreateEntityCommand ------------------------------------------------
 	class CreateEntityCommand : public Command
 	{

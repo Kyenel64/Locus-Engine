@@ -46,21 +46,27 @@ namespace Locus
 			const auto& tag = otherRegistry.get<TagComponent>(entity).Tag;
 
 			Entity newEntity = newScene->CreateEntityWithUUID(uuid, tag);
-			if (entity.HasComponent<TransformComponent>())
-				newEntity.AddOrReplaceComponent<TransformComponent>(entity.GetComponent<TransformComponent>());
-			if (entity.HasComponent<SpriteRendererComponent>())
-				newEntity.AddOrReplaceComponent<SpriteRendererComponent>(entity.GetComponent<SpriteRendererComponent>());
-			if (entity.HasComponent<CameraComponent>())
-				newEntity.AddOrReplaceComponent<CameraComponent>(entity.GetComponent<CameraComponent>());
-			if (entity.HasComponent<Rigidbody2DComponent>())
-				newEntity.AddOrReplaceComponent<Rigidbody2DComponent>(entity.GetComponent<Rigidbody2DComponent>());
-			if (entity.HasComponent<BoxCollider2DComponent>())
-				newEntity.AddOrReplaceComponent<BoxCollider2DComponent>(entity.GetComponent<BoxCollider2DComponent>());
-			if (entity.HasComponent<NativeScriptComponent>())
-				newEntity.AddOrReplaceComponent<NativeScriptComponent>(entity.GetComponent<NativeScriptComponent>());
+			CopyEntityComponents(entity, newEntity);
 		}
 
 		return newScene;
+	}
+
+	// Not sure if this is needed
+	void Scene::CopyEntityComponents(Entity from, Entity to)
+	{
+		if (from.HasComponent<TransformComponent>())
+			to.AddOrReplaceComponent<TransformComponent>(from.GetComponent<TransformComponent>());
+		if (from.HasComponent<SpriteRendererComponent>())
+			to.AddOrReplaceComponent<SpriteRendererComponent>(from.GetComponent<SpriteRendererComponent>());
+		if (from.HasComponent<CameraComponent>())
+			to.AddOrReplaceComponent<CameraComponent>(from.GetComponent<CameraComponent>());
+		if (from.HasComponent<Rigidbody2DComponent>())
+			to.AddOrReplaceComponent<Rigidbody2DComponent>(from.GetComponent<Rigidbody2DComponent>());
+		if (from.HasComponent<BoxCollider2DComponent>())
+			to.AddOrReplaceComponent<BoxCollider2DComponent>(from.GetComponent<BoxCollider2DComponent>());
+		if (from.HasComponent<NativeScriptComponent>())
+			to.AddOrReplaceComponent<NativeScriptComponent>(from.GetComponent<NativeScriptComponent>());
 	}
 
 	Entity Scene::CreateEntity(const std::string& name)

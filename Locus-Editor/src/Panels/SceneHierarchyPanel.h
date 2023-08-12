@@ -31,9 +31,16 @@ namespace Locus
 		void DrawComponentUI(const std::string& name, Entity entity, UIFunction uiFunction);
 
 		void DrawVec3Control(const std::string& name, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f);
+		
+		template<typename T>
+		void CopyComponentToClipboard(Entity selectedEntity);
+		void PasteComponent(Entity selectedEntity);
 
 	private:
 		Ref<Scene> m_ActiveScene;
 		Entity m_SelectedEntity;
+
+		ComponentsList m_ClipboardComponent;
+		ComponentType m_ClipboardComponentType = ComponentType::None;
 	};
 }

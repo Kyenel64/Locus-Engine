@@ -66,6 +66,9 @@ namespace Locus
 		Entity m_SelectedEntity;
 		Entity m_ClipboardEntity;
 
+		// Components
+		ComponentsList m_ClipboardComponents;
+
 		// Viewport Gizmo
 		int m_GizmoType = -1;
 

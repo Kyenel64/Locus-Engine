@@ -152,4 +152,26 @@ namespace Locus
 		}
 	};
 
+	struct ComponentsList
+	{
+		TagComponent Tag;
+		TransformComponent Transform;
+		SpriteRendererComponent SpriteRenderer;
+		CameraComponent Camera;
+		NativeScriptComponent NativeScript;
+		Rigidbody2DComponent Rigidbody2D;
+		BoxCollider2DComponent BoxCollider2D;
+	};
+
+	enum class ComponentType
+	{
+		None = 0,
+		Tag,
+		Transform,
+		SpriteRenderer,
+		Camera,
+		Rigidbody2D,
+		BoxCollider2D,
+		NativeScript
+	};
 }

@@ -21,10 +21,10 @@ namespace Locus
 		~Scene() = default;
 
 		static Ref<Scene> Copy(Ref<Scene> other);
+		static void CopyEntityComponents(Entity from, Entity to);
 
 		Entity CreateEntity(const std::string& name = std::string());
 		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = std::string());
-		Entity CreateEntityWithUUID(Entity entity, UUID uuid, const std::string& name = std::string());
 		void DestroyEntity(Entity entity);
 
 		void OnUpdateRuntime(Timestep deltaTime);

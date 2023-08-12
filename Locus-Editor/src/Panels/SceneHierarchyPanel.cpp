@@ -118,6 +118,14 @@ namespace Locus
 		{
 			Application::Get().GetImGuiLayer()->BlockEvents(false);
 		}
+
+		if (ImGui::BeginPopupContextWindow(0, 1 | ImGuiPopupFlags_NoOpenOverItems))
+		{
+			if (m_ClipboardComponentType != ComponentType::None && m_SelectedEntity)
+				if (ImGui::MenuItem("Paste Component"))
+					PasteComponent(m_SelectedEntity);
+			ImGui::EndPopup();
+		}
 		
 		ImGui::End();
 	}
@@ -288,11 +296,13 @@ namespace Locus
 			{
 				if (name != "Transform")
 				{
-					if (ImGui::MenuItem("Remove component"))
+					if (ImGui::MenuItem("Remove Component"))
 					{
 						removeComponent = true;
 					}
 				}
+				if (ImGui::MenuItem("Copy Component"))
+					CopyComponentToClipboard<T>(m_SelectedEntity);
 				ImGui::EndPopup();
 			}
 
@@ -304,6 +314,64 @@ namespace Locus
 
 			if (removeComponent)
 				CommandHistory::AddCommand(new RemoveComponentCommand<T>(entity));
+		}
+	}
+
+	template<typename T>
+	void SceneHierarchyPanel::CopyComponentToClipboard(Entity selectedEntity)
+	{
+		if (typeid(T) == typeid(TransformComponent))
+		{
+			m_ClipboardComponent.Transform = m_SelectedEntity.GetComponent<TransformComponent>();
+			m_ClipboardComponentType = ComponentType::Transform;
+		}
+		if (typeid(T) == typeid(SpriteRendererComponent))
+		{
+			m_ClipboardComponent.SpriteRenderer = m_SelectedEntity.GetComponent<SpriteRendererComponent>();
+			m_ClipboardComponentType = ComponentType::SpriteRenderer;
+		}
+		if (typeid(T) == typeid(CameraComponent))
+		{
+			m_ClipboardComponent.Camera = m_SelectedEntity.GetComponent<CameraComponent>();
+			m_ClipboardComponentType = ComponentType::Camera;
+		}
+		if (typeid(T) == typeid(Rigidbody2DComponent))
+		{
+			m_ClipboardComponent.Rigidbody2D = m_SelectedEntity.GetComponent<Rigidbody2DComponent>();
+			m_ClipboardComponentType = ComponentType::Rigidbody2D;
+		}
+		if (typeid(T) == typeid(BoxCollider2DComponent))
+		{
+			m_ClipboardComponent.BoxCollider2D = m_SelectedEntity.GetComponent<BoxCollider2DComponent>();
+			m_ClipboardComponentType = ComponentType::BoxCollider2D;
+		}
+		if (typeid(T) == typeid(NativeScriptComponent))
+		{
+			m_ClipboardComponent.NativeScript = m_SelectedEntity.GetComponent<NativeScriptComponent>();
+			m_ClipboardComponentType = ComponentType::NativeScript;
+		}
+	}
+
+	void SceneHierarchyPanel::PasteComponent(Entity selectedEntity)
+	{
+		switch (m_ClipboardComponentType)
+		{
+		case Locus::ComponentType::None:
+			break;
+		case Locus::ComponentType::Transform: selectedEntity.AddOrReplaceComponent<TransformComponent>(m_ClipboardComponent.Transform);
+			break;
+		case Locus::ComponentType::SpriteRenderer: selectedEntity.AddOrReplaceComponent<SpriteRendererComponent>(m_ClipboardComponent.SpriteRenderer);
+			break;
+		case Locus::ComponentType::Camera: selectedEntity.AddOrReplaceComponent<CameraComponent>(m_ClipboardComponent.Camera);
+			break;
+		case Locus::ComponentType::Rigidbody2D: selectedEntity.AddOrReplaceComponent<Rigidbody2DComponent>(m_ClipboardComponent.Rigidbody2D);
+			break;
+		case Locus::ComponentType::BoxCollider2D: selectedEntity.AddOrReplaceComponent<BoxCollider2DComponent>(m_ClipboardComponent.BoxCollider2D);
+			break;
+		case Locus::ComponentType::NativeScript: selectedEntity.AddOrReplaceComponent<NativeScriptComponent>(m_ClipboardComponent.NativeScript);
+			break;
+		default:
+			break;
 		}
 	}
 

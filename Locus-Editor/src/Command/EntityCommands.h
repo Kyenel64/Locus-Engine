@@ -17,7 +17,7 @@ namespace Locus
 		{
 		}
 
-		// Used for copying existing entities
+		// Used for duplicating existing entities
 		CreateEntityCommand(Ref<Scene> activeScene, const std::string& name, Entity copyEntity)
 			: m_ActiveScene(activeScene), m_EntityName(name), m_UUID(UUID()), m_CopyEntity(copyEntity)
 		{
@@ -50,7 +50,6 @@ namespace Locus
 		virtual void Execute() override
 		{
 			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_UUID, m_EntityName);
-			m_ActiveScene->CopyComponents(m_CopyEntity, m_Entity);
 			Application::Get().SetIsSavedStatus(false);
 		}
 
@@ -91,10 +90,7 @@ namespace Locus
 		{
 			// Hold component data. Try to make this scalable and not hard coded.
 			m_Components.Tag = m_Entity.GetComponent<TagComponent>();
-			m_AvailableComponents["Tag"] = true;
-
 			m_Components.Transform = m_Entity.GetComponent<TransformComponent>();
-			m_AvailableComponents["Transform"] = true;
 
 			if (m_Entity.HasComponent<SpriteRendererComponent>())
 			{
@@ -128,7 +124,6 @@ namespace Locus
 
 		virtual void Undo() override
 		{
-			// TODO: Move all this to CreateEntityWithUUID
 			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_UUID, m_Components.Tag.Tag);
 
 			m_Entity.GetComponent<TransformComponent>().Translation = m_Components.Transform.Translation;

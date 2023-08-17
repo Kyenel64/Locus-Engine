@@ -47,6 +47,7 @@ namespace Locus
 	private:
 		std::string m_SceneName = "Untitled";
 		entt::registry m_Registry;
+		std::vector<Entity> m_Entities;
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 
 		b2World* m_Box2DWorld = nullptr;
@@ -55,5 +56,6 @@ namespace Locus
 		friend class SceneSerializer;
 		friend class SceneHierarchyPanel;
 		friend class CreateEntityCommand;
+		friend class DestroyEntityCommand;
 	};
 }

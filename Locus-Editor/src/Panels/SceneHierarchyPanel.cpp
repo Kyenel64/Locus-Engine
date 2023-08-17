@@ -32,21 +32,8 @@ namespace Locus
 		if (m_ActiveScene)
 		{
 			// Display each entity
-			m_ActiveScene->m_Registry.each([&](auto entityID)
-				{
-					Entity entity(entityID, m_ActiveScene.get());
-					DrawEntityNode(entity);
-
-					ImGui::InvisibleButton("##Spacing", { -1.0f, 3.0f });
-					if (ImGui::BeginDragDropTarget())
-					{
-						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_NODE"))
-						{
-							LOCUS_CORE_INFO(payload->Data);
-						}
-						ImGui::EndDragDropTarget();
-					}
-				});
+			for (Entity entity : m_ActiveScene->m_Entities)
+				DrawEntityNode(entity);
 
 			// Select nothing if clicking in blank space
 			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered() || !m_SelectedEntity.IsValid())
@@ -140,10 +127,26 @@ namespace Locus
 
 		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
 		{
-			const char* entityName = entity.GetComponent<TagComponent>().Tag.c_str();
-			ImGui::SetDragDropPayload("ENTITY_NODE", entityName, sizeof(entityName));
+			ImGui::SetDragDropPayload("ENTITY_NODE", &entity, sizeof(entity));
 
 			ImGui::EndDragDropSource();
+		}
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_NODE"))
+			{
+				// Swap payloadEntity with source entity
+				Entity payloadEntity = *(const Entity*)payload->Data;
+				auto payloadPos = std::find(m_ActiveScene->m_Entities.begin(), m_ActiveScene->m_Entities.end(), payloadEntity);
+				auto sourcePos = std::find(m_ActiveScene->m_Entities.begin(), m_ActiveScene->m_Entities.end(), entity);
+				LOCUS_CORE_ASSERT(payloadPos != m_ActiveScene->m_Entities.end() && sourcePos != m_ActiveScene->m_Entities.end(), "m_Entities idnex out of bounds!");
+				uint32_t payloadIndex = payloadPos - m_ActiveScene->m_Entities.begin();
+				uint32_t sourceIndex = sourcePos - m_ActiveScene->m_Entities.begin();
+
+				m_ActiveScene->m_Entities[payloadIndex] = entity;
+				m_ActiveScene->m_Entities[sourceIndex] = payloadEntity;
+			}
+			ImGui::EndDragDropTarget();
 		}
 
 		if (ImGui::IsItemClicked())

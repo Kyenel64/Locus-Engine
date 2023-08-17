@@ -38,10 +38,8 @@ namespace Locus
 
 		auto& otherRegistry = other->m_Registry;
 
-		auto view = otherRegistry.view<IDComponent>();
-		for (auto e : view)
+		for (auto entity : other->m_Entities)
 		{
-			Entity entity = Entity(e, other.get());
 			UUID uuid = otherRegistry.get<IDComponent>(entity).ID;
 			const auto& tag = otherRegistry.get<TagComponent>(entity).Tag;
 
@@ -81,6 +79,7 @@ namespace Locus
 		entity.AddComponent<TransformComponent>();
 		auto& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Entity" : name;
+		m_Entities.push_back(entity);
 		return entity;
 	}
 

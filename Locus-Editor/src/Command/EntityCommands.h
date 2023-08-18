@@ -119,6 +119,8 @@ namespace Locus
 				m_AvailableComponents["BoxCollider2D"] = true;
 			}
 
+			auto entityPos = std::find(m_ActiveScene->m_Entities.begin(), m_ActiveScene->m_Entities.end(), m_Entity);
+			m_ActiveScene->m_Entities.erase(entityPos);
 			m_ActiveScene->DestroyEntity(m_Entity);
 			Application::Get().SetIsSavedStatus(false);
 		}

@@ -139,7 +139,7 @@ namespace Locus
 				Entity payloadEntity = *(const Entity*)payload->Data;
 				auto payloadPos = std::find(m_ActiveScene->m_Entities.begin(), m_ActiveScene->m_Entities.end(), payloadEntity);
 				auto sourcePos = std::find(m_ActiveScene->m_Entities.begin(), m_ActiveScene->m_Entities.end(), entity);
-				LOCUS_CORE_ASSERT(payloadPos != m_ActiveScene->m_Entities.end() && sourcePos != m_ActiveScene->m_Entities.end(), "m_Entities idnex out of bounds!");
+				LOCUS_CORE_ASSERT(payloadPos != m_ActiveScene->m_Entities.end() && sourcePos != m_ActiveScene->m_Entities.end(), "m_Entities index out of bounds!");
 				uint32_t payloadIndex = payloadPos - m_ActiveScene->m_Entities.begin();
 				uint32_t sourceIndex = sourcePos - m_ActiveScene->m_Entities.begin();
 

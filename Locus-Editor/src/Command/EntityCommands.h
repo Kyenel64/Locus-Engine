@@ -15,42 +15,11 @@ namespace Locus
 		CreateEntityCommand(Ref<Scene> activeScene, const std::string& name)
 			: m_ActiveScene(activeScene), m_EntityName(name), m_UUID(UUID())
 		{
-			// TODO:Creating multiple empty entities should also add .### at the end
-		}
-
-		// Used for duplicating existing entities
-		CreateEntityCommand(Ref<Scene> activeScene, const std::string& name, Entity copyEntity)
-			: m_ActiveScene(activeScene), m_EntityName(name), m_UUID(UUID()), m_CopyEntity(copyEntity)
-		{
-			auto view = m_ActiveScene->m_Registry.view<TagComponent>();
-			int dupAmount = 0;
-
-			size_t entityNameDupPos = m_EntityName.find_last_of('.'); // TODO: Work with multiple .'s
-
-			if (entityNameDupPos != std::string::npos)
-				m_EntityName = m_EntityName.substr(0, entityNameDupPos);
-
-			LOCUS_CORE_INFO(m_EntityName);
-			for (auto entity : view)
-			{
-				std::string tagWithDup = m_ActiveScene->m_Registry.get<TagComponent>(entity).Tag;
-				size_t dupExtensionPos = tagWithDup.find_last_of('.');
-				std::string tag = tagWithDup.substr(0, dupExtensionPos);
-				if (tag.find(m_EntityName) != std::string::npos)
-					dupAmount++;
-			}
-			if (dupAmount)
-			{
-				std::stringstream ss;
-				ss << std::setw(3) << std::setfill('0') << dupAmount;
-				m_EntityName.append(".");
-				m_EntityName.append(ss.str());
-			}
 		}
 
 		virtual void Execute() override
 		{
-			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_UUID, m_EntityName);
+			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_Entity, m_UUID, m_EntityName);
 			Application::Get().SetIsSavedStatus(false);
 		}
 
@@ -118,16 +87,13 @@ namespace Locus
 				m_Components.BoxCollider2D = m_Entity.GetComponent<BoxCollider2DComponent>();
 				m_AvailableComponents["BoxCollider2D"] = true;
 			}
-
-			auto entityPos = std::find(m_ActiveScene->m_Entities.begin(), m_ActiveScene->m_Entities.end(), m_Entity);
-			m_ActiveScene->m_Entities.erase(entityPos);
 			m_ActiveScene->DestroyEntity(m_Entity);
 			Application::Get().SetIsSavedStatus(false);
 		}
 
 		virtual void Undo() override
 		{
-			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_UUID, m_Components.Tag.Tag);
+			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_Entity, m_UUID, m_Components.Tag.Tag);
 
 			m_Entity.GetComponent<TransformComponent>().Translation = m_Components.Transform.Translation;
 			m_Entity.GetComponent<TransformComponent>().Scale = m_Components.Transform.Scale;
@@ -158,6 +124,72 @@ namespace Locus
 		Entity m_Entity;
 		UUID m_UUID;
 	};
+
+
+
+	// --- DuplicateEntityCommand ------------------------------------------------
+	class DuplicateEntityCommand : public Command
+	{
+	public:
+		DuplicateEntityCommand() = default;
+		~DuplicateEntityCommand() = default;
+
+		// Used for duplicating existing entities
+		DuplicateEntityCommand(Ref<Scene> activeScene, const std::string& name, Entity copyEntity)
+			: m_ActiveScene(activeScene), m_EntityName(name), m_UUID(UUID()), m_CopyEntity(copyEntity)
+		{
+			auto view = m_ActiveScene->m_Registry.view<TagComponent>();
+			int dupAmount = 0;
+
+			size_t entityNameDupPos = m_EntityName.find_last_of('.'); // TODO: Work with multiple .'s
+
+			if (entityNameDupPos != std::string::npos)
+				m_EntityName = m_EntityName.substr(0, entityNameDupPos);
+
+			LOCUS_CORE_INFO(m_EntityName);
+			for (auto entity : view)
+			{
+				std::string tagWithDup = m_ActiveScene->m_Registry.get<TagComponent>(entity).Tag;
+				size_t dupExtensionPos = tagWithDup.find_last_of('.');
+				std::string tag = tagWithDup.substr(0, dupExtensionPos);
+				if (tag.find(m_EntityName) != std::string::npos)
+					dupAmount++;
+			}
+			if (dupAmount)
+			{
+				std::stringstream ss;
+				ss << std::setw(3) << std::setfill('0') << dupAmount;
+				m_EntityName.append(".");
+				m_EntityName.append(ss.str());
+			}
+		}
+
+		virtual void Execute() override
+		{
+			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_UUID, m_EntityName);
+			m_ActiveScene->CopyComponents(m_CopyEntity, m_Entity);
+			Application::Get().SetIsSavedStatus(false);
+		}
+
+		virtual void Undo() override
+		{
+			m_ActiveScene->DestroyEntity(m_Entity);
+			Application::Get().SetIsSavedStatus(false);
+		}
+
+		virtual bool Merge(Command* other) override
+		{
+			return false;
+		}
+
+	private:
+		Ref<Scene> m_ActiveScene;
+		Entity m_Entity;
+		Entity m_CopyEntity;
+		UUID m_UUID;
+		std::string m_EntityName;
+	};
+
 
 
 	// --- AddComponentCommand ------------------------------------------------

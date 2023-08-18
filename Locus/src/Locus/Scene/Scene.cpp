@@ -83,8 +83,27 @@ namespace Locus
 		return entity;
 	}
 
+	// Only used when we want to create an entity with the same entt id. 
+	// For example, undoing a destroy entity command will create a new Entity with a new entt id.
+	// To prevent that, we use this function so the entt id stays the same.
+	Entity Scene::CreateEntityWithUUID(Entity copyEntity, UUID uuid, const std::string& name)
+	{
+		Entity entity = Entity(m_Registry.create(copyEntity), this);
+		entity.AddComponent<IDComponent>(uuid);
+		entity.AddComponent<TransformComponent>();
+		auto& tag = entity.AddComponent<TagComponent>();
+		tag.Tag = name.empty() ? "Entity" : name;
+		m_Entities.push_back(entity);
+		return entity;
+	}
+
 	void Scene::DestroyEntity(Entity entity)
 	{
+		auto it = std::find(m_Entities.begin(), m_Entities.end(), entity);
+		if (it != m_Entities.end())
+		{
+			m_Entities.erase(it);
+		}
 		m_Registry.destroy(entity);
 	}
 

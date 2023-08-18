@@ -27,6 +27,7 @@ namespace Locus
 
 		Entity CreateEntity(const std::string& name = std::string());
 		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = std::string());
+		Entity CreateEntityWithUUID(Entity copyEntity, UUID uuid, const std::string& name = std::string());
 		void DestroyEntity(Entity entity);
 
 		void OnUpdateRuntime(Timestep deltaTime);
@@ -57,5 +58,6 @@ namespace Locus
 		friend class SceneHierarchyPanel;
 		friend class CreateEntityCommand;
 		friend class DestroyEntityCommand;
+		friend class DuplicateEntityCommand;
 	};
 }

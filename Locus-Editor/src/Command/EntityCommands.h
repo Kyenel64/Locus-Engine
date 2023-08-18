@@ -103,12 +103,12 @@ namespace Locus
 				m_Entity.AddComponent<SpriteRendererComponent>(m_Components.SpriteRenderer);
 			if (m_AvailableComponents["Camera"])
 				m_Entity.AddComponent<CameraComponent>(m_Components.Camera);
-			if (m_AvailableComponents["NativeScript"])
-				m_Entity.AddComponent<NativeScriptComponent>(m_Components.NativeScript);
 			if (m_AvailableComponents["Rigidbody2D"])
 				m_Entity.AddComponent<Rigidbody2DComponent>(m_Components.Rigidbody2D);
 			if (m_AvailableComponents["BoxCollider2D"])
 				m_Entity.AddComponent<BoxCollider2DComponent>(m_Components.BoxCollider2D);
+			if (m_AvailableComponents["NativeScript"])
+				m_Entity.AddComponent<NativeScriptComponent>(m_Components.NativeScript);
 			Application::Get().SetIsSavedStatus(false);
 		}
 

@@ -429,6 +429,12 @@ namespace Locus
 				break;
 			}
 
+			case Key::Delete:
+			{
+				if (m_SelectedEntity)
+					CommandHistory::AddCommand(new DestroyEntityCommand(m_ActiveScene, m_SelectedEntity));
+			}
+
 			// Command History
 			case Key::Y:
 			{

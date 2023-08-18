@@ -38,14 +38,16 @@ namespace Locus
 
 		auto& otherRegistry = other->m_Registry;
 
-		for (auto entity : other->m_Entities)
-		{
-			UUID uuid = otherRegistry.get<IDComponent>(entity).ID;
-			const auto& tag = otherRegistry.get<TagComponent>(entity).Tag;
+		// Display each entity
+		otherRegistry.each([&](auto entityID)
+			{
+				Entity entity = Entity(entityID, other.get());
+				UUID uuid = otherRegistry.get<IDComponent>(entity).ID;
+				const auto& tag = otherRegistry.get<TagComponent>(entity).Tag;
 
-			Entity newEntity = newScene->CreateEntityWithUUID(uuid, tag);
-			CopyComponents(entity, newEntity);
-		}
+				Entity newEntity = newScene->CreateEntityWithUUID(uuid, tag);
+				CopyComponents(entity, newEntity);
+			});
 
 		return newScene;
 	}
@@ -79,7 +81,6 @@ namespace Locus
 		entity.AddComponent<TransformComponent>();
 		auto& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Entity" : name;
-		m_Entities.push_back(entity);
 		return entity;
 	}
 
@@ -93,17 +94,11 @@ namespace Locus
 		entity.AddComponent<TransformComponent>();
 		auto& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Entity" : name;
-		m_Entities.push_back(entity);
 		return entity;
 	}
 
 	void Scene::DestroyEntity(Entity entity)
 	{
-		auto it = std::find(m_Entities.begin(), m_Entities.end(), entity);
-		if (it != m_Entities.end())
-		{
-			m_Entities.erase(it);
-		}
 		m_Registry.destroy(entity);
 	}
 

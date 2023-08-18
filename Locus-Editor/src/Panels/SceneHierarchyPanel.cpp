@@ -32,8 +32,11 @@ namespace Locus
 		if (m_ActiveScene)
 		{
 			// Display each entity
-			for (Entity entity : m_ActiveScene->m_Entities)
-				DrawEntityNode(entity);
+			m_ActiveScene->m_Registry.each([&](auto entityID)
+				{
+					Entity entity = Entity(entityID, m_ActiveScene.get());
+					DrawEntityNode(entity);
+				});
 
 			// Select nothing if clicking in blank space
 			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered() || !m_SelectedEntity.IsValid())
@@ -135,16 +138,7 @@ namespace Locus
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_NODE"))
 			{
-				// Swap payloadEntity with source entity
-				Entity payloadEntity = *(const Entity*)payload->Data;
-				auto payloadPos = std::find(m_ActiveScene->m_Entities.begin(), m_ActiveScene->m_Entities.end(), payloadEntity);
-				auto sourcePos = std::find(m_ActiveScene->m_Entities.begin(), m_ActiveScene->m_Entities.end(), entity);
-				LOCUS_CORE_ASSERT(payloadPos != m_ActiveScene->m_Entities.end() && sourcePos != m_ActiveScene->m_Entities.end(), "m_Entities index out of bounds!");
-				uint32_t payloadIndex = payloadPos - m_ActiveScene->m_Entities.begin();
-				uint32_t sourceIndex = sourcePos - m_ActiveScene->m_Entities.begin();
-
-				m_ActiveScene->m_Entities[payloadIndex] = entity;
-				m_ActiveScene->m_Entities[sourceIndex] = payloadEntity;
+				
 			}
 			ImGui::EndDragDropTarget();
 		}

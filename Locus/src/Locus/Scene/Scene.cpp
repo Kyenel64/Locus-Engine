@@ -46,7 +46,7 @@ namespace Locus
 				const auto& tag = otherRegistry.get<TagComponent>(entity).Tag;
 
 				Entity newEntity = newScene->CreateEntityWithUUID(uuid, tag);
-				CopyComponents(entity, newEntity);
+				CopyAllComponents(entity, newEntity);
 			});
 
 		return newScene;
@@ -59,7 +59,7 @@ namespace Locus
 			to.AddOrReplaceComponent<T>(from.GetComponent<T>());
 	}
 
-	void Scene::CopyComponents(Entity from, Entity to)
+	void Scene::CopyAllComponents(Entity from, Entity to)
 	{
 		CopyComponent<TransformComponent>(from, to);
 		CopyComponent<SpriteRendererComponent>(from, to);

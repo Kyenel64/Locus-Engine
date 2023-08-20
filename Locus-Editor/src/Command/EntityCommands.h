@@ -167,7 +167,7 @@ namespace Locus
 		virtual void Execute() override
 		{
 			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_UUID, m_EntityName);
-			m_ActiveScene->CopyComponents(m_CopyEntity, m_Entity);
+			m_ActiveScene->CopyAllComponents(m_CopyEntity, m_Entity);
 			Application::Get().SetIsSavedStatus(false);
 		}
 

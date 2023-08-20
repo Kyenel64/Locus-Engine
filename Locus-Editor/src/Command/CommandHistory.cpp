@@ -37,12 +37,6 @@ namespace Locus
 		LOCUS_CORE_INFO("ADDED COMMAND. Ptr Position: {0}", m_CommandPtr);
 	}
 
-	void CommandHistory::SetNoMergeMostRecent()
-	{
-		if (m_CommandSize - 1 >= 0)
-			m_Commands[m_CommandSize - 1]->SetNoMerge();
-	}
-
 	void CommandHistory::Undo()
 	{
 		if (m_CommandPtr >= 0 && m_Commands[m_CommandPtr] != nullptr && !m_FirstCommand)

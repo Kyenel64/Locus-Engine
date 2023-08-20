@@ -34,18 +34,8 @@ namespace Locus
 			// Display each entity
 			m_ActiveScene->m_Registry.each([&](auto entityID)
 				{
-					Entity entity(entityID, m_ActiveScene.get());
+					Entity entity = Entity(entityID, m_ActiveScene.get());
 					DrawEntityNode(entity);
-
-					ImGui::InvisibleButton("##Spacing", { -1.0f, 3.0f });
-					if (ImGui::BeginDragDropTarget())
-					{
-						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_NODE"))
-						{
-							LOCUS_CORE_INFO(payload->Data);
-						}
-						ImGui::EndDragDropTarget();
-					}
 				});
 
 			// Select nothing if clicking in blank space
@@ -140,10 +130,17 @@ namespace Locus
 
 		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
 		{
-			const char* entityName = entity.GetComponent<TagComponent>().Tag.c_str();
-			ImGui::SetDragDropPayload("ENTITY_NODE", entityName, sizeof(entityName));
+			ImGui::SetDragDropPayload("ENTITY_NODE", &entity, sizeof(entity));
 
 			ImGui::EndDragDropSource();
+		}
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_NODE"))
+			{
+				
+			}
+			ImGui::EndDragDropTarget();
 		}
 
 		if (ImGui::IsItemClicked())

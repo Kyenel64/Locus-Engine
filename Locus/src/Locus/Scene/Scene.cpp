@@ -38,16 +38,16 @@ namespace Locus
 
 		auto& otherRegistry = other->m_Registry;
 
-		auto view = otherRegistry.view<IDComponent>();
-		for (auto e : view)
-		{
-			Entity entity = Entity(e, other.get());
-			UUID uuid = otherRegistry.get<IDComponent>(entity).ID;
-			const auto& tag = otherRegistry.get<TagComponent>(entity).Tag;
+		// Display each entity
+		otherRegistry.each([&](auto entityID)
+			{
+				Entity entity = Entity(entityID, other.get());
+				UUID uuid = otherRegistry.get<IDComponent>(entity).ID;
+				const auto& tag = otherRegistry.get<TagComponent>(entity).Tag;
 
-			Entity newEntity = newScene->CreateEntityWithUUID(uuid, tag);
-			CopyComponents(entity, newEntity);
-		}
+				Entity newEntity = newScene->CreateEntityWithUUID(uuid, tag);
+				CopyAllComponents(entity, newEntity);
+			});
 
 		return newScene;
 	}
@@ -59,7 +59,7 @@ namespace Locus
 			to.AddOrReplaceComponent<T>(from.GetComponent<T>());
 	}
 
-	void Scene::CopyComponents(Entity from, Entity to)
+	void Scene::CopyAllComponents(Entity from, Entity to)
 	{
 		CopyComponent<TransformComponent>(from, to);
 		CopyComponent<SpriteRendererComponent>(from, to);
@@ -77,6 +77,19 @@ namespace Locus
 	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name)
 	{
 		Entity entity = Entity(m_Registry.create(), this);
+		entity.AddComponent<IDComponent>(uuid);
+		entity.AddComponent<TransformComponent>();
+		auto& tag = entity.AddComponent<TagComponent>();
+		tag.Tag = name.empty() ? "Entity" : name;
+		return entity;
+	}
+
+	// Only used when we want to create an entity with the same entt id. 
+	// For example, undoing a destroy entity command will create a new Entity with a new entt id.
+	// To prevent that, we use this function so the entt id stays the same.
+	Entity Scene::CreateEntityWithUUID(Entity copyEntity, UUID uuid, const std::string& name)
+	{
+		Entity entity = Entity(m_Registry.create(copyEntity), this);
 		entity.AddComponent<IDComponent>(uuid);
 		entity.AddComponent<TransformComponent>();
 		auto& tag = entity.AddComponent<TagComponent>();

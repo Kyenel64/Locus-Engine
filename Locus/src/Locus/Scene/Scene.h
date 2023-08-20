@@ -23,10 +23,11 @@ namespace Locus
 		static Ref<Scene> Copy(Ref<Scene> other);
 		template<typename T>
 		static void CopyComponent(Entity from, Entity to);
-		static void CopyComponents(Entity from, Entity to);
+		static void CopyAllComponents(Entity from, Entity to);
 
 		Entity CreateEntity(const std::string& name = std::string());
 		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = std::string());
+		Entity CreateEntityWithUUID(Entity copyEntity, UUID uuid, const std::string& name = std::string());
 		void DestroyEntity(Entity entity);
 
 		void OnUpdateRuntime(Timestep deltaTime);
@@ -55,5 +56,7 @@ namespace Locus
 		friend class SceneSerializer;
 		friend class SceneHierarchyPanel;
 		friend class CreateEntityCommand;
+		friend class DestroyEntityCommand;
+		friend class DuplicateEntityCommand;
 	};
 }

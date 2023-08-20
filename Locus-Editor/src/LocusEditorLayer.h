@@ -27,7 +27,6 @@ namespace Locus
 		// Events
 		bool OnKeyPressed(KeyPressedEvent& e);
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
-		bool OnMouseButtonReleased(MouseButtonReleasedEvent& e);
 
 		void NewScene();
 		void OpenScene();
@@ -65,9 +64,6 @@ namespace Locus
 		Entity m_HoveredEntity;
 		Entity m_SelectedEntity;
 		Entity m_ClipboardEntity;
-
-		// Components
-		ComponentsList m_ClipboardComponents;
 
 		// Viewport Gizmo
 		int m_GizmoType = -1;

@@ -37,20 +37,14 @@ namespace Locus
 		LOCUS_CORE_INFO("ADDED COMMAND. Ptr Position: {0}", m_CommandPtr);
 	}
 
-	void CommandHistory::SetNoMergeMostRecent()
-	{
-		if (m_CommandSize - 1 >= 0)
-			m_Commands[m_CommandSize - 1]->SetNoMerge();
-	}
-
 	void CommandHistory::Undo()
 	{
 		if (m_CommandPtr >= 0 && m_Commands[m_CommandPtr] != nullptr && !m_FirstCommand)
 		{
-			LOCUS_CORE_INFO("UNDO COMMAND. Ptr Position: {0}", m_CommandPtr);
 			m_Commands[m_CommandPtr]->Undo();
 			m_CommandPtr--;
 			m_FirstCommand = false;
+			LOCUS_CORE_INFO("UNDO COMMAND. Ptr Position: {0}", m_CommandPtr);
 		}
 	}
 
@@ -59,10 +53,10 @@ namespace Locus
 		int32_t redoCommandPtr = m_CommandPtr + 1;
 		if (redoCommandPtr < m_CommandSize && redoCommandPtr >= 0 && !m_FirstCommand)
 		{
-			LOCUS_CORE_INFO("REDO COMMAND. Ptr Position: {0}", m_CommandPtr);
 			m_Commands[redoCommandPtr]->Execute();
 			m_CommandPtr++;
 			m_FirstCommand = false;
+			LOCUS_CORE_INFO("REDO COMMAND. Ptr Position: {0}", m_CommandPtr);
 		}
 	}
 

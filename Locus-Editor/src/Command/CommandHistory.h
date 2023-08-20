@@ -12,8 +12,6 @@ namespace Locus
 
 		static void Shutdown();
 
-		static void SetNoMergeMostRecent();
-
 		static void Reset();
 
 	private:

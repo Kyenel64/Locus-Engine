@@ -172,7 +172,6 @@ namespace Locus
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<KeyPressedEvent>(LOCUS_BIND_EVENT_FN(LocusEditorLayer::OnKeyPressed));
 		dispatcher.Dispatch<MouseButtonPressedEvent>(LOCUS_BIND_EVENT_FN(LocusEditorLayer::OnMouseButtonPressed));
-		dispatcher.Dispatch<MouseButtonReleasedEvent>(LOCUS_BIND_EVENT_FN(LocusEditorLayer::OnMouseButtonReleased));
 	}
 
 	void LocusEditorLayer::OnImGuiRender()
@@ -365,8 +364,6 @@ namespace Locus
 
 	bool LocusEditorLayer::OnKeyPressed(KeyPressedEvent& e)
 	{
-		//if (e.GetRepeatCount() > 0)
-			//return false;
 
 		bool control = Input::IsKeyPressed(Key::LeftControl) || Input::IsKeyPressed(Key::RightControl);
 		bool shift = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
@@ -411,7 +408,7 @@ namespace Locus
 					if (m_ClipboardEntity)
 					{
 						std::string& tag = m_ClipboardEntity.GetComponent<TagComponent>().Tag;
-						CommandHistory::AddCommand(new CreateEntityCommand(m_ActiveScene, tag, m_ClipboardEntity));
+						CommandHistory::AddCommand(new DuplicateEntityCommand(m_ActiveScene, tag, m_ClipboardEntity));
 					}
 				}
 				break;
@@ -424,9 +421,16 @@ namespace Locus
 					if (m_SelectedEntity)
 					{
 						std::string& tag = m_SelectedEntity.GetComponent<TagComponent>().Tag;
-						CommandHistory::AddCommand(new CreateEntityCommand(m_ActiveScene, tag, m_SelectedEntity));
+						CommandHistory::AddCommand(new DuplicateEntityCommand(m_ActiveScene, tag, m_SelectedEntity));
 					}
 				}
+				break;
+			}
+
+			case Key::Delete:
+			{
+				if (m_SelectedEntity)
+					CommandHistory::AddCommand(new DestroyEntityCommand(m_ActiveScene, m_SelectedEntity));
 				break;
 			}
 
@@ -473,17 +477,12 @@ namespace Locus
 		return false;
 	}
 
-	bool LocusEditorLayer::OnMouseButtonReleased(MouseButtonReleasedEvent& e)
-	{
-		CommandHistory::SetNoMergeMostRecent();
-		return false;
-	}
-
 	void LocusEditorLayer::NewScene()
 	{
-		m_ActiveScene = CreateRef<Scene>();
-		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_EditorScene = CreateRef<Scene>();
+		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_ActiveScene = m_EditorScene;
 		m_SavePath = std::string();
 		Application::Get().SetIsSavedStatus(false);
 		CommandHistory::Reset();
@@ -501,9 +500,7 @@ namespace Locus
 		m_EditorScene = CreateRef<Scene>();
 		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_SceneHierarchyPanel.SetContext(m_EditorScene);
-
 		m_ActiveScene = m_EditorScene;
-
 		SceneSerializer serializer(m_EditorScene);
 		serializer.Deserialize(path.string());
 		m_SavePath = path.string();

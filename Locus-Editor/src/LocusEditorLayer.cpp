@@ -180,25 +180,21 @@ namespace Locus
 		//ImGui::ShowDemoWindow();
 
 		static bool dockspaceOpen = true;
-		static bool opt_fullscreen_persistant = true;
-		bool opt_fullscreen = opt_fullscreen_persistant;
 		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
 		// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
 		// because it would be confusing to have two docking targets within each others.
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-		if (opt_fullscreen)
-		{
-			ImGuiViewport* viewport = ImGui::GetMainViewport();
-			ImGui::SetNextWindowPos(viewport->Pos);
-			ImGui::SetNextWindowSize(viewport->Size);
-			ImGui::SetNextWindowViewport(viewport->ID);
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-			window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-			window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-		}
-
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->Pos);
+		ImGui::SetNextWindowSize(viewport->Size);
+		ImGui::SetNextWindowViewport(viewport->ID);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove 
+			| ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+		
 		// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background and handle the pass-thru hole, so we ask Begin() to not render a background.
 		if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
 			window_flags |= ImGuiWindowFlags_NoBackground;
@@ -208,12 +204,8 @@ namespace Locus
 		// all active windows docked into it will lose their parent and become undocked.
 		// We cannot preserve the docking relationship between an active window and an inactive docking, otherwise 
 		// any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("DockSpace", &dockspaceOpen, window_flags);
-		ImGui::PopStyleVar();
-
-		if (opt_fullscreen)
-			ImGui::PopStyleVar(2);
+		ImGui::PopStyleVar(3);
 
 		// DockSpace
 		ImGuiIO& io = ImGui::GetIO();
@@ -224,11 +216,12 @@ namespace Locus
 		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		{
 			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+			//ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 		}
 
 		// --- Menu Bar -------------------------------------------------------
-		if (ImGui::BeginMenuBar())
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { -1.0f, 10.0f });
+		if (ImGui::BeginMainMenuBar())
 		{
 			if (ImGui::BeginMenu("File"))
 			{
@@ -255,8 +248,9 @@ namespace Locus
 				ImGui::EndMenu();
 			}
 
-			ImGui::EndMenuBar();
+			ImGui::EndMainMenuBar();
 		}
+		ImGui::PopStyleVar();
 
 		// --- Debug panel ---------------------------------------------------
 		ImGui::Begin("Debug");
@@ -622,36 +616,36 @@ namespace Locus
 
 	void LocusEditorLayer::EditorToolbar()
 	{
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 2));
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 0));
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-		auto& colors = ImGui::GetStyle().Colors;
-		const auto& buttonHovered = colors[ImGuiCol_ButtonHovered];
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(buttonHovered.x, buttonHovered.y, buttonHovered.z, 0.5f));
-		const auto& buttonActive = colors[ImGuiCol_ButtonActive];
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(buttonActive.x, buttonActive.y, buttonActive.z, 0.5f));
+		//ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 2));
+		//ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 0));
+		//ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+		//auto& colors = ImGui::GetStyle().Colors;
+		//const auto& buttonHovered = colors[ImGuiCol_ButtonHovered];
+		//ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(buttonHovered.x, buttonHovered.y, buttonHovered.z, 0.5f));
+		//const auto& buttonActive = colors[ImGuiCol_ButtonActive];
+		//ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(buttonActive.x, buttonActive.y, buttonActive.z, 0.5f));
 
-		// Sets docknode flags for individual windows
-		ImGuiWindowClass windowClass;
-		windowClass.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
-		windowClass.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoResize;
-		ImGui::SetNextWindowClass(&windowClass);
-		ImGui::Begin("##toolbar", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-		
-		float size = ImGui::GetWindowHeight() - 4.0f;
-		ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f));
+		//// Sets docknode flags for individual windows
+		//ImGuiWindowClass windowClass;
+		//windowClass.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
+		//windowClass.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoResize;
+		//ImGui::SetNextWindowClass(&windowClass);
+		//ImGui::Begin("##toolbar", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+		//
+		//float size = ImGui::GetWindowHeight() - 4.0f;
+		//ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f));
 
-		uint32_t iconID = m_SceneState == SceneState::Edit ? m_PlayButton->GetRendererID() : m_StopButton->GetRendererID();
-		if (ImGui::ImageButton((ImTextureID)(uint64_t)iconID, ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0))
-		{
-			if (m_SceneState == SceneState::Edit)
-				OnScenePlay();
-			else if (m_SceneState == SceneState::Play)
-				OnSceneStop();
-		}
-		ImGui::PopStyleVar(2);
-		ImGui::PopStyleColor(3);
-		ImGui::End();
+		//uint32_t iconID = m_SceneState == SceneState::Edit ? m_PlayButton->GetRendererID() : m_StopButton->GetRendererID();
+		//if (ImGui::ImageButton((ImTextureID)(uint64_t)iconID, ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0))
+		//{
+		//	if (m_SceneState == SceneState::Edit)
+		//		OnScenePlay();
+		//	else if (m_SceneState == SceneState::Play)
+		//		OnSceneStop();
+		//}
+		//ImGui::PopStyleVar(2);
+		//ImGui::PopStyleColor(3);
+		//ImGui::End();
 	}
 
 	void LocusEditorLayer::OnScenePlay()

@@ -24,9 +24,9 @@ namespace Locus
 	{
 		m_WindowSize.x = Application::Get().GetWindow().GetWidth();
 		m_WindowSize.y = Application::Get().GetWindow().GetHeight();
+		m_PrevWindowSize = m_WindowSize;
 
-		m_FrameSizes[0] = { m_WindowSize.x *        0.8f       - (m_WindowPadding * 2), m_WindowSize.y *        0.7f       - (m_WindowPadding * 2) - m_MenuBarHeight - m_TabBarHeight };
-		m_FrameSizes[1] = { m_WindowSize.x - m_FrameSizes[0].x - (m_WindowPadding * 4), m_WindowSize.y *        0.5f       - (m_WindowPadding * 2) - m_MenuBarHeight - m_TabBarHeight };
+		m_ViewportHeight = 800.0f;
 	}
 
 	void NewGUILayer::OnDetach()
@@ -36,28 +36,18 @@ namespace Locus
 
 	void NewGUILayer::OnUpdate(Timestep deltaTime)
 	{
-		m_WindowSize.x = Application::Get().GetWindow().GetWidth();
-		m_WindowSize.y = Application::Get().GetWindow().GetHeight();
-
-		if (m_LayoutStyle == LayoutStyle::Default)
-		{
-			m_FrameSizes[0] = { };
-			m_FramePositions[0] = { m_WindowPadding, 25.0f + m_WindowPadding };
-		}
-
 	}
 
 	void NewGUILayer::OnEvent(Event& event)
 	{
-
 	}
 
 	void NewGUILayer::OnImGuiRender()
 	{
-		ImGui::ShowDemoWindow();
+		//ImGui::ShowDemoWindow();
 
 		static bool dockspaceOpen = true;
-		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_NoSplit;
+		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -73,33 +63,93 @@ namespace Locus
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("DockSpace", &dockspaceOpen, window_flags);
 		ImGui::PopStyleVar();
+		ImGuiIO io = ImGui::GetIO();
 
-		ImGui::BeginMainMenuBar();
-		ImGui::EndMainMenuBar();
+		m_WindowSize.x = ImGui::GetContentRegionAvail().x;
+		m_WindowSize.y = ImGui::GetContentRegionAvail().y;
+		ProcessResize();
 
-		bool selected = false;
-		ImGui::Selectable("movebar", selected);
+		ImGui::BeginMenuBar();
+		ImGui::EndMenuBar();
 
-		ImGuiWindowFlags windowFlags =  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDocking;
+		if (ImGui::BeginTable("Layout", 1, ImGuiTableFlags_Borders, { m_WindowSize.x * 0.5f, m_WindowSize.y }))
+		{
+			ImGui::TableNextColumn();
+			ImGui::BeginChild("Frame1", { -1.0f, m_ViewportHeight }, true);
+			ImGui::EndChild();
 
+			ImGui::Button("Divider", { -1.0f, 5.0f });
+			if (ImGui::IsItemActive())
+			{
+				m_ViewportHeight += io.MouseDelta.y;
+			}
+
+			ImGui::BeginChild("Frame2", { -1.0f, -1.0f }, true);
+			ImGui::EndChild();
+
+			ImGui::EndTable();
+		}
+
+		//ProcessDragBars();
+
+		/*ImGuiWindowFlags windowFlags = ImGuiWindowFlags_None;
 		ImGui::Begin("ViewportWindow", false, windowFlags);
-		ImGui::SetWindowSize({ m_FrameSizes[0].x, m_FrameSizes[0].y });
-		ImGui::SetWindowPos({ m_FramePositions[0].x, m_FramePositions[0].y });
 		ImGui::End();
 
-		ImGui::Begin("SceneHierarchyFrame", false, windowFlags);
-		ImGui::SetWindowSize({ m_FrameSizes[1].x, m_FrameSizes[1].y });
+		/*ImGui::Begin("SceneHierarchyFrame", false, windowFlags);
 		ImGui::End();
 
 		ImGui::Begin("Properties", false, windowFlags);
-		ImGui::SetWindowSize({ m_FrameSizes[2].x, m_FrameSizes[2].y });
 		ImGui::End();
 
 		ImGui::Begin("ContentBrowser", false, windowFlags);
-		ImGui::SetWindowSize({ m_FrameSizes[3].x, m_FrameSizes[3].y });
-		ImGui::End();
+		ImGui::End();*/
 
 
 		ImGui::End();
+
+	}
+
+	void NewGUILayer::ProcessDragBars()
+	{
+		ImGuiIO io = ImGui::GetIO();
+		ImGuiWindowFlags buttonFlags = ImGuiWindowFlags_NoDecoration;
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, { 0.0f, 0.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 4.0f });
+		ImGui::Begin("Slider1", false, buttonFlags);
+		ImGui::SetWindowSize({ 100.0f, 10.0f });
+		ImGui::Button("HorizontalDividerRight", { -1.0f, 2.0f });
+		if (ImGui::IsItemActive())
+		{
+			ImVec2 newButtonPos = { ImGui::GetWindowPos().x, ImGui::GetWindowPos().y + io.MouseDelta.y };
+			ImGui::SetWindowPos(newButtonPos);
+
+			// Modify viewport size
+			ImGuiWindow* viewportWindow = ImGui::FindWindowByName("ViewportWindow");
+			ImVec2 newViewportSize = { viewportWindow->Size.x, viewportWindow->Size.y + io.MouseDelta.y };
+			ImGui::SetWindowSize(viewportWindow, newViewportSize);
+
+			// Modify browser Pos + Size
+			ImGuiWindow* browserWindow = ImGui::FindWindowByName("ContentBrowser");
+			ImVec2 newBrowserSize = { browserWindow->Size.x, browserWindow->Size.y - io.MouseDelta.y };
+			ImVec2 newBrowserPos = { browserWindow->Pos.x, browserWindow->Pos.y + io.MouseDelta.y };
+			ImGui::SetWindowSize(browserWindow, newBrowserSize);
+			ImGui::SetWindowPos(browserWindow, newBrowserPos);
+		}
+		ImGui::End();
+		ImGui::PopStyleVar(2);
+	}
+
+	void NewGUILayer::ProcessResize()
+	{
+		if (m_PrevWindowSize != m_WindowSize)
+		{
+			float diffY = m_PrevWindowSize.y - m_WindowSize.y;
+			LOCUS_CORE_INFO(diffY);
+
+			m_ViewportHeight -= diffY;
+		}
+
+		m_PrevWindowSize = m_WindowSize;
 	}
 }

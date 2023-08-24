@@ -17,12 +17,19 @@ namespace Locus
 		virtual void OnImGuiRender() override;
 
 	private:
+		void ProcessDragBars();
+		void ProcessResize();
+		bool OnWindowResize(WindowResizeEvent& e);
+
+	private:
 		float m_WindowPadding = 5.0f;
 		float m_MenuBarHeight = 25.0f;
 		float m_TabBarHeight = 25.0f;
+		float m_ViewportHeight;
 		glm::vec2 m_FrameSizes[4];
 		glm::vec2 m_FramePositions[4];
-		glm::vec2 m_WindowSize = { 1920.0f, 1080.0f };
+		glm::vec2 m_WindowSize;
+		glm::vec2 m_PrevWindowSize;
 
 		enum class LayoutStyle { Default = 0 };
 		LayoutStyle m_LayoutStyle = LayoutStyle::Default;

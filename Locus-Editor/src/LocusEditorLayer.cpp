@@ -216,7 +216,7 @@ namespace Locus
 		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		{
 			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-			//ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 		}
 
 		// --- Menu Bar -------------------------------------------------------
@@ -289,6 +289,7 @@ namespace Locus
 			viewportFlags |= ImGuiWindowFlags_UnsavedDocument;
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 20.0f);
 		ImGui::Begin("Viewport", 0, viewportFlags);
 	
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
@@ -325,7 +326,7 @@ namespace Locus
 		}
 		
 		ImGui::End(); // End viewport
-		ImGui::PopStyleVar();
+		ImGui::PopStyleVar(2);
 
 		// --- Save Project Popup ---------------------------------------------
 		if (Application::Get().GetSaveChangesPopupStatus())

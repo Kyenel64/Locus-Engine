@@ -3,6 +3,7 @@
 #include <Locus/Core/EntryPoint.h>
 
 #include "LocusEditorLayer.h"
+#include "NewGUILayer.h"
 
 namespace Locus
 {
@@ -12,7 +13,8 @@ namespace Locus
 		LocusEditorApp(ApplicationCommandLineArgs args) 
 			: Application("Locus Editor", args)
 		{
-			PushLayer(new LocusEditorLayer());
+			//PushLayer(new LocusEditorLayer());
+			PushLayer(new NewGUILayer());
 		}
 
 		~LocusEditorApp() {}

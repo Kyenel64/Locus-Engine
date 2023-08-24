@@ -1,5 +1,5 @@
-# Locus Engine
-Locus is a game engine currently in development for Windows using C++ and OpenGL. More platforms and rendering APIs may be implemented in the future.
+# Locus Game Engine
+Locus is a 2D game engine currently in development for Windows. More platforms and rendering APIs may be implemented in the future.
 ***
 ## How to Install
 
@@ -16,6 +16,4 @@ Requirements: Visual Studio 2022
 - Build solution using Visual Studio (Locus-Editor should be selected as the startup project).
 
 #### 4. Running the engine editor
-- You can either run using Visual Studio or the generated .exe.
-- The .exe will be generated in `bin/(Config)-windows-x86_64/Locus-Editor/Locus-Editor.exe`.
-- To run using the .exe file, copy the `assets` folder from `Locus-Editor/` to the directory containing .exe.
+- Press F5 or click the start button in Visual Studio to run the application.

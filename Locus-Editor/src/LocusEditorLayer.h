@@ -8,6 +8,7 @@
 
 #include "Panels/SceneHierarchyPanel.h"
 #include "Panels/ContentBrowserPanel.h"
+#include "Panels/PropertiesPanel.h"
 
 namespace Locus
 {
@@ -75,6 +76,7 @@ namespace Locus
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 		ContentBrowserPanel m_ContentBrowserPanel;
+		PropertiesPanel m_PropertiesPanel;
 
 		float m_ViewportHeight; // Makes more sense to do m_LeftSplitterPos & m_RightSplitterPos
 		float m_HierarchyHeight;

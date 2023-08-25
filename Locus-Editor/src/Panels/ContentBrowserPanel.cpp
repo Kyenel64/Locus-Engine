@@ -20,7 +20,7 @@ namespace Locus
 	void ContentBrowserPanel::OnImGuiRender()
 	{
 		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar;
-		ImGui::Begin("Content Browser", false, windowFlags);
+		//ImGui::Begin("Content Browser", false, windowFlags);
 
 		static ImGuiTableFlags tableFlags = ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Resizable
 			| ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg;
@@ -43,7 +43,7 @@ namespace Locus
 		}
 		ImGui::PopStyleColor();
 
-		ImGui::End(); // End Content Browser
+		//ImGui::End(); // End Content Browser
 	}
 
 	void ContentBrowserPanel::DrawCurrentDirectoryView()

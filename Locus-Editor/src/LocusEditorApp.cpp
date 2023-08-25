@@ -13,8 +13,8 @@ namespace Locus
 		LocusEditorApp(ApplicationCommandLineArgs args) 
 			: Application("Locus Editor", args)
 		{
-			//PushLayer(new LocusEditorLayer());
-			PushLayer(new NewGUILayer());
+			PushLayer(new LocusEditorLayer());
+			//PushLayer(new NewGUILayer());
 		}
 
 		~LocusEditorApp() {}

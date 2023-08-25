@@ -87,6 +87,7 @@ namespace Locus
 
 		// Panels
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_PropertiesPanel.SetContext(m_ActiveScene);
 
 		// Editor Camera
 		m_EditorCamera = EditorCamera(30.0f, 1920.0f / 1080.0f, 0.1f, 1000.0f);
@@ -160,6 +161,7 @@ namespace Locus
 			m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 		}
 		m_SelectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+		m_PropertiesPanel.SetSelectedEntity(m_SelectedEntity);
 
 		if (m_SelectedEntity == Entity::Null)
 			ImGuizmo::Enable(false);
@@ -314,10 +316,14 @@ namespace Locus
 		m_ContentBrowserPanel.OnImGuiRender();
 		LocusUI::EndWindow();
 
-
 		// --- Scene Hierarchy ------------------------------------------------
 		LocusUI::BeginWindow("SceneHierarchy", m_FrameSizes[2], m_FramePositions[2]);
 		m_SceneHierarchyPanel.OnImGuiRender();
+		LocusUI::EndWindow();
+
+		// --- Properties -----------------------------------------------------
+		LocusUI::BeginWindow("Properties", m_FrameSizes[3], m_FramePositions[3]);
+		m_PropertiesPanel.OnImGuiRender();
 		LocusUI::EndWindow();
 
 	

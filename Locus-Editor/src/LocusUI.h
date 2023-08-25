@@ -9,7 +9,7 @@ namespace LocusUI
 {
 	void BeginWindow(const std::string& name, const glm::vec2& size, const glm::vec2& pos)
 	{
-		ImGuiWindowFlags testFlags = ImGuiWindowFlags_NoDecoration;
+		ImGuiWindowFlags testFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 0.0f });
 		ImGui::PushStyleVar(ImGuiStyleVar_TabRounding, 0.0f);
@@ -19,7 +19,6 @@ namespace LocusUI
 		ImGui::SetWindowSize({ size.x, size.y });
 		ImGui::SetWindowPos({ pos.x, pos.y });
 
-
 		ImGui::BeginTabBar("TabBar");
 
 		ImGui::BeginTabItem(name.c_str());
@@ -28,8 +27,6 @@ namespace LocusUI
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, { 0.29f, 0.28f, 0.27f, 1.0f });
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
 		ImGui::BeginChild(childName.c_str(), ImGui::GetContentRegionAvail(), false);
-
-
 	}
 
 	void EndWindow()
@@ -41,6 +38,7 @@ namespace LocusUI
 		ImGui::EndTabItem();
 
 		ImGui::EndTabBar();
+
 		ImGui::End();
 		ImGui::PopStyleVar(3);
 		ImGui::PopStyleColor(2);

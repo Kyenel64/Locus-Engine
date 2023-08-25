@@ -1,5 +1,5 @@
 // --- SceneHierarchyPanel ----------------------------------------------------
-// Scene hierarchy and entity properties panels.
+// Scene hierarchy panel.
 #pragma once
 
 #include <glm/glm.hpp>
@@ -24,20 +24,9 @@ namespace Locus
 		void SetSelectedEntity(Entity entity) { m_SelectedEntity = entity; }
 	private:
 		void DrawEntityNode(Entity entity);
-		void DrawComponents(Entity entity);
-		template<typename T, typename UIFunction>
-		void DrawComponentUI(const std::string& name, Entity entity, UIFunction uiFunction);
-		void DrawVec3Control(const std::string& name, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f);
-		
-		template<typename T>
-		void CopyComponentToClipboard(Entity selectedEntity);
-		void PasteComponent(Entity selectedEntity);
 
 	private:
 		Ref<Scene> m_ActiveScene;
 		Entity m_SelectedEntity;
-
-		ComponentsList m_ClipboardComponent;
-		ComponentType m_ClipboardComponentType = ComponentType::None;
 	};
 }

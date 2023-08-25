@@ -20,10 +20,12 @@ namespace Locus
 		void ProcessResize();
 		void DrawLayoutTable();
 
+		void DrawWindow(const std::string& name, std::function<void()> windowFunction);
+
 	private:
 		float m_ViewportHeight;
 		float m_HierarchyHeight;
-		float m_CenterSplitter;
+		float m_CenterSplitterPos;
 		glm::vec2 m_FrameSizes[4];
 		glm::vec2 m_FramePositions[4];
 		glm::vec2 m_WindowSize;

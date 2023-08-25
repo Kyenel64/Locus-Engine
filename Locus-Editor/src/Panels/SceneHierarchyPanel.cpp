@@ -26,7 +26,7 @@ namespace Locus
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
 		// --- Scene Hierarchy Panel ------------------------------------------
-		ImGui::Begin("Scene Hierarchy");
+		//ImGui::Begin("Scene Hierarchy");
 
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 1.0f });
 		if (m_ActiveScene)
@@ -52,7 +52,7 @@ namespace Locus
 		}
 		ImGui::PopStyleVar();
 		
-		ImGui::End();
+		//ImGui::End();
 
 		// --- Properties Panel -----------------------------------------------
 		ImGui::Begin("Properties");

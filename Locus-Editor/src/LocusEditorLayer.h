@@ -28,18 +28,22 @@ namespace Locus
 		bool OnKeyPressed(KeyPressedEvent& e);
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 
+		// Serialization
 		void NewScene();
 		void OpenScene();
 		void OpenScene(const std::filesystem::path& path);
 		void SaveSceneAs();
 		void SaveScene();
 
+		// Viewport
+		void showGizmoUI();
+		void ProcessViewportDragDrop();
 		void OnScenePlay();
 		void OnSceneStop();
 
-		void showGizmoUI();
-		void ProcessViewportDragDrop();
-		void EditorToolbar();
+		// Layout
+		void DrawLayoutTable();
+		void DrawWindow(const std::string& name, std::function<void()> windowFunction);
 
 	private:
 		// Scene
@@ -71,5 +75,15 @@ namespace Locus
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 		ContentBrowserPanel m_ContentBrowserPanel;
+
+		float m_ViewportHeight; // Makes more sense to do m_LeftSplitterPos & m_RightSplitterPos
+		float m_HierarchyHeight;
+		float m_CenterSplitterPos;
+		glm::vec2 m_FrameSizes[4];
+		glm::vec2 m_FramePositions[4];
+		glm::vec2 m_WindowSize;
+
+		enum class LayoutStyle { Default = 0 };
+		LayoutStyle m_LayoutStyle = LayoutStyle::Default;
 	};
 }

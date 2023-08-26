@@ -24,8 +24,6 @@ namespace Locus
 		virtual inline unsigned int GetHeight() const override { return m_Data.Height; }
 
 		virtual inline float GetTime() const override { return (float)glfwGetTime(); }
-		virtual inline const std::string& GetTitle() const override { return m_Data.Title; }
-		virtual inline void SetTitle(const std::string& title) override { m_Data.Title = title; glfwSetWindowTitle(m_Window, m_Data.Title.c_str()); }
 
 		virtual inline void SetEventCallback(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
 		virtual void SetVSync(bool enabled) override;

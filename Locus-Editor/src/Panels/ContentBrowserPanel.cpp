@@ -6,7 +6,6 @@
 
 namespace Locus
 {
-
 	// TODO: move to project folder in the future when we create project folders
 	extern const std::filesystem::path g_ProjectPath = "assets";
 
@@ -19,9 +18,8 @@ namespace Locus
 
 	void ContentBrowserPanel::OnImGuiRender()
 	{
-		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoScrollbar;
-		LocusUI::BeginWindow("ContentBrowser");
-		LocusUI::BeginTab("ContentBrowserTab");
+		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar;
+		ImGui::Begin(" Content Browser ", false, windowFlags);
 
 		static ImGuiTableFlags tableFlags = ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Resizable
 			| ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg;
@@ -42,8 +40,7 @@ namespace Locus
 		}
 		ImGui::PopStyleColor();
 
-		LocusUI::EndTab();
-		LocusUI::EndWindow();
+		ImGui::End();
 	}
 
 	void ContentBrowserPanel::DrawCurrentDirectoryView()

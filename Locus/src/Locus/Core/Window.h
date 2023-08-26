@@ -35,6 +35,8 @@ namespace Locus
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
 		virtual float GetTime() const = 0;
+		virtual const std::string& GetTitle() const = 0;
+		virtual void SetTitle(const std::string & title) = 0;
 
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
 		virtual void SetVSync(bool enabled) = 0;

@@ -6,9 +6,11 @@
 
 #include <Locus.h>
 
+#include "Command/Command.h"
 #include "Panels/SceneHierarchyPanel.h"
 #include "Panels/ContentBrowserPanel.h"
 #include "Panels/PropertiesPanel.h"
+#include "LocusUI.h"
 
 namespace Locus
 {
@@ -44,7 +46,6 @@ namespace Locus
 
 		// Layout
 		void DrawLayoutTable();
-		void DrawWindow(const std::string& name, std::function<void()> windowFunction);
 
 	private:
 		// Scene
@@ -78,12 +79,14 @@ namespace Locus
 		ContentBrowserPanel m_ContentBrowserPanel;
 		PropertiesPanel m_PropertiesPanel;
 
+		// Layout
 		float m_ViewportHeight; // Makes more sense to do m_LeftSplitterPos & m_RightSplitterPos
 		float m_HierarchyHeight;
 		float m_CenterSplitterPos;
 		glm::vec2 m_FrameSizes[4];
 		glm::vec2 m_FramePositions[4];
 		glm::vec2 m_WindowSize;
+		std::string m_WindowTitle;
 
 		enum class LayoutStyle { Default = 0 };
 		LayoutStyle m_LayoutStyle = LayoutStyle::Default;

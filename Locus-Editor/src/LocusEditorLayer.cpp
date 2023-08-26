@@ -7,9 +7,6 @@
 #include <glm/gtx/matrix_decompose.hpp>
 #include <ImGuizmo.h>
 
-#include "Command/Command.h"
-#include "LocusUI.h"
-
 namespace Locus
 {
 	extern const std::filesystem::path g_ProjectPath;
@@ -19,6 +16,7 @@ namespace Locus
 	{
 		m_PlayButton = Texture2D::Create("resources/icons/PlayButton.png");
 		m_StopButton = Texture2D::Create("resources/icons/StopButton.png");
+		m_WindowTitle = Application::Get().GetWindow().GetTitle();
 	}
 
 	LocusEditorLayer::~LocusEditorLayer()
@@ -157,6 +155,7 @@ namespace Locus
 		m_HoveredEntity = {};
 		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
 		{
+			// TODO: This is really slow??
 			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY);
 			m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 		}
@@ -170,6 +169,10 @@ namespace Locus
 		
 		m_Framebuffer->Unbind();
 
+		if (!Application::Get().GetIsSavedStatus())
+			Application::Get().GetWindow().SetTitle(m_WindowTitle + " ***");
+		else
+			Application::Get().GetWindow().SetTitle(m_WindowTitle);
 
 		Renderer2D::StatsEndFrame();
 	}
@@ -217,6 +220,7 @@ namespace Locus
 		m_WindowSize.x = ImGui::GetContentRegionAvail().x;
 		m_WindowSize.y = ImGui::GetContentRegionAvail().y;
 
+
 		// --- Menu Bar -------------------------------------------------------
 		if (ImGui::BeginMainMenuBar())
 		{
@@ -248,36 +252,14 @@ namespace Locus
 			ImGui::EndMainMenuBar();
 		}
 
-		// --- Debug panel ---------------------------------------------------
-		/*ImGui::Begin("Debug");
-
-		auto stats = Renderer2D::GetStats();
-		ImGui::Text("Renderer2D Stats:");
-		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
-		ImGui::Text("Quads: %d", stats.QuadCount);
-		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
-		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
-		ImGui::Text("Frame Time: %f", stats.FrameTime);
-		ImGui::Text("FPS: %f", stats.FramesPerSecond);
-
-		std::string name = "None";
-		if (m_HoveredEntity)
-			if (m_HoveredEntity.HasComponent<IDComponent>())
-				name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
-		ImGui::Text("Hovered Entity: %s", name.c_str());
-
-		std::string collisionLayer = "None";
-		if (m_HoveredEntity)
-			if (m_HoveredEntity.HasComponent<BoxCollider2DComponent>())
-				collisionLayer = std::to_string(m_HoveredEntity.GetComponent<BoxCollider2DComponent>().CollisionLayer);
-		ImGui::Text("Hovered Collision Layer: %s", collisionLayer.c_str());
-
-		ImGui::End();*/
 
 		DrawLayoutTable();
 
+
+		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus;
 		// --- Viewport window ------------------------------------------------
-		LocusUI::BeginWindow("Viewport", m_FrameSizes[0], m_FramePositions[0]);
+		LocusUI::BeginWindow("Viewport", windowFlags, m_FrameSizes[0], m_FramePositions[0]);
+		LocusUI::BeginTab("ViewportTab");
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
 
@@ -308,22 +290,50 @@ namespace Locus
 
 					ImGui::EndMenuBar();
 				}*/
+		LocusUI::EndTab();
 		LocusUI::EndWindow();
 
 
 		// --- Content Browser ------------------------------------------------
-		LocusUI::BeginWindow("ContentBrowser", m_FrameSizes[1], m_FramePositions[1]);
+		ImGui::SetNextWindowSize({ m_FrameSizes[1].x, m_FrameSizes[1].y });
+		ImGui::SetNextWindowPos({ m_FramePositions[1].x, m_FramePositions[1].y });
 		m_ContentBrowserPanel.OnImGuiRender();
-		LocusUI::EndWindow();
+
 
 		// --- Scene Hierarchy ------------------------------------------------
-		LocusUI::BeginWindow("SceneHierarchy", m_FrameSizes[2], m_FramePositions[2]);
+		ImGui::SetNextWindowSize({ m_FrameSizes[2].x, m_FrameSizes[2].y });
+		ImGui::SetNextWindowPos({ m_FramePositions[2].x, m_FramePositions[2].y });
 		m_SceneHierarchyPanel.OnImGuiRender();
-		LocusUI::EndWindow();
+
 
 		// --- Properties -----------------------------------------------------
-		LocusUI::BeginWindow("Properties", m_FrameSizes[3], m_FramePositions[3]);
+		ImGui::SetNextWindowSize({ m_FrameSizes[3].x, m_FrameSizes[3].y });
+		ImGui::SetNextWindowPos({ m_FramePositions[3].x, m_FramePositions[3].y });
 		m_PropertiesPanel.OnImGuiRender();
+
+
+		// --- Debug panel ---------------------------------------------------
+		LocusUI::BeginWindow("Debug");
+		auto stats = Renderer2D::GetStats();
+		ImGui::Text("Renderer2D Stats:");
+		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
+		ImGui::Text("Quads: %d", stats.QuadCount);
+		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
+		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
+		ImGui::Text("Frame Time: %f", stats.FrameTime);
+		ImGui::Text("FPS: %f", stats.FramesPerSecond);
+
+		std::string name = "None";
+		if (m_HoveredEntity)
+			if (m_HoveredEntity.HasComponent<IDComponent>())
+				name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
+		ImGui::Text("Hovered Entity: %s", name.c_str());
+
+		std::string collisionLayer = "None";
+		if (m_HoveredEntity)
+			if (m_HoveredEntity.HasComponent<BoxCollider2DComponent>())
+				collisionLayer = std::to_string(m_HoveredEntity.GetComponent<BoxCollider2DComponent>().CollisionLayer);
+		ImGui::Text("Hovered Collision Layer: %s", collisionLayer.c_str());
 		LocusUI::EndWindow();
 
 	
@@ -617,7 +627,7 @@ namespace Locus
 	{
 		m_SceneState = SceneState::Play;
 		m_ActiveScene = Scene::Copy(m_EditorScene);
-		m_ActiveScene->OnRuntimeStart(); // Remember we call this after we copy editor scene since editor scene will never call runtime functions.
+		m_ActiveScene->OnRuntimeStart();
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 
 	}
@@ -725,35 +735,5 @@ namespace Locus
 			ImGui::EndTable();
 		}
 		ImGui::PopStyleVar(2);
-	}
-
-	void LocusEditorLayer::DrawWindow(const std::string& name, std::function<void()> windowFunction)
-	{
-		ImGuiWindowFlags testFlags = ImGuiWindowFlags_NoDecoration;
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 0.0f });
-		ImGui::PushStyleVar(ImGuiStyleVar_TabRounding, 0.0f);
-		ImGui::PushStyleColor(ImGuiCol_TabActive, { 0.29f, 0.28f, 0.27f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, { 0.21f, 0.196f, 0.176f, 1.0f });
-		ImGui::Begin(name.c_str(), false, testFlags);
-		ImGui::BeginTabBar("TabBar");
-		ImGui::BeginTabItem(name.c_str());
-		std::string childName = name + "_Child";
-		ImGui::PushStyleColor(ImGuiCol_ChildBg, { 0.29f, 0.28f, 0.27f, 1.0f });
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
-		ImGui::BeginChild(childName.c_str(), ImGui::GetContentRegionAvail(), false);
-
-		windowFunction();
-
-		ImGui::EndChild();
-		ImGui::PopStyleColor();
-		ImGui::PopStyleVar();
-
-		ImGui::EndTabItem();
-
-		ImGui::EndTabBar();
-		ImGui::End();
-		ImGui::PopStyleVar(3);
-		ImGui::PopStyleColor(2);
 	}
 }

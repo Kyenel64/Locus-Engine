@@ -7,6 +7,8 @@
 
 #include <Locus.h>
 
+#include "LocusUI.h"
+
 namespace Locus
 {
 	class ContentBrowserPanel

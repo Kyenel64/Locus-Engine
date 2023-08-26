@@ -16,7 +16,6 @@ namespace Locus
 	{
 		m_PlayButton = Texture2D::Create("resources/icons/PlayButton.png");
 		m_StopButton = Texture2D::Create("resources/icons/StopButton.png");
-		m_WindowTitle = Application::Get().GetWindow().GetTitle();
 	}
 
 	LocusEditorLayer::~LocusEditorLayer()
@@ -90,13 +89,10 @@ namespace Locus
 		// Editor Camera
 		m_EditorCamera = EditorCamera(30.0f, 1920.0f / 1080.0f, 0.1f, 1000.0f);
 
-		m_WindowSize.x = Application::Get().GetWindow().GetWidth();
-		m_WindowSize.y = Application::Get().GetWindow().GetHeight();
-
 		// TODO: set values on load
 		m_ViewportHeight = 800.0f;
 		m_HierarchyHeight = 400.0f;
-		m_CenterSplitterPos = m_WindowSize.x * 0.8f;
+		m_CenterSplitterPos = 1500.0f;
 	}
 
 	void LocusEditorLayer::OnDetach()
@@ -169,11 +165,6 @@ namespace Locus
 		
 		m_Framebuffer->Unbind();
 
-		if (!Application::Get().GetIsSavedStatus())
-			Application::Get().GetWindow().SetTitle(m_WindowTitle + " ***");
-		else
-			Application::Get().GetWindow().SetTitle(m_WindowTitle);
-
 		Renderer2D::StatsEndFrame();
 	}
 
@@ -196,7 +187,7 @@ namespace Locus
 		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoScrollbar |
 			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
-			ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+			ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoScrollWithMouse;
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
 		ImGui::SetNextWindowPos(viewport->Pos);
 		ImGui::SetNextWindowSize(viewport->Size);
@@ -205,23 +196,20 @@ namespace Locus
 		if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
 			window_flags |= ImGuiWindowFlags_NoBackground;
 
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, { 0.13f, 0.125f, 0.12f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, { 0.13f, 0.125f, 0.12f, 1.0f });
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 8.0f, 8.0f });
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, LocusColors::DarkGrey);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 13.0f, 13.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::Begin("Layout", false, window_flags);
-		ImGui::PopStyleVar();
-		ImGui::PopStyleColor(2);
+		ImGui::PopStyleVar(2);
+		ImGui::PopStyleColor();
 
 		ImGuiStyle& style = ImGui::GetStyle();
 		ImGuiIO& io = ImGui::GetIO();
-		style.WindowMenuButtonPosition = ImGuiDir_None;
-		style.WindowBorderSize = 0.0f;
-
-		m_WindowSize.x = ImGui::GetContentRegionAvail().x;
-		m_WindowSize.y = ImGui::GetContentRegionAvail().y;
-
 
 		// --- Menu Bar -------------------------------------------------------
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { -1.0f, 10.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, LocusColors::DarkGrey);
 		if (ImGui::BeginMainMenuBar())
 		{
 			if (ImGui::BeginMenu("File"))
@@ -251,15 +239,20 @@ namespace Locus
 
 			ImGui::EndMainMenuBar();
 		}
+		ImGui::PopStyleVar(2);
+		ImGui::PopStyleColor();
 
 
 		DrawLayoutTable();
 
 
-		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus;
 		// --- Viewport window ------------------------------------------------
-		LocusUI::BeginWindow("Viewport", windowFlags, m_FrameSizes[0], m_FramePositions[0]);
-		LocusUI::BeginTab("ViewportTab");
+		ImGuiWindowFlags viewportFlags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar;
+		if (!Application::Get().GetIsSavedStatus())
+			viewportFlags |= ImGuiWindowFlags_UnsavedDocument;
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
+		ImGui::Begin(" Viewport ", false, viewportFlags);
+		ImGui::PopStyleVar();
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
 
@@ -277,21 +270,20 @@ namespace Locus
 		if (selectedEntity && m_GizmoType != -1)
 			showGizmoUI();
 		// viewport menu
-		/*if (ImGui::BeginMenuBar())
-				{
-					if (ImGui::MenuItem("P", "q"))
-						m_GizmoType = -1;
-					if (ImGui::MenuItem("T", "w"))
-						m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
-					if (ImGui::MenuItem("R", "e"))
-						m_GizmoType = ImGuizmo::OPERATION::ROTATE;
-					if (ImGui::MenuItem("S", "r"))
-						m_GizmoType = ImGuizmo::OPERATION::SCALE;
+		if (ImGui::BeginMenuBar())
+		{
+			if (ImGui::MenuItem("P", "q"))
+				m_GizmoType = -1;
+			if (ImGui::MenuItem("T", "w"))
+				m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+			if (ImGui::MenuItem("R", "e"))
+				m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+			if (ImGui::MenuItem("S", "r"))
+				m_GizmoType = ImGuizmo::OPERATION::SCALE;
 
-					ImGui::EndMenuBar();
-				}*/
-		LocusUI::EndTab();
-		LocusUI::EndWindow();
+			ImGui::EndMenuBar();
+		}
+		ImGui::End();
 
 
 		// --- Content Browser ------------------------------------------------
@@ -313,7 +305,7 @@ namespace Locus
 
 
 		// --- Debug panel ---------------------------------------------------
-		LocusUI::BeginWindow("Debug");
+		ImGui::Begin(" Debug ", false);
 		auto stats = Renderer2D::GetStats();
 		ImGui::Text("Renderer2D Stats:");
 		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
@@ -334,7 +326,7 @@ namespace Locus
 			if (m_HoveredEntity.HasComponent<BoxCollider2DComponent>())
 				collisionLayer = std::to_string(m_HoveredEntity.GetComponent<BoxCollider2DComponent>().CollisionLayer);
 		ImGui::Text("Hovered Collision Layer: %s", collisionLayer.c_str());
-		LocusUI::EndWindow();
+		ImGui::End();
 
 	
 		// --- Save Project Popup ---------------------------------------------
@@ -644,13 +636,22 @@ namespace Locus
 	void LocusEditorLayer::DrawLayoutTable()
 	{
 		ImGuiIO io = ImGui::GetIO();
-		// --- Left Table ---
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
+		// Docked window flags
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 5.0f, 5.0f });
-		if (ImGui::BeginTable("LayoutLeft", 1, ImGuiTableFlags_None, { m_CenterSplitterPos, m_WindowSize.y }))
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, { 0.0f, 0.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0.0f, 3.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+
+		ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+		// --- Left Table ---
+		if (ImGui::BeginTable("LayoutLeft", 1, ImGuiTableFlags_None, { m_CenterSplitterPos, -1.0f}))
 		{
 			ImGui::TableNextColumn();
-			ImGui::BeginChild("Frame1", { -1.0f, m_ViewportHeight }, true);
+			ImGui::BeginChild("Frame1", { -1.0f, m_ViewportHeight }, false, childFlags);
+			ImGuiID dockspace_id = ImGui::GetID("Frame1Dockspace");
+			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
 
 			m_FrameSizes[0].x = ImGui::GetWindowSize().x;
 			m_FrameSizes[0].y = ImGui::GetWindowSize().y;
@@ -670,7 +671,7 @@ namespace Locus
 				m_ViewportHeight += io.MouseDelta.y;
 			}
 
-			ImGui::BeginChild("Frame2", { -1.0f, -1.0f }, true);
+			ImGui::BeginChild("Frame2", { -1.0f, -1.0f }, false, childFlags);
 
 			m_FrameSizes[1].x = ImGui::GetWindowSize().x;
 			m_FrameSizes[1].y = ImGui::GetWindowSize().y;
@@ -700,7 +701,7 @@ namespace Locus
 		if (ImGui::BeginTable("LayoutRight", 1, ImGuiTableFlags_None, { -1.0, -1.0f }))
 		{
 			ImGui::TableNextColumn();
-			ImGui::BeginChild("Frame3", { -1.0f, m_HierarchyHeight }, true);
+			ImGui::BeginChild("Frame3", { -1.0f, m_HierarchyHeight }, false, childFlags);
 
 			m_FrameSizes[2].x = ImGui::GetWindowSize().x;
 			m_FrameSizes[2].y = ImGui::GetWindowSize().y;
@@ -720,7 +721,7 @@ namespace Locus
 				m_HierarchyHeight += io.MouseDelta.y;
 			}
 
-			ImGui::BeginChild("Frame4", { -1.0f, -1.0f }, true);
+			ImGui::BeginChild("Frame4", { -1.0f, -1.0f }, false, childFlags);
 
 			m_FrameSizes[3].x = ImGui::GetWindowSize().x;
 			m_FrameSizes[3].y = ImGui::GetWindowSize().y;
@@ -734,6 +735,6 @@ namespace Locus
 
 			ImGui::EndTable();
 		}
-		ImGui::PopStyleVar(2);
+		ImGui::PopStyleVar(5);
 	}
 }

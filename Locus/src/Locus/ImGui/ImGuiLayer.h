@@ -7,6 +7,8 @@
 #include "Locus/Events/KeyEvent.h"
 #include "Locus/Events/MouseEvent.h"
 
+struct ImVec4;
+
 namespace Locus
 {
 	class ImGuiLayer : public Layer
@@ -32,6 +34,15 @@ namespace Locus
 
 	private:
 		bool m_BlockEvents = false;
+	};
+
+	struct LocusColors
+	{
+		static ImVec4 DarkGrey;
+		static ImVec4 MediumDarkGrey;
+		static ImVec4 Grey;
+		static ImVec4 LightGrey;
+		static ImVec4 Pink; // Debug purposes
 	};
 }
 

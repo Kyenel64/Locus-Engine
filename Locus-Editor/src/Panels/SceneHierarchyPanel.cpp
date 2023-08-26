@@ -5,7 +5,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Command/Command.h"
-#include "LocusUI.h"
 
 namespace Locus
 {
@@ -24,9 +23,8 @@ namespace Locus
 
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
-		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoScrollbar;
-		LocusUI::BeginWindow("SceneHierarchy", windowFlags);
-		LocusUI::BeginTab("SceneHierarchyTab");
+		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar;
+		ImGui::Begin(" Scene Hierarchy ", false, windowFlags);
 
 		// --- Scene Hierarchy Panel ------------------------------------------
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 1.0f });
@@ -53,8 +51,7 @@ namespace Locus
 		}
 		ImGui::PopStyleVar();
 		
-		LocusUI::EndTab();
-		LocusUI::EndWindow();
+		ImGui::End();
 	}
 
 	void SceneHierarchyPanel::DrawEntityNode(Entity entity)

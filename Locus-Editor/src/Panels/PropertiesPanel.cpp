@@ -7,7 +7,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Command/Command.h"
-#include "LocusUI.h"
 
 namespace Locus
 {
@@ -26,9 +25,8 @@ namespace Locus
 
 	void PropertiesPanel::OnImGuiRender()
 	{
-		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoScrollbar;
-		LocusUI::BeginWindow("Properties", windowFlags);
-		LocusUI::BeginTab("PropertiesTab");
+		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar;
+		ImGui::Begin(" Properties ", false, windowFlags);
 
 		if (m_SelectedEntity)
 		{
@@ -91,8 +89,7 @@ namespace Locus
 			ImGui::EndPopup();
 		}
 
-		LocusUI::EndTab();
-		LocusUI::EndWindow();
+		ImGui::End();
 	}
 
 	void PropertiesPanel::DrawVec3Control(const std::string& name, glm::vec3& values, float resetValue, float columnWidth)

@@ -11,12 +11,20 @@
 
 namespace Locus
 {
+	ImVec4 LocusColors::Black = { 0.0f, 0.0f, 0.0f, 1.0f };
 	ImVec4 LocusColors::DarkGrey = { 0.132f, 0.125f, 0.117f, 1.0f };
 	ImVec4 LocusColors::MediumDarkGrey = { 0.246f, 0.234f, 0.211f, 1.0f };
 	ImVec4 LocusColors::Grey = { 0.207f, 0.195f, 0.176f, 1.0f };
 	ImVec4 LocusColors::LightGrey = { 0.289f, 0.281f, 0.266f, 1.0f };
+	ImVec4 LocusColors::White = { 1.0f, 1.0f, 1.0f, 1.0f };
 	ImVec4 LocusColors::Pink = { 0.9f, 0.4f, 0.4f, 1.0f };
+	ImVec4 LocusColors::Transparent = { 0.0f, 0.0f, 0.0f, 0.0f };
+	ImVec4 LocusColors::Orange = { 0.585f, 0.332f, 0.18f, 1.0f };
 
+	ImVec4 ToImVec4(const glm::vec4& value)
+	{
+		return { value.x, value.y, value.z, value.w };
+	}
 
 	ImGuiLayer::ImGuiLayer() : Layer("ImGuiLayer")
 	{
@@ -39,7 +47,6 @@ namespace Locus
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
-		//io.ConfigDockingNoSplit;
 		io.ConfigDockingAlwaysTabBar = true;
 
 		style.ChildBorderSize = 0.0f;
@@ -49,7 +56,6 @@ namespace Locus
 
 		// Setup Dear ImGui style
 		ImGui::StyleColorsDark();
-		//ImGui::StyleColorsClassic();
 
 		// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -126,31 +132,34 @@ namespace Locus
 		auto& colors = ImGui::GetStyle().Colors;
 		colors[ImGuiCol_WindowBg] = LocusColors::LightGrey;
 
-		//// Headers
-		//colors[ImGuiCol_Header] = colorPallete[colorNames::LightTeal];
-		//colors[ImGuiCol_HeaderHovered] = colorPallete[colorNames::Grey];
-		//colors[ImGuiCol_HeaderActive] = colorPallete[colorNames::LightGrey];
+		// Headers
+		colors[ImGuiCol_Header] = LocusColors::Grey;
+		colors[ImGuiCol_HeaderHovered] = LocusColors::LightGrey;
+		colors[ImGuiCol_HeaderActive] = LocusColors::LightGrey;
 
 		// Buttons
-		colors[ImGuiCol_Button] = LocusColors::LightGrey;
+		colors[ImGuiCol_Button] = LocusColors::Grey;
 		colors[ImGuiCol_ButtonHovered] = LocusColors::LightGrey;
 		colors[ImGuiCol_ButtonActive] = LocusColors::LightGrey;
 
-		//// Frame BG
-		//colors[ImGuiCol_FrameBg] = colorPallete[colorNames::DarkGrey];
-		//colors[ImGuiCol_FrameBgHovered] = colorPallete[colorNames::Grey];
-		//colors[ImGuiCol_FrameBgActive] = colorPallete[colorNames::LightGrey];
+		// Frame BG
+		colors[ImGuiCol_FrameBg] = LocusColors::Grey;
+		colors[ImGuiCol_FrameBgHovered] = LocusColors::LightGrey;
+		colors[ImGuiCol_FrameBgActive] = LocusColors::LightGrey;
 
-		//// Tabs
+		// Tabs
 		colors[ImGuiCol_Tab] = LocusColors::MediumDarkGrey;
 		colors[ImGuiCol_TabHovered] = LocusColors::LightGrey;
 		colors[ImGuiCol_TabActive] = LocusColors::LightGrey;
 		colors[ImGuiCol_TabUnfocused] = LocusColors::MediumDarkGrey;
 		colors[ImGuiCol_TabUnfocusedActive] = LocusColors::LightGrey;
 
-		//// Title
+		// Title
 		colors[ImGuiCol_TitleBgActive] = LocusColors::Grey;
 		colors[ImGuiCol_TitleBg] = LocusColors::Grey;
 		colors[ImGuiCol_TitleBgCollapsed] = LocusColors::Grey;
+
+		// Border
+		colors[ImGuiCol_Border] = LocusColors::Orange;
 	}
 }

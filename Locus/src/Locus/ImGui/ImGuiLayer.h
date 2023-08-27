@@ -2,6 +2,8 @@
 // ImGui layer. Displays gui. Handles ImGui events
 #pragma once
 
+#include <glm/glm.hpp>
+
 #include "Locus/Core/Layer.h"
 #include "Locus/Events/ApplicationEvent.h"
 #include "Locus/Events/KeyEvent.h"
@@ -38,11 +40,17 @@ namespace Locus
 
 	struct LocusColors
 	{
+		static ImVec4 Black;
 		static ImVec4 DarkGrey;
 		static ImVec4 MediumDarkGrey;
 		static ImVec4 Grey;
 		static ImVec4 LightGrey;
+		static ImVec4 White;
+		static ImVec4 Transparent;
+		static ImVec4 Orange;
 		static ImVec4 Pink; // Debug purposes
 	};
+
+	ImVec4 ToImVec4(const glm::vec4& value);
 }
 

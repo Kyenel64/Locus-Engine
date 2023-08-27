@@ -16,6 +16,7 @@ namespace Locus
 	{
 		m_PlayButton = Texture2D::Create("resources/icons/PlayButton.png");
 		m_StopButton = Texture2D::Create("resources/icons/StopButton.png");
+		m_PauseButton = Texture2D::Create("resources/icons/PauseButton.png");
 	}
 
 	LocusEditorLayer::~LocusEditorLayer()
@@ -132,6 +133,10 @@ namespace Locus
 				m_EditorCamera.OnUpdate(deltaTime); // These are camera specific update commands. Actual rendering is in scene object.
 				break;
 			}
+			case SceneState::Pause:
+			{
+				break;
+			}
 			case SceneState::Play:
 			{
 				m_ActiveScene->OnUpdateRuntime(deltaTime);
@@ -181,7 +186,6 @@ namespace Locus
 	void LocusEditorLayer::OnImGuiRender()
 	{
 		LOCUS_PROFILE_FUNCTION();
-		ImGui::ShowDemoWindow();
 
 		// --- Dockspace ------------------------------------------------------
 		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
@@ -206,44 +210,12 @@ namespace Locus
 		ImGuiStyle& style = ImGui::GetStyle();
 		ImGuiIO& io = ImGui::GetIO();
 
-		// --- Menu Bar -------------------------------------------------------
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { -1.0f, 10.0f });
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, LocusColors::DarkGrey);
-		if (ImGui::BeginMainMenuBar())
-		{
-			if (ImGui::BeginMenu("File"))
-			{
-				if (ImGui::MenuItem("New", "Ctrl+N"))
-					NewScene();
-
-				if (ImGui::MenuItem("Open...", "Ctrl+O"))
-					OpenScene();
-
-				if (ImGui::MenuItem("Save", "Ctrl+S"))
-					SaveScene();
-
-				if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
-					SaveSceneAs();
-
-				if (ImGui::MenuItem("Exit"))
-				{
-					if (Application::Get().GetIsSavedStatus())
-						Application::Get().Close();
-					else
-						Application::Get().SetSaveChangesPopupStatus(true);
-				}
-
-				ImGui::EndMenu();
-			}
-
-			ImGui::EndMainMenuBar();
-		}
-		ImGui::PopStyleVar(2);
-		ImGui::PopStyleColor();
-
-
 		DrawLayoutTable();
+
+		ImGui::ShowDemoWindow();
+
+		// --- Menu Bar -------------------------------------------------------
+		DrawToolbar();
 
 
 		// --- Viewport window ------------------------------------------------
@@ -633,6 +605,11 @@ namespace Locus
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
+	void LocusEditorLayer::OnScenePause()
+	{
+		m_SceneState = SceneState::Pause;
+	}
+
 	void LocusEditorLayer::DrawLayoutTable()
 	{
 		ImGuiIO io = ImGui::GetIO();
@@ -736,5 +713,107 @@ namespace Locus
 			ImGui::EndTable();
 		}
 		ImGui::PopStyleVar(5);
+	}
+
+	void LocusEditorLayer::DrawToolbar()
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { -1.0f, 10.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, LocusColors::DarkGrey);
+		ImGui::PushStyleColor(ImGuiCol_Header, LocusColors::DarkGrey);
+		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, LocusColors::Grey);
+		ImGui::PushStyleColor(ImGuiCol_HeaderActive, LocusColors::Grey);
+		if (ImGui::BeginMainMenuBar())
+		{
+			if (ImGui::BeginMenu("File"))
+			{
+				if (ImGui::MenuItem("New", "Ctrl+N"))
+					NewScene();
+
+				if (ImGui::MenuItem("Open...", "Ctrl+O"))
+					OpenScene();
+
+				if (ImGui::MenuItem("Save", "Ctrl+S"))
+					SaveScene();
+
+				if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
+					SaveSceneAs();
+
+				if (ImGui::MenuItem("Exit"))
+				{
+					if (Application::Get().GetIsSavedStatus())
+						Application::Get().Close();
+					else
+						Application::Get().SetSaveChangesPopupStatus(true);
+				}
+
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Project"))
+			{
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Help"))
+			{
+				ImGui::EndMenu();
+			}
+
+			float avail = ImGui::GetWindowSize().x;
+
+			// --- Runtime buttons --------------------------------------------
+			// Background
+			ImDrawList* draw_list = ImGui::GetWindowDrawList();
+			ImVec2 bgSize = { 100.0f, 22.0f };
+			float bgOffset = (avail - bgSize.x) * 0.5f;
+			float menuPadding = 10.0f;
+			ImVec2 bgTopLeft = { bgOffset, ImGui::GetWindowPos().y + menuPadding };
+			ImVec2 bgBottomRight = { bgOffset + bgSize.x, ImGui::GetWindowPos().y + menuPadding + bgSize.y };
+			draw_list->AddRectFilled(bgTopLeft, bgBottomRight, ImColor(LocusColors::LightGrey), 3.0f, ImDrawFlags_None);
+
+			// Play button
+			float buttonSize = 20.0f;
+			float playOffset = ((avail - buttonSize) * 0.5f) - (bgSize.x * 0.33f) + 3.0f;
+			ImGui::SetCursorPosX(playOffset);
+			ImGui::SetCursorPosY(11.0f);
+			ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Transparent);
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Transparent);
+			// TODO: Fix texture resolution causing jagged edges
+			if (ImGui::ImageButton((ImTextureID)(uint64_t)m_PlayButton->GetRendererID(), ImVec2(buttonSize, buttonSize), ImVec2(0, 0), ImVec2(1, 1), 0))
+			{
+				if (m_SceneState == SceneState::Edit)
+					OnScenePlay();
+			}
+
+			// Pause button
+			float pauseOffset = ((avail - buttonSize) * 0.5f);
+			ImGui::SetCursorPosX(pauseOffset);
+			ImGui::SetCursorPosY(11.0f);
+			if (ImGui::ImageButton((ImTextureID)(uint64_t)m_PauseButton->GetRendererID(), ImVec2(buttonSize, buttonSize), ImVec2(0, 0), ImVec2(1, 1), 0))
+			{
+				if (m_SceneState == SceneState::Play)
+					OnScenePause();
+				else if (m_SceneState == SceneState::Pause)
+					m_SceneState = SceneState::Play;
+			}
+
+			// Stop button
+			float stopOffset = ((avail - buttonSize) * 0.5f + (bgSize.x * 0.33f));
+			ImGui::SetCursorPosX(stopOffset);
+			ImGui::SetCursorPosY(11.0f);
+			if (ImGui::ImageButton((ImTextureID)(uint64_t)m_StopButton->GetRendererID(), ImVec2(buttonSize, buttonSize), ImVec2(0, 0), ImVec2(1, 1), 0))
+			{
+				if (m_SceneState == SceneState::Play || m_SceneState == SceneState::Pause)
+					OnSceneStop();
+			}
+
+			ImGui::PopStyleColor(3);
+
+			ImGui::EndMainMenuBar();
+		}
+		ImGui::PopStyleVar(2);
+		ImGui::PopStyleColor(4);
 	}
 }

@@ -42,20 +42,23 @@ namespace Locus
 		void ProcessViewportDragDrop();
 		void OnScenePlay();
 		void OnSceneStop();
+		void OnScenePause();
 
 		// Layout
 		void DrawLayoutTable();
+		void DrawToolbar();
 
 	private:
 		// Scene
 		std::string m_SavePath;
 		Ref<Scene> m_ActiveScene;
 		Ref<Scene> m_EditorScene;
-		enum class SceneState { Edit = 0, Play = 1 };
+		enum class SceneState { Edit = 0, Play = 1, Pause = 2};
 		SceneState m_SceneState = SceneState::Edit;
 
 		// Textures
 		Ref<Texture2D> m_PlayButton;
+		Ref<Texture2D> m_PauseButton;
 		Ref<Texture2D> m_StopButton;
 
 		// Viewport

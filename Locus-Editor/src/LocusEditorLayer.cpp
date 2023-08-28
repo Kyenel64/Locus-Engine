@@ -618,7 +618,7 @@ namespace Locus
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 5.0f, 5.0f });
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, { 0.0f, 0.0f });
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0.0f, 3.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0.0f, 4.0f });
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 
 		ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
@@ -719,6 +719,7 @@ namespace Locus
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { -1.0f, 10.0f });
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 12.0f, -1.0f });
 		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, LocusColors::DarkGrey);
 		ImGui::PushStyleColor(ImGuiCol_Header, LocusColors::DarkGrey);
 		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, LocusColors::Grey);
@@ -813,7 +814,7 @@ namespace Locus
 
 			ImGui::EndMainMenuBar();
 		}
-		ImGui::PopStyleVar(2);
+		ImGui::PopStyleVar(3);
 		ImGui::PopStyleColor(4);
 	}
 }

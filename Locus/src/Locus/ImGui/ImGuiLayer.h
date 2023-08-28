@@ -48,6 +48,7 @@ namespace Locus
 		static ImVec4 White;
 		static ImVec4 Transparent;
 		static ImVec4 Orange;
+		static ImVec4 Tan;
 		static ImVec4 Pink; // Debug purposes
 	};
 

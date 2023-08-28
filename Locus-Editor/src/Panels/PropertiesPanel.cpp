@@ -21,11 +21,17 @@ namespace Locus
 	{
 		m_ActiveScene = context;
 		m_SelectedEntity = {};
+		m_ShowMoreButton = Texture2D::Create("resources/icons/ShowMoreButton.png");
 	}
 
 	void PropertiesPanel::OnImGuiRender()
 	{
 		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar;
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 10.0f, 10.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 4.0f, 2.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 10.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, { 0.0f, 0.5f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Orange);
 		ImGui::Begin(" Properties ", false, windowFlags);
 
 		if (m_SelectedEntity)
@@ -90,41 +96,54 @@ namespace Locus
 		}
 
 		ImGui::End();
+		ImGui::PopStyleVar(4);
+		ImGui::PopStyleColor();
 	}
 
 	void PropertiesPanel::DrawVec3Control(const std::string& name, glm::vec3& values, float resetValue, float columnWidth)
 	{
+		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Transparent);
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Transparent);
+		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0.0f, 1.0f });
+
 		glm::vec3 dragValues = values;
 		if (name == "Rotation")
 			dragValues = glm::degrees(dragValues);
-		ImGuiIO& io = ImGui::GetIO();
-		auto boldFont = io.Fonts->Fonts[0];
 
-		ImGui::PushID(name.c_str());
-
-		ImGui::Columns(2);
-		ImGui::SetColumnWidth(0, columnWidth);
-		ImGui::Text(name.c_str());
-		ImGui::NextColumn();
-
-		ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
-
-		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
-		ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
-
-		// X
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.2f, 0.2f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.2f, 0.2f, 1.0f });
-		ImGui::PushFont(boldFont);
-		if (ImGui::Button("X", buttonSize)) // TODO: double click
-			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.x));
-		ImGui::PopFont();
-		ImGui::PopStyleColor(3);
+		DrawControlLabel(name.c_str());
 
 		ImGui::SameLine();
-		if (ImGui::DragFloat("##X", &dragValues.x, 0.1f, 0.0f, 0.0f, "%.2f"))
+
+		ImGui::BeginTable("Vec3Control", 3);
+
+		// X
+		ImGui::TableNextColumn();
+		if (ImGui::Button("X", { 0.0f, 0.0f }))
+		{
+
+		}
+		ImGui::SameLine();
+		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
+		if(ImGui::DragFloat("##X", &dragValues.x, 0.1f, 0.0f, 0.0f, "%.2f"))
+		{
+
+			if (name == "Rotation")
+				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.x), values.x));
+			else
+				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.x, values.x));
+		}
+		ImGui::PopItemWidth();
+
+		// Y
+		ImGui::TableNextColumn();
+		if (ImGui::Button("Y", { 0.0f, 0.0f }))
+		{
+
+		}
+		ImGui::SameLine();
+		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
+		if (ImGui::DragFloat("##Y", &dragValues.y, 0.1f, 0.0f, 0.0f, "%.2f"))
 		{
 			if (name == "Rotation")
 				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.x), values.x));
@@ -132,53 +151,38 @@ namespace Locus
 				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.x, values.x));
 		}
 		ImGui::PopItemWidth();
-		ImGui::SameLine();
-
-		// Y
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.8f, 0.2f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.9f, 0.2f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.8f, 0.2f, 1.0f });
-		ImGui::PushFont(boldFont);
-		if (ImGui::Button("Y", buttonSize))
-			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.y));
-		ImGui::PopFont();
-		ImGui::PopStyleColor(3);
-
-		ImGui::SameLine();
-		if (ImGui::DragFloat("##Y", &dragValues.y, 0.1f, 0.0f, 0.0f, "%.2f"))
-		{
-			if (name == "Rotation")
-				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.y), values.y));
-			else
-				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.y, values.y));
-		}
-		ImGui::PopItemWidth();
-		ImGui::SameLine();
 
 		// Z
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.2f, 0.8f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.2f, 0.9f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.2f, 0.8f, 1.0f });
-		ImGui::PushFont(boldFont);
-		if (ImGui::Button("Z", buttonSize))
-			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.z));
-		ImGui::PopFont();
-		ImGui::PopStyleColor(3);
+		ImGui::TableNextColumn();
+		if (ImGui::Button("Z", { 0.0f, 0.0f }))
+		{
 
+		}
 		ImGui::SameLine();
+		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
 		if (ImGui::DragFloat("##Z", &dragValues.z, 0.1f, 0.0f, 0.0f, "%.2f"))
 		{
 			if (name == "Rotation")
-				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.z), values.z));
+				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.x), values.x));
 			else
-				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.z, values.z));
+				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.x, values.x));
 		}
 		ImGui::PopItemWidth();
 
+		ImGui::EndTable();
+		ImGui::PopStyleColor(3);
 		ImGui::PopStyleVar();
-		ImGui::Columns(1);
+		
+		//if (ImGui::Button("X", buttonSize)) // TODO: double click
+		//	CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.x));
 
-		ImGui::PopID();
+		//if (ImGui::DragFloat("##X", &dragValues.x, 0.1f, 0.0f, 0.0f, "%.2f"))
+		//{
+		//	if (name == "Rotation")
+		//		CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.x), values.x));
+		//	else
+		//		CommandHistory::AddCommand(new ChangeValueCommand(dragValues.x, values.x));
+		//}
 	}
 
 	template<typename T, typename UIFunction>
@@ -195,17 +199,18 @@ namespace Locus
 			auto& component = entity.GetComponent<T>();
 			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
 
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
-			ImGui::PushStyleColor(ImGuiCol_Header, { 0.30f, 0.30f, 0.30f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_Header, LocusColors::Tan);
 			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
-			ImGui::Separator();
 			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
-			ImGui::PopStyleVar(1);
 			ImGui::PopStyleColor();
 
 			ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
-			if (ImGui::Button("+", ImVec2(lineHeight, lineHeight)))
+			ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Transparent);
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::LightGrey);
+			if (ImGui::ImageButton((ImTextureID)(uint64_t)m_ShowMoreButton->GetRendererID(), ImVec2(lineHeight, lineHeight), ImVec2(0, 0), ImVec2(1, 1), 0))
 				ImGui::OpenPopup("Component Settings");
+			ImGui::PopStyleColor(3);
 
 			bool removeComponent = false;
 			if (ImGui::BeginPopup("Component Settings"))
@@ -244,24 +249,44 @@ namespace Locus
 			strcpy_s(buffer, sizeof(buffer), tag.c_str());
 			ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
 
-			if (ImGui::InputText("Tag", buffer, sizeof(buffer), flags))
+			ImGui::PushItemWidth(ImGui::GetWindowSize().x - 50.0f);
+			if (ImGui::InputText("##Tag", buffer, sizeof(buffer), flags))
 				CommandHistory::AddCommand(new ChangeValueCommand(std::string(buffer), tag));
+			ImGui::PopItemWidth();
+
+			ImGui::SameLine();
+
+			bool enabled = entity.GetComponent<TagComponent>().Enabled;
+			if (ImGui::Checkbox("##Enabled", &enabled))
+				entity.GetComponent<TagComponent>().Enabled = enabled;
 
 			if (!ImGui::TempInputIsActive(ImGui::GetActiveID()))
 				Application::Get().GetImGuiLayer()->BlockEvents(true);
 			else
 				Application::Get().GetImGuiLayer()->BlockEvents(false);
+
+			DrawControlLabel("Group", { 0.0f, 0.0f });
+
+			ImGui::SameLine();
+
+			ImGui::Button("Enemy (temp)", { 150.0f, 0.0f });
 		}
 
 		// --- Transform Component --------------------------------------------
 		DrawComponentUI<TransformComponent>("Transform", entity, [this](auto& component)
 			{
-				DrawVec3Control("Translation", component.Translation);
+				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 0.0f });
+				DrawVec3Control("Position", component.Translation);
 
 				DrawVec3Control("Rotation", component.GetRotationEuler());
 				component.SetRotationEuler(component.GetRotationEuler());
+				ImGui::PopStyleVar();
 
+				// Bottom spacing is removed if pushing item spacing to all three controls. 
+				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 5.0f });
 				DrawVec3Control("Scale", component.Scale, 1.0f);
+				ImGui::PopStyleVar();
+
 			});
 
 		// --- Camera Component -----------------------------------------------
@@ -510,5 +535,19 @@ namespace Locus
 		default:
 			break;
 		}
+	}
+
+	void PropertiesPanel::DrawControlLabel(const std::string& name, const glm::vec2& size)
+	{
+		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Transparent);
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Transparent);
+		ImGui::Button(name.c_str(), { size.x, size.y });
+		ImGui::PopStyleColor(3);
+	}
+
+	void PropertiesPanel::DrawFloatControl(const std::string& name, float& value)
+	{
+
 	}
 }

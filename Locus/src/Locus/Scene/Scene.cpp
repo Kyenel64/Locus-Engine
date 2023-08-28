@@ -182,13 +182,15 @@ namespace Locus
 	void Scene::OnUpdateEditor(Timestep deltaTime, EditorCamera& camera)
 	{
 		// Main rendering
-
 		Renderer2D::BeginScene(camera);
-		auto group = m_Registry.group<TransformComponent, SpriteRendererComponent>();
-		for (auto entity : group)
+		auto view = m_Registry.view<SpriteRendererComponent>();
+		for (auto e : view)
 		{
-			auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-			Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
+			Entity entity = Entity(e, this);
+			auto transform = entity.GetComponent<TransformComponent>();
+			auto sprite = entity.GetComponent<SpriteRendererComponent>();
+			if (entity.GetComponent<TagComponent>().Enabled)
+				Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
 		}
 		Renderer2D::EndScene();
 	}

@@ -24,6 +24,7 @@ namespace Locus
 	struct TagComponent
 	{
 		std::string Tag;
+		bool Enabled = true;
 
 		TagComponent() = default;
 		TagComponent(const TagComponent&) = default;

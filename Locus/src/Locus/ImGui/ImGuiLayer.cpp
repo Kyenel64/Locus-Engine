@@ -11,7 +11,7 @@
 
 namespace Locus
 {
-	ImVec4 LocusColors::Black = { 0.0f, 0.0f, 0.0f, 1.0f };
+	ImVec4 LocusColors::Black =	{ 0.0f, 0.0f, 0.0f, 1.0f };
 	ImVec4 LocusColors::DarkGrey = { 0.132f, 0.125f, 0.117f, 1.0f };
 	ImVec4 LocusColors::MediumDarkGrey = { 0.246f, 0.234f, 0.211f, 1.0f };
 	ImVec4 LocusColors::Grey = { 0.207f, 0.195f, 0.176f, 1.0f };
@@ -19,6 +19,7 @@ namespace Locus
 	ImVec4 LocusColors::White = { 1.0f, 1.0f, 1.0f, 1.0f };
 	ImVec4 LocusColors::Pink = { 0.9f, 0.4f, 0.4f, 1.0f };
 	ImVec4 LocusColors::Transparent = { 0.0f, 0.0f, 0.0f, 0.0f };
+	ImVec4 LocusColors::Tan = { 0.41f, 0.375f, 0.313f, 1.0f };
 	ImVec4 LocusColors::Orange = { 0.585f, 0.332f, 0.18f, 1.0f };
 
 	ImVec4 ToImVec4(const glm::vec4& value)
@@ -50,7 +51,8 @@ namespace Locus
 		io.ConfigDockingAlwaysTabBar = true;
 
 		style.ChildBorderSize = 0.0f;
-		style.TabRounding = 0.0f;
+		style.TabRounding = 2.0f;
+		style.FrameRounding = 2.0f;
 		style.WindowMenuButtonPosition = ImGuiDir_None;
 		style.WindowBorderSize = 1.0f;
 
@@ -65,7 +67,7 @@ namespace Locus
 		}
 
 		io.Fonts->AddFontFromFileTTF("assets/fonts/Inter/Inter-Bold.ttf", 20.0f);
-		io.FontDefault = io.Fonts->AddFontFromFileTTF("assets/fonts/Inter/Inter-Regular.ttf", 20.0f);
+		io.FontDefault = io.Fonts->AddFontFromFileTTF("assets/fonts/Inter/Inter-Regular.ttf", 16.0f);
 
 		SetDarkTheme();
 
@@ -133,9 +135,9 @@ namespace Locus
 		colors[ImGuiCol_WindowBg] = LocusColors::LightGrey;
 
 		// Headers
-		colors[ImGuiCol_Header] = LocusColors::Grey;
-		colors[ImGuiCol_HeaderHovered] = LocusColors::LightGrey;
-		colors[ImGuiCol_HeaderActive] = LocusColors::LightGrey;
+		colors[ImGuiCol_Header] = LocusColors::Orange;
+		colors[ImGuiCol_HeaderHovered] = LocusColors::Orange;
+		colors[ImGuiCol_HeaderActive] = LocusColors::Orange;
 
 		// Buttons
 		colors[ImGuiCol_Button] = LocusColors::Grey;
@@ -144,7 +146,7 @@ namespace Locus
 
 		// Frame BG
 		colors[ImGuiCol_FrameBg] = LocusColors::Grey;
-		colors[ImGuiCol_FrameBgHovered] = LocusColors::LightGrey;
+		colors[ImGuiCol_FrameBgHovered] = LocusColors::Orange;
 		colors[ImGuiCol_FrameBgActive] = LocusColors::LightGrey;
 
 		// Tabs

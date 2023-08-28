@@ -129,8 +129,9 @@ namespace Locus
 			out << YAML::Key << "TagComponent";
 
 			out << YAML::BeginMap; // Tag Component
-			auto& tag = entity.GetComponent<TagComponent>().Tag;
-			out << YAML::Key << "Tag" << YAML::Value << tag;
+			auto& tag = entity.GetComponent<TagComponent>();
+			out << YAML::Key << "Tag" << YAML::Value << tag.Tag;
+			out << YAML::Key << "Enabled" << YAML::Value << tag.Enabled;
 			out << YAML::EndMap; // End Tag Component
 		}
 
@@ -272,12 +273,16 @@ namespace Locus
 
 				// --- Tag Component ------------------------------------------
 				std::string name;
+				bool enabled;
 				auto tagComponent = entity["TagComponent"];
 				if (tagComponent)
+				{
 					name = tagComponent["Tag"].as<std::string>();
+					enabled = tagComponent["Enabled"].as<bool>();
+				}
 
 				LOCUS_CORE_TRACE("Deserializing Entity: {0}, ID: {1}", name, uuid);
-				Entity deserializedEntity = m_Scene->CreateEntityWithUUID(uuid, name);
+				Entity deserializedEntity = m_Scene->CreateEntityWithUUID(uuid, name, enabled);
 
 				// --- Transform Component ------------------------------------
 				auto transformComponent = entity["TransformComponent"];

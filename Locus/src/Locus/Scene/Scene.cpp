@@ -75,13 +75,14 @@ namespace Locus
 		return CreateEntityWithUUID(UUID(), name);
 	}
 
-	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name)
+	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name, bool enabled)
 	{
 		Entity entity = Entity(m_Registry.create(), this);
 		entity.AddComponent<IDComponent>(uuid);
 		entity.AddComponent<TransformComponent>();
 		auto& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Entity" : name;
+		tag.Enabled = enabled;
 		return entity;
 	}
 

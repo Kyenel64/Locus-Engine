@@ -156,8 +156,7 @@ namespace Locus
 		m_HoveredEntity = {};
 		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
 		{
-			// TODO: This is really slow??
-			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY);
+			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY); // TODO: This is really slow??
 			m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 		}
 		m_SelectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
@@ -448,8 +447,9 @@ namespace Locus
 	{
 		m_EditorScene = CreateRef<Scene>();
 		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 		m_ActiveScene = m_EditorScene;
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_PropertiesPanel.SetContext(m_ActiveScene);
 		m_SavePath = std::string();
 		Application::Get().SetIsSavedStatus(false);
 		CommandHistory::Reset();
@@ -466,8 +466,9 @@ namespace Locus
 	{
 		m_EditorScene = CreateRef<Scene>();
 		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-		m_SceneHierarchyPanel.SetContext(m_EditorScene);
 		m_ActiveScene = m_EditorScene;
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_PropertiesPanel.SetContext(m_ActiveScene);
 		SceneSerializer serializer(m_EditorScene);
 		serializer.Deserialize(path.string());
 		m_SavePath = path.string();

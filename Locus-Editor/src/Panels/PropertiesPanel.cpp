@@ -116,6 +116,7 @@ namespace Locus
 
 		ImGui::BeginTable("Vec3Control", 3);
 
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 0.0f });
 		// X
 		ImGui::TableNextColumn();
 		ImGui::Button("X", { 0.0f, 0.0f });
@@ -169,6 +170,8 @@ namespace Locus
 		if (ImGui::IsItemHovered())
 			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
 		ImGui::PopItemWidth();
+
+		ImGui::PopStyleVar();
 
 		ImGui::EndTable();
 		ImGui::PopStyleColor();
@@ -265,7 +268,7 @@ namespace Locus
 		// --- Transform Component --------------------------------------------
 		DrawComponentUI<TransformComponent>("Transform", entity, [this](auto& component)
 			{
-				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 0.0f });
+				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 5.0f, 0.0f });
 				DrawVec3Control("Position", component.Translation);
 
 				DrawVec3Control("Rotation", component.GetRotationEuler());
@@ -273,7 +276,7 @@ namespace Locus
 				ImGui::PopStyleVar();
 
 				// Bottom spacing is removed if pushing item spacing to all three controls. 
-				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 5.0f });
+				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 5.0f, 5.0f });
 				DrawVec3Control("Scale", component.Scale, 1.0f);
 				ImGui::PopStyleVar();
 
@@ -285,19 +288,23 @@ namespace Locus
 				SceneCamera& camera = component.Camera;
 
 				// Primary camera check
+				DrawControlLabel("Primary");
+				ImGui::SameLine();
 				bool primaryCheck = component.Primary;
-				if (ImGui::Checkbox("Primary", &primaryCheck))
+				if (ImGui::Checkbox("##Primary", &primaryCheck))
 					CommandHistory::AddCommand(new ChangeValueCommand(primaryCheck, component.Primary));
 
 				// Background color
 				glm::vec4 backgroundColor = camera.GetBackgroundColor();
-				if (ImGui::ColorEdit4("Background Color", glm::value_ptr(backgroundColor)))
-					CommandHistory::AddCommand(new ChangeFunctionValueCommand(LOCUS_BIND_FN(camera.SetBackgroundColor, const glm::vec4&), backgroundColor, camera.GetBackgroundColor()));
+				DrawColorControl("Background Color", camera.GetBackgroundColor());
 
 				// Projection mode
+				DrawControlLabel("Projection");
+				ImGui::SameLine();
 				const char* projectionTypeString[] = { "Orthographic", "Perspective" };
 				const char* currentProjectionTypeString = projectionTypeString[(int)camera.GetProjectionType()];
-				if (ImGui::BeginCombo("Projection", currentProjectionTypeString))
+				ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
+				if (ImGui::BeginCombo("##Projection", currentProjectionTypeString))
 				{
 					for (int i = 0; i < 2; i++)
 					{
@@ -310,48 +317,39 @@ namespace Locus
 					}
 					ImGui::EndCombo();
 				}
+				ImGui::PopItemWidth();
 
 				// Orthographic settings
 				if (camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic)
 				{
 					// Size
-					float orthoSize = camera.GetOrthographicSize();
-					if (ImGui::DragFloat("Size", &orthoSize))
-						CommandHistory::AddCommand(new ChangeFunctionValueCommand(LOCUS_BIND_FN(camera.SetOrthographicSize, float), orthoSize, camera.GetOrthographicSize()));
+					DrawFloatControl("Size", camera.GetOrthographicSize());
 
 					// Near
-					float nearClip = camera.GetOrthographicNearClip();
-					if (ImGui::DragFloat("Near Clip", &nearClip))
-						CommandHistory::AddCommand(new ChangeFunctionValueCommand(LOCUS_BIND_FN(camera.SetOrthographicNearClip, float), nearClip, camera.GetOrthographicNearClip()));
+					DrawFloatControl("Near Clip", camera.GetOrthographicNearClip());
 
 					// Far
-					float farClip = camera.GetOrthographicFarClip();
-					if (ImGui::DragFloat("Far Clip", &farClip))
-						CommandHistory::AddCommand(new ChangeFunctionValueCommand(LOCUS_BIND_FN(camera.SetOrthographicFarClip, float), farClip, camera.GetOrthographicFarClip()));
+					DrawFloatControl("Far Clip", camera.GetOrthographicFarClip());
 
 					// Fixed Aspect Ratio
-					bool fixedAspectRatio = component.FixedAspectRatio;
-					if (ImGui::Checkbox("Fixed Aspect Ratio", &fixedAspectRatio))
-						CommandHistory::AddCommand(new ChangeValueCommand(fixedAspectRatio, component.FixedAspectRatio));
+					DrawControlLabel("Fixed Aspect Ratio");
+					ImGui::SameLine();
+					bool isFixed = component.FixedAspectRatio;
+					if (ImGui::Checkbox("##FixedAspectRatio", &isFixed))
+						CommandHistory::AddCommand(new ChangeValueCommand(isFixed, component.FixedAspectRatio));
 				}
 
 				// Perspective settings
 				if (camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
 				{
 					// FOV
-					float fov = glm::degrees(camera.GetPerspectiveFOV());
-					if (ImGui::DragFloat("FOV", &fov))
-						CommandHistory::AddCommand(new ChangeFunctionValueCommand(LOCUS_BIND_FN(camera.SetPerspectiveFOV, float), glm::radians(fov), camera.GetPerspectiveFOV()));
+					DrawFloatControl("FOV", camera.GetPerspectiveFOV());
 
 					// Near
-					float nearClip = camera.GetPerspectiveNearClip();
-					if (ImGui::DragFloat("Near Clip", &nearClip))
-						CommandHistory::AddCommand(new ChangeFunctionValueCommand(LOCUS_BIND_FN(camera.SetPerspectiveNearClip, float), nearClip, camera.GetPerspectiveNearClip()));
+					DrawFloatControl("Near Clip", camera.GetPerspectiveNearClip());
 
 					// Far
-					float farClip = camera.GetPerspectiveFarClip();
-					if (ImGui::DragFloat("Far Clip", &farClip))
-						CommandHistory::AddCommand(new ChangeFunctionValueCommand(LOCUS_BIND_FN(camera.SetPerspectiveFarClip, float), farClip, camera.GetPerspectiveFarClip()));
+					DrawFloatControl("Far Clip", camera.GetPerspectiveFarClip());
 				}
 			});
 
@@ -404,9 +402,12 @@ namespace Locus
 		DrawComponentUI<Rigidbody2DComponent>("Rigidbody 2D", entity, [this](auto& component)
 			{
 				// Body type
+				DrawControlLabel("Body Type");
+				ImGui::SameLine();
 				const char* RigidbodyTypeString[] = { "Static", "Dynamic", "Kinematic" };
 				const char* currentRigidbodyTypeString = RigidbodyTypeString[(int)component.BodyType];
-				if (ImGui::BeginCombo("Body Type", currentRigidbodyTypeString))
+				ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
+				if (ImGui::BeginCombo("##Body Type", currentRigidbodyTypeString))
 				{
 					for (int i = 0; i < 2; i++)
 					{
@@ -419,46 +420,35 @@ namespace Locus
 					}
 					ImGui::EndCombo();
 				}
+				ImGui::PopItemWidth();
 
 				// Mass
-				float mass = component.Mass;
-				if (ImGui::DragFloat("Mass", &mass))
-					CommandHistory::AddCommand(new ChangeValueCommand(mass, component.Mass));
+				DrawFloatControl("Mass", component.Mass);
 
 				// Gravity Scale
-				float gravityScale = component.GravityScale;
-				if (ImGui::DragFloat("Gravity Scale", &gravityScale))
-					CommandHistory::AddCommand(new ChangeValueCommand(gravityScale, component.GravityScale));
+				DrawFloatControl("Gravity Scale", component.GravityScale);
 
 				// Linear Drag
-				float linearDrag = component.LinearDrag;
-				if (ImGui::DragFloat("Linear Drag", &linearDrag))
-					CommandHistory::AddCommand(new ChangeValueCommand(linearDrag, component.LinearDrag));
+				DrawFloatControl("Linear Drag", component.LinearDrag);
 
 				// Angular Drag
-				float angularDrag = component.AngularDrag;
-				if (ImGui::DragFloat("Angular Drag", &angularDrag))
-					CommandHistory::AddCommand(new ChangeValueCommand(angularDrag, component.AngularDrag));
+				DrawFloatControl("Angular Drag", component.AngularDrag);
 
 				// Fixed Rotation
+				DrawControlLabel("Fixed Rotation");
+				ImGui::SameLine();
 				bool fixedRotation = component.FixedRotation;
-				if (ImGui::Checkbox("Fixed Rotation", &fixedRotation))
+				if (ImGui::Checkbox("##Fixed Rotation", &fixedRotation))
 					CommandHistory::AddCommand(new ChangeValueCommand(fixedRotation, component.FixedRotation));
 
 				// Friction
-				float friction = component.Friction;
-				if (ImGui::DragFloat("Friction", &friction))
-					CommandHistory::AddCommand(new ChangeValueCommand(friction, component.Friction));
+				DrawFloatControl("Friction", component.Friction);
 
 				// Restitution
-				float restitution = component.Restitution;
-				if (ImGui::DragFloat("Restitution", &restitution))
-					CommandHistory::AddCommand(new ChangeValueCommand(restitution, component.Restitution));
+				DrawFloatControl("Restitution", component.Restitution);
 
 				// Restitution Threshold
-				float restitutionThreshold = component.RestitutionThreshold;
-				if (ImGui::DragFloat("Restitution Threshold", &restitutionThreshold))
-					CommandHistory::AddCommand(new ChangeValueCommand(restitutionThreshold, component.RestitutionThreshold));
+				DrawFloatControl("Restitution Threshold", component.RestitutionThreshold);
 			});
 
 		DrawComponentUI<BoxCollider2DComponent>("Box Collider 2D", entity, [this](auto& component)
@@ -547,7 +537,7 @@ namespace Locus
 	void PropertiesPanel::DrawControlLabel(const std::string& name, const glm::vec2& size)
 	{
 		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Transparent);
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Pink);
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Transparent);
 		ImGui::Button(name.c_str(), { size.x, size.y });
 		ImGui::PopStyleColor(3);
@@ -558,8 +548,12 @@ namespace Locus
 		DrawControlLabel(name);
 		ImGui::SameLine();
 
-		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
-			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, changeValue));
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+			if (ImGui::IsMouseDoubleClicked(0))
+				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, changeValue));
+		}
 
 		float dragVal = changeValue;
 		if (ImGui::DragFloat("##", &dragVal))

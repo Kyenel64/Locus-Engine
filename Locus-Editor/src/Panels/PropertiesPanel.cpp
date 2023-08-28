@@ -22,6 +22,7 @@ namespace Locus
 		m_ActiveScene = context;
 		m_SelectedEntity = {};
 		m_ShowMoreButton = Texture2D::Create("resources/icons/ShowMoreButton.png");
+		m_FolderIcon = Texture2D::Create("resources/icons/FolderIcon.png");
 	}
 
 	void PropertiesPanel::OnImGuiRender()
@@ -103,8 +104,6 @@ namespace Locus
 	void PropertiesPanel::DrawVec3Control(const std::string& name, glm::vec3& values, float resetValue, float columnWidth)
 	{
 		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Transparent);
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Transparent);
 		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0.0f, 1.0f });
 
 		glm::vec3 dragValues = values;
@@ -119,70 +118,61 @@ namespace Locus
 
 		// X
 		ImGui::TableNextColumn();
-		if (ImGui::Button("X", { 0.0f, 0.0f }))
-		{
-
-		}
+		ImGui::Button("X", { 0.0f, 0.0f });
+		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.x));
 		ImGui::SameLine();
 		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
 		if(ImGui::DragFloat("##X", &dragValues.x, 0.1f, 0.0f, 0.0f, "%.2f"))
 		{
-
 			if (name == "Rotation")
 				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.x), values.x));
 			else
 				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.x, values.x));
 		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
 		ImGui::PopItemWidth();
 
 		// Y
 		ImGui::TableNextColumn();
-		if (ImGui::Button("Y", { 0.0f, 0.0f }))
-		{
-
-		}
+		ImGui::Button("Y", { 0.0f, 0.0f });
+		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.y));
 		ImGui::SameLine();
 		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
 		if (ImGui::DragFloat("##Y", &dragValues.y, 0.1f, 0.0f, 0.0f, "%.2f"))
 		{
 			if (name == "Rotation")
-				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.x), values.x));
+				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.y), values.y));
 			else
-				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.x, values.x));
+				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.y, values.y));
 		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
 		ImGui::PopItemWidth();
 
 		// Z
 		ImGui::TableNextColumn();
-		if (ImGui::Button("Z", { 0.0f, 0.0f }))
-		{
-
-		}
+		ImGui::Button("Z", { 0.0f, 0.0f });
+		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.z));
 		ImGui::SameLine();
 		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
 		if (ImGui::DragFloat("##Z", &dragValues.z, 0.1f, 0.0f, 0.0f, "%.2f"))
 		{
 			if (name == "Rotation")
-				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.x), values.x));
+				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.z), values.z));
 			else
-				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.x, values.x));
+				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.z, values.z));
 		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
 		ImGui::PopItemWidth();
 
 		ImGui::EndTable();
-		ImGui::PopStyleColor(3);
+		ImGui::PopStyleColor();
 		ImGui::PopStyleVar();
-		
-		//if (ImGui::Button("X", buttonSize)) // TODO: double click
-		//	CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.x));
-
-		//if (ImGui::DragFloat("##X", &dragValues.x, 0.1f, 0.0f, 0.0f, "%.2f"))
-		//{
-		//	if (name == "Rotation")
-		//		CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.x), values.x));
-		//	else
-		//		CommandHistory::AddCommand(new ChangeValueCommand(dragValues.x, values.x));
-		//}
 	}
 
 	template<typename T, typename UIFunction>
@@ -368,13 +358,14 @@ namespace Locus
 		// --- SpriteRenderer Component ---------------------------------------
 		DrawComponentUI<SpriteRendererComponent>("Sprite Renderer", entity, [this](auto& component)
 			{
-				// Color
-				glm::vec4 color = component.Color;
-				if (ImGui::ColorEdit4("Color", glm::value_ptr(color)))
-					CommandHistory::AddCommand(new ChangeValueCommand(color, component.Color));
+				// Sprite
+				DrawControlLabel("Sprite", { 110.0f, 50.0f });
+				ImGui::SameLine();
 
-				// Texture
-				ImGui::Button("Texture", ImVec2(100.0f, 0.0f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Grey);
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Grey);
+				ImGui::ImageButton((ImTextureID)(uint64_t)component.Texture->GetRendererID(), { 50.0f, 50.0f }, { 1, 1 }, { 0, 0 });
+				ImGui::PopStyleColor(2);
 				if (ImGui::BeginDragDropTarget())
 				{
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TEXTURE_ITEM_PATH"))
@@ -386,11 +377,21 @@ namespace Locus
 					ImGui::EndDragDropTarget();
 				}
 
-				// Texture Tiling
-				float tilingFactor = component.TilingFactor;
-				if (ImGui::DragFloat("Tiling", &tilingFactor))
-					CommandHistory::AddCommand(new ChangeValueCommand(tilingFactor, component.TilingFactor));
+				ImGui::SameLine();
 
+				ImGui::SetCursorPosY(ImGui::GetCursorPos().y + 25.0f - ImGui::GetFontSize() * 0.5f);
+				ImGui::Button(component.Texture->GetTextureName().c_str(), { -1.0f, 0.0f });
+				ImGui::SameLine(ImGui::GetContentRegionAvail().x - 5.0f);
+				ImGui::SetCursorPosY(ImGui::GetCursorPos().y + 25.0f - ImGui::GetFontSize() * 0.5f);
+				ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
+				ImGui::ImageButton((ImTextureID)(uint64_t)m_FolderIcon->GetRendererID(), { 16.0f, 16.0f }, { 1, 1 }, { 0, 0 });
+				ImGui::PopStyleColor();
+
+				// Color
+				DrawColorControl("Color", component.Color);
+
+				// Tiling Factor
+				DrawFloatControl("Tiling Factor", component.TilingFactor);
 			});
 
 		// --- Rigidbody2D Component ------------------------------------------
@@ -546,8 +547,57 @@ namespace Locus
 		ImGui::PopStyleColor(3);
 	}
 
-	void PropertiesPanel::DrawFloatControl(const std::string& name, float& value)
+	void PropertiesPanel::DrawFloatControl(const std::string& name, float& changeValue, float resetValue)
 	{
+		DrawControlLabel(name);
+		ImGui::SameLine();
 
+		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, changeValue));
+
+		float dragVal = changeValue;
+		if (ImGui::DragFloat("##", &dragVal))
+			CommandHistory::AddCommand(new ChangeValueCommand(dragVal, changeValue));
+		if (ImGui::IsItemHovered())
+			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+	}
+
+	void PropertiesPanel::DrawColorControl(const std::string& name, glm::vec4& colorValue)
+	{
+		DrawControlLabel("Color");
+		ImGui::SameLine();
+
+		glm::vec4 color = colorValue;
+		static glm::vec4 backupColor;
+		ImGui::PushStyleColor(ImGuiCol_Button, ToImVec4(color));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ToImVec4(color));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ToImVec4(color));
+		if (ImGui::Button("##Color", { ImGui::GetContentRegionAvail().x, 0.0f }))
+		{
+			ImGui::OpenPopup("mypicker");
+			backupColor = color;
+		}
+		ImGui::PopStyleColor(3);
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::ColorTooltip("Color", glm::value_ptr(color), ImGuiColorEditFlags_None);
+		}
+		if (ImGui::BeginPopup("mypicker"))
+		{
+			ImGui::Text("Color");
+			ImGui::Separator();
+			if (ImGui::ColorPicker4("##picker", glm::value_ptr(color), ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview))
+				CommandHistory::AddCommand(new ChangeValueCommand(color, colorValue));
+			ImGui::SameLine();
+
+			ImGui::BeginGroup(); // Lock X position
+			ImGui::Text("Current");
+			ImGui::ColorButton("##current", ToImVec4(color), ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40));
+			ImGui::Text("Previous");
+			if (ImGui::ColorButton("##previous", ToImVec4(backupColor), ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40)))
+				color = backupColor;
+			ImGui::EndGroup();
+			ImGui::EndPopup();
+		}
 	}
 }

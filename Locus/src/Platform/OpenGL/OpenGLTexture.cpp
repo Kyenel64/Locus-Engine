@@ -94,4 +94,13 @@ namespace Locus
 		LOCUS_CORE_ASSERT(size == m_Width * m_Height * bpp, "Data must be entire texture");
 		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data);
 	}
+
+	const std::string OpenGLTexture2D::GetTextureName() const
+	{
+		std::string textureName;
+		size_t textureNamePos = m_Path.find_last_of("\\") + 1;
+		if (textureNamePos != std::string::npos)
+			textureName = m_Path.substr(textureNamePos, m_Path.size());
+		return textureName;
+	}
 }

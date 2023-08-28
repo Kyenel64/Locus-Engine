@@ -28,8 +28,8 @@ namespace Locus
 		template<typename T, typename UIFunction>
 		void DrawComponentUI(const std::string& name, Entity entity, UIFunction uiFunction);
 		void DrawVec3Control(const std::string& name, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f);
-		void DrawColorControl(const std::string& name);
-		void DrawFloatControl(const std::string& name, float& value);
+		void DrawColorControl(const std::string& name, glm::vec4& colorValue);
+		void DrawFloatControl(const std::string& name, float& changeValue, float resetValue = 1.0f);
 		void DrawControlLabel(const std::string& name, const glm::vec2& size = { 110.0f, 0.0f });
 
 		template<typename T>
@@ -42,6 +42,7 @@ namespace Locus
 
 		// Textures
 		Ref<Texture2D> m_ShowMoreButton;
+		Ref<Texture2D> m_FolderIcon;
 
 		ComponentsList m_ClipboardComponent;
 		ComponentType m_ClipboardComponentType = ComponentType::None;

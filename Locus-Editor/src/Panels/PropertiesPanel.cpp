@@ -364,7 +364,10 @@ namespace Locus
 
 				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Grey);
 				ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Grey);
-				ImGui::ImageButton((ImTextureID)(uint64_t)component.Texture->GetRendererID(), { 50.0f, 50.0f }, { 1, 1 }, { 0, 0 });
+				if (component.Texture == nullptr)
+					ImGui::Button("##EmptyTexture", { 50.0f, 50.0f });
+				else
+					ImGui::ImageButton((ImTextureID)(uint64_t)component.Texture->GetRendererID(), { 50.0f, 50.0f }, { 1, 1 }, { 0, 0 });
 				ImGui::PopStyleColor(2);
 				if (ImGui::BeginDragDropTarget())
 				{
@@ -380,7 +383,10 @@ namespace Locus
 				ImGui::SameLine();
 
 				ImGui::SetCursorPosY(ImGui::GetCursorPos().y + 25.0f - ImGui::GetFontSize() * 0.5f);
-				ImGui::Button(component.Texture->GetTextureName().c_str(), { -1.0f, 0.0f });
+				if (component.Texture == nullptr)
+					ImGui::Button("##EmptyTexturePath", { -1.0f, 0.0f });
+				else
+					ImGui::Button(component.Texture->GetTextureName().c_str(), { -1.0f, 0.0f });
 				ImGui::SameLine(ImGui::GetContentRegionAvail().x - 5.0f);
 				ImGui::SetCursorPosY(ImGui::GetCursorPos().y + 25.0f - ImGui::GetFontSize() * 0.5f);
 				ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);

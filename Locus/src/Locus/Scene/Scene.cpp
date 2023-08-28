@@ -61,6 +61,7 @@ namespace Locus
 
 	void Scene::CopyAllComponents(Entity from, Entity to)
 	{
+		to.GetComponent<TagComponent>().Enabled = from.GetComponent<TagComponent>().Enabled;
 		CopyComponent<TransformComponent>(from, to);
 		CopyComponent<SpriteRendererComponent>(from, to);
 		CopyComponent<CameraComponent>(from, to);
@@ -106,42 +107,50 @@ namespace Locus
 	{
 		// --- Update Scripts -------------------------------------------------
 		{
-			auto view = m_Registry.view<NativeScriptComponent>();
+			// TODO: Check for enabled.
+			auto view = m_Registry.view<NativeScriptComponent, TagComponent>();
 			for (auto entity : view)
 			{
 				auto& nsc = view.get<NativeScriptComponent>(entity);
-				// temp. move this if statement to OnScenePlay
-				if (!nsc.Instance)
+				bool enabled = view.get<TagComponent>(entity).Enabled;
+				if (enabled)
 				{
-					nsc.Instance = nsc.InstantiateScript();
-					nsc.Instance->m_Entity = Entity(entity, this);
-					nsc.Instance->OnCreate();
+					// temp. move this if statement to OnScenePlay
+					if (!nsc.Instance)
+					{
+						nsc.Instance = nsc.InstantiateScript();
+						nsc.Instance->m_Entity = Entity(entity, this);
+						nsc.Instance->OnCreate();
+					}
+					nsc.Instance->OnUpdate(deltaTime);
 				}
-				nsc.Instance->OnUpdate(deltaTime);
 			}
 		}
 
 		// --- Physics --------------------------------------------------------
-
 		m_Box2DWorld->Step(deltaTime, 6, 2); // TODO: paremeterize
 
-		auto view = m_Registry.view<Rigidbody2DComponent>();
+		auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
 		for (auto e : view)
 		{
 			Entity entity = Entity(e, this);
-			auto& transform = entity.GetComponent<TransformComponent>();
-			auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+			if (entity.GetComponent<TagComponent>().Enabled)
+			{
+				auto& transform = entity.GetComponent<TransformComponent>();
+				auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
 			
-			b2Body* body = (b2Body*)rb2d.RuntimeBody;
-			const b2Vec2& position = body->GetPosition();
-			transform.Translation.x = position.x;
-			transform.Translation.y = position.y;
-			transform.SetRotationEuler({ 0, 0, body->GetAngle()});
+				b2Body* body = (b2Body*)rb2d.RuntimeBody;
+				const b2Vec2& position = body->GetPosition();
+				transform.Translation.x = position.x;
+				transform.Translation.y = position.y;
+				transform.SetRotationEuler({ 0, 0, body->GetAngle()});
+			}
+			
 		}
 
 		// --- Rendering 2D ---------------------------------------------------
 		// Find first main camera
-		SceneCamera* mainCamera = nullptr; // TODO: Switched Camera to SceneCamera. Change back if problems
+		SceneCamera* mainCamera = nullptr;
 		glm::mat4 cameraTransform;
 		{
 			auto view = m_Registry.view<TransformComponent, CameraComponent>();
@@ -164,11 +173,13 @@ namespace Locus
 			RenderCommand::Clear();
 
 			Renderer2D::BeginScene(*mainCamera, cameraTransform);
-			auto group = m_Registry.group<TransformComponent, SpriteRendererComponent>();
+			auto group = m_Registry.group<TransformComponent, SpriteRendererComponent, TagComponent>();
 			for (auto entity : group)
 			{
 				auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-				Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
+				bool enabled = group.get<TagComponent>(entity).Enabled;
+				if (enabled)
+					Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
 			}
 			Renderer2D::EndScene();
 		}
@@ -183,13 +194,12 @@ namespace Locus
 	{
 		// Main rendering
 		Renderer2D::BeginScene(camera);
-		auto view = m_Registry.view<SpriteRendererComponent>();
-		for (auto e : view)
+		auto group = m_Registry.group<TransformComponent, SpriteRendererComponent, TagComponent>();
+		for (auto entity : group)
 		{
-			Entity entity = Entity(e, this);
-			auto transform = entity.GetComponent<TransformComponent>();
-			auto sprite = entity.GetComponent<SpriteRendererComponent>();
-			if (entity.GetComponent<TagComponent>().Enabled)
+			auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+			bool enabled = group.get<TagComponent>(entity).Enabled;
+			if (enabled)
 				Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
 		}
 		Renderer2D::EndScene();
@@ -199,53 +209,56 @@ namespace Locus
 	{
 		m_Box2DWorld = new b2World({ 0.0f, -9.8f });
 
-		auto view = m_Registry.view<Rigidbody2DComponent>();
+		auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
 		for (auto e : view)
 		{
 			Entity entity = Entity(e, this);
-			auto& transform = entity.GetComponent<TransformComponent>();
-			auto& rb2D = entity.GetComponent<Rigidbody2DComponent>();
-
-			// Body
-			b2BodyDef bodyDef;
-			bodyDef.type = Rigidbody2DTypeToBox2DType(rb2D.BodyType);
-			bodyDef.position.Set(transform.Translation.x, transform.Translation.y);
-			bodyDef.angle = transform.GetRotationEuler().z;
-			bodyDef.linearDamping = rb2D.LinearDrag;
-			bodyDef.angularDamping = rb2D.AngularDrag;
-			bodyDef.fixedRotation = rb2D.FixedRotation;
-			bodyDef.gravityScale = rb2D.GravityScale;
-			b2Body* entityBody = m_Box2DWorld->CreateBody(&bodyDef);
-			rb2D.RuntimeBody = entityBody;
-			b2MassData massData;
-			massData.mass = rb2D.Mass;
-			entityBody->SetMassData(&massData);
-
-			b2FixtureDef fixtureDef;
-			fixtureDef.density = rb2D.Mass;
-			fixtureDef.friction = rb2D.Friction;
-			fixtureDef.restitution = rb2D.Restitution;
-			fixtureDef.restitutionThreshold = rb2D.RestitutionThreshold;
-			fixtureDef.filter.categoryBits = 0;
-
-			// Box Collider
-			b2PolygonShape box;
-			b2Vec2 size = { transform.Scale.x, transform.Scale.y};
-			b2Vec2 offset = { 0.0f, 0.0f };
-			float angle = 0.0f;
-			if (entity.HasComponent<BoxCollider2DComponent>()) // TODO: Reformat this
+			if (entity.GetComponent<TagComponent>().Enabled)
 			{
-				auto& b2D = entity.GetComponent<BoxCollider2DComponent>();
+				auto& transform = entity.GetComponent<TransformComponent>();
+				auto& rb2D = entity.GetComponent<Rigidbody2DComponent>();
 
-				fixtureDef.filter.categoryBits = b2D.CollisionLayer;
-				size.x = b2D.Size.x * size.x;
-				size.y = b2D.Size.y * size.y;
-				offset.x = b2D.Offset.x;
-				offset.y = b2D.Offset.y;
+				// Body
+				b2BodyDef bodyDef;
+				bodyDef.type = Rigidbody2DTypeToBox2DType(rb2D.BodyType);
+				bodyDef.position.Set(transform.Translation.x, transform.Translation.y);
+				bodyDef.angle = transform.GetRotationEuler().z;
+				bodyDef.linearDamping = rb2D.LinearDrag;
+				bodyDef.angularDamping = rb2D.AngularDrag;
+				bodyDef.fixedRotation = rb2D.FixedRotation;
+				bodyDef.gravityScale = rb2D.GravityScale;
+				b2Body* entityBody = m_Box2DWorld->CreateBody(&bodyDef);
+				rb2D.RuntimeBody = entityBody;
+				b2MassData massData;
+				massData.mass = rb2D.Mass;
+				entityBody->SetMassData(&massData);
+
+				b2FixtureDef fixtureDef;
+				fixtureDef.density = rb2D.Mass;
+				fixtureDef.friction = rb2D.Friction;
+				fixtureDef.restitution = rb2D.Restitution;
+				fixtureDef.restitutionThreshold = rb2D.RestitutionThreshold;
+				fixtureDef.filter.categoryBits = 0;
+
+				// Box Collider
+				b2PolygonShape box;
+				b2Vec2 size = { transform.Scale.x, transform.Scale.y};
+				b2Vec2 offset = { 0.0f, 0.0f };
+				float angle = 0.0f;
+				if (entity.HasComponent<BoxCollider2DComponent>()) // TODO: Reformat this
+				{
+					auto& b2D = entity.GetComponent<BoxCollider2DComponent>();
+
+					fixtureDef.filter.categoryBits = b2D.CollisionLayer;
+					size.x = b2D.Size.x * size.x;
+					size.y = b2D.Size.y * size.y;
+					offset.x = b2D.Offset.x;
+					offset.y = b2D.Offset.y;
+				}
+				box.SetAsBox(size.x / 2, size.y / 2, offset, angle);
+				fixtureDef.shape = &box;
+				entityBody->CreateFixture(&fixtureDef);
 			}
-			box.SetAsBox(size.x / 2, size.y / 2, offset, angle);
-			fixtureDef.shape = &box;
-			entityBody->CreateFixture(&fixtureDef);
 		}
 	}
 

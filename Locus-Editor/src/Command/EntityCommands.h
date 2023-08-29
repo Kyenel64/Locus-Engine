@@ -17,9 +17,28 @@ namespace Locus
 		{
 		}
 
+		CreateEntityCommand(Ref<Scene> activeScene, const std::string& name, Entity parentEntity)
+			: m_ActiveScene(activeScene), m_EntityName(name), m_UUID(UUID()), m_ParentEntity(parentEntity)
+		{
+		}
+
 		virtual void Execute() override
 		{
 			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_Entity, m_UUID, m_EntityName);
+			if (m_ParentEntity != Entity::Null)
+			{
+				m_Entity.GetComponent<RelationshipComponent>().Parent = m_ParentEntity;
+				auto& childrenCount = m_ParentEntity.GetComponent<RelationshipComponent>().childrenCount;
+				if (childrenCount == 0)
+				{
+					m_ParentEntity.GetComponent<RelationshipComponent>().FirstChild = m_Entity;
+				}
+				else
+				{
+					// TODO: set next and prev entities
+				}
+				childrenCount++;
+			}
 			Application::Get().SetIsSavedStatus(false);
 		}
 
@@ -38,6 +57,7 @@ namespace Locus
 		Ref<Scene> m_ActiveScene;
 		Entity m_Entity;
 		Entity m_CopyEntity;
+		Entity m_ParentEntity = Entity::Null;
 		UUID m_UUID;
 		std::string m_EntityName;
 	};

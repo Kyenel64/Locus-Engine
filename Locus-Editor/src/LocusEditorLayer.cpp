@@ -91,7 +91,7 @@ namespace Locus
 		m_EditorCamera = EditorCamera(30.0f, 1920.0f / 1080.0f, 0.1f, 1000.0f);
 
 		// TODO: set values on load
-		m_ViewportHeight = 800.0f;
+		m_ViewportHeight = 600.0f;
 		m_HierarchyHeight = 400.0f;
 		m_CenterSplitterPos = 1500.0f;
 	}
@@ -276,30 +276,9 @@ namespace Locus
 
 
 		// --- Debug panel ---------------------------------------------------
-		ImGui::Begin(" Debug ", false);
-		auto stats = Renderer2D::GetStats();
-		ImGui::Text("Renderer2D Stats:");
-		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
-		ImGui::Text("Quads: %d", stats.QuadCount);
-		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
-		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
-		ImGui::Text("Frame Time: %f", stats.FrameTime);
-		ImGui::Text("FPS: %f", stats.FramesPerSecond);
-
-		std::string name = "None";
-		if (m_HoveredEntity)
-			if (m_HoveredEntity.HasComponent<IDComponent>())
-				name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
-		ImGui::Text("Hovered Entity: %s", name.c_str());
-
-		std::string collisionLayer = "None";
-		if (m_HoveredEntity)
-			if (m_HoveredEntity.HasComponent<BoxCollider2DComponent>())
-				collisionLayer = std::to_string(m_HoveredEntity.GetComponent<BoxCollider2DComponent>().CollisionLayer);
-		ImGui::Text("Hovered Collision Layer: %s", collisionLayer.c_str());
-		ImGui::End();
-
+		DrawDebugPanel();
 	
+
 		// --- Save Project Popup ---------------------------------------------
 		if (Application::Get().GetSaveChangesPopupStatus())
 			ImGui::OpenPopup("Save?");
@@ -817,5 +796,65 @@ namespace Locus
 		}
 		ImGui::PopStyleVar(3);
 		ImGui::PopStyleColor(4);
+	}
+
+	void LocusEditorLayer::DrawDebugPanel()
+	{
+		ImGui::Begin(" Debug ", false);
+		auto stats = Renderer2D::GetStats();
+		ImGui::Text("Renderer2D Stats:");
+		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
+		ImGui::Text("Quads: %d", stats.QuadCount);
+		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
+		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
+		ImGui::Text("Frame Time: %f", stats.FrameTime);
+		ImGui::Text("FPS: %f", stats.FramesPerSecond);
+
+		std::string name = "None";
+		if (m_HoveredEntity)
+			if (m_HoveredEntity.HasComponent<IDComponent>())
+				name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
+		ImGui::Text("Hovered Entity: %s", name.c_str());
+
+		std::string collisionLayer = "None";
+		if (m_HoveredEntity)
+			if (m_HoveredEntity.HasComponent<BoxCollider2DComponent>())
+				collisionLayer = std::to_string(m_HoveredEntity.GetComponent<BoxCollider2DComponent>().CollisionLayer);
+		ImGui::Text("Hovered Collision Layer: %s", collisionLayer.c_str());
+
+		// Relationships debug
+		if (m_SelectedEntity)
+		{
+			ImGui::Separator();
+			ImGui::Text("Relationships");
+			auto& rc = m_SelectedEntity.GetComponent<RelationshipComponent>();
+			ImGui::Text("Children Count: %d", rc.childrenCount);
+			Entity firstChild;
+			Entity parent;
+			Entity next;
+			Entity prev;
+			if (rc.FirstChild != entt::null)
+			{
+				firstChild = Entity(rc.FirstChild, m_ActiveScene.get());
+				ImGui::Text("First Child: %s", firstChild.GetComponent<TagComponent>().Tag.c_str());
+			}
+			if (rc.Parent != entt::null)
+			{
+				parent = Entity(rc.Parent, m_ActiveScene.get());
+				ImGui::Text("Parent: %s", parent.GetComponent<TagComponent>().Tag.c_str());
+			}
+			if (rc.Next != entt::null)
+			{
+				next = Entity(rc.Next, m_ActiveScene.get());
+				ImGui::Text("Next: % s", next.GetComponent<TagComponent>().Tag.c_str());
+			}
+			if (rc.Prev != entt::null)
+			{
+				prev = Entity(rc.Prev, m_ActiveScene.get());
+				ImGui::Text("Prev: %s", prev.GetComponent<TagComponent>().Tag.c_str());
+			}
+		}
+
+		ImGui::End();
 	}
 }

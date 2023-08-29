@@ -97,6 +97,9 @@ namespace Locus
 		bool entityDeleted = false;
 		if (ImGui::BeginPopupContextItem())
 		{
+			if (ImGui::MenuItem("Create Empty Entity"))
+				CommandHistory::AddCommand(new CreateEntityCommand(m_ActiveScene, "Empty Entity", m_SelectedEntity));
+
 			if (ImGui::MenuItem("Delete Entity"))
 				entityDeleted = true;
 			ImGui::EndPopup();

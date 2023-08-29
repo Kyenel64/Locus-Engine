@@ -44,6 +44,8 @@ namespace Locus
 		Ref<Scene> m_ActiveScene;
 		Entity m_SelectedEntity;
 
+		float m_LabelWidth = 110.0f;
+
 		// Textures
 		Ref<Texture2D> m_ShowMoreButton;
 		Ref<Texture2D> m_FolderIcon;

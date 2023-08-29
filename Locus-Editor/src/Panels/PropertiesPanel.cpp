@@ -27,6 +27,7 @@ namespace Locus
 
 	void PropertiesPanel::OnImGuiRender()
 	{
+		float windowWidth = ImGui::GetWindowSize().x;
 		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar;
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 10.0f, 10.0f });
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 4.0f, 2.0f });
@@ -34,6 +35,8 @@ namespace Locus
 		ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, { 0.0f, 0.5f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Orange);
 		ImGui::Begin(" Properties ", false, windowFlags);
+
+		m_LabelWidth =  60.0f * ( 1.0f + ((ImGui::GetWindowSize().x / windowWidth) * 5.0f));
 
 		if (m_SelectedEntity)
 		{
@@ -211,7 +214,7 @@ namespace Locus
 				SceneCamera& camera = component.Camera;
 
 				// Primary camera check
-				DrawControlLabel("Primary");
+				DrawControlLabel("Primary", { m_LabelWidth, 0.0f });
 				ImGui::SameLine();
 				bool primaryCheck = component.Primary;
 				if (ImGui::Checkbox("##Primary", &primaryCheck))
@@ -222,7 +225,7 @@ namespace Locus
 				DrawColorControl("Background Color", camera.GetBackgroundColor());
 
 				// Projection mode
-				DrawControlLabel("Projection");
+				DrawControlLabel("Projection", { m_LabelWidth, 0.0f });
 				ImGui::SameLine();
 				const char* projectionTypeString[] = { "Orthographic", "Perspective" };
 				const char* currentProjectionTypeString = projectionTypeString[(int)camera.GetProjectionType()];
@@ -253,7 +256,7 @@ namespace Locus
 					DrawFloatControl("Far Clip", camera.GetOrthographicFarClip());
 
 					// Fixed Aspect Ratio
-					DrawControlLabel("Fixed Aspect Ratio");
+					DrawControlLabel("Fixed Aspect Ratio", { m_LabelWidth, 0.0f });
 					ImGui::SameLine();
 					bool isFixed = component.FixedAspectRatio;
 					if (ImGui::Checkbox("##FixedAspectRatio", &isFixed))
@@ -276,7 +279,7 @@ namespace Locus
 		DrawComponentUI<SpriteRendererComponent>("Sprite Renderer", entity, [this](auto& component)
 			{
 				// Sprite
-				DrawControlLabel("Sprite", { 110.0f, 50.0f });
+				DrawControlLabel("Sprite", { m_LabelWidth, 50.0f });
 				ImGui::SameLine();
 
 				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Grey);
@@ -320,7 +323,7 @@ namespace Locus
 		DrawComponentUI<Rigidbody2DComponent>("Rigidbody 2D", entity, [this](auto& component)
 			{
 				// Body type
-				DrawControlLabel("Body Type");
+				DrawControlLabel("Body Type", { m_LabelWidth, 0.0f });
 				ImGui::SameLine();
 				const char* RigidbodyTypeString[] = { "Static", "Dynamic", "Kinematic" };
 				const char* currentRigidbodyTypeString = RigidbodyTypeString[(int)component.BodyType];
@@ -350,7 +353,7 @@ namespace Locus
 				DrawFloatControl("Angular Drag", component.AngularDrag);
 
 				// Fixed Rotation
-				DrawControlLabel("Fixed Rotation");
+				DrawControlLabel("Fixed Rotation", { m_LabelWidth, 0.0f });
 				ImGui::SameLine();
 				bool fixedRotation = component.FixedRotation;
 				if (ImGui::Checkbox("##Fixed Rotation", &fixedRotation))
@@ -386,7 +389,7 @@ namespace Locus
 
 	void PropertiesPanel::DrawFloatControl(const std::string& name, float& changeValue, float resetValue)
 	{
-		DrawControlLabel(name);
+		DrawControlLabel(name, { m_LabelWidth, 0.0f });
 		ImGui::SameLine();
 
 		if (ImGui::IsItemHovered())
@@ -408,7 +411,7 @@ namespace Locus
 
 	void PropertiesPanel::DrawIntControl(const std::string& name, int& changeValue, int resetValue)
 	{
-		DrawControlLabel(name);
+		DrawControlLabel(name, { m_LabelWidth, 0.0f });
 		ImGui::SameLine();
 
 		if (ImGui::IsItemHovered())
@@ -430,7 +433,7 @@ namespace Locus
 
 	void PropertiesPanel::DrawUInt16Control(const std::string& name, uint16_t& changeValue, uint16_t resetValue)
 	{
-		DrawControlLabel(name);
+		DrawControlLabel(name, { m_LabelWidth, 0.0f });
 		ImGui::SameLine();
 
 		if (ImGui::IsItemHovered())
@@ -452,7 +455,7 @@ namespace Locus
 
 	void PropertiesPanel::DrawColorControl(const std::string& name, glm::vec4& colorValue)
 	{
-		DrawControlLabel("Color");
+		DrawControlLabel("Color", { m_LabelWidth, 0.0f });
 		ImGui::SameLine();
 
 		glm::vec4 color = colorValue;
@@ -498,7 +501,7 @@ namespace Locus
 		if (name == "Rotation")
 			dragValues = glm::degrees(dragValues);
 
-		DrawControlLabel(name.c_str());
+		DrawControlLabel(name.c_str(), { m_LabelWidth, 0.0f });
 
 		ImGui::SameLine();
 
@@ -508,8 +511,12 @@ namespace Locus
 		// X
 		ImGui::TableNextColumn();
 		ImGui::Button("X", { 0.0f, 0.0f });
-		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
-			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.x));
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+			if (ImGui::IsMouseDoubleClicked(0))
+				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.x));
+		}
 		ImGui::SameLine();
 		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
 		if (ImGui::DragFloat("##X", &dragValues.x, 0.1f, 0.0f, 0.0f, "%.2f"))
@@ -526,8 +533,12 @@ namespace Locus
 		// Y
 		ImGui::TableNextColumn();
 		ImGui::Button("Y", { 0.0f, 0.0f });
-		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
-			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.y));
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+			if (ImGui::IsMouseDoubleClicked(0))
+				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.y));
+		}
 		ImGui::SameLine();
 		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
 		if (ImGui::DragFloat("##Y", &dragValues.y, 0.1f, 0.0f, 0.0f, "%.2f"))
@@ -557,7 +568,7 @@ namespace Locus
 		if (name == "Rotation")
 			dragValues = glm::degrees(dragValues);
 
-		DrawControlLabel(name.c_str());
+		DrawControlLabel(name.c_str(), { m_LabelWidth, 0.0f });
 
 		ImGui::SameLine();
 
@@ -567,8 +578,12 @@ namespace Locus
 		// X
 		ImGui::TableNextColumn();
 		ImGui::Button("X", { 0.0f, 0.0f });
-		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
-			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.x));
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+			if (ImGui::IsMouseDoubleClicked(0))
+				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.x));
+		}
 		ImGui::SameLine();
 		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
 		if(ImGui::DragFloat("##X", &dragValues.x, 0.1f, 0.0f, 0.0f, "%.2f"))
@@ -585,8 +600,12 @@ namespace Locus
 		// Y
 		ImGui::TableNextColumn();
 		ImGui::Button("Y", { 0.0f, 0.0f });
-		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
-			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.y));
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+			if (ImGui::IsMouseDoubleClicked(0))
+				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.y));
+		}
 		ImGui::SameLine();
 		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
 		if (ImGui::DragFloat("##Y", &dragValues.y, 0.1f, 0.0f, 0.0f, "%.2f"))
@@ -603,8 +622,12 @@ namespace Locus
 		// Z
 		ImGui::TableNextColumn();
 		ImGui::Button("Z", { 0.0f, 0.0f });
-		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
-			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.z));
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+			if (ImGui::IsMouseDoubleClicked(0))
+				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.z));
+		}
 		ImGui::SameLine();
 		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
 		if (ImGui::DragFloat("##Z", &dragValues.z, 0.1f, 0.0f, 0.0f, "%.2f"))

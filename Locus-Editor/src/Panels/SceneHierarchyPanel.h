@@ -28,5 +28,8 @@ namespace Locus
 	private:
 		Ref<Scene> m_ActiveScene;
 		Entity m_SelectedEntity;
+
+		// Textures
+		Ref<Texture2D> m_PlusButton;
 	};
 }

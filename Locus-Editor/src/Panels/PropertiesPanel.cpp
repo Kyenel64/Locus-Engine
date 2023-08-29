@@ -101,83 +101,6 @@ namespace Locus
 		ImGui::PopStyleColor();
 	}
 
-	void PropertiesPanel::DrawVec3Control(const std::string& name, glm::vec3& values, float resetValue, float columnWidth)
-	{
-		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
-		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0.0f, 1.0f });
-
-		glm::vec3 dragValues = values;
-		if (name == "Rotation")
-			dragValues = glm::degrees(dragValues);
-
-		DrawControlLabel(name.c_str());
-
-		ImGui::SameLine();
-
-		ImGui::BeginTable("Vec3Control", 3);
-
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 0.0f });
-		// X
-		ImGui::TableNextColumn();
-		ImGui::Button("X", { 0.0f, 0.0f });
-		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
-			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.x));
-		ImGui::SameLine();
-		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-		if(ImGui::DragFloat("##X", &dragValues.x, 0.1f, 0.0f, 0.0f, "%.2f"))
-		{
-			if (name == "Rotation")
-				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.x), values.x));
-			else
-				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.x, values.x));
-		}
-		if (ImGui::IsItemHovered())
-			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-		ImGui::PopItemWidth();
-
-		// Y
-		ImGui::TableNextColumn();
-		ImGui::Button("Y", { 0.0f, 0.0f });
-		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
-			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.y));
-		ImGui::SameLine();
-		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-		if (ImGui::DragFloat("##Y", &dragValues.y, 0.1f, 0.0f, 0.0f, "%.2f"))
-		{
-			if (name == "Rotation")
-				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.y), values.y));
-			else
-				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.y, values.y));
-		}
-		if (ImGui::IsItemHovered())
-			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-		ImGui::PopItemWidth();
-
-		// Z
-		ImGui::TableNextColumn();
-		ImGui::Button("Z", { 0.0f, 0.0f });
-		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
-			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.z));
-		ImGui::SameLine();
-		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-		if (ImGui::DragFloat("##Z", &dragValues.z, 0.1f, 0.0f, 0.0f, "%.2f"))
-		{
-			if (name == "Rotation")
-				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.z), values.z));
-			else
-				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.z, values.z));
-		}
-		if (ImGui::IsItemHovered())
-			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-		ImGui::PopItemWidth();
-
-		ImGui::PopStyleVar();
-
-		ImGui::EndTable();
-		ImGui::PopStyleColor();
-		ImGui::PopStyleVar();
-	}
-
 	template<typename T, typename UIFunction>
 	void PropertiesPanel::DrawComponentUI(const std::string& name, Entity entity, UIFunction uiFunction)
 	{
@@ -324,10 +247,8 @@ namespace Locus
 				{
 					// Size
 					DrawFloatControl("Size", camera.GetOrthographicSize());
-
 					// Near
 					DrawFloatControl("Near Clip", camera.GetOrthographicNearClip());
-
 					// Far
 					DrawFloatControl("Far Clip", camera.GetOrthographicFarClip());
 
@@ -344,10 +265,8 @@ namespace Locus
 				{
 					// FOV
 					DrawFloatControl("FOV", camera.GetPerspectiveFOV());
-
 					// Near
 					DrawFloatControl("Near Clip", camera.GetPerspectiveNearClip());
-
 					// Far
 					DrawFloatControl("Far Clip", camera.GetPerspectiveFarClip());
 				}
@@ -393,7 +312,6 @@ namespace Locus
 
 				// Color
 				DrawColorControl("Color", component.Color);
-
 				// Tiling Factor
 				DrawFloatControl("Tiling Factor", component.TilingFactor);
 			});
@@ -424,13 +342,10 @@ namespace Locus
 
 				// Mass
 				DrawFloatControl("Mass", component.Mass);
-
 				// Gravity Scale
 				DrawFloatControl("Gravity Scale", component.GravityScale);
-
 				// Linear Drag
 				DrawFloatControl("Linear Drag", component.LinearDrag);
-
 				// Angular Drag
 				DrawFloatControl("Angular Drag", component.AngularDrag);
 
@@ -443,10 +358,8 @@ namespace Locus
 
 				// Friction
 				DrawFloatControl("Friction", component.Friction);
-
 				// Restitution
 				DrawFloatControl("Restitution", component.Restitution);
-
 				// Restitution Threshold
 				DrawFloatControl("Restitution Threshold", component.RestitutionThreshold);
 			});
@@ -454,26 +367,262 @@ namespace Locus
 		DrawComponentUI<BoxCollider2DComponent>("Box Collider 2D", entity, [this](auto& component)
 			{
 				// Collision Layer
-				int collisionLayer = component.CollisionLayer;
-				if (ImGui::DragInt("Collision Layer", &collisionLayer, 1.0f, 1, 16))
-					CommandHistory::AddCommand(new ChangeValueCommand((uint16_t)collisionLayer, component.CollisionLayer));
-
+				DrawUInt16Control("Collision Layer", component.CollisionLayer);
 				// Size
-				float size[2] = { component.Size.x, component.Size.y };
-				if (ImGui::DragFloat2("Size", (float*)&size, 0.1f))
-				{
-					glm::vec2 sizeVec = { size[0], size[1] };
-					CommandHistory::AddCommand(new ChangeValueCommand(sizeVec, component.Size));
-				}
-
+				DrawVec2Control("Size", component.Size, 1.0f);
 				// Offset
-				float offset[2] = { component.Offset.x, component.Offset.y };
-				if (ImGui::DragFloat2("Offset", (float*)&offset, 0.1f))
-				{
-					glm::vec2 offsetVec = { offset[0], offset[1] };
-					CommandHistory::AddCommand(new ChangeValueCommand(offsetVec, component.Offset));
-				}
+				DrawVec2Control("Offset", component.Offset);
 			});
+	}
+
+	void PropertiesPanel::DrawControlLabel(const std::string& name, const glm::vec2& size)
+	{
+		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Transparent);
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Transparent);
+		ImGui::Button(name.c_str(), { size.x, size.y });
+		ImGui::PopStyleColor(3);
+	}
+
+	void PropertiesPanel::DrawFloatControl(const std::string& name, float& changeValue, float resetValue)
+	{
+		DrawControlLabel(name);
+		ImGui::SameLine();
+
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+			if (ImGui::IsMouseDoubleClicked(0))
+				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, changeValue));
+		}
+
+		float dragVal = changeValue;
+		std::string label = "##" + name;
+		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
+		if (ImGui::DragFloat(label.c_str(), &dragVal))
+			CommandHistory::AddCommand(new ChangeValueCommand(dragVal, changeValue));
+		ImGui::PopItemWidth();
+		if (ImGui::IsItemHovered())
+			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+	}
+
+	void PropertiesPanel::DrawIntControl(const std::string& name, int& changeValue, int resetValue)
+	{
+		DrawControlLabel(name);
+		ImGui::SameLine();
+
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+			if (ImGui::IsMouseDoubleClicked(0))
+				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, changeValue));
+		}
+
+		int dragVal = changeValue;
+		std::string label = "##" + name;
+		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
+		if (ImGui::DragInt(label.c_str(), &dragVal, 1.0f, 0))
+			CommandHistory::AddCommand(new ChangeValueCommand(dragVal, changeValue));
+		ImGui::PopItemWidth();
+		if (ImGui::IsItemHovered())
+			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+	}
+
+	void PropertiesPanel::DrawUInt16Control(const std::string& name, uint16_t& changeValue, uint16_t resetValue)
+	{
+		DrawControlLabel(name);
+		ImGui::SameLine();
+
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+			if (ImGui::IsMouseDoubleClicked(0))
+				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, changeValue));
+		}
+
+		int dragVal = static_cast<int>(changeValue);
+		std::string label = "##" + name;
+		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
+		if (ImGui::DragInt(label.c_str(), &dragVal, 1.0f, 0))
+			CommandHistory::AddCommand(new ChangeValueCommand(static_cast<uint16_t>(dragVal), changeValue));
+		ImGui::PopItemWidth();
+		if (ImGui::IsItemHovered())
+			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+	}
+
+	void PropertiesPanel::DrawColorControl(const std::string& name, glm::vec4& colorValue)
+	{
+		DrawControlLabel("Color");
+		ImGui::SameLine();
+
+		glm::vec4 color = colorValue;
+		static glm::vec4 backupColor;
+		ImGui::PushStyleColor(ImGuiCol_Button, ToImVec4(color));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ToImVec4(color));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ToImVec4(color));
+		if (ImGui::Button("##Color", { ImGui::GetContentRegionAvail().x, 0.0f }))
+		{
+			ImGui::OpenPopup("mypicker");
+			backupColor = color;
+		}
+		ImGui::PopStyleColor(3);
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::ColorTooltip("Color", glm::value_ptr(color), ImGuiColorEditFlags_None);
+		}
+		if (ImGui::BeginPopup("mypicker"))
+		{
+			ImGui::Text("Color");
+			ImGui::Separator();
+			if (ImGui::ColorPicker4("##picker", glm::value_ptr(color), ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview))
+				CommandHistory::AddCommand(new ChangeValueCommand(color, colorValue));
+			ImGui::SameLine();
+
+			ImGui::BeginGroup(); // Lock X position
+			ImGui::Text("Current");
+			ImGui::ColorButton("##current", ToImVec4(color), ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40));
+			ImGui::Text("Previous");
+			if (ImGui::ColorButton("##previous", ToImVec4(backupColor), ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40)))
+				color = backupColor;
+			ImGui::EndGroup();
+			ImGui::EndPopup();
+		}
+	}
+	
+	void PropertiesPanel::DrawVec2Control(const std::string& name, glm::vec2& values, float resetValue)
+	{
+		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
+		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0.0f, 1.0f });
+
+		glm::vec2 dragValues = values;
+		if (name == "Rotation")
+			dragValues = glm::degrees(dragValues);
+
+		DrawControlLabel(name.c_str());
+
+		ImGui::SameLine();
+
+		ImGui::BeginTable("Vec3Control", 2);
+
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 0.0f });
+		// X
+		ImGui::TableNextColumn();
+		ImGui::Button("X", { 0.0f, 0.0f });
+		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.x));
+		ImGui::SameLine();
+		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
+		if (ImGui::DragFloat("##X", &dragValues.x, 0.1f, 0.0f, 0.0f, "%.2f"))
+		{
+			if (name == "Rotation")
+				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.x), values.x));
+			else
+				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.x, values.x));
+		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+		ImGui::PopItemWidth();
+
+		// Y
+		ImGui::TableNextColumn();
+		ImGui::Button("Y", { 0.0f, 0.0f });
+		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.y));
+		ImGui::SameLine();
+		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
+		if (ImGui::DragFloat("##Y", &dragValues.y, 0.1f, 0.0f, 0.0f, "%.2f"))
+		{
+			if (name == "Rotation")
+				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.y), values.y));
+			else
+				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.y, values.y));
+		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+		ImGui::PopItemWidth();
+
+		ImGui::PopStyleVar();
+
+		ImGui::EndTable();
+		ImGui::PopStyleColor();
+		ImGui::PopStyleVar();
+	}
+
+	void PropertiesPanel::DrawVec3Control(const std::string& name, glm::vec3& values, float resetValue)
+	{
+		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
+		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0.0f, 1.0f });
+
+		glm::vec3 dragValues = values;
+		if (name == "Rotation")
+			dragValues = glm::degrees(dragValues);
+
+		DrawControlLabel(name.c_str());
+
+		ImGui::SameLine();
+
+		ImGui::BeginTable("Vec3Control", 3);
+
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 0.0f });
+		// X
+		ImGui::TableNextColumn();
+		ImGui::Button("X", { 0.0f, 0.0f });
+		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.x));
+		ImGui::SameLine();
+		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
+		if(ImGui::DragFloat("##X", &dragValues.x, 0.1f, 0.0f, 0.0f, "%.2f"))
+		{
+			if (name == "Rotation")
+				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.x), values.x));
+			else
+				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.x, values.x));
+		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+		ImGui::PopItemWidth();
+
+		// Y
+		ImGui::TableNextColumn();
+		ImGui::Button("Y", { 0.0f, 0.0f });
+		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.y));
+		ImGui::SameLine();
+		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
+		if (ImGui::DragFloat("##Y", &dragValues.y, 0.1f, 0.0f, 0.0f, "%.2f"))
+		{
+			if (name == "Rotation")
+				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.y), values.y));
+			else
+				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.y, values.y));
+		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+		ImGui::PopItemWidth();
+
+		// Z
+		ImGui::TableNextColumn();
+		ImGui::Button("Z", { 0.0f, 0.0f });
+		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+			CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.z));
+		ImGui::SameLine();
+		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
+		if (ImGui::DragFloat("##Z", &dragValues.z, 0.1f, 0.0f, 0.0f, "%.2f"))
+		{
+			if (name == "Rotation")
+				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.z), values.z));
+			else
+				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.z, values.z));
+		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+		ImGui::PopItemWidth();
+
+		ImGui::PopStyleVar();
+
+		ImGui::EndTable();
+		ImGui::PopStyleColor();
+		ImGui::PopStyleVar();
 	}
 
 	template<typename T>
@@ -531,73 +680,6 @@ namespace Locus
 			break;
 		default:
 			break;
-		}
-	}
-
-	void PropertiesPanel::DrawControlLabel(const std::string& name, const glm::vec2& size)
-	{
-		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Pink);
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Transparent);
-		ImGui::Button(name.c_str(), { size.x, size.y });
-		ImGui::PopStyleColor(3);
-	}
-
-	void PropertiesPanel::DrawFloatControl(const std::string& name, float& changeValue, float resetValue)
-	{
-		DrawControlLabel(name);
-		ImGui::SameLine();
-
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			if (ImGui::IsMouseDoubleClicked(0))
-				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, changeValue));
-		}
-
-		float dragVal = changeValue;
-		if (ImGui::DragFloat("##", &dragVal))
-			CommandHistory::AddCommand(new ChangeValueCommand(dragVal, changeValue));
-		if (ImGui::IsItemHovered())
-			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-	}
-
-	void PropertiesPanel::DrawColorControl(const std::string& name, glm::vec4& colorValue)
-	{
-		DrawControlLabel("Color");
-		ImGui::SameLine();
-
-		glm::vec4 color = colorValue;
-		static glm::vec4 backupColor;
-		ImGui::PushStyleColor(ImGuiCol_Button, ToImVec4(color));
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ToImVec4(color));
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ToImVec4(color));
-		if (ImGui::Button("##Color", { ImGui::GetContentRegionAvail().x, 0.0f }))
-		{
-			ImGui::OpenPopup("mypicker");
-			backupColor = color;
-		}
-		ImGui::PopStyleColor(3);
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::ColorTooltip("Color", glm::value_ptr(color), ImGuiColorEditFlags_None);
-		}
-		if (ImGui::BeginPopup("mypicker"))
-		{
-			ImGui::Text("Color");
-			ImGui::Separator();
-			if (ImGui::ColorPicker4("##picker", glm::value_ptr(color), ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview))
-				CommandHistory::AddCommand(new ChangeValueCommand(color, colorValue));
-			ImGui::SameLine();
-
-			ImGui::BeginGroup(); // Lock X position
-			ImGui::Text("Current");
-			ImGui::ColorButton("##current", ToImVec4(color), ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40));
-			ImGui::Text("Previous");
-			if (ImGui::ColorButton("##previous", ToImVec4(backupColor), ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40)))
-				color = backupColor;
-			ImGui::EndGroup();
-			ImGui::EndPopup();
 		}
 	}
 }

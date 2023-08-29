@@ -19,15 +19,37 @@ namespace Locus
 	{
 		m_ActiveScene = context;
 		m_SelectedEntity = {};
+		m_PlusButton = Texture2D::Create("resources/icons/PlusButton.png");
 	}
 
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
 		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar;
+		//ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { });
 		ImGui::Begin(" Scene Hierarchy ", false, windowFlags);
 
 		// --- Scene Hierarchy Panel ------------------------------------------
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 1.0f });
+		// Top bar
+		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
+		if (ImGui::ImageButton((ImTextureID)m_PlusButton->GetRendererID(), { 15.0f, 15.0f }))
+		{
+			// TODO: Functionality
+		}
+		ImGui::PopStyleColor();
+
+		ImGui::SameLine();
+
+		char buffer[256];
+		memset(buffer, 0, sizeof(buffer));
+		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
+		ImGui::InputText("##Search", buffer, sizeof(buffer), ImGuiInputTextFlags_None); // TODO: Functionality
+		ImGui::PopItemWidth();
+
+		// Hierarchy panel
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.0f);
+		ImGui::PushStyleColor(ImGuiCol_ChildBg, LocusColors::Grey);
+		ImGui::BeginChild("Hierarchy");
+		
 		if (m_ActiveScene)
 		{
 			// Display each entity
@@ -49,8 +71,11 @@ namespace Locus
 				ImGui::EndPopup();
 			}
 		}
+
+		ImGui::EndChild();
+		ImGui::PopStyleColor();
 		ImGui::PopStyleVar();
-		
+
 		ImGui::End();
 	}
 
@@ -60,22 +85,11 @@ namespace Locus
 
 		ImGuiTreeNodeFlags flags = ((m_SelectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0)
 			| ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, LocusColors::Tan);
 		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
-
-		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
-		{
-			ImGui::SetDragDropPayload("ENTITY_NODE", &entity, sizeof(entity));
-
-			ImGui::EndDragDropSource();
-		}
-		if (ImGui::BeginDragDropTarget())
-		{
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_NODE"))
-			{
-				
-			}
-			ImGui::EndDragDropTarget();
-		}
+		ImGui::PopStyleVar();
+		ImGui::PopStyleColor();
 
 		if (ImGui::IsItemClicked())
 			m_SelectedEntity = entity;

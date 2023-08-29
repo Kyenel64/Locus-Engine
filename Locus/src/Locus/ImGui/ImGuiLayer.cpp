@@ -51,8 +51,9 @@ namespace Locus
 		io.ConfigDockingAlwaysTabBar = true;
 
 		style.ChildBorderSize = 0.0f;
-		style.TabRounding = 2.0f;
-		style.FrameRounding = 2.0f;
+		style.TabRounding = 3.0f;
+		style.FrameRounding = 3.0f;
+		style.ChildRounding = 3.0f;
 		style.WindowMenuButtonPosition = ImGuiDir_None;
 		style.WindowBorderSize = 1.0f;
 

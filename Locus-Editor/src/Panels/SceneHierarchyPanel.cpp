@@ -5,6 +5,8 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Command/Command.h"
+#include "Command/CommandHistory.h"
+#include "Command/EntityCommands.h"
 
 namespace Locus
 {
@@ -56,7 +58,8 @@ namespace Locus
 			m_ActiveScene->m_Registry.each([&](auto entityID)
 				{
 					Entity entity = Entity(entityID, m_ActiveScene.get());
-					DrawEntityNode(entity);
+					if (entity.GetComponent<RelationshipComponent>().Parent == entt::null)
+						DrawEntityNode(entity);
 				});
 
 			// Select nothing if clicking in blank space
@@ -95,24 +98,37 @@ namespace Locus
 			m_SelectedEntity = entity;
 
 		bool entityDeleted = false;
-		if (ImGui::BeginPopupContextItem())
+		bool openOnCreate = false;
+		if (ImGui::BeginPopupContextItem()) // TODO: Create child when hovering too
 		{
 			if (ImGui::MenuItem("Create Empty Entity"))
+			{
 				CommandHistory::AddCommand(new CreateEntityCommand(m_ActiveScene, "Empty Entity", m_SelectedEntity));
+				openOnCreate = true;
+			}
 
 			if (ImGui::MenuItem("Delete Entity"))
 				entityDeleted = true;
 			ImGui::EndPopup();
 		}
 
+		if (openOnCreate)
+			ImGui::GetStateStorage()->SetBool(ImGui::GetFocusID(), true);
+
 		if (opened)
 		{
 			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
-			// temp
-			bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
-			if (opened)
-				ImGui::TreePop();
-
+			uint32_t childrenCount = entity.GetComponent<RelationshipComponent>().ChildrenCount;
+			if (childrenCount)
+			{
+				auto& rc = entity.GetComponent<RelationshipComponent>();
+				Entity curEntity = Entity(rc.FirstChild, m_ActiveScene.get());
+				while ((entt::entity)curEntity != entt::null)
+				{
+					DrawEntityNode(curEntity);
+					curEntity = Entity(curEntity.GetComponent<RelationshipComponent>().Next, m_ActiveScene.get());
+				}
+			}
 			ImGui::TreePop();
 		}
 
@@ -122,5 +138,6 @@ namespace Locus
 			if (m_SelectedEntity == entity)
 				m_SelectedEntity = {};
 		}
+
 	}
 }

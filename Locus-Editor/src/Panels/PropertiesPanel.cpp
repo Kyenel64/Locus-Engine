@@ -7,6 +7,9 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Command/Command.h"
+#include "Command/CommandHistory.h"
+#include "Command/EntityCommands.h"
+#include "Command/ValueCommands.h"
 
 namespace Locus
 {

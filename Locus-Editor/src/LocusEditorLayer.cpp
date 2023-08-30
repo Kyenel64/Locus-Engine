@@ -825,36 +825,38 @@ namespace Locus
 		// Relationships debug
 		if (m_SelectedEntity)
 		{
-			ImGui::Separator();
-			ImGui::Text("Relationships");
-			auto& rc = m_SelectedEntity.GetComponent<RelationshipComponent>();
-			ImGui::Text("Children Count: %d", rc.childrenCount);
-			Entity firstChild;
-			Entity parent;
-			Entity next;
-			Entity prev;
-			if (rc.FirstChild != entt::null)
+			if (m_SelectedEntity.HasComponent<RelationshipComponent>())
 			{
-				firstChild = Entity(rc.FirstChild, m_ActiveScene.get());
-				ImGui::Text("First Child: %s", firstChild.GetComponent<TagComponent>().Tag.c_str());
-			}
-			if (rc.Parent != entt::null)
-			{
-				parent = Entity(rc.Parent, m_ActiveScene.get());
-				ImGui::Text("Parent: %s", parent.GetComponent<TagComponent>().Tag.c_str());
-			}
-			if (rc.Next != entt::null)
-			{
-				next = Entity(rc.Next, m_ActiveScene.get());
-				ImGui::Text("Next: % s", next.GetComponent<TagComponent>().Tag.c_str());
-			}
-			if (rc.Prev != entt::null)
-			{
-				prev = Entity(rc.Prev, m_ActiveScene.get());
-				ImGui::Text("Prev: %s", prev.GetComponent<TagComponent>().Tag.c_str());
+				ImGui::Separator();
+				ImGui::Text("Relationships");
+				auto& rc = m_SelectedEntity.GetComponent<RelationshipComponent>();
+				ImGui::Text("Children Count: %d", rc.ChildrenCount);
+				Entity firstChild;
+				Entity parent;
+				Entity next;
+				Entity prev;
+				if (rc.FirstChild != entt::null)
+				{
+					firstChild = Entity(rc.FirstChild, m_ActiveScene.get());
+					ImGui::Text("First Child: %s", firstChild.GetComponent<TagComponent>().Tag.c_str());
+				}
+				if (rc.Parent != entt::null)
+				{
+					parent = Entity(rc.Parent, m_ActiveScene.get());
+					ImGui::Text("Parent: %s", parent.GetComponent<TagComponent>().Tag.c_str());
+				}
+				if (rc.Next != entt::null)
+				{
+					next = Entity(rc.Next, m_ActiveScene.get());
+					ImGui::Text("Next: % s", next.GetComponent<TagComponent>().Tag.c_str());
+				}
+				if (rc.Prev != entt::null)
+				{
+					prev = Entity(rc.Prev, m_ActiveScene.get());
+					ImGui::Text("Prev: %s", prev.GetComponent<TagComponent>().Tag.c_str());
+				}
 			}
 		}
-
 		ImGui::End();
 	}
 }

@@ -7,6 +7,9 @@
 #include <Locus.h>
 
 #include "Command/Command.h"
+#include "Command/CommandHistory.h"
+#include "Command/EntityCommands.h"
+#include "Command/ValueCommands.h"
 #include "Panels/SceneHierarchyPanel.h"
 #include "Panels/ContentBrowserPanel.h"
 #include "Panels/PropertiesPanel.h"

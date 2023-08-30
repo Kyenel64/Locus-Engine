@@ -20,7 +20,3 @@ namespace Locus
 		bool m_CanMerge = true;
 	};
 }
-
-#include "Command/CommandHistory.h"
-#include "Command/EntityCommands.h"
-#include "Command/ValueCommands.h"

@@ -17,6 +17,7 @@ namespace Locus
 		{
 		}
 
+		// Create an entity from a parent entity
 		CreateEntityCommand(Ref<Scene> activeScene, const std::string& name, Entity parentEntity)
 			: m_ActiveScene(activeScene), m_EntityName(name), m_UUID(UUID()), m_ParentEntity(parentEntity)
 		{
@@ -28,14 +29,31 @@ namespace Locus
 			if (m_ParentEntity != Entity::Null)
 			{
 				m_Entity.GetComponent<RelationshipComponent>().Parent = m_ParentEntity;
-				auto& childrenCount = m_ParentEntity.GetComponent<RelationshipComponent>().childrenCount;
+				auto& childrenCount = m_ParentEntity.GetComponent<RelationshipComponent>().ChildrenCount;
 				if (childrenCount == 0)
 				{
 					m_ParentEntity.GetComponent<RelationshipComponent>().FirstChild = m_Entity;
 				}
 				else
 				{
-					// TODO: set next and prev entities
+					// Set next and prev entities
+					auto& firstChild = m_ParentEntity.GetComponent<RelationshipComponent>().FirstChild;
+					Entity firstChildEntity = Entity(firstChild, m_ActiveScene.get());
+					Entity curEntity = firstChildEntity;
+					while ((entt::entity)curEntity != entt::null)
+					{
+						auto& rc = curEntity.GetComponent<RelationshipComponent>();
+						if (rc.Next == entt::null)
+						{
+							rc.Next = m_Entity;
+							m_Entity.GetComponent<RelationshipComponent>().Prev = (entt::entity)curEntity;
+							break;
+						}
+						curEntity = Entity(rc.Next, m_ActiveScene.get());
+					}
+					auto& next = firstChildEntity.GetComponent<RelationshipComponent>().Next;
+					if ((entt::entity)next == entt::null)
+						LOCUS_CORE_WARN("next == Entity::Null");
 				}
 				childrenCount++;
 			}
@@ -81,6 +99,7 @@ namespace Locus
 			// Hold component data. Try to make this scalable and not hard coded.
 			m_Components.Tag = m_Entity.GetComponent<TagComponent>();
 			m_Components.Transform = m_Entity.GetComponent<TransformComponent>();
+			m_Components.Relationship = m_Entity.GetComponent<RelationshipComponent>();
 
 			if (m_Entity.HasComponent<SpriteRendererComponent>())
 			{
@@ -107,17 +126,42 @@ namespace Locus
 				m_Components.BoxCollider2D = m_Entity.GetComponent<BoxCollider2DComponent>();
 				m_AvailableComponents["BoxCollider2D"] = true;
 			}
+
+			//m_DestroyedScene->AddEntity(m_Entity);
+
+			// --- Process relationships --------------------------------------
+			auto& entityRC = m_Entity.GetComponent<RelationshipComponent>();
+
+			// Destroy all children
+			if (entityRC.ChildrenCount)
+			{
+				LOCUS_CORE_INFO("Destroying Parent");
+				// We destroy the actual parent later since we need to perform more operations on the entity.
+				Entity firstEntity = Entity(entityRC.FirstChild, m_ActiveScene.get());
+				DestroyRecursive(firstEntity);
+			}
+
+			// Case: Destroy first child
+			// Case: Destroy middle child
+			// Case: Destroy last child
+
 			m_ActiveScene->DestroyEntity(m_Entity);
 			Application::Get().SetIsSavedStatus(false);
 		}
 
 		virtual void Undo() override
 		{
-			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_Entity, m_UUID, m_Components.Tag.Tag);
+			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_Entity, m_UUID, m_Components.Tag.Tag, m_Components.Tag.Enabled);
 
 			m_Entity.GetComponent<TransformComponent>().Translation = m_Components.Transform.Translation;
 			m_Entity.GetComponent<TransformComponent>().Scale = m_Components.Transform.Scale;
 			m_Entity.GetComponent<TransformComponent>().SetRotationEuler(m_Components.Transform.GetRotationEuler());
+
+			m_Entity.GetComponent<RelationshipComponent>().ChildrenCount = m_Components.Relationship.ChildrenCount;
+			m_Entity.GetComponent<RelationshipComponent>().Parent = m_Components.Relationship.Parent;
+			m_Entity.GetComponent<RelationshipComponent>().FirstChild = m_Components.Relationship.FirstChild;
+			m_Entity.GetComponent<RelationshipComponent>().Next = m_Components.Relationship.Next;
+			m_Entity.GetComponent<RelationshipComponent>().Prev = m_Components.Relationship.Prev;
 
 			if (m_AvailableComponents["SpriteRenderer"])
 				m_Entity.AddComponent<SpriteRendererComponent>(m_Components.SpriteRenderer);
@@ -138,7 +182,32 @@ namespace Locus
 		}
 
 	private:
+		Entity DestroyRecursive(Entity entity)
+		{
+			if ((entt::entity)entity == entt::null)
+			{
+				return Entity::Null;
+			}
+			else
+			{
+				LOCUS_CORE_INFO("Destroying Child: {0}", entity.GetComponent<TagComponent>().Tag);
+				auto& entityRC = entity.GetComponent<RelationshipComponent>();
+
+				if (entityRC.Next != entt::null)
+				{
+					Entity nextEntity = Entity(entityRC.Next, m_ActiveScene.get());
+					DestroyRecursive(nextEntity);
+				}
+
+				Entity childEntity = Entity(entityRC.FirstChild, m_ActiveScene.get());
+				m_ActiveScene->DestroyEntity(entity);
+				return DestroyRecursive(childEntity);
+			}
+		}
+
+	private:
 		Ref<Scene> m_ActiveScene;
+		//Ref<DestroyedScene> m_DestroyedScene;
 		ComponentsList m_Components;
 		std::unordered_map<std::string, bool> m_AvailableComponents;
 		Entity m_Entity;

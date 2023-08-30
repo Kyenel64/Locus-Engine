@@ -27,7 +27,7 @@ namespace Locus
 
 		Entity CreateEntity(const std::string& name = std::string());
 		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = std::string(), bool enabled = true);
-		Entity CreateEntityWithUUID(Entity copyEntity, UUID uuid, const std::string& name = std::string());
+		Entity CreateEntityWithUUID(Entity copyEntity, UUID uuid, const std::string& name = std::string(), bool enabled = true);
 		void DestroyEntity(Entity entity);
 
 		void OnUpdateRuntime(Timestep deltaTime);

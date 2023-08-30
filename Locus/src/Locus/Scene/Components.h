@@ -35,7 +35,7 @@ namespace Locus
 	struct RelationshipComponent 
 	{
 		// TODO: Will pointers be faster?
-		uint32_t childrenCount = 0;
+		uint32_t ChildrenCount = 0;
 		entt::entity FirstChild = entt::null;
 		entt::entity Next = entt::null;
 		entt::entity Prev = entt::null;
@@ -171,6 +171,7 @@ namespace Locus
 	{
 		TagComponent Tag;
 		TransformComponent Transform;
+		RelationshipComponent Relationship;
 		SpriteRendererComponent SpriteRenderer;
 		CameraComponent Camera;
 		NativeScriptComponent NativeScript;
@@ -183,6 +184,7 @@ namespace Locus
 		None = 0,
 		Tag,
 		Transform,
+		Relationship,
 		SpriteRenderer,
 		Camera,
 		Rigidbody2D,

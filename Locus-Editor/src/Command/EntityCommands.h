@@ -3,6 +3,8 @@
 
 #include <iomanip>
 
+#include <Locus/Scene/Graveyard.h> // Move to Locus.h
+
 namespace Locus
 {
 	// --- CreateEntityCommand ------------------------------------------------
@@ -90,44 +92,13 @@ namespace Locus
 		~DestroyEntityCommand() = default;
 
 		DestroyEntityCommand(Ref<Scene> activeScene, Entity entity)
-			: m_ActiveScene(activeScene), m_Entity(entity), m_UUID(UUID())
+			: m_ActiveScene(activeScene), m_Entity(entity), m_UUID(UUID()), m_Graveyard(m_ActiveScene->GetGraveyard())
 		{
 		}
 
 		virtual void Execute() override
 		{
-			// Hold component data. Try to make this scalable and not hard coded.
-			m_Components.Tag = m_Entity.GetComponent<TagComponent>();
-			m_Components.Transform = m_Entity.GetComponent<TransformComponent>();
-			m_Components.Relationship = m_Entity.GetComponent<RelationshipComponent>();
-
-			if (m_Entity.HasComponent<SpriteRendererComponent>())
-			{
-				m_Components.SpriteRenderer = m_Entity.GetComponent<SpriteRendererComponent>();
-				m_AvailableComponents["SpriteRenderer"] = true;
-			}
-			if (m_Entity.HasComponent<CameraComponent>())
-			{
-				m_Components.Camera = m_Entity.GetComponent<CameraComponent>();
-				m_AvailableComponents["Camera"] = true;
-			}
-			if (m_Entity.HasComponent<NativeScriptComponent>())
-			{
-				m_Components.NativeScript = m_Entity.GetComponent<NativeScriptComponent>();
-				m_AvailableComponents["NativeScript"] = true;
-			}
-			if (m_Entity.HasComponent<Rigidbody2DComponent>())
-			{
-				m_Components.Rigidbody2D = m_Entity.GetComponent<Rigidbody2DComponent>();
-				m_AvailableComponents["Rigidbody2D"] = true;
-			}
-			if (m_Entity.HasComponent<BoxCollider2DComponent>())
-			{
-				m_Components.BoxCollider2D = m_Entity.GetComponent<BoxCollider2DComponent>();
-				m_AvailableComponents["BoxCollider2D"] = true;
-			}
-
-			//m_DestroyedScene->AddEntity(m_Entity);
+			m_OldEntity = m_Graveyard->AddEntity(m_Entity);
 
 			// --- Process relationships --------------------------------------
 			auto& entityRC = m_Entity.GetComponent<RelationshipComponent>();
@@ -151,28 +122,7 @@ namespace Locus
 
 		virtual void Undo() override
 		{
-			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_Entity, m_UUID, m_Components.Tag.Tag, m_Components.Tag.Enabled);
-
-			m_Entity.GetComponent<TransformComponent>().Translation = m_Components.Transform.Translation;
-			m_Entity.GetComponent<TransformComponent>().Scale = m_Components.Transform.Scale;
-			m_Entity.GetComponent<TransformComponent>().SetRotationEuler(m_Components.Transform.GetRotationEuler());
-
-			m_Entity.GetComponent<RelationshipComponent>().ChildrenCount = m_Components.Relationship.ChildrenCount;
-			m_Entity.GetComponent<RelationshipComponent>().Parent = m_Components.Relationship.Parent;
-			m_Entity.GetComponent<RelationshipComponent>().FirstChild = m_Components.Relationship.FirstChild;
-			m_Entity.GetComponent<RelationshipComponent>().Next = m_Components.Relationship.Next;
-			m_Entity.GetComponent<RelationshipComponent>().Prev = m_Components.Relationship.Prev;
-
-			if (m_AvailableComponents["SpriteRenderer"])
-				m_Entity.AddComponent<SpriteRendererComponent>(m_Components.SpriteRenderer);
-			if (m_AvailableComponents["Camera"])
-				m_Entity.AddComponent<CameraComponent>(m_Components.Camera);
-			if (m_AvailableComponents["Rigidbody2D"])
-				m_Entity.AddComponent<Rigidbody2DComponent>(m_Components.Rigidbody2D);
-			if (m_AvailableComponents["BoxCollider2D"])
-				m_Entity.AddComponent<BoxCollider2DComponent>(m_Components.BoxCollider2D);
-			if (m_AvailableComponents["NativeScript"])
-				m_Entity.AddComponent<NativeScriptComponent>(m_Components.NativeScript);
+			m_Graveyard->MoveEntityToScene(m_OldEntity, m_ActiveScene);
 			Application::Get().SetIsSavedStatus(false);
 		}
 
@@ -207,10 +157,9 @@ namespace Locus
 
 	private:
 		Ref<Scene> m_ActiveScene;
-		//Ref<DestroyedScene> m_DestroyedScene;
-		ComponentsList m_Components;
-		std::unordered_map<std::string, bool> m_AvailableComponents;
+		Ref<Graveyard> m_Graveyard;
 		Entity m_Entity;
+		entt::entity m_OldEntity;
 		UUID m_UUID;
 	};
 

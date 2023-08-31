@@ -29,6 +29,11 @@ namespace Locus
 		return b2_staticBody;
 	}
 
+	Scene::Scene()
+	{
+		m_Graveyard = CreateRef<Graveyard>();
+	}
+
 	Ref<Scene> Scene::Copy(Ref<Scene> other)
 	{
 		Ref<Scene> newScene = CreateRef<Scene>();

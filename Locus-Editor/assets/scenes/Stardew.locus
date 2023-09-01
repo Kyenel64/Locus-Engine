@@ -6,7 +6,7 @@ Entities:
       Enabled: true
     TransformComponent:
       Translation: [8.34036636, -1.22446442, 0]
-      Rotation: [0, 0, 0]
+      Rotation: [10, 0, 0]
       Scale: [3, 5, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]

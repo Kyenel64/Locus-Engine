@@ -1,5 +1,6 @@
 # Locus Game Engine
-Locus is a 2D game engine currently in development for Windows. More platforms and rendering APIs may be implemented in the future.
+Locus is a 2D/3D game engine currently in development for Windows. Currently only supports Windows with OpenGL but other platforms/APIs will be implemented in the future.  
+Trello: https://trello.com/b/NNDPkCjF/locus-kanban
 ***
 ## How to Install
 

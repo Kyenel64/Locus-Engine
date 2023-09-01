@@ -2,6 +2,8 @@
 // Entity class for Locus's ECS.
 #pragma once
 
+#include <optional>
+
 #include <entt.hpp>
 
 #include "Locus/Core/Log.h"

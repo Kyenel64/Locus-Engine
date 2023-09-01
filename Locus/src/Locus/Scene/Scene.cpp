@@ -29,6 +29,11 @@ namespace Locus
 		return b2_staticBody;
 	}
 
+	Scene::Scene()
+	{
+		m_Graveyard = CreateRef<Graveyard>();
+	}
+
 	Ref<Scene> Scene::Copy(Ref<Scene> other)
 	{
 		Ref<Scene> newScene = CreateRef<Scene>();
@@ -62,6 +67,7 @@ namespace Locus
 	void Scene::CopyAllComponents(Entity from, Entity to)
 	{
 		to.GetComponent<TagComponent>().Enabled = from.GetComponent<TagComponent>().Enabled;
+		CopyComponent<RelationshipComponent>(from, to);
 		CopyComponent<TransformComponent>(from, to);
 		CopyComponent<SpriteRendererComponent>(from, to);
 		CopyComponent<CameraComponent>(from, to);
@@ -80,6 +86,7 @@ namespace Locus
 		Entity entity = Entity(m_Registry.create(), this);
 		entity.AddComponent<IDComponent>(uuid);
 		entity.AddComponent<TransformComponent>();
+		entity.AddComponent<RelationshipComponent>();
 		auto& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Entity" : name;
 		tag.Enabled = enabled;
@@ -89,13 +96,15 @@ namespace Locus
 	// Only used when we want to create an entity with the same entt id. 
 	// For example, undoing a destroy entity command will create a new Entity with a new entt id.
 	// To prevent that, we use this function so the entt id stays the same.
-	Entity Scene::CreateEntityWithUUID(Entity copyEntity, UUID uuid, const std::string& name)
+	Entity Scene::CreateEntityWithUUID(Entity copyEntity, UUID uuid, const std::string& name, bool enabled)
 	{
 		Entity entity = Entity(m_Registry.create(copyEntity), this);
 		entity.AddComponent<IDComponent>(uuid);
 		entity.AddComponent<TransformComponent>();
+		entity.AddComponent<RelationshipComponent>();
 		auto& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Entity" : name;
+		tag.Enabled = enabled;
 		return entity;
 	}
 
@@ -310,6 +319,12 @@ namespace Locus
 
 	template<>
 	void Scene::OnComponentAdded<TagComponent>(Entity entity, TagComponent& component)
+	{
+
+	}
+
+	template<>
+	void Scene::OnComponentAdded<RelationshipComponent>(Entity entity, RelationshipComponent& component)
 	{
 
 	}

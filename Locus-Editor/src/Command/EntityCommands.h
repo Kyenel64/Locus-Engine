@@ -2,6 +2,7 @@
 #include "Command.h"
 
 #include <iomanip>
+#include <stack>
 
 namespace Locus
 {
@@ -37,7 +38,83 @@ namespace Locus
 	private:
 		Ref<Scene> m_ActiveScene;
 		Entity m_Entity;
-		Entity m_CopyEntity;
+		UUID m_UUID;
+		std::string m_EntityName;
+	};
+
+
+
+	// --- CreateChildEntityCommand -------------------------------------------
+	class CreateChildEntityCommand : public Command
+	{
+	public:
+		CreateChildEntityCommand() = default;
+		~CreateChildEntityCommand() = default;
+
+		CreateChildEntityCommand(Ref<Scene> activeScene, const std::string& name, Entity parentEntity)
+			: m_ActiveScene(activeScene), m_EntityName(name), m_UUID(UUID()), m_ParentEntity(parentEntity)
+		{
+		}
+
+		virtual void Execute() override
+		{
+			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_Entity, m_UUID, m_EntityName);
+
+			auto& entityRC = m_Entity.GetComponent<RelationshipComponent>();
+			auto& parentRC = m_ParentEntity.GetComponent<RelationshipComponent>();
+
+			// Set Parent, Next, and Prev entity relationships
+			entityRC.Parent = m_ParentEntity;
+			if (parentRC.ChildrenCount == 0)
+			{
+				parentRC.FirstChild = m_Entity;
+			}
+			else
+			{
+				Entity curEntity = Entity(parentRC.FirstChild, m_ActiveScene.get());
+				while ((entt::entity)curEntity != entt::null)
+				{
+					auto& rc = curEntity.GetComponent<RelationshipComponent>();
+					if (rc.Next == entt::null)
+					{
+						rc.Next = (entt::entity)m_Entity;
+						entityRC.Prev = (entt::entity)curEntity;
+						break;
+					}
+					curEntity = Entity(rc.Next, m_ActiveScene.get());
+				}
+			}
+			parentRC.ChildrenCount++;
+
+			Application::Get().SetIsSavedStatus(false);
+		}
+
+		virtual void Undo() override
+		{
+			auto& parentRC = m_ParentEntity.GetComponent<RelationshipComponent>();
+			auto& entityRC = m_Entity.GetComponent<RelationshipComponent>();
+			Entity prevEntity = Entity(entityRC.Prev, m_ActiveScene.get());
+
+			if (parentRC.FirstChild == m_Entity)
+				parentRC.FirstChild = entityRC.Next;
+			else
+				prevEntity.GetComponent<RelationshipComponent>().Next = entityRC.Next;
+
+			parentRC.ChildrenCount--;
+
+			m_ActiveScene->DestroyEntity(m_Entity);
+			Application::Get().SetIsSavedStatus(false);
+		}
+
+		virtual bool Merge(Command* other) override
+		{
+			return false;
+		}
+
+	private:
+		Ref<Scene> m_ActiveScene;
+		Entity m_Entity;
+		Entity m_ParentEntity = Entity::Null;
 		UUID m_UUID;
 		std::string m_EntityName;
 	};
@@ -52,63 +129,78 @@ namespace Locus
 		~DestroyEntityCommand() = default;
 
 		DestroyEntityCommand(Ref<Scene> activeScene, Entity entity)
-			: m_ActiveScene(activeScene), m_Entity(entity), m_UUID(UUID())
+			: m_ActiveScene(activeScene), m_Entity(entity), m_UUID(UUID()), m_Graveyard(m_ActiveScene->GetGraveyard())
 		{
 		}
 
 		virtual void Execute() override
 		{
-			// Hold component data. Try to make this scalable and not hard coded.
-			m_Components.Tag = m_Entity.GetComponent<TagComponent>();
-			m_Components.Transform = m_Entity.GetComponent<TransformComponent>();
+			LOCUS_CORE_INFO("Deleting: {0}, ID: {1}", m_Entity.GetComponent<TagComponent>().Tag, (uint32_t)m_Entity);
+			m_OldEntity = m_Graveyard->AddEntity(m_Entity);
+			auto& entityRC = m_Entity.GetComponent<RelationshipComponent>();
 
-			if (m_Entity.HasComponent<SpriteRendererComponent>())
+			// Destroy all children
+			if (entityRC.ChildrenCount)
 			{
-				m_Components.SpriteRenderer = m_Entity.GetComponent<SpriteRendererComponent>();
-				m_AvailableComponents["SpriteRenderer"] = true;
+				Entity firstEntity = Entity(entityRC.FirstChild, m_ActiveScene.get());
+				DestroyChildEntities(firstEntity);
 			}
-			if (m_Entity.HasComponent<CameraComponent>())
-			{
-				m_Components.Camera = m_Entity.GetComponent<CameraComponent>();
-				m_AvailableComponents["Camera"] = true;
-			}
-			if (m_Entity.HasComponent<NativeScriptComponent>())
-			{
-				m_Components.NativeScript = m_Entity.GetComponent<NativeScriptComponent>();
-				m_AvailableComponents["NativeScript"] = true;
-			}
-			if (m_Entity.HasComponent<Rigidbody2DComponent>())
-			{
-				m_Components.Rigidbody2D = m_Entity.GetComponent<Rigidbody2DComponent>();
-				m_AvailableComponents["Rigidbody2D"] = true;
-			}
-			if (m_Entity.HasComponent<BoxCollider2DComponent>())
-			{
-				m_Components.BoxCollider2D = m_Entity.GetComponent<BoxCollider2DComponent>();
-				m_AvailableComponents["BoxCollider2D"] = true;
-			}
+
+			ProcessEntityRelationships(m_Entity);
+
 			m_ActiveScene->DestroyEntity(m_Entity);
 			Application::Get().SetIsSavedStatus(false);
 		}
 
 		virtual void Undo() override
 		{
-			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_Entity, m_UUID, m_Components.Tag.Tag);
+			auto& entityRC = m_Graveyard->m_Registry.get<RelationshipComponent>(m_OldEntity);
+			Entity parentEntity = Entity(entityRC.Parent, m_ActiveScene.get());
+			Entity prevEntity = Entity(entityRC.Prev, m_ActiveScene.get());
+			Entity nextEntity = Entity(entityRC.Next, m_ActiveScene.get());
 
-			m_Entity.GetComponent<TransformComponent>().Translation = m_Components.Transform.Translation;
-			m_Entity.GetComponent<TransformComponent>().Scale = m_Components.Transform.Scale;
-			m_Entity.GetComponent<TransformComponent>().SetRotationEuler(m_Components.Transform.GetRotationEuler());
+			m_Entity = m_Graveyard->MoveEntityToScene(m_OldEntity, m_ActiveScene);
 
-			if (m_AvailableComponents["SpriteRenderer"])
-				m_Entity.AddComponent<SpriteRendererComponent>(m_Components.SpriteRenderer);
-			if (m_AvailableComponents["Camera"])
-				m_Entity.AddComponent<CameraComponent>(m_Components.Camera);
-			if (m_AvailableComponents["Rigidbody2D"])
-				m_Entity.AddComponent<Rigidbody2DComponent>(m_Components.Rigidbody2D);
-			if (m_AvailableComponents["BoxCollider2D"])
-				m_Entity.AddComponent<BoxCollider2DComponent>(m_Components.BoxCollider2D);
-			if (m_AvailableComponents["NativeScript"])
-				m_Entity.AddComponent<NativeScriptComponent>(m_Components.NativeScript);
+			// Recreate all the child entities
+			while (!m_DeletedChildEntities.empty())
+			{
+				m_Graveyard->MoveEntityToScene(m_DeletedChildEntities.top(), m_ActiveScene);
+				m_DeletedChildEntities.pop();
+			}
+
+			switch (m_DeletionCase)
+			{
+			case Locus::DestroyEntityCommand::DeletionCase::FirstChild:
+			{
+				auto& parentRC = parentEntity.GetComponent<RelationshipComponent>();
+				parentRC.FirstChild = m_Entity;
+				parentRC.ChildrenCount++;
+				break;
+			}
+			case Locus::DestroyEntityCommand::DeletionCase::MiddleChild:
+			{
+				auto& parentRC = parentEntity.GetComponent<RelationshipComponent>();
+				auto& prevRC = prevEntity.GetComponent<RelationshipComponent>();
+				auto& nextRC = nextEntity.GetComponent<RelationshipComponent>();
+				prevRC.Next = m_Entity;
+				nextRC.Prev = m_Entity;
+				parentRC.ChildrenCount++;
+				break;
+			}
+			case Locus::DestroyEntityCommand::DeletionCase::LastChild:
+			{
+				auto& parentRC = parentEntity.GetComponent<RelationshipComponent>();
+				parentRC.ChildrenCount++;
+				auto& prevRC = prevEntity.GetComponent<RelationshipComponent>();
+				prevRC.Next = m_Entity;
+				break;
+			}
+			case Locus::DestroyEntityCommand::DeletionCase::Parent:
+				break;
+			default:
+				break;
+			}
+
 			Application::Get().SetIsSavedStatus(false);
 		}
 
@@ -118,11 +210,86 @@ namespace Locus
 		}
 
 	private:
+		void ProcessEntityRelationships(Entity entity)
+		{
+			auto& entityRC = entity.GetComponent<RelationshipComponent>();
+			if (entityRC.Parent != entt::null)
+			{
+				Entity parentEntity = Entity(entityRC.Parent, m_ActiveScene.get());
+				auto& parentRC = parentEntity.GetComponent<RelationshipComponent>();
+
+				// Case: First child
+				if (parentRC.FirstChild == entity)
+				{
+					parentRC.FirstChild = entityRC.Next;
+					if (entityRC.Next != entt::null)
+					{
+						Entity nextEntity = Entity(entityRC.Next, m_ActiveScene.get());
+						nextEntity.GetComponent<RelationshipComponent>().Prev = entt::null;
+					}
+					m_DeletionCase = DeletionCase::FirstChild;
+				}
+
+				// Case: Destroy middle child
+				if (entityRC.Next != entt::null && entityRC.Prev != entt::null)
+				{
+					Entity prevEntity = Entity(entityRC.Prev, m_ActiveScene.get());
+					auto& prevRC = prevEntity.GetComponent<RelationshipComponent>();
+					prevRC.Next = entityRC.Next;
+
+					Entity nextEntity = Entity(entityRC.Next, m_ActiveScene.get());
+					auto& nextRC = nextEntity.GetComponent<RelationshipComponent>();
+					nextRC.Prev = entityRC.Prev;
+
+					m_DeletionCase = DeletionCase::MiddleChild;
+				}
+				// Case: Destroy last child
+				if (entityRC.Next == entt::null && entityRC.Prev != entt::null)
+				{
+					Entity prevEntity = Entity(entityRC.Prev, m_ActiveScene.get());
+					auto& prevRC = prevEntity.GetComponent<RelationshipComponent>();
+					prevRC.Next = entt::null;
+					m_DeletionCase = DeletionCase::LastChild;
+				}
+				parentRC.ChildrenCount--;
+			}
+			else
+			{
+				m_DeletionCase = DeletionCase::Parent;
+			}
+		}
+
+		// Recursively move child entities to graveyard and destroy
+		void DestroyChildEntities(Entity entity)
+		{
+			if ((entt::entity)entity != entt::null)
+			{
+				auto& entityRC = entity.GetComponent<RelationshipComponent>();
+				m_DeletedChildEntities.push(m_Graveyard->AddEntity(entity));
+
+				if (entityRC.Next != entt::null)
+				{
+					Entity nextEntity = Entity(entityRC.Next, m_ActiveScene.get());
+					DestroyChildEntities(nextEntity);
+				}
+
+				Entity childEntity = Entity(entityRC.FirstChild, m_ActiveScene.get());
+				ProcessEntityRelationships(entity);
+				DestroyChildEntities(childEntity);
+				m_ActiveScene->DestroyEntity(entity);
+			}
+		}
+
+	private:
 		Ref<Scene> m_ActiveScene;
-		ComponentsList m_Components;
-		std::unordered_map<std::string, bool> m_AvailableComponents;
+		Ref<Graveyard> m_Graveyard;
 		Entity m_Entity;
+		entt::entity m_OldEntity;
+		std::stack<entt::entity> m_DeletedChildEntities;
 		UUID m_UUID;
+
+		enum class DeletionCase { FirstChild = 0, MiddleChild = 1, LastChild = 2, Parent = 3 };
+		DeletionCase m_DeletionCase;
 	};
 
 

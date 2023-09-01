@@ -6,6 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
+#include <entt.hpp>
 
 #include "Locus/Core/UUID.h"
 #include "Locus/Renderer/Texture.h"
@@ -29,6 +30,19 @@ namespace Locus
 		TagComponent() = default;
 		TagComponent(const TagComponent&) = default;
 		TagComponent(const std::string& tag) : Tag(tag) {}
+	};
+
+	struct RelationshipComponent 
+	{
+		// TODO: Will pointers be faster?
+		uint32_t ChildrenCount = 0;
+		entt::entity FirstChild = entt::null;
+		entt::entity Next = entt::null;
+		entt::entity Prev = entt::null;
+		entt::entity Parent = entt::null;
+
+		RelationshipComponent() = default;
+		RelationshipComponent(const RelationshipComponent&) = default;
 	};
 
 	struct TransformComponent
@@ -157,6 +171,7 @@ namespace Locus
 	{
 		TagComponent Tag;
 		TransformComponent Transform;
+		RelationshipComponent Relationship;
 		SpriteRendererComponent SpriteRenderer;
 		CameraComponent Camera;
 		NativeScriptComponent NativeScript;
@@ -169,6 +184,7 @@ namespace Locus
 		None = 0,
 		Tag,
 		Transform,
+		Relationship,
 		SpriteRenderer,
 		Camera,
 		Rigidbody2D,

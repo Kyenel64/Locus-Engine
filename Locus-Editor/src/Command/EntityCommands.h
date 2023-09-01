@@ -4,8 +4,6 @@
 #include <iomanip>
 #include <stack>
 
-#include <Locus/Scene/Graveyard.h> // Move to Locus.h
-
 namespace Locus
 {
 	// --- CreateEntityCommand ------------------------------------------------
@@ -20,64 +18,14 @@ namespace Locus
 		{
 		}
 
-		// Create an entity from a parent entity
-		CreateEntityCommand(Ref<Scene> activeScene, const std::string& name, Entity parentEntity)
-			: m_ActiveScene(activeScene), m_EntityName(name), m_UUID(UUID()), m_ParentEntity(parentEntity)
-		{
-		}
-
 		virtual void Execute() override
 		{
 			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_Entity, m_UUID, m_EntityName);
-
-			// If creating a child entity
-			if (m_ParentEntity != Entity::Null)
-			{
-				auto& entityRC = m_Entity.GetComponent<RelationshipComponent>();
-				entityRC.Parent = m_ParentEntity;
-				auto& parentRC = m_ParentEntity.GetComponent<RelationshipComponent>();
-				if (parentRC.ChildrenCount == 0)
-				{
-					parentRC.FirstChild = m_Entity;
-				}
-				else
-				{
-					// Set next and prev entities
-					Entity curEntity = Entity(parentRC.FirstChild, m_ActiveScene.get());
-					while ((entt::entity)curEntity != entt::null)
-					{
-						auto& rc = curEntity.GetComponent<RelationshipComponent>();
-						if (rc.Next == entt::null)
-						{
-							rc.Next = (entt::entity)m_Entity;
-							entityRC.Prev = (entt::entity)curEntity;
-							break;
-						}
-						curEntity = Entity(rc.Next, m_ActiveScene.get());
-					}
-				}
-				parentRC.ChildrenCount++;
-			}
 			Application::Get().SetIsSavedStatus(false);
 		}
 
 		virtual void Undo() override
 		{
-			if (m_ParentEntity != Entity::Null)
-			{
-				auto& parentRC = m_ParentEntity.GetComponent<RelationshipComponent>();
-				auto& entityRC = m_Entity.GetComponent<RelationshipComponent>();
-				if (parentRC.FirstChild == m_Entity)
-				{
-					parentRC.FirstChild = entityRC.Next;
-				}
-				else
-				{
-					Entity prevEntity = Entity(entityRC.Prev, m_ActiveScene.get());
-					prevEntity.GetComponent<RelationshipComponent>().Next = entityRC.Next;
-				}
-				parentRC.ChildrenCount--;
-			}
 			m_ActiveScene->DestroyEntity(m_Entity);
 			Application::Get().SetIsSavedStatus(false);
 		}
@@ -90,11 +38,87 @@ namespace Locus
 	private:
 		Ref<Scene> m_ActiveScene;
 		Entity m_Entity;
-		Entity m_CopyEntity;
+		UUID m_UUID;
+		std::string m_EntityName;
+	};
+
+
+
+	// --- CreateChildEntityCommand -------------------------------------------
+	class CreateChildEntityCommand : public Command
+	{
+	public:
+		CreateChildEntityCommand() = default;
+		~CreateChildEntityCommand() = default;
+
+		CreateChildEntityCommand(Ref<Scene> activeScene, const std::string& name, Entity parentEntity)
+			: m_ActiveScene(activeScene), m_EntityName(name), m_UUID(UUID()), m_ParentEntity(parentEntity)
+		{
+		}
+
+		virtual void Execute() override
+		{
+			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_Entity, m_UUID, m_EntityName);
+
+			auto& entityRC = m_Entity.GetComponent<RelationshipComponent>();
+			auto& parentRC = m_ParentEntity.GetComponent<RelationshipComponent>();
+
+			// Set Parent, Next, and Prev entity relationships
+			entityRC.Parent = m_ParentEntity;
+			if (parentRC.ChildrenCount == 0)
+			{
+				parentRC.FirstChild = m_Entity;
+			}
+			else
+			{
+				Entity curEntity = Entity(parentRC.FirstChild, m_ActiveScene.get());
+				while ((entt::entity)curEntity != entt::null)
+				{
+					auto& rc = curEntity.GetComponent<RelationshipComponent>();
+					if (rc.Next == entt::null)
+					{
+						rc.Next = (entt::entity)m_Entity;
+						entityRC.Prev = (entt::entity)curEntity;
+						break;
+					}
+					curEntity = Entity(rc.Next, m_ActiveScene.get());
+				}
+			}
+			parentRC.ChildrenCount++;
+
+			Application::Get().SetIsSavedStatus(false);
+		}
+
+		virtual void Undo() override
+		{
+			auto& parentRC = m_ParentEntity.GetComponent<RelationshipComponent>();
+			auto& entityRC = m_Entity.GetComponent<RelationshipComponent>();
+			Entity prevEntity = Entity(entityRC.Prev, m_ActiveScene.get());
+
+			if (parentRC.FirstChild == m_Entity)
+				parentRC.FirstChild = entityRC.Next;
+			else
+				prevEntity.GetComponent<RelationshipComponent>().Next = entityRC.Next;
+
+			parentRC.ChildrenCount--;
+
+			m_ActiveScene->DestroyEntity(m_Entity);
+			Application::Get().SetIsSavedStatus(false);
+		}
+
+		virtual bool Merge(Command* other) override
+		{
+			return false;
+		}
+
+	private:
+		Ref<Scene> m_ActiveScene;
+		Entity m_Entity;
 		Entity m_ParentEntity = Entity::Null;
 		UUID m_UUID;
 		std::string m_EntityName;
 	};
+
 
 
 	// --- DestroyEntityCommand -----------------------------------------------
@@ -111,7 +135,7 @@ namespace Locus
 
 		virtual void Execute() override
 		{
-			LOCUS_CORE_INFO("Deleting: {0}", m_Entity.GetComponent<TagComponent>().Tag);
+			LOCUS_CORE_INFO("Deleting: {0}, ID: {1}", m_Entity.GetComponent<TagComponent>().Tag, (uint32_t)m_Entity);
 			m_OldEntity = m_Graveyard->AddEntity(m_Entity);
 			auto& entityRC = m_Entity.GetComponent<RelationshipComponent>();
 
@@ -130,12 +154,14 @@ namespace Locus
 
 		virtual void Undo() override
 		{
-			LOCUS_CORE_INFO("m_Entity: {0}, m_OldEntity: {1}", (uint32_t)m_Entity, (uint32_t)m_OldEntity);
 			auto& entityRC = m_Graveyard->m_Registry.get<RelationshipComponent>(m_OldEntity);
 			Entity parentEntity = Entity(entityRC.Parent, m_ActiveScene.get());
 			Entity prevEntity = Entity(entityRC.Prev, m_ActiveScene.get());
 			Entity nextEntity = Entity(entityRC.Next, m_ActiveScene.get());
+
 			m_Entity = m_Graveyard->MoveEntityToScene(m_OldEntity, m_ActiveScene);
+
+			// Recreate all the child entities
 			while (!m_DeletedChildEntities.empty())
 			{
 				m_Graveyard->MoveEntityToScene(m_DeletedChildEntities.top(), m_ActiveScene);
@@ -195,7 +221,6 @@ namespace Locus
 				// Case: First child
 				if (parentRC.FirstChild == entity)
 				{
-					LOCUS_CORE_INFO("first child!");
 					parentRC.FirstChild = entityRC.Next;
 					if (entityRC.Next != entt::null)
 					{
@@ -234,11 +259,11 @@ namespace Locus
 			}
 		}
 
+		// Recursively move child entities to graveyard and destroy
 		void DestroyChildEntities(Entity entity)
 		{
 			if ((entt::entity)entity != entt::null)
 			{
-				LOCUS_CORE_INFO("Destroying Child: {0}", entity.GetComponent<TagComponent>().Tag);
 				auto& entityRC = entity.GetComponent<RelationshipComponent>();
 				m_DeletedChildEntities.push(m_Graveyard->AddEntity(entity));
 

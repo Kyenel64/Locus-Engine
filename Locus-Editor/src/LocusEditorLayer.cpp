@@ -211,7 +211,7 @@ namespace Locus
 
 		DrawLayoutTable();
 
-		ImGui::ShowDemoWindow();
+		//ImGui::ShowDemoWindow();
 
 		// --- Menu Bar -------------------------------------------------------
 		DrawToolbar();

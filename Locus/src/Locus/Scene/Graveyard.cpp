@@ -9,7 +9,6 @@ namespace Locus
 	entt::entity Graveyard::AddEntity(Entity entity)
 	{
 		auto newEntity = m_Registry.create(entity);
-		LOCUS_CORE_ASSERT((entt::entity)entity == newEntity, "Entity ID does not match entt ID!");
 		m_Registry.emplace_or_replace<TagComponent>(newEntity, entity.GetComponent<TagComponent>());
 		m_Registry.emplace_or_replace<IDComponent>(newEntity, entity.GetComponent<IDComponent>());
 		m_Registry.emplace_or_replace<RelationshipComponent>(newEntity, entity.GetComponent<RelationshipComponent>());

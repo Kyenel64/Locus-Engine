@@ -60,6 +60,7 @@ namespace Locus
 		friend class SceneSerializer;
 		friend class SceneHierarchyPanel;
 		friend class CreateEntityCommand;
+		friend class CreateChildEntityCommand;
 		friend class DestroyEntityCommand;
 		friend class DuplicateEntityCommand;
 	};

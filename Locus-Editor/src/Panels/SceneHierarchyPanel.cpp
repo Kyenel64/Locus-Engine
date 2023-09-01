@@ -103,7 +103,7 @@ namespace Locus
 		{
 			if (ImGui::MenuItem("Create Empty Entity"))
 			{
-				CommandHistory::AddCommand(new CreateEntityCommand(m_ActiveScene, "Empty Entity", m_SelectedEntity));
+				CommandHistory::AddCommand(new CreateChildEntityCommand(m_ActiveScene, "Empty Entity", m_SelectedEntity));
 				openOnCreate = true;
 			}
 

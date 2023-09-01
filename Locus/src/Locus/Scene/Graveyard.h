@@ -1,3 +1,8 @@
+// --- Graveyard --------------------------------------------------------------
+// The graveyard contains a separate registry from the main scene which holds
+// destroyed entities. The command pattern utilizes this to easily undo and 
+// redo entity creation/deletion.
+// TODO: If graveyard isnt needed anywhere else, move to editor project.
 #pragma once
 
 #include <entt.hpp>

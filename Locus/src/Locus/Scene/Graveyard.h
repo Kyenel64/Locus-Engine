@@ -14,8 +14,10 @@ namespace Locus
 		~Graveyard() = default;
 
 		entt::entity AddEntity(Entity entity);
-		void MoveEntityToScene(entt::entity entity, Ref<Scene> scene);
+		Entity MoveEntityToScene(entt::entity entity, Ref<Scene> scene);
 	private:
 		entt::registry m_Registry;
+
+		friend class DestroyEntityCommand;
 	};
 }

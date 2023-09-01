@@ -126,7 +126,10 @@ namespace Locus
 				while ((entt::entity)curEntity != entt::null)
 				{
 					DrawEntityNode(curEntity);
-					curEntity = Entity(curEntity.GetComponent<RelationshipComponent>().Next, m_ActiveScene.get());
+					if (curEntity.HasComponent<RelationshipComponent>())
+						curEntity = Entity(curEntity.GetComponent<RelationshipComponent>().Next, m_ActiveScene.get());
+					else
+						break;
 				}
 			}
 			ImGui::TreePop();

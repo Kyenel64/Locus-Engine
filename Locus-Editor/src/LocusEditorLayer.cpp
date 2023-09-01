@@ -28,11 +28,6 @@ namespace Locus
 	{
 		LOCUS_PROFILE_FUNCTION();
 
-		// Textures
-		//m_CheckerboardTexture = Texture2D::Create("assets/textures/Checkerboard.png");
-		//m_SpriteSheet = Texture2D::Create("assets/textures/TX_Tileset_Grass.png");
-		//m_Grass = SubTexture2D::CreateFromCoords(m_SpriteSheet, { 1, 0 }, { 32, 32 }, { 1, 2 });
-
 		// Framebuffer
 		FramebufferSpecification framebufferSpecs;
 		framebufferSpecs.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INT, FramebufferTextureFormat::Depth };
@@ -53,35 +48,6 @@ namespace Locus
 			serializer.Deserialize(sceneFilePath);
 			m_SavePath = sceneFilePath;
 		}
-
-		/*class CameraControls : public ScriptableEntity
-		{
-		public:
-			virtual void OnCreate() override
-			{
-
-			}
-
-			virtual void OnDestroy() override
-			{
-
-			}
-
-			virtual void OnUpdate(Timestep deltaTime) override
-			{
-				auto& translation = GetComponent<TransformComponent>().Translation;
-				float speed = 5.0f;
-
-				if (Input::IsKeyPressed(Key::A))
-					translation.x -= speed * deltaTime;
-				if (Input::IsKeyPressed(Key::D))
-					translation.x += speed * deltaTime;
-				if (Input::IsKeyPressed(Key::W))
-					translation.y += speed * deltaTime;
-				if (Input::IsKeyPressed(Key::S))
-					translation.y -= speed * deltaTime;
-			}
-		};*/
 
 		// Panels
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
@@ -277,49 +243,6 @@ namespace Locus
 
 		// --- Debug panel ---------------------------------------------------
 		DrawDebugPanel();
-	
-
-		// --- Content Browser ------------------------------------------------
-		ImGui::SetNextWindowSize({ m_FrameSizes[1].x, m_FrameSizes[1].y });
-		ImGui::SetNextWindowPos({ m_FramePositions[1].x, m_FramePositions[1].y });
-		m_ContentBrowserPanel.OnImGuiRender();
-
-
-		// --- Scene Hierarchy ------------------------------------------------
-		ImGui::SetNextWindowSize({ m_FrameSizes[2].x, m_FrameSizes[2].y });
-		ImGui::SetNextWindowPos({ m_FramePositions[2].x, m_FramePositions[2].y });
-		m_SceneHierarchyPanel.OnImGuiRender();
-
-
-		// --- Properties -----------------------------------------------------
-		ImGui::SetNextWindowSize({ m_FrameSizes[3].x, m_FrameSizes[3].y });
-		ImGui::SetNextWindowPos({ m_FramePositions[3].x, m_FramePositions[3].y });
-		m_PropertiesPanel.OnImGuiRender();
-
-
-		// --- Debug panel ---------------------------------------------------
-		ImGui::Begin(" Debug ", false);
-		auto stats = Renderer2D::GetStats();
-		ImGui::Text("Renderer2D Stats:");
-		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
-		ImGui::Text("Quads: %d", stats.QuadCount);
-		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
-		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
-		ImGui::Text("Frame Time: %f", stats.FrameTime);
-		ImGui::Text("FPS: %f", stats.FramesPerSecond);
-
-		std::string name = "None";
-		if (m_HoveredEntity)
-			if (m_HoveredEntity.HasComponent<IDComponent>())
-				name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
-		ImGui::Text("Hovered Entity: %s", name.c_str());
-
-		std::string collisionLayer = "None";
-		if (m_HoveredEntity)
-			if (m_HoveredEntity.HasComponent<BoxCollider2DComponent>())
-				collisionLayer = std::to_string(m_HoveredEntity.GetComponent<BoxCollider2DComponent>().CollisionLayer);
-		ImGui::Text("Hovered Collision Layer: %s", collisionLayer.c_str());
-		ImGui::End();
 
 	
 		// --- Save Project Popup ---------------------------------------------

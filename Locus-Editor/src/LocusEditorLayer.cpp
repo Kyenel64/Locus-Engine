@@ -279,6 +279,49 @@ namespace Locus
 		DrawDebugPanel();
 	
 
+		// --- Content Browser ------------------------------------------------
+		ImGui::SetNextWindowSize({ m_FrameSizes[1].x, m_FrameSizes[1].y });
+		ImGui::SetNextWindowPos({ m_FramePositions[1].x, m_FramePositions[1].y });
+		m_ContentBrowserPanel.OnImGuiRender();
+
+
+		// --- Scene Hierarchy ------------------------------------------------
+		ImGui::SetNextWindowSize({ m_FrameSizes[2].x, m_FrameSizes[2].y });
+		ImGui::SetNextWindowPos({ m_FramePositions[2].x, m_FramePositions[2].y });
+		m_SceneHierarchyPanel.OnImGuiRender();
+
+
+		// --- Properties -----------------------------------------------------
+		ImGui::SetNextWindowSize({ m_FrameSizes[3].x, m_FrameSizes[3].y });
+		ImGui::SetNextWindowPos({ m_FramePositions[3].x, m_FramePositions[3].y });
+		m_PropertiesPanel.OnImGuiRender();
+
+
+		// --- Debug panel ---------------------------------------------------
+		ImGui::Begin(" Debug ", false);
+		auto stats = Renderer2D::GetStats();
+		ImGui::Text("Renderer2D Stats:");
+		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
+		ImGui::Text("Quads: %d", stats.QuadCount);
+		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
+		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
+		ImGui::Text("Frame Time: %f", stats.FrameTime);
+		ImGui::Text("FPS: %f", stats.FramesPerSecond);
+
+		std::string name = "None";
+		if (m_HoveredEntity)
+			if (m_HoveredEntity.HasComponent<IDComponent>())
+				name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
+		ImGui::Text("Hovered Entity: %s", name.c_str());
+
+		std::string collisionLayer = "None";
+		if (m_HoveredEntity)
+			if (m_HoveredEntity.HasComponent<BoxCollider2DComponent>())
+				collisionLayer = std::to_string(m_HoveredEntity.GetComponent<BoxCollider2DComponent>().CollisionLayer);
+		ImGui::Text("Hovered Collision Layer: %s", collisionLayer.c_str());
+		ImGui::End();
+
+	
 		// --- Save Project Popup ---------------------------------------------
 		if (Application::Get().GetSaveChangesPopupStatus())
 			ImGui::OpenPopup("Save?");

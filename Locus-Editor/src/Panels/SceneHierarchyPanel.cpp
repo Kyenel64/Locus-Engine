@@ -33,7 +33,7 @@ namespace Locus
 		// --- Scene Hierarchy Panel ------------------------------------------
 		// Top bar
 		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
-		if (ImGui::ImageButton((ImTextureID)m_PlusButton->GetRendererID(), { 15.0f, 15.0f }))
+		if (ImGui::ImageButton((ImTextureID)(uintptr_t)m_PlusButton->GetRendererID(), { 15.0f, 15.0f }))
 		{
 			// TODO: Functionality
 		}

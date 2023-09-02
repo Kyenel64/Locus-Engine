@@ -173,6 +173,11 @@ namespace Locus
 			case Locus::DestroyEntityCommand::DeletionCase::FirstChild:
 			{
 				auto& parentRC = parentEntity.GetComponent<RelationshipComponent>();
+				if (nextEntity != Entity::Null)
+				{
+					auto& nextRC = nextEntity.GetComponent<RelationshipComponent>();
+					nextRC.Prev = m_Entity;
+				}
 				parentRC.FirstChild = m_Entity;
 				parentRC.ChildrenCount++;
 				break;

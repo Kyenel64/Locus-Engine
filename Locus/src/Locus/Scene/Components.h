@@ -35,7 +35,7 @@ namespace Locus
 
 	struct RelationshipComponent 
 	{
-		// TODO: Will pointers be faster?
+		// TODO: Look into how unity handles relationships
 		uint32_t ChildCount = 0;
 		Entity Parent = Entity::Null;
 		Entity FirstChild = Entity::Null;
@@ -48,7 +48,7 @@ namespace Locus
 
 	struct TransformComponent
 	{
-		glm::vec3 Translation = { 0.0f, 0.0f, 0.0f };
+		glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
 
 	private:
@@ -60,12 +60,12 @@ namespace Locus
 	public:
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent&) = default;
-		TransformComponent(const glm::vec3& translation) : Translation(translation) {}
+		TransformComponent(const glm::vec3& position) : Position(position) {}
 
 		glm::mat4 GetTransform() const
 		{
 			glm::mat4 rotation = glm::toMat4(RotationQuat);
-			return glm::translate(glm::mat4(1.0f), Translation)
+			return glm::translate(glm::mat4(1.0f), Position)
 				* rotation
 				* glm::scale(glm::mat4(1.0f), Scale);
 		}

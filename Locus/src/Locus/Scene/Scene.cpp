@@ -151,8 +151,8 @@ namespace Locus
 			
 				b2Body* body = (b2Body*)rb2d.RuntimeBody;
 				const b2Vec2& position = body->GetPosition();
-				transform.Translation.x = position.x;
-				transform.Translation.y = position.y;
+				transform.Position.x = position.x;
+				transform.Position.y = position.y;
 				transform.SetRotationEuler({ 0, 0, body->GetAngle()});
 			}
 			
@@ -231,7 +231,7 @@ namespace Locus
 				// Body
 				b2BodyDef bodyDef;
 				bodyDef.type = Rigidbody2DTypeToBox2DType(rb2D.BodyType);
-				bodyDef.position.Set(transform.Translation.x, transform.Translation.y);
+				bodyDef.position.Set(transform.Position.x, transform.Position.y);
 				bodyDef.angle = transform.GetRotationEuler().z;
 				bodyDef.linearDamping = rb2D.LinearDrag;
 				bodyDef.angularDamping = rb2D.AngularDrag;

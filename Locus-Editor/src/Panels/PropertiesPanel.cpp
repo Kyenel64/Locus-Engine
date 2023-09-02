@@ -198,7 +198,7 @@ namespace Locus
 		DrawComponentUI<TransformComponent>("Transform", entity, [this](auto& component)
 			{
 				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 5.0f, 0.0f });
-				DrawVec3Control("Position", component.Translation);
+				DrawVec3Control("Position", component.Position);
 
 				DrawVec3Control("Rotation", component.GetRotationEuler());
 				component.SetRotationEuler(component.GetRotationEuler());

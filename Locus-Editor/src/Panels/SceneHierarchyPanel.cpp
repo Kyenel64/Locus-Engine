@@ -58,7 +58,7 @@ namespace Locus
 			m_ActiveScene->m_Registry.each([&](auto entityID)
 				{
 					Entity entity = Entity(entityID, m_ActiveScene.get());
-					if (entity.GetComponent<RelationshipComponent>().Parent == entt::null)
+					if (entity.GetComponent<RelationshipComponent>().Parent == Entity::Null)
 						DrawEntityNode(entity);
 				});
 
@@ -122,12 +122,12 @@ namespace Locus
 			if (childrenCount)
 			{
 				auto& rc = entity.GetComponent<RelationshipComponent>();
-				Entity curEntity = Entity(rc.FirstChild, m_ActiveScene.get());
-				while ((entt::entity)curEntity != entt::null)
+				Entity curEntity = rc.FirstChild;
+				while (curEntity != Entity::Null)
 				{
 					DrawEntityNode(curEntity);
 					if (curEntity.HasComponent<RelationshipComponent>())
-						curEntity = Entity(curEntity.GetComponent<RelationshipComponent>().Next, m_ActiveScene.get());
+						curEntity = curEntity.GetComponent<RelationshipComponent>().Next;
 					else
 						break;
 				}

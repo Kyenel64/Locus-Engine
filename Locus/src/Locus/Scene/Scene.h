@@ -42,6 +42,7 @@ namespace Locus
 		Entity GetPrimaryCameraEntity();
 		const std::string& GetSceneName() const { return m_SceneName; }
 		Ref<Graveyard> GetGraveyard() const { return m_Graveyard; }
+		Entity GetEntityByUUID(UUID uuid);
 
 		void SetSceneName(const std::string& name) { m_SceneName = name; }
 

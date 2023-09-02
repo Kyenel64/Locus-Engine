@@ -305,6 +305,19 @@ namespace Locus
 		return {};
 	}
 
+	Entity Scene::GetEntityByUUID(UUID uuid)
+	{
+		auto view = m_Registry.view<IDComponent>();
+		for (auto e : view)
+		{
+			Entity entity = Entity(e, this);
+			if (entity.GetComponent<IDComponent>().ID == uuid)
+				return entity;
+		}
+
+		return Entity::Null;
+	}
+
 	template<typename T>
 	void Scene::OnComponentAdded(Entity entity, T& component)
 	{

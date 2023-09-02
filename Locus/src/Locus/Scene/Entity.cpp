@@ -1,6 +1,8 @@
 #include "Lpch.h"
 #include "Entity.h"
 
+#include "Locus/Scene/Components.h"
+
 namespace Locus
 {
 	Entity Entity::Null = {};
@@ -9,4 +11,6 @@ namespace Locus
 		: m_EntityHandle(handle), m_Scene(scene)
 	{
 	}
+
+	UUID Entity::GetUUID() { return GetComponent<IDComponent>().ID; }
 }

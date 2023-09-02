@@ -58,8 +58,11 @@ namespace Locus
 			m_ActiveScene->m_Registry.each([&](auto entityID)
 				{
 					Entity entity = Entity(entityID, m_ActiveScene.get());
-					if (entity.GetComponent<RelationshipComponent>().Parent == Entity::Null)
-						DrawEntityNode(entity);
+					if (entity.HasComponent<RelationshipComponent>())
+					{
+						if (entity.GetComponent<RelationshipComponent>().Parent == Entity::Null)
+							DrawEntityNode(entity);
+					}
 				});
 
 			// Select nothing if clicking in blank space
@@ -118,8 +121,8 @@ namespace Locus
 		if (opened)
 		{
 			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
-			uint32_t childrenCount = entity.GetComponent<RelationshipComponent>().ChildrenCount;
-			if (childrenCount)
+			uint32_t childCount = entity.GetComponent<RelationshipComponent>().ChildCount;
+			if (childCount)
 			{
 				auto& rc = entity.GetComponent<RelationshipComponent>();
 				Entity curEntity = rc.FirstChild;

@@ -1,0 +1,58 @@
+Scene: Untitled
+Entities:
+  - Entity: 9162182958059964504
+    TagComponent:
+      Tag: Parent1Child2
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      ChildCount: 0
+      Parent: 16906765738218555656
+      FirstChild: 0
+      Next: 0
+      Prev: 3435677538079956630
+  - Entity: 6566443517638761618
+    TagComponent:
+      Tag: Parent1Child1Child1
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      ChildCount: 0
+      Parent: 3435677538079956630
+      FirstChild: 0
+      Next: 0
+      Prev: 0
+  - Entity: 3435677538079956630
+    TagComponent:
+      Tag: Parent1Child1
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      ChildCount: 1
+      Parent: 16906765738218555656
+      FirstChild: 6566443517638761618
+      Next: 9162182958059964504
+      Prev: 0
+  - Entity: 16906765738218555656
+    TagComponent:
+      Tag: Parent1
+      Enabled: true
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    RelationshipComponent:
+      ChildCount: 2
+      Parent: 0
+      FirstChild: 3435677538079956630
+      Next: 0
+      Prev: 0

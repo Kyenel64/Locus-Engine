@@ -65,7 +65,7 @@ namespace Locus
 
 			// Set Parent, Next, and Prev entity relationships
 			entityRC.Parent = m_ParentEntity;
-			if (parentRC.ChildrenCount == 0)
+			if (parentRC.ChildCount == 0)
 			{
 				parentRC.FirstChild = m_Entity;
 			}
@@ -84,7 +84,7 @@ namespace Locus
 					curEntity = rc.Next;
 				}
 			}
-			parentRC.ChildrenCount++;
+			parentRC.ChildCount++;
 
 			Application::Get().SetIsSavedStatus(false);
 		}
@@ -100,7 +100,7 @@ namespace Locus
 			else
 				prevEntity.GetComponent<RelationshipComponent>().Next = entityRC.Next;
 
-			parentRC.ChildrenCount--;
+			parentRC.ChildCount--;
 
 			m_ActiveScene->DestroyEntity(m_Entity);
 			Application::Get().SetIsSavedStatus(false);
@@ -140,7 +140,7 @@ namespace Locus
 			auto& entityRC = m_Entity.GetComponent<RelationshipComponent>();
 
 			// Destroy all children
-			if (entityRC.ChildrenCount)
+			if (entityRC.ChildCount)
 			{
 				Entity firstEntity = entityRC.FirstChild;
 				DestroyChildEntities(firstEntity);
@@ -179,7 +179,7 @@ namespace Locus
 					nextRC.Prev = m_Entity;
 				}
 				parentRC.FirstChild = m_Entity;
-				parentRC.ChildrenCount++;
+				parentRC.ChildCount++;
 				break;
 			}
 			case Locus::DestroyEntityCommand::DeletionCase::MiddleChild:
@@ -189,13 +189,13 @@ namespace Locus
 				auto& nextRC = nextEntity.GetComponent<RelationshipComponent>();
 				prevRC.Next = m_Entity;
 				nextRC.Prev = m_Entity;
-				parentRC.ChildrenCount++;
+				parentRC.ChildCount++;
 				break;
 			}
 			case Locus::DestroyEntityCommand::DeletionCase::LastChild:
 			{
 				auto& parentRC = parentEntity.GetComponent<RelationshipComponent>();
-				parentRC.ChildrenCount++;
+				parentRC.ChildCount++;
 				auto& prevRC = prevEntity.GetComponent<RelationshipComponent>();
 				prevRC.Next = m_Entity;
 				break;
@@ -256,7 +256,7 @@ namespace Locus
 					prevRC.Next = Entity::Null;
 					m_DeletionCase = DeletionCase::LastChild;
 				}
-				parentRC.ChildrenCount--;
+				parentRC.ChildCount--;
 			}
 			else
 			{

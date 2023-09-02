@@ -36,11 +36,11 @@ namespace Locus
 	struct RelationshipComponent 
 	{
 		// TODO: Will pointers be faster?
-		uint32_t ChildrenCount = 0;
+		uint32_t ChildCount = 0;
+		Entity Parent = Entity::Null;
 		Entity FirstChild = Entity::Null;
 		Entity Next = Entity::Null;
 		Entity Prev = Entity::Null;
-		Entity Parent = Entity::Null;
 
 		RelationshipComponent() = default;
 		RelationshipComponent(const RelationshipComponent&) = default;

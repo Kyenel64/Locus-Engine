@@ -148,6 +148,43 @@ namespace Locus
 			out << YAML::EndMap; // End Transform Component
 		}
 
+		// --- Relationship Component -----------------------------------------
+		if (entity.HasComponent<RelationshipComponent>())
+		{
+			out << YAML::Key << "RelationshipComponent";
+
+			out << YAML::BeginMap; // Relationship Component
+			auto& rc = entity.GetComponent<RelationshipComponent>();
+
+			// ChildCount
+			out << YAML::Key << "ChildCount" << YAML::Value << rc.ChildCount;
+
+			// Parent
+			if (rc.Parent != Entity::Null)
+				out << YAML::Key << "Parent" << YAML::Value << rc.Parent.GetComponent<IDComponent>().ID;
+			else
+				out << YAML::Key << "Parent" << YAML::Value << 0;
+
+			// FirstChild
+			if (rc.FirstChild != Entity::Null)
+				out << YAML::Key << "FirstChild" << YAML::Value << rc.FirstChild.GetComponent<IDComponent>().ID;
+			else
+				out << YAML::Key << "FirstChild" << YAML::Value << 0;
+
+			// Next
+			if (rc.Next != Entity::Null)
+				out << YAML::Key << "Next" << YAML::Value << rc.Next.GetComponent<IDComponent>().ID;
+			else
+				out << YAML::Key << "Next" << YAML::Value << 0;
+
+			// Prev
+			if (rc.Prev != Entity::Null)
+				out << YAML::Key << "Prev" << YAML::Value << rc.Prev.GetComponent<IDComponent>().ID;
+			else
+				out << YAML::Key << "Prev" << YAML::Value << 0;
+			out << YAML::EndMap; // End Relationship Component
+		}
+
 		// --- Sprite Renderer Component --------------------------------------
 		if (entity.HasComponent<SpriteRendererComponent>())
 		{
@@ -350,6 +387,34 @@ namespace Locus
 					bc2D.CollisionLayer = boxCollider2DComponent["CollisionLayer"].as<int>();
 					bc2D.Offset = boxCollider2DComponent["Offset"].as<glm::vec2>();
 					bc2D.Size = boxCollider2DComponent["Size"].as<glm::vec2>();
+				}
+			}
+
+			// Process relationship components after all entities are created
+			for (auto e : entities)
+			{
+				uint64_t uuid = e["Entity"].as<uint64_t>();
+
+				Entity entity = m_Scene->GetEntityByUUID(uuid);
+				auto& tag = entity.GetComponent<TagComponent>().Tag;
+
+				// --- Relationship Component ---------------------------------
+				auto relationshipComponent = e["RelationshipComponent"];
+				if (relationshipComponent)
+				{
+					auto& rc = entity.GetComponent<RelationshipComponent>();
+					
+					rc.ChildCount = relationshipComponent["ChildCount"].as<uint32_t>();
+
+					if (relationshipComponent["Parent"].as<uint64_t>() != 0)
+						rc.Parent = m_Scene->GetEntityByUUID(relationshipComponent["Parent"].as<uint64_t>());
+					if (relationshipComponent["FirstChild"].as<uint64_t>() != 0)
+						rc.FirstChild = m_Scene->GetEntityByUUID(relationshipComponent["FirstChild"].as<uint64_t>());
+					if (relationshipComponent["Next"].as<uint64_t>() != 0)
+						rc.Next = m_Scene->GetEntityByUUID(relationshipComponent["Next"].as<uint64_t>());
+					if (relationshipComponent["Prev"].as<uint64_t>() != 0)
+						rc.Prev = m_Scene->GetEntityByUUID(relationshipComponent["Prev"].as<uint64_t>());
+
 				}
 			}
 		}

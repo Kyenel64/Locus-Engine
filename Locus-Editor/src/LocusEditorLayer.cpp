@@ -393,7 +393,7 @@ namespace Locus
 		m_EditorScene = CreateRef<Scene>();
 		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_ActiveScene = m_EditorScene;
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene); // TODO: Set these to Editor scene?
 		m_PropertiesPanel.SetContext(m_ActiveScene);
 		m_SavePath = std::string();
 		Application::Get().SetIsSavedStatus(false);
@@ -796,7 +796,7 @@ namespace Locus
 				ImGui::Separator();
 				ImGui::Text("Relationships");
 				auto& rc = m_SelectedEntity.GetComponent<RelationshipComponent>();
-				ImGui::Text("Children Count: %d", rc.ChildrenCount);
+				ImGui::Text("Children Count: %d", rc.ChildCount);
 				Entity firstChild;
 				Entity parent;
 				Entity next;

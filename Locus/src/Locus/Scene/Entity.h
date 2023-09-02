@@ -9,7 +9,6 @@
 #include "Locus/Core/Log.h"
 #include "Locus/Core/UUID.h"
 #include "Locus/Scene/Scene.h"
-#include "Locus/Scene/Components.h"
 
 namespace Locus
 {
@@ -74,7 +73,7 @@ namespace Locus
 		operator uint32_t() const { return (uint32_t)m_EntityHandle; }
 		operator entt::entity() const { return m_EntityHandle; }
 
-		UUID GetUUID() { return GetComponent<IDComponent>().ID; }
+		UUID GetUUID();
 
 		bool operator==(const Entity& other) const 
 		{

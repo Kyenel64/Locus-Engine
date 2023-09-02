@@ -11,6 +11,7 @@
 #include "Locus/Core/UUID.h"
 #include "Locus/Renderer/Texture.h"
 #include "Locus/Scene/SceneCamera.h"
+#include "Locus/Scene/Entity.h"
 
 namespace Locus
 {
@@ -36,10 +37,10 @@ namespace Locus
 	{
 		// TODO: Will pointers be faster?
 		uint32_t ChildrenCount = 0;
-		entt::entity FirstChild = entt::null;
-		entt::entity Next = entt::null;
-		entt::entity Prev = entt::null;
-		entt::entity Parent = entt::null;
+		Entity FirstChild = Entity::Null;
+		Entity Next = Entity::Null;
+		Entity Prev = Entity::Null;
+		Entity Parent = Entity::Null;
 
 		RelationshipComponent() = default;
 		RelationshipComponent(const RelationshipComponent&) = default;

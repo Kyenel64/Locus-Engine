@@ -801,22 +801,22 @@ namespace Locus
 				Entity parent;
 				Entity next;
 				Entity prev;
-				if (rc.FirstChild != entt::null)
+				if (rc.FirstChild != Entity::Null)
 				{
 					firstChild = Entity(rc.FirstChild, m_ActiveScene.get());
 					ImGui::Text("First Child: %s", firstChild.GetComponent<TagComponent>().Tag.c_str());
 				}
-				if (rc.Parent != entt::null)
+				if (rc.Parent != Entity::Null)
 				{
 					parent = Entity(rc.Parent, m_ActiveScene.get());
 					ImGui::Text("Parent: %s", parent.GetComponent<TagComponent>().Tag.c_str());
 				}
-				if (rc.Next != entt::null)
+				if (rc.Next != Entity::Null)
 				{
 					next = Entity(rc.Next, m_ActiveScene.get());
 					ImGui::Text("Next: % s", next.GetComponent<TagComponent>().Tag.c_str());
 				}
-				if (rc.Prev != entt::null)
+				if (rc.Prev != Entity::Null)
 				{
 					prev = Entity(rc.Prev, m_ActiveScene.get());
 					ImGui::Text("Prev: %s", prev.GetComponent<TagComponent>().Tag.c_str());

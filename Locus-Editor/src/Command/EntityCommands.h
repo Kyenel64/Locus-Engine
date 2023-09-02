@@ -71,17 +71,17 @@ namespace Locus
 			}
 			else
 			{
-				Entity curEntity = Entity(parentRC.FirstChild, m_ActiveScene.get());
-				while ((entt::entity)curEntity != entt::null)
+				Entity curEntity = parentRC.FirstChild;
+				while (curEntity != Entity::Null)
 				{
 					auto& rc = curEntity.GetComponent<RelationshipComponent>();
-					if (rc.Next == entt::null)
+					if (rc.Next == Entity::Null)
 					{
-						rc.Next = (entt::entity)m_Entity;
-						entityRC.Prev = (entt::entity)curEntity;
+						rc.Next = m_Entity;
+						entityRC.Prev = curEntity;
 						break;
 					}
-					curEntity = Entity(rc.Next, m_ActiveScene.get());
+					curEntity = rc.Next;
 				}
 			}
 			parentRC.ChildrenCount++;
@@ -93,7 +93,7 @@ namespace Locus
 		{
 			auto& parentRC = m_ParentEntity.GetComponent<RelationshipComponent>();
 			auto& entityRC = m_Entity.GetComponent<RelationshipComponent>();
-			Entity prevEntity = Entity(entityRC.Prev, m_ActiveScene.get());
+			Entity prevEntity = entityRC.Prev;
 
 			if (parentRC.FirstChild == m_Entity)
 				parentRC.FirstChild = entityRC.Next;
@@ -142,7 +142,7 @@ namespace Locus
 			// Destroy all children
 			if (entityRC.ChildrenCount)
 			{
-				Entity firstEntity = Entity(entityRC.FirstChild, m_ActiveScene.get());
+				Entity firstEntity = entityRC.FirstChild;
 				DestroyChildEntities(firstEntity);
 			}
 
@@ -155,9 +155,9 @@ namespace Locus
 		virtual void Undo() override
 		{
 			auto& entityRC = m_Graveyard->m_Registry.get<RelationshipComponent>(m_OldEntity);
-			Entity parentEntity = Entity(entityRC.Parent, m_ActiveScene.get());
-			Entity prevEntity = Entity(entityRC.Prev, m_ActiveScene.get());
-			Entity nextEntity = Entity(entityRC.Next, m_ActiveScene.get());
+			Entity parentEntity = entityRC.Parent;
+			Entity prevEntity = entityRC.Prev;
+			Entity nextEntity = entityRC.Next;
 
 			m_Entity = m_Graveyard->MoveEntityToScene(m_OldEntity, m_ActiveScene);
 
@@ -213,42 +213,42 @@ namespace Locus
 		void ProcessEntityRelationships(Entity entity)
 		{
 			auto& entityRC = entity.GetComponent<RelationshipComponent>();
-			if (entityRC.Parent != entt::null)
+			if (entityRC.Parent != Entity::Null)
 			{
-				Entity parentEntity = Entity(entityRC.Parent, m_ActiveScene.get());
+				Entity parentEntity = entityRC.Parent;
 				auto& parentRC = parentEntity.GetComponent<RelationshipComponent>();
 
 				// Case: First child
 				if (parentRC.FirstChild == entity)
 				{
 					parentRC.FirstChild = entityRC.Next;
-					if (entityRC.Next != entt::null)
+					if (entityRC.Next != Entity::Null)
 					{
-						Entity nextEntity = Entity(entityRC.Next, m_ActiveScene.get());
-						nextEntity.GetComponent<RelationshipComponent>().Prev = entt::null;
+						Entity nextEntity = entityRC.Next;
+						nextEntity.GetComponent<RelationshipComponent>().Prev = Entity::Null;
 					}
 					m_DeletionCase = DeletionCase::FirstChild;
 				}
 
 				// Case: Destroy middle child
-				if (entityRC.Next != entt::null && entityRC.Prev != entt::null)
+				if (entityRC.Next != Entity::Null && entityRC.Prev != Entity::Null)
 				{
-					Entity prevEntity = Entity(entityRC.Prev, m_ActiveScene.get());
+					Entity prevEntity = entityRC.Prev;
 					auto& prevRC = prevEntity.GetComponent<RelationshipComponent>();
 					prevRC.Next = entityRC.Next;
 
-					Entity nextEntity = Entity(entityRC.Next, m_ActiveScene.get());
+					Entity nextEntity = entityRC.Next;
 					auto& nextRC = nextEntity.GetComponent<RelationshipComponent>();
 					nextRC.Prev = entityRC.Prev;
 
 					m_DeletionCase = DeletionCase::MiddleChild;
 				}
 				// Case: Destroy last child
-				if (entityRC.Next == entt::null && entityRC.Prev != entt::null)
+				if (entityRC.Next == Entity::Null && entityRC.Prev != Entity::Null)
 				{
-					Entity prevEntity = Entity(entityRC.Prev, m_ActiveScene.get());
+					Entity prevEntity = entityRC.Prev;
 					auto& prevRC = prevEntity.GetComponent<RelationshipComponent>();
-					prevRC.Next = entt::null;
+					prevRC.Next = Entity::Null;
 					m_DeletionCase = DeletionCase::LastChild;
 				}
 				parentRC.ChildrenCount--;
@@ -262,18 +262,18 @@ namespace Locus
 		// Recursively move child entities to graveyard and destroy
 		void DestroyChildEntities(Entity entity)
 		{
-			if ((entt::entity)entity != entt::null)
+			if (entity != Entity::Null)
 			{
 				auto& entityRC = entity.GetComponent<RelationshipComponent>();
 				m_DeletedChildEntities.push(m_Graveyard->AddEntity(entity));
 
-				if (entityRC.Next != entt::null)
+				if (entityRC.Next != Entity::Null)
 				{
-					Entity nextEntity = Entity(entityRC.Next, m_ActiveScene.get());
+					Entity nextEntity = entityRC.Next;
 					DestroyChildEntities(nextEntity);
 				}
 
-				Entity childEntity = Entity(entityRC.FirstChild, m_ActiveScene.get());
+				Entity childEntity = entityRC.FirstChild;
 				ProcessEntityRelationships(entity);
 				DestroyChildEntities(childEntity);
 				m_ActiveScene->DestroyEntity(entity);

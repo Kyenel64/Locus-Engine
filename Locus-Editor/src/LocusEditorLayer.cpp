@@ -485,7 +485,7 @@ namespace Locus
 			{
 				case ImGuizmo::TRANSLATE:
 				{
-					CommandHistory::AddCommand(new ChangeValueCommand(translation, tc.Translation));
+					CommandHistory::AddCommand(new ChangeValueCommand(translation, tc.Position));
 					break;
 				}
 				case ImGuizmo::ROTATE:

@@ -142,7 +142,7 @@ namespace Locus
 
 			out << YAML::BeginMap; // Transform Component
 			auto& tc = entity.GetComponent<TransformComponent>();
-			out << YAML::Key << "Translation" << YAML::Value << tc.Translation;
+			out << YAML::Key << "Translation" << YAML::Value << tc.Position;
 			out << YAML::Key << "Rotation" << YAML::Value << tc.GetRotationEuler();
 			out << YAML::Key << "Scale" << YAML::Value << tc.Scale;
 			out << YAML::EndMap; // End Transform Component
@@ -310,7 +310,7 @@ namespace Locus
 
 				// --- Tag Component ------------------------------------------
 				std::string name;
-				bool enabled;
+				bool enabled = true;
 				auto tagComponent = entity["TagComponent"];
 				if (tagComponent)
 				{
@@ -326,7 +326,7 @@ namespace Locus
 				if (transformComponent)
 				{
 					auto& tc = deserializedEntity.GetComponent<TransformComponent>();
-					tc.Translation = transformComponent["Translation"].as<glm::vec3>();
+					tc.Position = transformComponent["Translation"].as<glm::vec3>();
 					tc.SetRotationEuler(transformComponent["Rotation"].as<glm::vec3>());
 					tc.Scale = transformComponent["Scale"].as<glm::vec3>();
 				}

@@ -11,9 +11,10 @@ namespace Locus
 		auto newEntity = m_Registry.create(entity);
 		m_Registry.emplace_or_replace<TagComponent>(newEntity, entity.GetComponent<TagComponent>());
 		m_Registry.emplace_or_replace<IDComponent>(newEntity, entity.GetComponent<IDComponent>());
-		m_Registry.emplace_or_replace<RelationshipComponent>(newEntity, entity.GetComponent<RelationshipComponent>());
 		m_Registry.emplace_or_replace<TransformComponent>(newEntity, entity.GetComponent<TransformComponent>());
 
+		if (entity.HasComponent<ChildComponent>())
+			m_Registry.emplace_or_replace<ChildComponent>(newEntity, entity.GetComponent<ChildComponent>());
 		if (entity.HasComponent<SpriteRendererComponent>())
 			m_Registry.emplace_or_replace<SpriteRendererComponent>(newEntity, entity.GetComponent<SpriteRendererComponent>());
 		if (entity.HasComponent<CameraComponent>())
@@ -35,8 +36,9 @@ namespace Locus
 		Entity newEntity = Entity(entity, scene.get());
 		scene->CreateEntityWithUUID(newEntity, uuid, tc.Tag, tc.Enabled);
 
-		newEntity.AddOrReplaceComponent<RelationshipComponent>(m_Registry.get<RelationshipComponent>(entity));
 		newEntity.AddOrReplaceComponent<TransformComponent>(m_Registry.get<TransformComponent>(entity));
+		if (m_Registry.any_of<ChildComponent>(entity))
+			newEntity.AddOrReplaceComponent<ChildComponent>(m_Registry.get<ChildComponent>(entity));
 		if (m_Registry.any_of<SpriteRendererComponent>(entity))
 			newEntity.AddOrReplaceComponent<SpriteRendererComponent>(m_Registry.get<SpriteRendererComponent>(entity));
 		if (m_Registry.any_of<CameraComponent>(entity))

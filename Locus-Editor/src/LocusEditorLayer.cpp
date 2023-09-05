@@ -126,12 +126,15 @@ namespace Locus
 			m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 		}
 		m_SelectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+		if (!m_SelectedEntity.IsValid())
+			m_SelectedEntity = {};
 		m_PropertiesPanel.SetSelectedEntity(m_SelectedEntity);
 
-		if (m_SelectedEntity == Entity::Null)
-			ImGuizmo::Enable(false);
-		else
+
+		if (m_SelectedEntity.IsValid())
 			ImGuizmo::Enable(true);
+		else
+			ImGuizmo::Enable(false);
 		
 		m_Framebuffer->Unbind();
 
@@ -179,6 +182,10 @@ namespace Locus
 
 		//ImGui::ShowDemoWindow();
 
+		// --- Save Popup -----------------------------------------------------
+		OpenSavePopup();
+
+
 		// --- Menu Bar -------------------------------------------------------
 		DrawToolbar();
 
@@ -203,8 +210,7 @@ namespace Locus
 
 		ProcessViewportDragDrop();
 		// viewport gizmo
-		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
-		if (selectedEntity && m_GizmoType != -1)
+		if (m_SelectedEntity && m_GizmoType != -1)
 			showGizmoUI();
 		// viewport menu
 		if (ImGui::BeginMenuBar())
@@ -244,31 +250,6 @@ namespace Locus
 		// --- Debug panel ---------------------------------------------------
 		DrawDebugPanel();
 
-	
-		// --- Save Project Popup ---------------------------------------------
-		if (Application::Get().GetSaveChangesPopupStatus())
-			ImGui::OpenPopup("Save?");
-		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-		ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-		if (ImGui::BeginPopupModal("Save?", NULL, ImGuiWindowFlags_AlwaysAutoResize))
-		{
-			ImGui::Text("Save Current Project?");
-			if (ImGui::Button("Save")) // TODO: Keep on popup modal when clicking cancel
-			{
-				SaveScene();
-				Application::Get().Close();
-			}
-			if (ImGui::Button("Don't Save"))
-			{
-				Application::Get().Close();
-			}
-			if (ImGui::Button("Close"))
-			{
-				Application::Get().SetSaveChangesPopupStatus(false);
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::EndPopup();
-		}
 
 		ImGui::End(); // End ImGui
 	}
@@ -461,7 +442,7 @@ namespace Locus
 		// Entity transform
 		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
 		auto& tc = selectedEntity.GetComponent<TransformComponent>();
-		glm::mat4& transform = tc.GetTransform();
+		glm::mat4& transform = tc.GetWorldTransform();
 
 		// Snapping
 		bool snap = Input::IsKeyPressed(Key::LeftControl);
@@ -485,13 +466,13 @@ namespace Locus
 			{
 				case ImGuizmo::TRANSLATE:
 				{
-					CommandHistory::AddCommand(new ChangeValueCommand(translation, tc.Position));
+					CommandHistory::AddCommand(new ChangeValueCommand(translation, tc.GetLocalPosition()));
 					break;
 				}
 				case ImGuizmo::ROTATE:
 				{
 					// Do this in Euler in an attempt to preserve any full revolutions (> 360)
-					glm::vec3 originalRotationEuler = tc.GetRotationEuler();
+					glm::vec3 originalRotationEuler = tc.GetLocalRotation();
 
 					// Map original rotation to range [-180, 180] which is what ImGuizmo gives us
 					originalRotationEuler.x = fmodf(originalRotationEuler.x + glm::pi<float>(), glm::two_pi<float>()) - glm::pi<float>();
@@ -505,13 +486,13 @@ namespace Locus
 					if (fabs(deltaRotationEuler.y) < 0.001) deltaRotationEuler.y = 0.0f;
 					if (fabs(deltaRotationEuler.z) < 0.001) deltaRotationEuler.z = 0.0f;
 
-					glm::vec3 rotationEuler = tc.GetRotationEuler();
-					CommandHistory::AddCommand(new ChangeValueCommand(rotationEuler + deltaRotationEuler, tc.GetRotationEuler()));
+					glm::vec3 rotationEuler = tc.GetLocalRotation();
+					CommandHistory::AddCommand(new ChangeValueCommand(rotationEuler + deltaRotationEuler, tc.GetLocalRotation()));
 					break;
 				}
 				case ImGuizmo::SCALE:
 				{
-					CommandHistory::AddCommand(new ChangeValueCommand(scale, tc.Scale));
+					CommandHistory::AddCommand(new ChangeValueCommand(scale, tc.GetLocalScale()));
 					break;
 				}
 			}
@@ -763,6 +744,35 @@ namespace Locus
 		ImGui::PopStyleVar(3);
 		ImGui::PopStyleColor(4);
 	}
+	
+	void LocusEditorLayer::OpenSavePopup()
+	{
+		// --- Save Project Popup ---------------------------------------------
+		if (Application::Get().GetSaveChangesPopupStatus())
+			ImGui::OpenPopup("Save?");
+		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+		ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+		if (ImGui::BeginPopupModal("Save?", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+		{
+			m_SelectedEntity = {};
+			ImGui::Text("Save Current Project?");
+			if (ImGui::Button("Save")) // TODO: Keep on popup modal when clicking cancel
+			{
+				SaveScene();
+				Application::Get().Close();
+			}
+			if (ImGui::Button("Don't Save"))
+			{
+				Application::Get().Close();
+			}
+			if (ImGui::Button("Close"))
+			{
+				Application::Get().SetSaveChangesPopupStatus(false);
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+	}
 
 	void LocusEditorLayer::DrawDebugPanel()
 	{
@@ -789,39 +799,30 @@ namespace Locus
 		ImGui::Text("Hovered Collision Layer: %s", collisionLayer.c_str());
 
 		// Relationships debug
-		if (m_SelectedEntity)
+		if (m_SelectedEntity.IsValid())
 		{
-			if (m_SelectedEntity.HasComponent<RelationshipComponent>())
-			{
-				ImGui::Separator();
-				ImGui::Text("Relationships");
-				auto& rc = m_SelectedEntity.GetComponent<RelationshipComponent>();
-				ImGui::Text("Children Count: %d", rc.ChildCount);
-				Entity firstChild;
-				Entity parent;
-				Entity next;
-				Entity prev;
-				if (rc.FirstChild != Entity::Null)
-				{
-					firstChild = Entity(rc.FirstChild, m_ActiveScene.get());
-					ImGui::Text("First Child: %s", firstChild.GetComponent<TagComponent>().Tag.c_str());
-				}
-				if (rc.Parent != Entity::Null)
-				{
-					parent = Entity(rc.Parent, m_ActiveScene.get());
-					ImGui::Text("Parent: %s", parent.GetComponent<TagComponent>().Tag.c_str());
-				}
-				if (rc.Next != Entity::Null)
-				{
-					next = Entity(rc.Next, m_ActiveScene.get());
-					ImGui::Text("Next: % s", next.GetComponent<TagComponent>().Tag.c_str());
-				}
-				if (rc.Prev != Entity::Null)
-				{
-					prev = Entity(rc.Prev, m_ActiveScene.get());
-					ImGui::Text("Prev: %s", prev.GetComponent<TagComponent>().Tag.c_str());
-				}
-			}
+		}
+
+		// Transforms
+		if (m_SelectedEntity.IsValid())
+		{
+			ImGui::Separator();
+			ImGui::Text("Transforms");
+
+			auto tc = m_SelectedEntity.GetComponent<TransformComponent>();
+			if (tc.Parent != Entity::Null)
+				ImGui::Text("Parent: %s", tc.Parent.GetComponent<TagComponent>().Tag.c_str());
+			else
+				ImGui::Text("Parent: Entity::Null");
+
+			ImGui::Text("LocalPosition: %f, %f, %f", tc.GetLocalPosition().x, tc.GetLocalPosition().y, tc.GetLocalPosition().z);
+			ImGui::Text("WorldPosition: %f, %f, %f", tc.GetWorldPosition().x, tc.GetWorldPosition().y, tc.GetWorldPosition().z);
+
+			ImGui::Text("LocalRotation: %f, %f, %f", glm::degrees(tc.GetLocalRotation().x), glm::degrees(tc.GetLocalRotation()).y, glm::degrees(tc.GetLocalRotation().z));
+			ImGui::Text("WorldRotation: %f, %f, %f", glm::degrees(tc.GetWorldRotation().x), glm::degrees(tc.GetWorldRotation()).y, glm::degrees(tc.GetWorldRotation().z));
+
+			ImGui::Text("LocalScale: %f, %f, %f", tc.GetLocalScale().x, tc.GetLocalScale().y, tc.GetLocalScale().z);
+			ImGui::Text("WorldScale: %f, %f, %f", tc.GetWorldScale().x, tc.GetWorldScale().y, tc.GetWorldScale().z);
 		}
 		ImGui::End();
 	}

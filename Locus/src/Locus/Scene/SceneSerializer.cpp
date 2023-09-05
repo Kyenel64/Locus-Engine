@@ -142,47 +142,10 @@ namespace Locus
 
 			out << YAML::BeginMap; // Transform Component
 			auto& tc = entity.GetComponent<TransformComponent>();
-			out << YAML::Key << "Translation" << YAML::Value << tc.Position;
-			out << YAML::Key << "Rotation" << YAML::Value << tc.GetRotationEuler();
-			out << YAML::Key << "Scale" << YAML::Value << tc.Scale;
+			out << YAML::Key << "WorldPosition" << YAML::Value << tc.GetWorldPosition();
+			out << YAML::Key << "WorldRotation" << YAML::Value << tc.GetWorldRotation();
+			out << YAML::Key << "WorldScale" << YAML::Value << tc.GetWorldScale();
 			out << YAML::EndMap; // End Transform Component
-		}
-
-		// --- Relationship Component -----------------------------------------
-		if (entity.HasComponent<RelationshipComponent>())
-		{
-			out << YAML::Key << "RelationshipComponent";
-
-			out << YAML::BeginMap; // Relationship Component
-			auto& rc = entity.GetComponent<RelationshipComponent>();
-
-			// ChildCount
-			out << YAML::Key << "ChildCount" << YAML::Value << rc.ChildCount;
-
-			// Parent
-			if (rc.Parent != Entity::Null)
-				out << YAML::Key << "Parent" << YAML::Value << rc.Parent.GetComponent<IDComponent>().ID;
-			else
-				out << YAML::Key << "Parent" << YAML::Value << 0;
-
-			// FirstChild
-			if (rc.FirstChild != Entity::Null)
-				out << YAML::Key << "FirstChild" << YAML::Value << rc.FirstChild.GetComponent<IDComponent>().ID;
-			else
-				out << YAML::Key << "FirstChild" << YAML::Value << 0;
-
-			// Next
-			if (rc.Next != Entity::Null)
-				out << YAML::Key << "Next" << YAML::Value << rc.Next.GetComponent<IDComponent>().ID;
-			else
-				out << YAML::Key << "Next" << YAML::Value << 0;
-
-			// Prev
-			if (rc.Prev != Entity::Null)
-				out << YAML::Key << "Prev" << YAML::Value << rc.Prev.GetComponent<IDComponent>().ID;
-			else
-				out << YAML::Key << "Prev" << YAML::Value << 0;
-			out << YAML::EndMap; // End Relationship Component
 		}
 
 		// --- Sprite Renderer Component --------------------------------------
@@ -326,9 +289,9 @@ namespace Locus
 				if (transformComponent)
 				{
 					auto& tc = deserializedEntity.GetComponent<TransformComponent>();
-					tc.Position = transformComponent["Translation"].as<glm::vec3>();
-					tc.SetRotationEuler(transformComponent["Rotation"].as<glm::vec3>());
-					tc.Scale = transformComponent["Scale"].as<glm::vec3>();
+					tc.SetWorldPosition(transformComponent["WorldPosition"].as<glm::vec3>());
+					tc.SetWorldRotation(transformComponent["WorldRotation"].as<glm::vec3>());
+					tc.SetWorldScale(transformComponent["WorldScale"].as<glm::vec3>());
 				}
 
 				// --- Sprite Renderer Component ------------------------------
@@ -393,29 +356,7 @@ namespace Locus
 			// Process relationship components after all entities are created
 			for (auto e : entities)
 			{
-				uint64_t uuid = e["Entity"].as<uint64_t>();
-
-				Entity entity = m_Scene->GetEntityByUUID(uuid);
-				auto& tag = entity.GetComponent<TagComponent>().Tag;
-
-				// --- Relationship Component ---------------------------------
-				auto relationshipComponent = e["RelationshipComponent"];
-				if (relationshipComponent)
-				{
-					auto& rc = entity.GetComponent<RelationshipComponent>();
-					
-					rc.ChildCount = relationshipComponent["ChildCount"].as<uint32_t>();
-
-					if (relationshipComponent["Parent"].as<uint64_t>() != 0)
-						rc.Parent = m_Scene->GetEntityByUUID(relationshipComponent["Parent"].as<uint64_t>());
-					if (relationshipComponent["FirstChild"].as<uint64_t>() != 0)
-						rc.FirstChild = m_Scene->GetEntityByUUID(relationshipComponent["FirstChild"].as<uint64_t>());
-					if (relationshipComponent["Next"].as<uint64_t>() != 0)
-						rc.Next = m_Scene->GetEntityByUUID(relationshipComponent["Next"].as<uint64_t>());
-					if (relationshipComponent["Prev"].as<uint64_t>() != 0)
-						rc.Prev = m_Scene->GetEntityByUUID(relationshipComponent["Prev"].as<uint64_t>());
-
-				}
+				
 			}
 		}
 

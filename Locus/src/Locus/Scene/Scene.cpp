@@ -47,10 +47,7 @@ namespace Locus
 		otherRegistry.each([&](auto entityID)
 			{
 				Entity entity = Entity(entityID, other.get());
-				UUID uuid = otherRegistry.get<IDComponent>(entity).ID;
-				const auto& tag = otherRegistry.get<TagComponent>(entity).Tag;
-
-				Entity newEntity = newScene->CreateEntityWithUUID(uuid, tag);
+				Entity newEntity = newScene->CreateEntity();
 				CopyAllComponents(entity, newEntity);
 			});
 
@@ -66,8 +63,8 @@ namespace Locus
 
 	void Scene::CopyAllComponents(Entity from, Entity to)
 	{
-		to.GetComponent<TagComponent>().Enabled = from.GetComponent<TagComponent>().Enabled;
-		CopyComponent<RelationshipComponent>(from, to);
+		CopyComponent<TagComponent>(from, to);
+		CopyComponent<ChildComponent>(from, to);
 		CopyComponent<TransformComponent>(from, to);
 		CopyComponent<SpriteRendererComponent>(from, to);
 		CopyComponent<CameraComponent>(from, to);
@@ -86,7 +83,7 @@ namespace Locus
 		Entity entity = Entity(m_Registry.create(), this);
 		entity.AddComponent<IDComponent>(uuid);
 		entity.AddComponent<TransformComponent>();
-		entity.AddComponent<RelationshipComponent>();
+		entity.GetComponent<TransformComponent>().Self = entity;
 		auto& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Entity" : name;
 		tag.Enabled = enabled;
@@ -101,7 +98,7 @@ namespace Locus
 		Entity entity = Entity(m_Registry.create(copyEntity), this);
 		entity.AddComponent<IDComponent>(uuid);
 		entity.AddComponent<TransformComponent>();
-		entity.AddComponent<RelationshipComponent>();
+		entity.GetComponent<TransformComponent>().Self = entity;
 		auto& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Entity" : name;
 		tag.Enabled = enabled;
@@ -117,7 +114,6 @@ namespace Locus
 	{
 		// --- Update Scripts -------------------------------------------------
 		{
-			// TODO: Check for enabled.
 			auto view = m_Registry.view<NativeScriptComponent, TagComponent>();
 			for (auto entity : view)
 			{
@@ -151,9 +147,8 @@ namespace Locus
 			
 				b2Body* body = (b2Body*)rb2d.RuntimeBody;
 				const b2Vec2& position = body->GetPosition();
-				transform.Position.x = position.x;
-				transform.Position.y = position.y;
-				transform.SetRotationEuler({ 0, 0, body->GetAngle()});
+				transform.SetWorldPosition({ position.x, position.y , 0.0f });
+				transform.SetLocalRotation({ 0, 0, body->GetAngle()});
 			}
 			
 		}
@@ -170,7 +165,7 @@ namespace Locus
 				if (camera.Primary)
 				{
 					mainCamera = &camera.Camera;
-					cameraTransform = transform.GetTransform();
+					cameraTransform = transform.GetWorldTransform();
 					break;
 				}
 			}
@@ -189,7 +184,7 @@ namespace Locus
 				auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
 				bool enabled = group.get<TagComponent>(entity).Enabled;
 				if (enabled)
-					Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
+					Renderer2D::DrawSprite(transform.GetWorldTransform(), sprite, (int)entity);
 			}
 			Renderer2D::EndScene();
 		}
@@ -210,7 +205,7 @@ namespace Locus
 			auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
 			bool enabled = group.get<TagComponent>(entity).Enabled;
 			if (enabled)
-				Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
+				Renderer2D::DrawSprite(transform.GetWorldTransform(), sprite, (int)entity);
 		}
 		Renderer2D::EndScene();
 	}
@@ -231,8 +226,8 @@ namespace Locus
 				// Body
 				b2BodyDef bodyDef;
 				bodyDef.type = Rigidbody2DTypeToBox2DType(rb2D.BodyType);
-				bodyDef.position.Set(transform.Position.x, transform.Position.y);
-				bodyDef.angle = transform.GetRotationEuler().z;
+				bodyDef.position.Set(transform.GetWorldPosition().x, transform.GetWorldPosition().y);
+				bodyDef.angle = transform.GetWorldRotation().z;
 				bodyDef.linearDamping = rb2D.LinearDrag;
 				bodyDef.angularDamping = rb2D.AngularDrag;
 				bodyDef.fixedRotation = rb2D.FixedRotation;
@@ -252,7 +247,7 @@ namespace Locus
 
 				// Box Collider
 				b2PolygonShape box;
-				b2Vec2 size = { transform.Scale.x, transform.Scale.y};
+				b2Vec2 size = { transform.GetWorldScale().x, transform.GetWorldScale().y};
 				b2Vec2 offset = { 0.0f, 0.0f };
 				float angle = 0.0f;
 				if (entity.HasComponent<BoxCollider2DComponent>()) // TODO: Reformat this
@@ -337,13 +332,13 @@ namespace Locus
 	}
 
 	template<>
-	void Scene::OnComponentAdded<RelationshipComponent>(Entity entity, RelationshipComponent& component)
+	void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent& component)
 	{
 
 	}
 
 	template<>
-	void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent& component)
+	void Scene::OnComponentAdded<ChildComponent>(Entity entity, ChildComponent& component)
 	{
 
 	}

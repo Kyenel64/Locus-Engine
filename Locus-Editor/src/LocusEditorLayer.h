@@ -51,6 +51,7 @@ namespace Locus
 		void DrawLayoutTable();
 		void DrawToolbar();
 		void DrawDebugPanel();
+		void OpenSavePopup();
 
 	private:
 		// Scene

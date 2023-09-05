@@ -58,11 +58,8 @@ namespace Locus
 			m_ActiveScene->m_Registry.each([&](auto entityID)
 				{
 					Entity entity = Entity(entityID, m_ActiveScene.get());
-					if (entity.HasComponent<RelationshipComponent>())
-					{
-						if (entity.GetComponent<RelationshipComponent>().Parent == Entity::Null)
-							DrawEntityNode(entity);
-					}
+					if (entity.GetComponent<TransformComponent>().Parent == Entity::Null)
+						DrawEntityNode(entity);
 				});
 
 			// Select nothing if clicking in blank space
@@ -102,7 +99,7 @@ namespace Locus
 
 		bool entityDeleted = false;
 		bool openOnCreate = false;
-		if (ImGui::BeginPopupContextItem()) // TODO: Create child when hovering too
+		if (m_SelectedEntity && ImGui::BeginPopupContextItem()) // TODO: Create child when hovering too
 		{
 			if (ImGui::MenuItem("Create Empty Entity"))
 			{
@@ -121,18 +118,12 @@ namespace Locus
 		if (opened)
 		{
 			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
-			uint32_t childCount = entity.GetComponent<RelationshipComponent>().ChildCount;
-			if (childCount)
+			if (entity.HasComponent<ChildComponent>())
 			{
-				auto& rc = entity.GetComponent<RelationshipComponent>();
-				Entity curEntity = rc.FirstChild;
-				while (curEntity != Entity::Null)
+				auto& cc = entity.GetComponent<ChildComponent>();
+				for (auto childEntity : cc.ChildEntities)
 				{
-					DrawEntityNode(curEntity);
-					if (curEntity.HasComponent<RelationshipComponent>())
-						curEntity = curEntity.GetComponent<RelationshipComponent>().Next;
-					else
-						break;
+					DrawEntityNode(childEntity);
 				}
 			}
 			ImGui::TreePop();

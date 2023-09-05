@@ -198,15 +198,14 @@ namespace Locus
 		DrawComponentUI<TransformComponent>("Transform", entity, [this](auto& component)
 			{
 				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 5.0f, 0.0f });
-				DrawVec3Control("Position", component.Position);
+				DrawVec3Control("Position", component.GetLocalPosition());
 
-				DrawVec3Control("Rotation", component.GetRotationEuler());
-				component.SetRotationEuler(component.GetRotationEuler());
+				DrawVec3Control("Rotation", component.GetLocalRotation());
 				ImGui::PopStyleVar();
 
 				// Bottom spacing is removed if pushing item spacing to all three controls. 
 				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 5.0f, 5.0f });
-				DrawVec3Control("Scale", component.Scale, 1.0f);
+				DrawVec3Control("Scale", component.GetLocalScale(), 1.0f);
 				ImGui::PopStyleVar();
 
 			});

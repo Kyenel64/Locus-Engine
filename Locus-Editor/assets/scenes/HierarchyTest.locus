@@ -1,70 +1,79 @@
 Scene: Untitled
 Entities:
-  - Entity: 16906765738218555656
+  - Entity: 9952625982851901988
+    TagComponent:
+      Tag: Child2
+      Enabled: true
+    TransformComponent:
+      Self: 9952625982851901988
+      Parent: 2090525039407005965
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalScale: [1, 1, 1]
+      WorldPosition: [0, 0, 0]
+      WorldRotation: [0, 0, 0]
+      WorldScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [0.588744581, 0.191150829, 0.191150829, 1]
+      TexturePath: ""
+      TilingFactor: 1
+  - Entity: 3817402640139202223
+    TagComponent:
+      Tag: Child1
+      Enabled: true
+    TransformComponent:
+      Self: 3817402640139202223
+      Parent: 2090525039407005965
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalScale: [1, 1, 1]
+      WorldPosition: [0, 0, 0]
+      WorldRotation: [0, 0, 0]
+      WorldScale: [1, 1, 1]
+    ChildComponent:
+      ChildCount: 1
+      ChildEntities:
+        Child0: 2534315909601149933
+    SpriteRendererComponent:
+      Color: [0.909090877, 0.636930883, 0.0708382726, 1]
+      TexturePath: ""
+      TilingFactor: 1
+  - Entity: 2090525039407005965
     TagComponent:
       Tag: Parent1
       Enabled: true
     TransformComponent:
-      Translation: [-0.100000001, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      ChildCount: 2
+      Self: 2090525039407005965
       Parent: 0
-      FirstChild: 3435677538079956630
-      Next: 0
-      Prev: 0
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalScale: [1, 1, 1]
+      WorldPosition: [0, 0, 0]
+      WorldRotation: [0, 0, 0]
+      WorldScale: [1, 1, 1]
+    ChildComponent:
+      ChildCount: 2
+      ChildEntities:
+        Child0: 3817402640139202223
+        Child1: 9952625982851901988
     SpriteRendererComponent:
-      Color: [1, 1, 1, 1]
+      Color: [0.0794392824, 0.588744581, 0.0203894526, 1]
       TexturePath: ""
       TilingFactor: 1
-  - Entity: 3435677538079956630
+  - Entity: 2534315909601149933
     TagComponent:
-      Tag: Parent1Child1
+      Tag: Child1Child1
       Enabled: true
     TransformComponent:
-      Translation: [1.79999995, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      ChildCount: 1
-      Parent: 16906765738218555656
-      FirstChild: 6566443517638761618
-      Next: 9162182958059964504
-      Prev: 0
+      Self: 2534315909601149933
+      Parent: 3817402640139202223
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalScale: [1, 1, 1]
+      WorldPosition: [0, 0, 0]
+      WorldRotation: [0, 0, 0]
+      WorldScale: [1, 1, 1]
     SpriteRendererComponent:
-      Color: [1, 1, 1, 1]
-      TexturePath: ""
-      TilingFactor: 1
-  - Entity: 6566443517638761618
-    TagComponent:
-      Tag: Parent1Child1Child1
-      Enabled: true
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      ChildCount: 0
-      Parent: 3435677538079956630
-      FirstChild: 0
-      Next: 0
-      Prev: 0
-  - Entity: 9162182958059964504
-    TagComponent:
-      Tag: Parent1Child2
-      Enabled: true
-    TransformComponent:
-      Translation: [3.70000005, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      ChildCount: 0
-      Parent: 16906765738218555656
-      FirstChild: 0
-      Next: 0
-      Prev: 3435677538079956630
-    SpriteRendererComponent:
-      Color: [1, 1, 1, 1]
+      Color: [0.0722705647, 0.0219261143, 0.506493509, 1]
       TexturePath: ""
       TilingFactor: 1

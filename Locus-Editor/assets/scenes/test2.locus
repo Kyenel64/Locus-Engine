@@ -1,0 +1,53 @@
+Scene: Untitled
+Entities:
+  - Entity: 8351879976255249897
+    TagComponent:
+      Tag: Empty Entity
+      Enabled: true
+    TransformComponent:
+      Self: 8351879976255249897
+      Parent: 4677834353435049716
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalScale: [1, 1, 1]
+      WorldPosition: [0, 0, 0]
+      WorldRotation: [0, 0, 0]
+      WorldScale: [1, 1, 1]
+  - Entity: 3755353442951566096
+    TagComponent:
+      Tag: Parent
+      Enabled: true
+    TransformComponent:
+      Self: 3755353442951566096
+      Parent: 0
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalScale: [1, 1, 1]
+      WorldPosition: [0, 0, 0]
+      WorldRotation: [0, 0, 0]
+      WorldScale: [1, 1, 1]
+    ChildComponent:
+      ChildCount: 1
+      ChildEntities:
+        Child0: 4677834353435049716
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: ""
+      TilingFactor: 1
+  - Entity: 4677834353435049716
+    TagComponent:
+      Tag: Child1
+      Enabled: true
+    TransformComponent:
+      Self: 4677834353435049716
+      Parent: 3755353442951566096
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalScale: [1, 1, 1]
+      WorldPosition: [0, 0, 0]
+      WorldRotation: [0, 0, 0]
+      WorldScale: [1, 1, 1]
+    ChildComponent:
+      ChildCount: 1
+      ChildEntities:
+        Child0: 8351879976255249897

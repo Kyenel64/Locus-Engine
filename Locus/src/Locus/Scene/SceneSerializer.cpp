@@ -395,12 +395,9 @@ namespace Locus
 						Entity parent = m_Scene->GetEntityByUUID(transformComponent["Parent"].as<uint64_t>());
 						tc.Parent = parent;
 					}
-					tc.LocalPosition = transformComponent["LocalPosition"].as<glm::vec3>();
-					tc.LocalRotation = transformComponent["LocalRotation"].as<glm::vec3>();
-					tc.LocalScale = transformComponent["LocalScale"].as<glm::vec3>();
-					tc.WorldPosition = transformComponent["WorldPosition"].as<glm::vec3>();
-					tc.WorldRotation = transformComponent["WorldRotation"].as<glm::vec3>();
-					tc.WorldScale = transformComponent["WorldScale"].as<glm::vec3>();
+					tc.SetWorldPosition(transformComponent["WorldPosition"].as<glm::vec3>());
+					tc.SetWorldRotation(transformComponent["WorldRotation"].as<glm::vec3>());
+					tc.SetWorldScale(transformComponent["WorldScale"].as<glm::vec3>());
 				}
 
 				// --- Child Component ----------------------------------------

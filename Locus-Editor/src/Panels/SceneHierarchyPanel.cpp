@@ -58,11 +58,8 @@ namespace Locus
 			m_ActiveScene->m_Registry.each([&](auto entityID)
 				{
 					Entity entity = Entity(entityID, m_ActiveScene.get());
-					if (entity.HasComponent<TransformComponent>())
-					{
-						if (entity.GetComponent<TransformComponent>().Parent == Entity::Null)
-							DrawEntityNode(entity);
-					}
+					if (entity.GetComponent<TransformComponent>().Parent == Entity::Null)
+						DrawEntityNode(entity);
 				});
 
 			// Select nothing if clicking in blank space

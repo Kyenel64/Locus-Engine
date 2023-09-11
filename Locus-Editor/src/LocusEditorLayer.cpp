@@ -798,9 +798,21 @@ namespace Locus
 				collisionLayer = std::to_string(m_HoveredEntity.GetComponent<BoxCollider2DComponent>().CollisionLayer);
 		ImGui::Text("Hovered Collision Layer: %s", collisionLayer.c_str());
 
-		// Relationships debug
+		// Child debug
 		if (m_SelectedEntity.IsValid())
 		{
+			if (m_SelectedEntity.HasComponent<ChildComponent>())
+			{
+				auto& cc = m_SelectedEntity.GetComponent<ChildComponent>();
+				ImGui::Separator();
+				ImGui::Text("Children:");
+				ImGui::Indent();
+				for (auto entity : cc.ChildEntities)
+				{
+					auto tag = entity.GetComponent<TagComponent>().Tag;
+					ImGui::Text(tag.c_str());
+				}
+			}
 		}
 
 		// Transforms

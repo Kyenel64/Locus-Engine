@@ -197,6 +197,9 @@ namespace Locus
 			Dirty = true;
 		}
 
+
+		friend class PropertiesPanel;
+		friend class SceneSerializer;
 	};
 
 	struct SpriteRendererComponent

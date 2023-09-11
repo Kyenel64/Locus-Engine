@@ -197,15 +197,21 @@ namespace Locus
 		// --- Transform Component --------------------------------------------
 		DrawComponentUI<TransformComponent>("Transform", entity, [this](auto& component)
 			{
+				// Position
 				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 5.0f, 0.0f });
-				DrawVec3Control("Position", component.GetLocalPosition());
-
-				DrawVec3Control("Rotation", component.GetLocalRotation());
+				if (DrawVec3Control("Position", component.LocalPosition))
+					component.SetLocalPosition(component.LocalPosition); // sync world data
+				
+				// Rotation
+				if (DrawVec3Control("Rotation", component.LocalRotation))
+					component.SetLocalRotation(component.LocalRotation);
 				ImGui::PopStyleVar();
 
+				// Scale
 				// Bottom spacing is removed if pushing item spacing to all three controls. 
 				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 5.0f, 5.0f });
-				DrawVec3Control("Scale", component.GetLocalScale(), 1.0f);
+				if (DrawVec3Control("Scale", component.LocalScale, 1.0f))
+					component.SetLocalScale(component.LocalScale);
 				ImGui::PopStyleVar();
 
 			});
@@ -561,8 +567,9 @@ namespace Locus
 		ImGui::PopStyleVar();
 	}
 
-	void PropertiesPanel::DrawVec3Control(const std::string& name, glm::vec3& values, float resetValue)
+	bool PropertiesPanel::DrawVec3Control(const std::string& name, glm::vec3& values, float resetValue)
 	{
+		bool isChanged = false;
 		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
 		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0.0f, 1.0f });
 
@@ -584,16 +591,25 @@ namespace Locus
 		{
 			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 			if (ImGui::IsMouseDoubleClicked(0))
+			{
 				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.x));
+				isChanged = true;
+			}
 		}
 		ImGui::SameLine();
 		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
 		if(ImGui::DragFloat("##X", &dragValues.x, 0.1f, 0.0f, 0.0f, "%.2f"))
 		{
 			if (name == "Rotation")
+			{
 				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.x), values.x));
+				isChanged = true;
+			}
 			else
+			{
 				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.x, values.x));
+				isChanged = true;
+			}
 		}
 		if (ImGui::IsItemHovered())
 			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
@@ -606,16 +622,25 @@ namespace Locus
 		{
 			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 			if (ImGui::IsMouseDoubleClicked(0))
+			{
 				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.y));
+				isChanged = true;
+			}
 		}
 		ImGui::SameLine();
 		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
 		if (ImGui::DragFloat("##Y", &dragValues.y, 0.1f, 0.0f, 0.0f, "%.2f"))
 		{
 			if (name == "Rotation")
+			{
 				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.y), values.y));
+				isChanged = true;
+			}
 			else
+			{
 				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.y, values.y));
+				isChanged = true;
+			}
 		}
 		if (ImGui::IsItemHovered())
 			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
@@ -628,16 +653,25 @@ namespace Locus
 		{
 			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 			if (ImGui::IsMouseDoubleClicked(0))
+			{
 				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.z));
+				isChanged = true;
+			}
 		}
 		ImGui::SameLine();
 		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
 		if (ImGui::DragFloat("##Z", &dragValues.z, 0.1f, 0.0f, 0.0f, "%.2f"))
 		{
 			if (name == "Rotation")
+			{
 				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.z), values.z));
+				isChanged = true;
+			}
 			else
+			{
 				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.z, values.z));
+				isChanged = true;
+			}
 		}
 		if (ImGui::IsItemHovered())
 			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
@@ -648,6 +682,10 @@ namespace Locus
 		ImGui::EndTable();
 		ImGui::PopStyleColor();
 		ImGui::PopStyleVar();
+
+		if (Input::IsKeyPressed(Key::Z) && Input::IsKeyPressed(Key::LeftControl))
+			isChanged = true;
+		return isChanged;
 	}
 
 	template<typename T>

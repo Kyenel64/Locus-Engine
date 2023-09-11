@@ -26,16 +26,20 @@ Entities:
     TransformComponent:
       Self: 15052415675499779649
       Parent: 17251395628889316976
-      LocalPosition: [0, 0, 0]
+      LocalPosition: [3.29999995, 0, 0]
       LocalRotation: [0, 0, 0]
       LocalScale: [1, 1, 1]
-      WorldPosition: [0, 0, 0]
+      WorldPosition: [3.29999995, 0, 0]
       WorldRotation: [0, 0, 0]
       WorldScale: [1, 1, 1]
     ChildComponent:
       ChildCount: 1
       ChildEntities:
         Child0: 18079244633763447185
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: ""
+      TilingFactor: 1
   - Entity: 18079244633763447185
     TagComponent:
       Tag: Child1Child1
@@ -43,12 +47,16 @@ Entities:
     TransformComponent:
       Self: 18079244633763447185
       Parent: 15052415675499779649
-      LocalPosition: [0, 0, 0]
+      LocalPosition: [-4.9000001, 0, 0]
       LocalRotation: [0, 0, 0]
       LocalScale: [1, 1, 1]
-      WorldPosition: [0, 0, 0]
+      WorldPosition: [-1.60000014, 0, 0]
       WorldRotation: [0, 0, 0]
       WorldScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: ""
+      TilingFactor: 1
   - Entity: 18431765712538825203
     TagComponent:
       Tag: Child2

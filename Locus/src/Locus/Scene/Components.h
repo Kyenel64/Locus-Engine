@@ -200,6 +200,7 @@ namespace Locus
 
 		friend class PropertiesPanel;
 		friend class SceneSerializer;
+		friend class LocusEditorLayer;
 	};
 
 	struct SpriteRendererComponent

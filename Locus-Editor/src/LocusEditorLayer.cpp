@@ -466,7 +466,8 @@ namespace Locus
 			{
 				case ImGuizmo::TRANSLATE:
 				{
-					CommandHistory::AddCommand(new ChangeValueCommand(translation, tc.GetLocalPosition()));
+					CommandHistory::AddCommand(new ChangeValueCommand(translation, tc.WorldPosition));
+					tc.SetWorldPosition(tc.WorldPosition);
 					break;
 				}
 				case ImGuizmo::ROTATE:
@@ -487,12 +488,14 @@ namespace Locus
 					if (fabs(deltaRotationEuler.z) < 0.001) deltaRotationEuler.z = 0.0f;
 
 					glm::vec3 rotationEuler = tc.GetLocalRotation();
-					CommandHistory::AddCommand(new ChangeValueCommand(rotationEuler + deltaRotationEuler, tc.GetLocalRotation()));
+					CommandHistory::AddCommand(new ChangeValueCommand(rotationEuler + deltaRotationEuler, tc.WorldRotation));
+					tc.SetWorldRotation(tc.WorldRotation);
 					break;
 				}
 				case ImGuizmo::SCALE:
 				{
-					CommandHistory::AddCommand(new ChangeValueCommand(scale, tc.GetLocalScale()));
+					CommandHistory::AddCommand(new ChangeValueCommand(scale, tc.WorldScale));
+					tc.SetWorldScale(tc.WorldScale);
 					break;
 				}
 			}

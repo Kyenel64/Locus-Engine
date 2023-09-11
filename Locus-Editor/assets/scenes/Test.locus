@@ -7,12 +7,12 @@ Entities:
     TransformComponent:
       Self: 5524332787037955851
       Parent: 1312083380621814390
-      LocalPosition: [3.4000001, 0, 0]
-      LocalRotation: [0, 0, 0]
-      LocalScale: [0, 0, 0]
-      WorldPosition: [0.200000048, 0, 0]
-      WorldRotation: [0, 0, 0]
-      WorldScale: [1, 1, 1]
+      LocalPosition: [6.81729841, -2.01518154, 0.680926502]
+      LocalRotation: [0.207841665, 0.519388676, -0.203671813]
+      LocalScale: [4.61548281, 5.27680683, 1.9957478]
+      WorldPosition: [2.1172986, 3.48481846, 0.680926502]
+      WorldRotation: [0.207841665, 0.519388676, -0.907023609]
+      WorldScale: [5.61548281, 6.27680683, 2.9957478]
     SpriteRendererComponent:
       Color: [0.00832066778, 0.330017865, 0.961038947, 1]
       TexturePath: ""
@@ -24,11 +24,11 @@ Entities:
     TransformComponent:
       Self: 1312083380621814390
       Parent: 0
-      LocalPosition: [-4.0999999, 3.70000005, 0]
-      LocalRotation: [0, 0, 0]
+      LocalPosition: [-4.69999981, 5.5, 0]
+      LocalRotation: [0, 0, -0.703351796]
       LocalScale: [1, 1, 1]
-      WorldPosition: [-4.0999999, 3.70000005, 0]
-      WorldRotation: [0, 0, 0]
+      WorldPosition: [-4.69999981, 5.5, 0]
+      WorldRotation: [0, 0, -0.703351796]
       WorldScale: [1, 1, 1]
     ChildComponent:
       ChildCount: 1

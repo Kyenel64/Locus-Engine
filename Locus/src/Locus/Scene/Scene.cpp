@@ -203,9 +203,17 @@ namespace Locus
 		for (auto entity : group)
 		{
 			auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+
 			bool enabled = group.get<TagComponent>(entity).Enabled;
 			if (enabled)
 				Renderer2D::DrawSprite(transform.GetWorldTransform(), sprite, (int)entity);
+
+			if (transform.Parent != Entity::Null)
+			{
+				auto& parentTC = transform.Parent.GetComponent<TransformComponent>();
+				if (parentTC.Dirty)
+					transform.Sync();
+			}
 		}
 		Renderer2D::EndScene();
 	}

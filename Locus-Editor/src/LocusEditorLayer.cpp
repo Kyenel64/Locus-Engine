@@ -830,6 +830,10 @@ namespace Locus
 			else
 				ImGui::Text("Parent: Entity::Null");
 
+			ImGui::Text("Self: %s", tc.Self.GetComponent<TagComponent>().Tag.c_str());
+			std::string dirty = tc.Dirty ? "True" : "False";
+			ImGui::Text("Dirty: %s", dirty.c_str());
+
 			ImGui::Text("LocalPosition: %f, %f, %f", tc.GetLocalPosition().x, tc.GetLocalPosition().y, tc.GetLocalPosition().z);
 			ImGui::Text("WorldPosition: %f, %f, %f", tc.GetWorldPosition().x, tc.GetWorldPosition().y, tc.GetWorldPosition().z);
 

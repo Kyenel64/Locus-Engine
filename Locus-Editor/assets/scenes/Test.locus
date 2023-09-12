@@ -1,40 +1,40 @@
 Scene: Untitled
 Entities:
-  - Entity: 5524332787037955851
+  - Entity: 16065333074664969647
     TagComponent:
-      Tag: Blue
+      Tag: Parent
       Enabled: true
     TransformComponent:
-      Self: 5524332787037955851
-      Parent: 1312083380621814390
-      LocalPosition: [7.57314014, -3.16447163, 2.12653828]
-      LocalRotation: [-0.11047934, 0.199594736, -1.33692217]
-      LocalScale: [4.61548281, 5.27680683, 1.9957478]
-      WorldPosition: [2.87314034, 2.33552837, 2.12653828]
-      WorldRotation: [-0.11047934, 0.199594736, -2.0402739]
-      WorldScale: [5.61548281, 6.27680683, 2.9957478]
-    SpriteRendererComponent:
-      Color: [0.00832066778, 0.330017865, 0.961038947, 1]
-      TexturePath: ""
-      TilingFactor: 1
-  - Entity: 1312083380621814390
-    TagComponent:
-      Tag: Red
-      Enabled: true
-    TransformComponent:
-      Self: 1312083380621814390
+      Self: 16065333074664969647
       Parent: 0
-      LocalPosition: [-4.69999981, 5.5, 0]
-      LocalRotation: [0, 0, -0.703351796]
+      LocalPosition: [0.588226914, -0.789176583, 3.9000001]
+      LocalRotation: [0, 0, 0]
       LocalScale: [1, 1, 1]
-      WorldPosition: [-4.69999981, 5.5, 0]
-      WorldRotation: [0, 0, -0.703351796]
+      WorldPosition: [0.588226914, -0.789176583, 3.9000001]
+      WorldRotation: [0, 0, 0]
       WorldScale: [1, 1, 1]
     ChildComponent:
       ChildCount: 1
       ChildEntities:
-        Child0: 5524332787037955851
+        Child0: 4258136647365585415
     SpriteRendererComponent:
-      Color: [0.887445867, 0, 0, 1]
+      Color: [0.338336974, 0.766233802, 0.505050004, 1]
+      TexturePath: ""
+      TilingFactor: 1
+  - Entity: 4258136647365585415
+    TagComponent:
+      Tag: Child
+      Enabled: true
+    TransformComponent:
+      Self: 4258136647365585415
+      Parent: 16065333074664969647
+      LocalPosition: [7.05917645, 3.04834747, 0]
+      LocalRotation: [0, 0, 0]
+      LocalScale: [1, 1, 1]
+      WorldPosition: [7.64740324, 2.25917101, 3.9000001]
+      WorldRotation: [0, 0, 0]
+      WorldScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [0.679653645, 0.223609, 0.223609, 1]
       TexturePath: ""
       TilingFactor: 1

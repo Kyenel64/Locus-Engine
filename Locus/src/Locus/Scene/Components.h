@@ -179,7 +179,7 @@ namespace Locus
 		{
 			LocalScale = scale;
 			if (Parent != Entity::Null)
-				WorldScale = Parent.GetComponent<TransformComponent>().GetWorldScale() + scale;
+				WorldScale = glm::vec3(1.0f) - Parent.GetComponent<TransformComponent>().GetWorldScale() + scale;
 			else
 				WorldScale = LocalScale;
 
@@ -197,10 +197,28 @@ namespace Locus
 			Dirty = true;
 		}
 
+	private:
+		void Sync()
+		{
+			if (Parent != Entity::Null)
+			{
+				auto& parentTC = Parent.GetComponent<TransformComponent>();
+				WorldScale = glm::vec3(1.0f) - parentTC.WorldScale + LocalScale;
 
-		friend class PropertiesPanel;
+				glm::vec3 diff = parentTC.WorldRotation + LocalRotation;
+				glm::mat4 transform = glm::translate(glm::mat4(1.0f), parentTC.WorldPosition + LocalPosition)
+					* glm::rotate(glm::mat4(1.0f), parentTC.WorldRotation.z + LocalRotation.z, glm::vec3(0, 0, 1));
+				WorldPosition = transform[3];
+				Dirty = true;
+				parentTC.Dirty = false;
+			}
+		}
+
+
+		friend class Scene;
 		friend class SceneSerializer;
 		friend class LocusEditorLayer;
+		friend class PropertiesPanel;
 	};
 
 	struct SpriteRendererComponent

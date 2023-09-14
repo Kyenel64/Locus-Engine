@@ -199,6 +199,7 @@ namespace Locus
 	{
 		// Main rendering
 		Renderer2D::BeginScene(camera);
+
 		auto group = m_Registry.group<TransformComponent, SpriteRendererComponent, TagComponent>();
 		for (auto entity : group)
 		{
@@ -207,7 +208,12 @@ namespace Locus
 			bool enabled = group.get<TagComponent>(entity).Enabled;
 			if (enabled)
 				Renderer2D::DrawSprite(transform.GetWorldTransform(), sprite, (int)entity);
+		}
 
+		auto view = m_Registry.view<TransformComponent>();
+		for (auto entity : view)
+		{
+			auto& transform = view.get<TransformComponent>(entity);
 			if (transform.Parent != Entity::Null)
 			{
 				auto& parentTC = transform.Parent.GetComponent<TransformComponent>();
@@ -215,6 +221,7 @@ namespace Locus
 					transform.Sync();
 			}
 		}
+
 		Renderer2D::EndScene();
 	}
 

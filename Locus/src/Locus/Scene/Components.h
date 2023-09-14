@@ -6,6 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 #include <entt.hpp>
 
 #include "Locus/Core/UUID.h"
@@ -54,18 +55,19 @@ namespace Locus
 		glm::quat LocalRotationQuat = { 0.0f, 0.0f, 0.0f, 0.0f };
 		glm::vec3 LocalScale = { 1.0f, 1.0f, 1.0f };
 
-		// TODO: Combine into matrix?
 		glm::vec3 WorldPosition = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 WorldRotation = { 0.0f, 0.0f, 0.0f };
 		glm::quat WorldRotationQuat = { 0.0f, 0.0f, 0.0f, 0.0f };
 		glm::vec3 WorldScale = { 1.0f, 1.0f, 1.0f };
+
+		glm::mat4 LocalToWorld = glm::mat4(1.0f);
+		glm::mat4 WorldTransform = glm::mat4(1.0f);
 
 		bool Dirty = false;
 
 	public:
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent&) = default;
-		TransformComponent(const glm::vec3& position) : WorldPosition(position) {}
 
 		// Transform
 		glm::mat4 GetLocalTransform() const
@@ -78,10 +80,7 @@ namespace Locus
 
 		glm::mat4 GetWorldTransform() const
 		{
-			glm::mat4 rotation = glm::toMat4(WorldRotationQuat);
-			return glm::translate(glm::mat4(1.0f), WorldPosition)
-				 * rotation
-				 * glm::scale(glm::mat4(1.0f), WorldScale);
+			return WorldTransform;
 		}
 
 		// Position
@@ -91,22 +90,14 @@ namespace Locus
 		void SetLocalPosition(const glm::vec3& position) 
 		{
 			LocalPosition = position;
-			if (Parent != Entity::Null)
-				WorldPosition = Parent.GetComponent<TransformComponent>().GetWorldPosition() + position;
-			else
-				WorldPosition = LocalPosition;
-
-			Dirty = true;
+			SetWorldFromLocalChange();
 		}
 
 		void SetWorldPosition(const glm::vec3& position)
 		{
 			WorldPosition = position;
-			if (Parent != Entity::Null)
-				LocalPosition = position - Parent.GetComponent<TransformComponent>().GetWorldPosition();
-			else
-				LocalPosition = WorldPosition;
-			Dirty = true;
+			UpdateWorldTransform();
+			SetLocalFromWorldChange();
 		}
 
 		// Rotation
@@ -119,99 +110,85 @@ namespace Locus
 		{
 			LocalRotation = rotation;
 			LocalRotationQuat = glm::quat(LocalRotation);
-			
-			if (Parent != Entity::Null)
-				WorldRotation = Parent.GetComponent<TransformComponent>().GetWorldRotation() + rotation;
-			else
-				WorldRotation = LocalRotation;
-			WorldRotationQuat = glm::quat(WorldRotation);
-
-			Dirty = true;
+			SetWorldFromLocalChange();
 		}
 
 		void SetLocalRotationQuat(const glm::quat& quat)
 		{
 			LocalRotationQuat = quat;
 			LocalRotation = glm::eulerAngles(LocalRotationQuat);
-			
-			if (Parent != Entity::Null)
-				WorldRotationQuat = Parent.GetComponent<TransformComponent>().GetWorldRotationQuat() + quat;
-			else
-				WorldRotationQuat = LocalRotationQuat;
-			WorldRotation = glm::eulerAngles(WorldRotationQuat);
-
-			Dirty = true;
+			SetWorldFromLocalChange();
 		}
 
 		void SetWorldRotation(const glm::vec3& rotation)
 		{
 			WorldRotation = rotation;
 			WorldRotationQuat = glm::quat(WorldRotation);
-
-			if (Parent != Entity::Null)
-				LocalRotation = rotation - Parent.GetComponent<TransformComponent>().GetWorldRotation();
-			else
-				LocalRotation = WorldRotation;
-			LocalRotationQuat = glm::quat(LocalRotation);
-
-			Dirty = true;
+			UpdateWorldTransform();
+			SetLocalFromWorldChange();
 		}
 
 		void SetWorldRotationQuat(const glm::quat& quat)
 		{
 			WorldRotationQuat = quat;
 			WorldRotation = glm::eulerAngles(WorldRotationQuat);
-
-			if (Parent != Entity::Null)
-				LocalRotationQuat = quat - Parent.GetComponent<TransformComponent>().GetWorldRotationQuat();
-			else
-				LocalRotationQuat = WorldRotationQuat;
-			LocalRotation = glm::eulerAngles(LocalRotationQuat);
-
-			Dirty = true;
+			UpdateWorldTransform();
+			SetLocalFromWorldChange();
 		}
 
-		// Scale
 		glm::vec3 GetLocalScale() const { return LocalScale; }
 		glm::vec3 GetWorldScale() const { return WorldScale; }
 
 		void SetLocalScale(const glm::vec3& scale)
 		{
 			LocalScale = scale;
-			if (Parent != Entity::Null)
-				WorldScale = glm::vec3(1.0f) - Parent.GetComponent<TransformComponent>().GetWorldScale() + scale;
-			else
-				WorldScale = LocalScale;
-
-			Dirty = true;
+			SetWorldFromLocalChange();
 		}
 
 		void SetWorldScale(const glm::vec3& scale)
 		{
 			WorldScale = scale;
-			if (Parent != Entity::Null)
-				LocalScale = scale - Parent.GetComponent<TransformComponent>().GetWorldScale();
-			else
-				LocalScale = WorldScale;
-
-			Dirty = true;
+			UpdateWorldTransform();
+			SetLocalFromWorldChange();
 		}
 
 	private:
+		void SetWorldFromLocalChange()
+		{
+			WorldTransform = LocalToWorld * GetLocalTransform();
+			glm::decompose(WorldTransform, WorldScale, WorldRotationQuat, WorldPosition, glm::vec3(), glm::vec4());
+			WorldRotation = glm::eulerAngles(WorldRotationQuat);
+
+			if (Self.HasComponent<ChildComponent>())
+				Dirty = true;
+		}
+
+		void UpdateWorldTransform()
+		{
+			WorldTransform = glm::translate(glm::mat4(1.0f), WorldPosition)
+				* glm::toMat4(WorldRotationQuat)
+				* glm::scale(glm::mat4(1.0f), WorldScale);
+		}
+
+		void SetLocalFromWorldChange()
+		{
+			glm::mat4 localMatrix = glm::inverse(LocalToWorld) * WorldTransform;
+			glm::decompose(localMatrix, LocalScale, LocalRotationQuat, LocalPosition, glm::vec3(), glm::vec4());
+			LocalRotation = glm::eulerAngles(LocalRotationQuat);
+
+			if (Self.HasComponent<ChildComponent>())
+				Dirty = true;
+		}
+
 		void Sync()
 		{
-			if (Parent != Entity::Null)
-			{
-				auto& parentTC = Parent.GetComponent<TransformComponent>();
-				WorldScale = glm::vec3(1.0f) - parentTC.WorldScale + LocalScale;
+			auto& parentTC = Parent.GetComponent<TransformComponent>();
+			LocalToWorld = parentTC.WorldTransform;
+			SetWorldFromLocalChange();
 
-				glm::vec3 diff = parentTC.WorldRotation + LocalRotation;
-				glm::mat4 transform = glm::translate(glm::mat4(1.0f), parentTC.WorldPosition + LocalPosition)
-					* glm::rotate(glm::mat4(1.0f), parentTC.WorldRotation.z + LocalRotation.z, glm::vec3(0, 0, 1));
-				WorldPosition = transform[3];
+			parentTC.Dirty = false;
+			if (Self.HasComponent<ChildComponent>())
 				Dirty = true;
-				parentTC.Dirty = false;
-			}
 		}
 
 

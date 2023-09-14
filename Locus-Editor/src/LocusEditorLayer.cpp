@@ -440,8 +440,8 @@ namespace Locus
 		glm::mat4 cameraView = m_EditorCamera.GetViewMatrix();
 
 		// Entity transform
-		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
-		auto& tc = selectedEntity.GetComponent<TransformComponent>();
+		//Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+		auto& tc = m_SelectedEntity.GetComponent<TransformComponent>();
 		glm::mat4& transform = tc.GetWorldTransform();
 
 		// Snapping

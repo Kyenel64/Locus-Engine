@@ -117,7 +117,7 @@ namespace Locus
 	{
 	}
 
-	static void SerializeEntity(YAML::Emitter& out, Entity entity)
+	void SceneSerializer::SerializeEntity(YAML::Emitter& out, Entity entity)
 	{
 		LOCUS_CORE_ASSERT(entity.HasComponent<IDComponent>(), "Entity does not have ID!");
 		out << YAML::BeginMap; // Begin Entity
@@ -147,12 +147,9 @@ namespace Locus
 				out << YAML::Key << "Parent" << YAML::Value << tc.Parent.GetComponent<IDComponent>().ID;
 			else
 				out << YAML::Key << "Parent" << YAML::Value << 0;
-			out << YAML::Key << "LocalPosition" << YAML::Value << tc.GetLocalPosition();
-			out << YAML::Key << "LocalRotation" << YAML::Value << tc.GetLocalRotation();
-			out << YAML::Key << "LocalScale" << YAML::Value << tc.GetLocalScale();
-			out << YAML::Key << "WorldPosition" << YAML::Value << tc.GetWorldPosition();
-			out << YAML::Key << "WorldRotation" << YAML::Value << tc.GetWorldRotation();
-			out << YAML::Key << "WorldScale" << YAML::Value << tc.GetWorldScale();
+			out << YAML::Key << "LocalPosition" << YAML::Value << tc.LocalPosition;
+			out << YAML::Key << "LocalRotation" << YAML::Value << tc.LocalRotation;
+			out << YAML::Key << "LocalScale" << YAML::Value << tc.LocalScale;
 			out << YAML::EndMap; // End Transform Component
 		}
 
@@ -399,10 +396,6 @@ namespace Locus
 					tc.LocalRotation = transformComponent["LocalRotation"].as<glm::vec3>();
 					tc.LocalRotationQuat = glm::quat(tc.LocalRotation);
 					tc.LocalScale = transformComponent["LocalScale"].as<glm::vec3>();
-					tc.WorldPosition = transformComponent["WorldPosition"].as<glm::vec3>();
-					tc.WorldRotation = transformComponent["WorldRotation"].as<glm::vec3>();
-					tc.WorldRotationQuat = glm::quat(tc.WorldRotation);
-					tc.WorldScale = transformComponent["WorldScale"].as<glm::vec3>();
 				}
 
 				// --- Child Component ----------------------------------------

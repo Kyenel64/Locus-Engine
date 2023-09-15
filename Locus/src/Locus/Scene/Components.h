@@ -13,6 +13,7 @@
 #include "Locus/Renderer/Texture.h"
 #include "Locus/Scene/SceneCamera.h"
 #include "Locus/Scene/Entity.h"
+#include "Locus/Math/Math.h"
 
 namespace Locus
 {
@@ -60,8 +61,10 @@ namespace Locus
 		glm::quat WorldRotationQuat = { 0.0f, 0.0f, 0.0f, 0.0f };
 		glm::vec3 WorldScale = { 1.0f, 1.0f, 1.0f };
 
-		glm::mat4 LocalToWorld = glm::mat4(1.0f);
 		glm::mat4 WorldTransform = glm::mat4(1.0f);
+		glm::mat4 LocalToWorld = glm::mat4(1.0f);
+		glm::mat4 WorldToLocal = glm::inverse(LocalToWorld);
+		
 
 		bool Dirty = false;
 
@@ -156,7 +159,7 @@ namespace Locus
 		void SetWorldFromLocalChange()
 		{
 			WorldTransform = LocalToWorld * GetLocalTransform();
-			glm::decompose(WorldTransform, WorldScale, WorldRotationQuat, WorldPosition, glm::vec3(), glm::vec4());
+			Math::Decompose(WorldTransform, WorldScale, WorldRotationQuat, WorldPosition);
 			WorldRotation = glm::eulerAngles(WorldRotationQuat);
 
 			if (Self.HasComponent<ChildComponent>())
@@ -172,8 +175,8 @@ namespace Locus
 
 		void SetLocalFromWorldChange()
 		{
-			glm::mat4 localMatrix = glm::inverse(LocalToWorld) * WorldTransform;
-			glm::decompose(localMatrix, LocalScale, LocalRotationQuat, LocalPosition, glm::vec3(), glm::vec4());
+			glm::mat4 localMatrix = WorldToLocal * WorldTransform;
+			Math::Decompose(localMatrix, LocalScale, LocalRotationQuat, LocalPosition);
 			LocalRotation = glm::eulerAngles(LocalRotationQuat);
 
 			if (Self.HasComponent<ChildComponent>())
@@ -184,6 +187,7 @@ namespace Locus
 		{
 			auto& parentTC = Parent.GetComponent<TransformComponent>();
 			LocalToWorld = parentTC.WorldTransform;
+			WorldToLocal = glm::inverse(LocalToWorld);
 			SetWorldFromLocalChange();
 
 			parentTC.Dirty = false;

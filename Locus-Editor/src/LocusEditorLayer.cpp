@@ -458,7 +458,7 @@ namespace Locus
 		glm::vec3 translation, scale;
 		glm::quat rotation;
 		//Math::DecomposeTransform(transform, scale, rotation, translation);
-		glm::decompose(transform, scale, rotation, translation, glm::vec3(1.0f), glm::vec4(1.0f));
+		Math::Decompose(transform, scale, rotation, translation);
 
 		if (ImGuizmo::IsUsing())
 		{

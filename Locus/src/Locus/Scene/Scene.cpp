@@ -148,7 +148,7 @@ namespace Locus
 				b2Body* body = (b2Body*)rb2d.RuntimeBody;
 				const b2Vec2& position = body->GetPosition();
 				transform.SetWorldPosition({ position.x, position.y , 0.0f });
-				transform.SetLocalRotation({ 0, 0, body->GetAngle()});
+				transform.SetWorldRotation({ 0, 0, body->GetAngle()});
 			}
 			
 		}

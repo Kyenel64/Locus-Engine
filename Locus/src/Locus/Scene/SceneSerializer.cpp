@@ -87,6 +87,84 @@ namespace YAML {
 		}
 	};
 
+	template<>
+	struct convert<glm::quat>
+	{
+		static Node encode(const glm::quat& rhs)
+		{
+			Node node;
+			node.push_back(rhs.x);
+			node.push_back(rhs.y);
+			node.push_back(rhs.z);
+			node.push_back(rhs.w);
+			node.SetStyle(EmitterStyle::Flow);
+			return node;
+		}
+
+		static bool decode(const Node& node, glm::quat& rhs)
+		{
+			if (!node.IsSequence() || node.size() != 4)
+				return false;
+
+			rhs.x = node[0].as<float>();
+			rhs.y = node[1].as<float>();
+			rhs.z = node[2].as<float>();
+			rhs.w = node[3].as<float>();
+			return true;
+		}
+	};
+
+	template<>
+	struct convert<glm::mat4>
+	{
+		static Node encode(const glm::mat4& rhs)
+		{
+			Node node;
+			node.push_back(rhs[0].x);
+			node.push_back(rhs[0].y);
+			node.push_back(rhs[0].z);
+			node.push_back(rhs[0].w);
+			node.push_back(rhs[1].x);
+			node.push_back(rhs[1].y);
+			node.push_back(rhs[1].z);
+			node.push_back(rhs[1].w);
+			node.push_back(rhs[2].x);
+			node.push_back(rhs[2].y);
+			node.push_back(rhs[2].z);
+			node.push_back(rhs[2].w);
+			node.push_back(rhs[3].x);
+			node.push_back(rhs[3].y);
+			node.push_back(rhs[3].z);
+			node.push_back(rhs[3].w);
+			node.SetStyle(EmitterStyle::Flow);
+			return node;
+		}
+
+		static bool decode(const Node& node, glm::mat4& rhs)
+		{
+			if (!node.IsSequence() || node.size() != 16)
+				return false;
+
+			rhs[0].x = node[0].as<float>();
+			rhs[0].y = node[1].as<float>();
+			rhs[0].z = node[2].as<float>();
+			rhs[0].w = node[3].as<float>();
+			rhs[1].x = node[4].as<float>();
+			rhs[1].y = node[5].as<float>();
+			rhs[1].z = node[6].as<float>();
+			rhs[1].w = node[7].as<float>();
+			rhs[2].x = node[8].as<float>();
+			rhs[2].y = node[9].as<float>();
+			rhs[2].z = node[10].as<float>();
+			rhs[2].w = node[11].as<float>();
+			rhs[3].x = node[12].as<float>();
+			rhs[3].y = node[13].as<float>();
+			rhs[3].z = node[14].as<float>();
+			rhs[3].w = node[15].as<float>();
+			return true;
+		}
+	};
+
 }
 
 namespace Locus
@@ -109,6 +187,23 @@ namespace Locus
 	{
 		out << YAML::Flow;
 		out << YAML::BeginSeq << v.x << v.y << v.z << v.w << YAML::EndSeq;
+		return out;
+	}
+
+	YAML::Emitter& operator<<(YAML::Emitter& out, const glm::quat& v)
+	{
+		out << YAML::Flow;
+		out << YAML::BeginSeq << v.x << v.y << v.z << v.w << YAML::EndSeq;
+		return out;
+	}
+
+	YAML::Emitter& operator<<(YAML::Emitter& out, const glm::mat4& v)
+	{
+		out << YAML::Flow;
+		out << YAML::BeginSeq << v[0].x << v[0].y << v[0].z << v[0].w 
+			                  << v[1].x << v[1].y << v[1].z << v[1].w 
+			                  << v[2].x << v[2].y << v[2].z << v[2].w 
+			                  << v[3].x << v[3].y << v[3].z << v[3].w << YAML::EndSeq;
 		return out;
 	}
 
@@ -149,7 +244,16 @@ namespace Locus
 				out << YAML::Key << "Parent" << YAML::Value << 0;
 			out << YAML::Key << "LocalPosition" << YAML::Value << tc.LocalPosition;
 			out << YAML::Key << "LocalRotation" << YAML::Value << tc.LocalRotation;
+			out << YAML::Key << "LocalRotationQuat" << YAML::Value << tc.LocalRotationQuat;
 			out << YAML::Key << "LocalScale" << YAML::Value << tc.LocalScale;
+			out << YAML::Key << "WorldPosition" << YAML::Value << tc.WorldPosition;
+			out << YAML::Key << "WorldRotation" << YAML::Value << tc.WorldRotation;
+			out << YAML::Key << "WorldRotationQuat" << YAML::Value << tc.WorldRotationQuat;
+			out << YAML::Key << "WorldScale" << YAML::Value << tc.WorldScale;
+			out << YAML::Key << "WorldTransform" << YAML::Value << tc.WorldTransform;
+			out << YAML::Key << "LocalToWorld" << YAML::Value << tc.LocalToWorld;
+			out << YAML::Key << "WorldToLocal" << YAML::Value << tc.WorldToLocal;
+
 			out << YAML::EndMap; // End Transform Component
 		}
 
@@ -315,6 +419,18 @@ namespace Locus
 				{
 					auto& tc = deserializedEntity.GetComponent<TransformComponent>();
 					tc.Self = deserializedEntity;
+					tc.LocalPosition = transformComponent["LocalPosition"].as<glm::vec3>();
+					tc.LocalRotation = transformComponent["LocalRotation"].as<glm::vec3>();
+					tc.LocalRotationQuat = transformComponent["LocalRotationQuat"].as<glm::quat>();
+					tc.LocalScale = transformComponent["LocalScale"].as<glm::vec3>();
+					tc.WorldPosition = transformComponent["WorldPosition"].as<glm::vec3>();
+					tc.WorldRotation = transformComponent["WorldRotation"].as<glm::vec3>();
+					tc.WorldRotationQuat = transformComponent["WorldRotationQuat"].as<glm::quat>();
+					tc.WorldScale = transformComponent["WorldScale"].as<glm::vec3>();
+
+					tc.WorldTransform = transformComponent["WorldTransform"].as<glm::mat4>();
+					tc.LocalToWorld = transformComponent["LocalToWorld"].as<glm::mat4>();
+					tc.WorldToLocal = transformComponent["WorldToLocal"].as<glm::mat4>();
 				}
 
 				// --- Sprite Renderer Component ------------------------------

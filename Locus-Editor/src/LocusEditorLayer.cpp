@@ -135,7 +135,7 @@ namespace Locus
 			ImGuizmo::Enable(true);
 		else
 			ImGuizmo::Enable(false);
-		
+
 		m_Framebuffer->Unbind();
 
 		Renderer2D::StatsEndFrame();
@@ -363,7 +363,10 @@ namespace Locus
 		if (e.GetMouseButton() == Mouse::ButtonLeft)
 		{
 			if (m_ViewportHovered && !ImGuizmo::IsOver())
+			{
 				m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
+				m_SelectedEntity = m_HoveredEntity;
+			}
 		}
 
 		return false;
@@ -527,6 +530,7 @@ namespace Locus
 
 	void LocusEditorLayer::OnSceneStop()
 	{
+		m_SelectedEntity = {};
 		m_SceneState = SceneState::Edit;
 		m_ActiveScene->OnRuntimeStop();
 
@@ -830,17 +834,21 @@ namespace Locus
 				ImGui::Text("Parent: Entity::Null");
 
 			ImGui::Text("Self: %s", tc.Self.GetComponent<TagComponent>().Tag.c_str());
-			/*std::string dirty = tc.Dirty ? "True" : "False";
-			ImGui::Text("Dirty: %s", dirty.c_str());
 
-			ImGui::Text("LocalPosition: %f, %f, %f", tc.GetLocalPosition().x, tc.GetLocalPosition().y, tc.GetLocalPosition().z);
-			ImGui::Text("WorldPosition: %f, %f, %f", tc.GetWorldPosition().x, tc.GetWorldPosition().y, tc.GetWorldPosition().z);
+			glm::mat4 worldTransform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
+			glm::vec3 worldPosition, worldScale;
+			glm::quat worldRotationQuat;
+			Math::Decompose(worldTransform, worldScale, worldRotationQuat, worldPosition);
+			glm::vec3 worldRotation = glm::eulerAngles(worldRotationQuat);
 
-			ImGui::Text("LocalRotation: %f, %f, %f", glm::degrees(tc.GetLocalRotation().x), glm::degrees(tc.GetLocalRotation()).y, glm::degrees(tc.GetLocalRotation().z));
-			ImGui::Text("WorldRotation: %f, %f, %f", glm::degrees(tc.GetWorldRotation().x), glm::degrees(tc.GetWorldRotation()).y, glm::degrees(tc.GetWorldRotation().z));
+			ImGui::Text("LocalPosition: %f, %f, %f", tc.LocalPosition.x, tc.LocalPosition.y, tc.LocalPosition.z);
+			ImGui::Text("WorldPosition: %f, %f, %f", worldPosition.x, worldPosition.y, worldPosition.z);
 
-			ImGui::Text("LocalScale: %f, %f, %f", tc.GetLocalScale().x, tc.GetLocalScale().y, tc.GetLocalScale().z);
-			ImGui::Text("WorldScale: %f, %f, %f", tc.GetWorldScale().x, tc.GetWorldScale().y, tc.GetWorldScale().z);*/
+			ImGui::Text("LocalRotation: %f, %f, %f", glm::degrees(tc.LocalRotation.x), glm::degrees(tc.LocalRotation.y), glm::degrees(tc.LocalRotation.z));
+			ImGui::Text("WorldRotation: %f, %f, %f", glm::degrees(worldRotation.x), glm::degrees(worldRotation.y), glm::degrees(worldRotation.z));
+
+			ImGui::Text("LocalScale: %f, %f, %f", tc.LocalScale.x, tc.LocalScale.y, tc.LocalScale.z);
+			ImGui::Text("WorldScale: %f, %f, %f", worldScale.x, worldScale.y, worldScale.z);
 		}
 		ImGui::End();
 	}

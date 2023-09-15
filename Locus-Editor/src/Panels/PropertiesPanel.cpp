@@ -41,7 +41,7 @@ namespace Locus
 
 		m_LabelWidth =  60.0f * ( 1.0f + ((ImGui::GetWindowSize().x / windowWidth) * 5.0f));
 
-		if (m_SelectedEntity)
+		if (m_SelectedEntity.IsValid())
 		{
 			DrawComponents(m_SelectedEntity);
 

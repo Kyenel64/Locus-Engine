@@ -47,8 +47,26 @@ namespace Locus
 		otherRegistry.each([&](auto entityID)
 			{
 				Entity entity = Entity(entityID, other.get());
-				Entity newEntity = newScene->CreateEntity();
+				Entity newEntity = newScene->CreateEntityWithUUID(entity.GetUUID());
 				CopyAllComponents(entity, newEntity);
+			});
+
+		// Convert all Entity references to newScene since copying 
+		newScene->m_Registry.each([&](auto entityID)
+			{
+				Entity entity = Entity(entityID, newScene.get());
+				auto& tc = entity.GetComponent<TransformComponent>();
+				if (tc.Parent != Entity::Null)
+					tc.Parent = newScene->GetEntityByUUID(tc.Parent.GetUUID());
+
+				if (entity.HasComponent<ChildComponent>())
+				{
+					auto& cc = entity.GetComponent<ChildComponent>();
+					for (uint32_t i = 0; i < cc.ChildCount; i++)
+					{
+						cc.ChildEntities[i] = newScene->GetEntityByUUID(cc.ChildEntities[i].GetUUID());
+					}
+				}
 			});
 
 		return newScene;
@@ -186,7 +204,7 @@ namespace Locus
 				bool enabled = entity.GetComponent<TagComponent>().Enabled;
 				auto& sprite = entity.GetComponent<SpriteRendererComponent>();
 				if (enabled)
-					Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)entity);
+					Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
 			}
 			Renderer2D::EndScene();
 		}
@@ -210,7 +228,7 @@ namespace Locus
 			bool enabled = entity.GetComponent<TagComponent>().Enabled;
 			auto& sprite = entity.GetComponent<SpriteRendererComponent>();
 			if (enabled)
-				Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)entity);
+				Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
 		}
 
 		Renderer2D::EndScene();

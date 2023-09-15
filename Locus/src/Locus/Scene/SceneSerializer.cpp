@@ -246,13 +246,6 @@ namespace Locus
 			out << YAML::Key << "LocalRotation" << YAML::Value << tc.LocalRotation;
 			out << YAML::Key << "LocalRotationQuat" << YAML::Value << tc.LocalRotationQuat;
 			out << YAML::Key << "LocalScale" << YAML::Value << tc.LocalScale;
-			out << YAML::Key << "WorldPosition" << YAML::Value << tc.WorldPosition;
-			out << YAML::Key << "WorldRotation" << YAML::Value << tc.WorldRotation;
-			out << YAML::Key << "WorldRotationQuat" << YAML::Value << tc.WorldRotationQuat;
-			out << YAML::Key << "WorldScale" << YAML::Value << tc.WorldScale;
-			out << YAML::Key << "WorldTransform" << YAML::Value << tc.WorldTransform;
-			out << YAML::Key << "LocalToWorld" << YAML::Value << tc.LocalToWorld;
-			out << YAML::Key << "WorldToLocal" << YAML::Value << tc.WorldToLocal;
 
 			out << YAML::EndMap; // End Transform Component
 		}
@@ -423,14 +416,6 @@ namespace Locus
 					tc.LocalRotation = transformComponent["LocalRotation"].as<glm::vec3>();
 					tc.LocalRotationQuat = transformComponent["LocalRotationQuat"].as<glm::quat>();
 					tc.LocalScale = transformComponent["LocalScale"].as<glm::vec3>();
-					tc.WorldPosition = transformComponent["WorldPosition"].as<glm::vec3>();
-					tc.WorldRotation = transformComponent["WorldRotation"].as<glm::vec3>();
-					tc.WorldRotationQuat = transformComponent["WorldRotationQuat"].as<glm::quat>();
-					tc.WorldScale = transformComponent["WorldScale"].as<glm::vec3>();
-
-					tc.WorldTransform = transformComponent["WorldTransform"].as<glm::mat4>();
-					tc.LocalToWorld = transformComponent["LocalToWorld"].as<glm::mat4>();
-					tc.WorldToLocal = transformComponent["WorldToLocal"].as<glm::mat4>();
 				}
 
 				// --- Sprite Renderer Component ------------------------------

@@ -199,19 +199,17 @@ namespace Locus
 			{
 				// Position
 				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 5.0f, 0.0f });
-				if (DrawVec3Control("Position", component.LocalPosition))
-					component.SetLocalPosition(component.LocalPosition); // sync world data
+				DrawVec3Control("Position", component.LocalPosition);
 				
 				// Rotation
-				if (DrawVec3Control("Rotation", component.LocalRotation))
-					component.SetLocalRotation(component.LocalRotation);
+				DrawVec3Control("Rotation", component.LocalRotation);
+				component.SetLocalRotation(component.LocalRotation);
 				ImGui::PopStyleVar();
 
 				// Scale
 				// Bottom spacing is removed if pushing item spacing to all three controls. 
 				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 5.0f, 5.0f });
-				if (DrawVec3Control("Scale", component.LocalScale, 1.0f))
-					component.SetLocalScale(component.LocalScale);
+				DrawVec3Control("Scale", component.LocalScale, 1.0f);
 				ImGui::PopStyleVar();
 
 			});

@@ -440,9 +440,8 @@ namespace Locus
 		glm::mat4 cameraView = m_EditorCamera.GetViewMatrix();
 
 		// Entity transform
-		//Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
 		auto& tc = m_SelectedEntity.GetComponent<TransformComponent>();
-		glm::mat4& transform = tc.GetWorldTransform();
+		glm::mat4& transform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
 
 		// Snapping
 		bool snap = Input::IsKeyPressed(Key::LeftControl);
@@ -455,9 +454,12 @@ namespace Locus
 			(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform),
 			nullptr, snap ? snapValues : nullptr);
 
+		// Convert back to local space
+		if (tc.Parent != Entity::Null)
+			transform *= glm::inverse(m_ActiveScene->GetWorldTransform(tc.Parent));
+
 		glm::vec3 translation, scale;
 		glm::quat rotation;
-		//Math::DecomposeTransform(transform, scale, rotation, translation);
 		Math::Decompose(transform, scale, rotation, translation);
 
 		if (ImGuizmo::IsUsing())
@@ -466,8 +468,7 @@ namespace Locus
 			{
 				case ImGuizmo::TRANSLATE:
 				{
-					CommandHistory::AddCommand(new ChangeValueCommand(translation, tc.WorldPosition));
-					tc.SetWorldPosition(tc.WorldPosition);
+					CommandHistory::AddCommand(new ChangeValueCommand(translation, tc.LocalPosition));
 					break;
 				}
 				case ImGuizmo::ROTATE:
@@ -488,14 +489,12 @@ namespace Locus
 					if (fabs(deltaRotationEuler.z) < 0.001) deltaRotationEuler.z = 0.0f;
 
 					glm::vec3 rotationEuler = tc.GetLocalRotation();
-					CommandHistory::AddCommand(new ChangeValueCommand(rotationEuler + deltaRotationEuler, tc.WorldRotation));
-					tc.SetWorldRotation(tc.WorldRotation);
+					CommandHistory::AddCommand(new ChangeValueCommand(rotationEuler + deltaRotationEuler, tc.LocalRotation));
 					break;
 				}
 				case ImGuizmo::SCALE:
 				{
-					CommandHistory::AddCommand(new ChangeValueCommand(scale, tc.WorldScale));
-					tc.SetWorldScale(tc.WorldScale);
+					CommandHistory::AddCommand(new ChangeValueCommand(scale, tc.LocalScale));
 					break;
 				}
 			}
@@ -831,7 +830,7 @@ namespace Locus
 				ImGui::Text("Parent: Entity::Null");
 
 			ImGui::Text("Self: %s", tc.Self.GetComponent<TagComponent>().Tag.c_str());
-			std::string dirty = tc.Dirty ? "True" : "False";
+			/*std::string dirty = tc.Dirty ? "True" : "False";
 			ImGui::Text("Dirty: %s", dirty.c_str());
 
 			ImGui::Text("LocalPosition: %f, %f, %f", tc.GetLocalPosition().x, tc.GetLocalPosition().y, tc.GetLocalPosition().z);
@@ -841,7 +840,7 @@ namespace Locus
 			ImGui::Text("WorldRotation: %f, %f, %f", glm::degrees(tc.GetWorldRotation().x), glm::degrees(tc.GetWorldRotation()).y, glm::degrees(tc.GetWorldRotation().z));
 
 			ImGui::Text("LocalScale: %f, %f, %f", tc.GetLocalScale().x, tc.GetLocalScale().y, tc.GetLocalScale().z);
-			ImGui::Text("WorldScale: %f, %f, %f", tc.GetWorldScale().x, tc.GetWorldScale().y, tc.GetWorldScale().z);
+			ImGui::Text("WorldScale: %f, %f, %f", tc.GetWorldScale().x, tc.GetWorldScale().y, tc.GetWorldScale().z);*/
 		}
 		ImGui::End();
 	}

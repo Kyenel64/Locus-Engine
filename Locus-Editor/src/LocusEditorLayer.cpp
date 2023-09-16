@@ -472,7 +472,7 @@ namespace Locus
 
 		// Convert back to local space
 		if (tc.Parent != Entity::Null)
-			transform *= glm::inverse(m_ActiveScene->GetWorldTransform(tc.Parent));
+			transform = glm::inverse(m_ActiveScene->GetWorldTransform(tc.Parent)) * transform;
 
 		glm::vec3 translation, scale;
 		glm::quat rotation;

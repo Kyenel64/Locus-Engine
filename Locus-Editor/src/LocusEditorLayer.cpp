@@ -219,7 +219,12 @@ namespace Locus
 		ProcessViewportDragDrop();
 		// viewport gizmo
 		if (m_SelectedEntity && m_GizmoType != -1)
-			showGizmoUI();
+		{
+			if (!m_GizmoFirstClick)
+				showGizmoUI();
+			else
+				m_GizmoFirstClick = false;
+		}
 		// viewport menu
 		if (ImGui::BeginMenuBar())
 		{
@@ -473,7 +478,7 @@ namespace Locus
 		glm::quat rotation;
 		Math::Decompose(transform, scale, rotation, translation);
 
-		if (ImGuizmo::IsUsing() && !m_GizmoFirstClick)
+		if (ImGuizmo::IsUsing())
 		{
 			switch (m_GizmoType)
 			{
@@ -509,7 +514,6 @@ namespace Locus
 					break;
 				}
 			}
-			m_GizmoFirstClick = false;
 		}
 	}
 

@@ -83,6 +83,7 @@ namespace Locus
 		// Viewport Gizmo
 		int m_GizmoType = -1;
 		bool m_GizmoVisible = false;
+		bool m_GizmoFirstClick = true;
 
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;

@@ -110,10 +110,6 @@ namespace Locus
 			}
 		}
 
-
-		if (ImGui::IsMouseReleased(ImGuiMouseButton_Left))
-			OnMouseButtonReleased();
-
 		// Read pixel
 		auto [mx, my] = ImGui::GetMousePos();
 		mx -= m_ViewportBounds[0].x;
@@ -372,16 +368,16 @@ namespace Locus
 
 	bool LocusEditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& e)
 	{
-		return false;
-	}
-
-	void LocusEditorLayer::OnMouseButtonReleased()
-	{
-		if (m_ViewportHovered && (!ImGuizmo::IsOver() || ImGuizmo::IsOver() && !m_GizmoVisible))
+		if (e.GetMouseButton() == Mouse::ButtonLeft)
 		{
-			m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
-			m_SelectedEntity = m_HoveredEntity;
+			if (m_ViewportHovered && (!ImGuizmo::IsOver() || ImGuizmo::IsOver() && !m_GizmoVisible))
+			{
+				m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
+				m_SelectedEntity = m_HoveredEntity;
+				m_GizmoFirstClick = true;
+			}
 		}
+		return false;
 	}
 
 	void LocusEditorLayer::NewScene()
@@ -477,7 +473,7 @@ namespace Locus
 		glm::quat rotation;
 		Math::Decompose(transform, scale, rotation, translation);
 
-		if (ImGuizmo::IsUsing())
+		if (ImGuizmo::IsUsing() && !m_GizmoFirstClick)
 		{
 			switch (m_GizmoType)
 			{
@@ -513,6 +509,7 @@ namespace Locus
 					break;
 				}
 			}
+			m_GizmoFirstClick = false;
 		}
 	}
 

@@ -423,7 +423,7 @@ namespace Locus
 		std::string path = FileDialogs::SaveFile("Locus Scene (*.locus)\0*.locus\0");
 		if (!path.empty())
 		{
-			SceneSerializer serializer(m_ActiveScene);
+			SceneSerializer serializer(m_EditorScene);
 			serializer.Serialize(path);
 			m_SavePath = path;
 			Application::Get().SetIsSavedStatus(true);
@@ -438,7 +438,7 @@ namespace Locus
 		}
 		else
 		{
-			SceneSerializer serializer(m_ActiveScene);
+			SceneSerializer serializer(m_EditorScene);
 			serializer.Serialize(m_SavePath);
 			Application::Get().SetIsSavedStatus(true);
 		}

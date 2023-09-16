@@ -55,7 +55,7 @@ Entities:
     TransformComponent:
       Self: 18090131422620236725
       Parent: 0
-      LocalPosition: [0.342504501, 5.7329731, 0]
+      LocalPosition: [0.0136561757, 5.24283791, 0]
       LocalRotation: [0, 0, -0.35953784]
       LocalRotationQuat: [0, 0, -0.178802222, 0.98388505]
       LocalScale: [1, 1, 1]

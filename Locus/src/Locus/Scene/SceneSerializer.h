@@ -4,6 +4,11 @@
 
 #include "Locus/Scene/Scene.h"
 
+namespace YAML
+{
+	class Emitter;
+}
+
 namespace Locus
 {
 	class SceneSerializer
@@ -16,6 +21,9 @@ namespace Locus
 
 		bool Deserialize(const std::string& path);
 		bool DeserializeRunTime(const std::string& path);
+
+	private:
+		void SerializeEntity(YAML::Emitter& out, Entity entity);
 
 	private:
 		Ref<Scene> m_Scene;

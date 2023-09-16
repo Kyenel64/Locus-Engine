@@ -47,8 +47,26 @@ namespace Locus
 		otherRegistry.each([&](auto entityID)
 			{
 				Entity entity = Entity(entityID, other.get());
-				Entity newEntity = newScene->CreateEntity();
+				Entity newEntity = newScene->CreateEntityWithUUID(entity.GetUUID());
 				CopyAllComponents(entity, newEntity);
+			});
+
+		// Convert all Entity references to newScene since copying 
+		newScene->m_Registry.each([&](auto entityID)
+			{
+				Entity entity = Entity(entityID, newScene.get());
+				auto& tc = entity.GetComponent<TransformComponent>();
+				if (tc.Parent != Entity::Null)
+					tc.Parent = newScene->GetEntityByUUID(tc.Parent.GetUUID());
+
+				if (entity.HasComponent<ChildComponent>())
+				{
+					auto& cc = entity.GetComponent<ChildComponent>();
+					for (uint32_t i = 0; i < cc.ChildCount; i++)
+					{
+						cc.ChildEntities[i] = newScene->GetEntityByUUID(cc.ChildEntities[i].GetUUID());
+					}
+				}
 			});
 
 		return newScene;
@@ -147,8 +165,8 @@ namespace Locus
 			
 				b2Body* body = (b2Body*)rb2d.RuntimeBody;
 				const b2Vec2& position = body->GetPosition();
-				transform.SetWorldPosition({ position.x, position.y , 0.0f });
-				transform.SetLocalRotation({ 0, 0, body->GetAngle()});
+				transform.LocalPosition = { position.x, position.y , 0.0f };
+				transform.SetLocalRotation( {0, 0, body->GetAngle()} );
 			}
 			
 		}
@@ -159,13 +177,14 @@ namespace Locus
 		glm::mat4 cameraTransform;
 		{
 			auto view = m_Registry.view<TransformComponent, CameraComponent>();
-			for (auto entity : view)
+			for (auto e : view)
 			{
-				auto [transform, camera] = view.get<TransformComponent, CameraComponent>(entity);
+				Entity entity = Entity(e, this);
+				auto& camera = entity.GetComponent<CameraComponent>();
 				if (camera.Primary)
 				{
 					mainCamera = &camera.Camera;
-					cameraTransform = transform.GetWorldTransform();
+					cameraTransform = GetWorldTransform(entity);
 					break;
 				}
 			}
@@ -179,12 +198,13 @@ namespace Locus
 
 			Renderer2D::BeginScene(*mainCamera, cameraTransform);
 			auto group = m_Registry.group<TransformComponent, SpriteRendererComponent, TagComponent>();
-			for (auto entity : group)
+			for (auto e : group)
 			{
-				auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-				bool enabled = group.get<TagComponent>(entity).Enabled;
+				Entity entity = Entity(e, this);
+				bool enabled = entity.GetComponent<TagComponent>().Enabled;
+				auto& sprite = entity.GetComponent<SpriteRendererComponent>();
 				if (enabled)
-					Renderer2D::DrawSprite(transform.GetWorldTransform(), sprite, (int)entity);
+					Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
 			}
 			Renderer2D::EndScene();
 		}
@@ -199,14 +219,18 @@ namespace Locus
 	{
 		// Main rendering
 		Renderer2D::BeginScene(camera);
+
 		auto group = m_Registry.group<TransformComponent, SpriteRendererComponent, TagComponent>();
-		for (auto entity : group)
+		for (auto e : group)
 		{
-			auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-			bool enabled = group.get<TagComponent>(entity).Enabled;
+			Entity entity = Entity(e, this);
+
+			bool enabled = entity.GetComponent<TagComponent>().Enabled;
+			auto& sprite = entity.GetComponent<SpriteRendererComponent>();
 			if (enabled)
-				Renderer2D::DrawSprite(transform.GetWorldTransform(), sprite, (int)entity);
+				Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
 		}
+
 		Renderer2D::EndScene();
 	}
 
@@ -220,14 +244,21 @@ namespace Locus
 			Entity entity = Entity(e, this);
 			if (entity.GetComponent<TagComponent>().Enabled)
 			{
-				auto& transform = entity.GetComponent<TransformComponent>();
+				auto& tc = entity.GetComponent<TransformComponent>();
 				auto& rb2D = entity.GetComponent<Rigidbody2DComponent>();
+
+				/*glm::mat4 worldTransform = GetWorldTransform(entity);
+				glm::vec3 worldPosition, worldScale;
+				glm::quat worldRotationQuat;
+				Math::Decompose(worldTransform, worldScale, worldRotationQuat, worldPosition);
+				glm::vec3 worldRotation = glm::eulerAngles(worldRotationQuat);*/
 
 				// Body
 				b2BodyDef bodyDef;
 				bodyDef.type = Rigidbody2DTypeToBox2DType(rb2D.BodyType);
-				bodyDef.position.Set(transform.GetWorldPosition().x, transform.GetWorldPosition().y);
-				bodyDef.angle = transform.GetWorldRotation().z;
+				
+				bodyDef.position.Set(tc.LocalPosition.x, tc.LocalPosition.y);
+				bodyDef.angle = tc.LocalRotation.z;
 				bodyDef.linearDamping = rb2D.LinearDrag;
 				bodyDef.angularDamping = rb2D.AngularDrag;
 				bodyDef.fixedRotation = rb2D.FixedRotation;
@@ -247,7 +278,7 @@ namespace Locus
 
 				// Box Collider
 				b2PolygonShape box;
-				b2Vec2 size = { transform.GetWorldScale().x, transform.GetWorldScale().y};
+				b2Vec2 size = { tc.LocalScale.x, tc.LocalScale.y};
 				b2Vec2 offset = { 0.0f, 0.0f };
 				float angle = 0.0f;
 				if (entity.HasComponent<BoxCollider2DComponent>()) // TODO: Reformat this
@@ -311,6 +342,17 @@ namespace Locus
 		}
 
 		return Entity::Null;
+	}
+
+	glm::mat4 Scene::GetWorldTransform(Entity entity)
+	{
+		glm::mat4 transform(1.0f);
+		auto& tc = entity.GetComponent<TransformComponent>();
+
+		if (tc.Parent != Entity::Null)
+			transform = GetWorldTransform(tc.Parent);
+
+		return transform * tc.GetLocalTransform();
 	}
 
 	template<typename T>

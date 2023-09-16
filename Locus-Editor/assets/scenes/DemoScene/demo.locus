@@ -1,0 +1,550 @@
+Scene: Untitled
+Entities:
+  - Entity: 15939842933279708774
+    TagComponent:
+      Tag: Main Camera
+      Enabled: true
+    TransformComponent:
+      Self: 15939842933279708774
+      Parent: 0
+      LocalPosition: [0, -1.67383432, 13.070507]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        BackgroundColor: [0.939393938, 0.759616733, 0.565263033, 1]
+        ProjectionType: 0
+        OrthographicSize: 10
+        OrthographicNearClip: -1
+        OrthographicFarClip: 1000
+        PerspectiveFOV: 0.785398185
+        PerspectiveNearClip: 0.00999999978
+        PerspectiveFarClip: 1000
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 9642928867914844756
+    TagComponent:
+      Tag: Background2
+      Enabled: true
+    TransformComponent:
+      Self: 9642928867914844756
+      Parent: 0
+      LocalPosition: [0, 8.18000031, -0.649999976]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [40, 33, 10.0437117]
+    SpriteRendererComponent:
+      Color: [0.346320331, 0.170911327, 0.170911327, 1]
+      TexturePath: assets\scenes\DemoScene\background\background_layer_1.png
+      TilingFactor: 2
+  - Entity: 12368017746451781863
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 12368017746451781863
+      Parent: 0
+      LocalPosition: [-13, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1Left.png
+      TilingFactor: 1
+  - Entity: 10718171791840595351
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 10718171791840595351
+      Parent: 0
+      LocalPosition: [-13, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1Left.png
+      TilingFactor: 1
+  - Entity: 8940172843657402432
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 8940172843657402432
+      Parent: 0
+      LocalPosition: [9, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1.png
+      TilingFactor: 1
+  - Entity: 9856407106106113184
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 9856407106106113184
+      Parent: 0
+      LocalPosition: [8, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1.png
+      TilingFactor: 1
+  - Entity: 7325708045721359630
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 7325708045721359630
+      Parent: 0
+      LocalPosition: [7, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1.png
+      TilingFactor: 1
+  - Entity: 14922479131865349195
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 14922479131865349195
+      Parent: 0
+      LocalPosition: [6, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1.png
+      TilingFactor: 1
+  - Entity: 5606706911975826633
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 5606706911975826633
+      Parent: 0
+      LocalPosition: [5, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1.png
+      TilingFactor: 1
+  - Entity: 10208410813415591974
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 10208410813415591974
+      Parent: 0
+      LocalPosition: [4, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1.png
+      TilingFactor: 1
+  - Entity: 13424433313314593048
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 13424433313314593048
+      Parent: 0
+      LocalPosition: [-11, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1.png
+      TilingFactor: 1
+  - Entity: 10039921384220272388
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 10039921384220272388
+      Parent: 0
+      LocalPosition: [-10, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1.png
+      TilingFactor: 1
+  - Entity: 17822222400315375559
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 17822222400315375559
+      Parent: 0
+      LocalPosition: [-9, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1.png
+      TilingFactor: 1
+  - Entity: 14737725310342095192
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 14737725310342095192
+      Parent: 0
+      LocalPosition: [-8, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1.png
+      TilingFactor: 1
+  - Entity: 12053812372411883417
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 12053812372411883417
+      Parent: 0
+      LocalPosition: [-6, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1.png
+      TilingFactor: 1
+  - Entity: 11734479006764185582
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 11734479006764185582
+      Parent: 0
+      LocalPosition: [0, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1.png
+      TilingFactor: 1
+  - Entity: 16533961198883739230
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 16533961198883739230
+      Parent: 0
+      LocalPosition: [-5, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1.png
+      TilingFactor: 1
+  - Entity: 9296046138384623772
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 9296046138384623772
+      Parent: 0
+      LocalPosition: [-1, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1.png
+      TilingFactor: 1
+  - Entity: 6946635917530727231
+    TagComponent:
+      Tag: Background1
+      Enabled: true
+    TransformComponent:
+      Self: 6946635917530727231
+      Parent: 0
+      LocalPosition: [0, 8.09000015, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [40, 33.0999985, 10.0437117]
+    SpriteRendererComponent:
+      Color: [0.523809552, 0.256147504, 0.18594107, 1]
+      TexturePath: assets\scenes\DemoScene\background\background_layer_2.png
+      TilingFactor: 2
+  - Entity: 15259710990347280493
+    TagComponent:
+      Tag: Background2
+      Enabled: true
+    TransformComponent:
+      Self: 15259710990347280493
+      Parent: 0
+      LocalPosition: [0, 8.18000031, 0.25]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [40, 33, 10.0437117]
+    SpriteRendererComponent:
+      Color: [0.857142866, 0.761294365, 0.423005581, 1]
+      TexturePath: assets\scenes\DemoScene\background\background_layer_3.png
+      TilingFactor: 2
+  - Entity: 10493528806491597175
+    TagComponent:
+      Tag: FullGround
+      Enabled: true
+    TransformComponent:
+      Self: 10493528806491597175
+      Parent: 0
+      LocalPosition: [-1.20000005, -6.63999987, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [23.3999996, 2.5, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\FullGround.png
+      TilingFactor: 1
+  - Entity: 16134848955784828919
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 16134848955784828919
+      Parent: 0
+      LocalPosition: [-12, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1.png
+      TilingFactor: 1
+  - Entity: 8189612711080607641
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 8189612711080607641
+      Parent: 0
+      LocalPosition: [1, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1.png
+      TilingFactor: 1
+  - Entity: 6451921575781721438
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 6451921575781721438
+      Parent: 0
+      LocalPosition: [2, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1.png
+      TilingFactor: 1
+  - Entity: 9054139327026955470
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 9054139327026955470
+      Parent: 0
+      LocalPosition: [3, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1.png
+      TilingFactor: 1
+  - Entity: 2521970337904418272
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 2521970337904418272
+      Parent: 0
+      LocalPosition: [10.5, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1Right.png
+      TilingFactor: 1
+  - Entity: 338191691928823000
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 338191691928823000
+      Parent: 0
+      LocalPosition: [1.52047229, -4.32781076, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 0.5, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\rock_1.png
+      TilingFactor: 1
+  - Entity: 13662936831907649391
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 13662936831907649391
+      Parent: 0
+      LocalPosition: [3, -3.53724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 2, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\lamp.png
+      TilingFactor: 1
+  - Entity: 2984632639577543622
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 2984632639577543622
+      Parent: 0
+      LocalPosition: [-3, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1.png
+      TilingFactor: 1
+  - Entity: 5578963272107548445
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 5578963272107548445
+      Parent: 0
+      LocalPosition: [-4, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1.png
+      TilingFactor: 1
+  - Entity: 14394172157746087835
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 14394172157746087835
+      Parent: 0
+      LocalPosition: [-7, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1.png
+      TilingFactor: 1
+  - Entity: 7797977992716506852
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 7797977992716506852
+      Parent: 0
+      LocalPosition: [9.5, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1.png
+      TilingFactor: 1
+  - Entity: 5901607928547087461
+    TagComponent:
+      Tag: Ground
+      Enabled: true
+    TransformComponent:
+      Self: 5901607928547087461
+      Parent: 0
+      LocalPosition: [-2, -5.03724527, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\Ground1.png
+      TilingFactor: 1
+  - Entity: 8172760093722201217
+    TagComponent:
+      Tag: Grass
+      Enabled: true
+    TransformComponent:
+      Self: 8172760093722201217
+      Parent: 0
+      LocalPosition: [-6.5, -4.44159555, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [0.699999988, 0.200000003, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\grass_2.png
+      TilingFactor: 1
+  - Entity: 873621801631000615
+    TagComponent:
+      Tag: Goblin
+      Enabled: true
+    TransformComponent:
+      Self: 873621801631000615
+      Parent: 0
+      LocalPosition: [0, -3.52222681, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [2, 2, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\character\Goblin.png
+      TilingFactor: 1
+  - Entity: 18108607659467261805
+    TagComponent:
+      Tag: Grass
+      Enabled: true
+    TransformComponent:
+      Self: 18108607659467261805
+      Parent: 0
+      LocalPosition: [-2, -4.44159555, 0.5]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [0.400000006, 0.200000003, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: assets\scenes\DemoScene\decorations\grass_2.png
+      TilingFactor: 1

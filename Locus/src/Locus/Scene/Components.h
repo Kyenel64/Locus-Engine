@@ -6,12 +6,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 #include <entt.hpp>
 
 #include "Locus/Core/UUID.h"
 #include "Locus/Renderer/Texture.h"
 #include "Locus/Scene/SceneCamera.h"
 #include "Locus/Scene/Entity.h"
+#include "Locus/Math/Math.h"
 
 namespace Locus
 {
@@ -47,25 +49,16 @@ namespace Locus
 		Entity Self = Entity::Null;
 		Entity Parent = Entity::Null;
 
-	private:
-		// Euler
 		glm::vec3 LocalPosition = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 LocalRotation = { 0.0f, 0.0f, 0.0f };
-		glm::quat LocalRotationQuat = { 0.0f, 0.0f, 0.0f, 0.0f };
 		glm::vec3 LocalScale = { 1.0f, 1.0f, 1.0f };
 
-		// TODO: Combine into matrix?
-		glm::vec3 WorldPosition = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 WorldRotation = { 0.0f, 0.0f, 0.0f };
-		glm::quat WorldRotationQuat = { 0.0f, 0.0f, 0.0f, 0.0f };
-		glm::vec3 WorldScale = { 1.0f, 1.0f, 1.0f };
-
-		bool Dirty = false;
+	private:
+		glm::vec3 LocalRotation = { 0.0f, 0.0f, 0.0f };
+		glm::quat LocalRotationQuat = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 	public:
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent&) = default;
-		TransformComponent(const glm::vec3& position) : WorldPosition(position) {}
 
 		// Transform
 		glm::mat4 GetLocalTransform() const
@@ -76,127 +69,26 @@ namespace Locus
 				 * glm::scale(glm::mat4(1.0f), LocalScale);
 		}
 
-		glm::mat4 GetWorldTransform() const
-		{
-			glm::mat4 rotation = glm::toMat4(WorldRotationQuat);
-			return glm::translate(glm::mat4(1.0f), WorldPosition)
-				 * rotation
-				 * glm::scale(glm::mat4(1.0f), WorldScale);
-		}
-
 		// Position
-		glm::vec3 GetLocalPosition() const { return LocalPosition; }
-		glm::vec3 GetWorldPosition() const { return WorldPosition; }
-
-		void SetLocalPosition(const glm::vec3& position) 
-		{
-			LocalPosition = position;
-			if (Parent != Entity::Null)
-				WorldPosition = Parent.GetComponent<TransformComponent>().GetWorldPosition() + position;
-			else
-				WorldPosition = LocalPosition;
-
-			Dirty = true;
-		}
-
-		void SetWorldPosition(const glm::vec3& position)
-		{
-			WorldPosition = position;
-			if (Parent != Entity::Null)
-				LocalPosition = position - Parent.GetComponent<TransformComponent>().GetWorldPosition();
-			else
-				LocalPosition = WorldPosition;
-			Dirty = true;
-		}
-
-		// Rotation
 		glm::vec3 GetLocalRotation() const { return LocalRotation; }
-		glm::vec3 GetWorldRotation() const { return WorldRotation; }
 		glm::quat GetLocalRotationQuat() const { return LocalRotationQuat; }
-		glm::quat GetWorldRotationQuat() const { return WorldRotationQuat; }
 
 		void SetLocalRotation(const glm::vec3& rotation)
 		{
 			LocalRotation = rotation;
 			LocalRotationQuat = glm::quat(LocalRotation);
-			
-			if (Parent != Entity::Null)
-				WorldRotation = Parent.GetComponent<TransformComponent>().GetWorldRotation() + rotation;
-			else
-				WorldRotation = LocalRotation;
-			WorldRotationQuat = glm::quat(WorldRotation);
-
-			Dirty = true;
 		}
 
 		void SetLocalRotationQuat(const glm::quat& quat)
 		{
 			LocalRotationQuat = quat;
 			LocalRotation = glm::eulerAngles(LocalRotationQuat);
-			
-			if (Parent != Entity::Null)
-				WorldRotationQuat = Parent.GetComponent<TransformComponent>().GetWorldRotationQuat() + quat;
-			else
-				WorldRotationQuat = LocalRotationQuat;
-			WorldRotation = glm::eulerAngles(WorldRotationQuat);
-
-			Dirty = true;
 		}
 
-		void SetWorldRotation(const glm::vec3& rotation)
-		{
-			WorldRotation = rotation;
-			WorldRotationQuat = glm::quat(WorldRotation);
-
-			if (Parent != Entity::Null)
-				LocalRotation = rotation - Parent.GetComponent<TransformComponent>().GetWorldRotation();
-			else
-				LocalRotation = WorldRotation;
-			LocalRotationQuat = glm::quat(LocalRotation);
-
-			Dirty = true;
-		}
-
-		void SetWorldRotationQuat(const glm::quat& quat)
-		{
-			WorldRotationQuat = quat;
-			WorldRotation = glm::eulerAngles(WorldRotationQuat);
-
-			if (Parent != Entity::Null)
-				LocalRotationQuat = quat - Parent.GetComponent<TransformComponent>().GetWorldRotationQuat();
-			else
-				LocalRotationQuat = WorldRotationQuat;
-			LocalRotation = glm::eulerAngles(LocalRotationQuat);
-
-			Dirty = true;
-		}
-
-		// Scale
-		glm::vec3 GetLocalScale() const { return LocalScale; }
-		glm::vec3 GetWorldScale() const { return WorldScale; }
-
-		void SetLocalScale(const glm::vec3& scale)
-		{
-			LocalScale = scale;
-			if (Parent != Entity::Null)
-				WorldScale = Parent.GetComponent<TransformComponent>().GetWorldScale() + scale;
-			else
-				WorldScale = LocalScale;
-
-			Dirty = true;
-		}
-
-		void SetWorldScale(const glm::vec3& scale)
-		{
-			WorldScale = scale;
-			if (Parent != Entity::Null)
-				LocalScale = scale - Parent.GetComponent<TransformComponent>().GetWorldScale();
-			else
-				LocalScale = WorldScale;
-
-			Dirty = true;
-		}
-
+		friend class Scene;
+		friend class SceneSerializer;
+		friend class LocusEditorLayer;
+		friend class PropertiesPanel;
 	};
 
 	struct SpriteRendererComponent

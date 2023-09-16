@@ -33,6 +33,8 @@ namespace Locus
 		bool OnKeyPressed(KeyPressedEvent& e);
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 
+		void OnMouseButtonReleased();
+
 		// Serialization
 		void NewScene();
 		void OpenScene();
@@ -80,6 +82,8 @@ namespace Locus
 
 		// Viewport Gizmo
 		int m_GizmoType = -1;
+		bool m_GizmoVisible = false;
+		bool m_GizmoFirstClick = true;
 
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;

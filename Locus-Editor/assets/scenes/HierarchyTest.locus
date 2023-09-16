@@ -1,79 +1,76 @@
 Scene: Untitled
 Entities:
-  - Entity: 9952625982851901988
+  - Entity: 1305602244922242236
     TagComponent:
-      Tag: Child2
+      Tag: Red
       Enabled: true
     TransformComponent:
-      Self: 9952625982851901988
-      Parent: 2090525039407005965
-      LocalPosition: [0, 0, 0]
-      LocalRotation: [0, 0, 0]
+      Self: 1305602244922242236
+      Parent: 0
+      LocalPosition: [1.27230108, 1.27191925, 0]
+      LocalRotation: [0, -0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
       LocalScale: [1, 1, 1]
-      WorldPosition: [0, 0, 0]
+      WorldPosition: [1.27230108, 1.27191925, 0]
       WorldRotation: [0, 0, 0]
+      WorldRotationQuat: [0, 0, 0, 0]
       WorldScale: [1, 1, 1]
-    SpriteRendererComponent:
-      Color: [0.588744581, 0.191150829, 0.191150829, 1]
-      TexturePath: ""
-      TilingFactor: 1
-  - Entity: 3817402640139202223
-    TagComponent:
-      Tag: Child1
-      Enabled: true
-    TransformComponent:
-      Self: 3817402640139202223
-      Parent: 2090525039407005965
-      LocalPosition: [0, 0, 0]
-      LocalRotation: [0, 0, 0]
-      LocalScale: [1, 1, 1]
-      WorldPosition: [0, 0, 0]
-      WorldRotation: [0, 0, 0]
-      WorldScale: [1, 1, 1]
+      WorldTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1.27230108, 1.27191925, 0, 1]
+      LocalToWorld: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+      WorldToLocal: [1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -0, 0, -0, 1]
     ChildComponent:
       ChildCount: 1
       ChildEntities:
-        Child0: 2534315909601149933
+        Child0: 10873498710316986227
     SpriteRendererComponent:
-      Color: [0.909090877, 0.636930883, 0.0708382726, 1]
+      Color: [1, 0, 0, 1]
       TexturePath: ""
       TilingFactor: 1
-  - Entity: 2090525039407005965
+  - Entity: 10873498710316986227
     TagComponent:
-      Tag: Parent1
+      Tag: Blue
       Enabled: true
     TransformComponent:
-      Self: 2090525039407005965
-      Parent: 0
-      LocalPosition: [0, 0, 0]
-      LocalRotation: [0, 0, 0]
+      Self: 10873498710316986227
+      Parent: 1305602244922242236
+      LocalPosition: [3.25323343, 1.73207855, 0]
+      LocalRotation: [0, -0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
       LocalScale: [1, 1, 1]
-      WorldPosition: [0, 0, 0]
-      WorldRotation: [0, 0, 0]
+      WorldPosition: [4.52553463, 3.0039978, 0]
+      WorldRotation: [0, -0, 0]
+      WorldRotationQuat: [0, 0, 0, 1]
       WorldScale: [1, 1, 1]
+      WorldTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 4.52553463, 3.0039978, 0, 1]
+      LocalToWorld: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1.27230108, 1.27191925, 0, 1]
+      WorldToLocal: [1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -1.27230108, -1.27191925, -0, 1]
     ChildComponent:
-      ChildCount: 2
+      ChildCount: 1
       ChildEntities:
-        Child0: 3817402640139202223
-        Child1: 9952625982851901988
+        Child0: 3300798224898839683
     SpriteRendererComponent:
-      Color: [0.0794392824, 0.588744581, 0.0203894526, 1]
+      Color: [0.134429395, 0.0084705893, 0.97835499, 1]
       TexturePath: ""
       TilingFactor: 1
-  - Entity: 2534315909601149933
+  - Entity: 3300798224898839683
     TagComponent:
-      Tag: Child1Child1
+      Tag: Green
       Enabled: true
     TransformComponent:
-      Self: 2534315909601149933
-      Parent: 3817402640139202223
-      LocalPosition: [0, 0, 0]
-      LocalRotation: [0, 0, 0]
+      Self: 3300798224898839683
+      Parent: 10873498710316986227
+      LocalPosition: [2.80485487, -2.1113739, 0]
+      LocalRotation: [0, -0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
       LocalScale: [1, 1, 1]
-      WorldPosition: [0, 0, 0]
-      WorldRotation: [0, 0, 0]
+      WorldPosition: [7.3303895, 0.892623901, 0]
+      WorldRotation: [0, -0, 0]
+      WorldRotationQuat: [0, 0, 0, 1]
       WorldScale: [1, 1, 1]
+      WorldTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 7.3303895, 0.892623901, 0, 1]
+      LocalToWorld: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 4.52553463, 3.0039978, 0, 1]
+      WorldToLocal: [1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -4.52553463, -3.0039978, -0, 1]
     SpriteRendererComponent:
-      Color: [0.0722705647, 0.0219261143, 0.506493509, 1]
+      Color: [0.103896022, 1, 0, 1]
       TexturePath: ""
       TilingFactor: 1

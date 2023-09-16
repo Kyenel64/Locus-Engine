@@ -13,38 +13,33 @@ namespace Locus::Math
 		return v * desiredLength / length(v);
 	}
 
-	bool DecomposeTransform(const glm::mat4& transform, glm::vec3& translation, glm::quat& rotation, glm::vec3& scale)
+	bool Decompose(const glm::mat4& transform, glm::vec3& scale, glm::quat& rotation, glm::vec3& position)
 	{
-		// from glm::decompose
-		glm::mat4 LocalMatrix(transform);
+		glm::mat4 localTransform = transform;
 
 		// Normalize the matrix.
-		if (glm::epsilonEqual(LocalMatrix[3][3], 0.0f, glm::epsilon<float>()))
+		if (glm::epsilonEqual(localTransform[3][3], 0.0f, glm::epsilon<float>()))
 			return false;
 
-		for (glm::length_t i = 0; i < 4; ++i)
-			for (glm::length_t j = 0; j < 4; ++j)
-				LocalMatrix[i][j] /= LocalMatrix[3][3];
+		for (size_t i = 0; i < 4; ++i)
+			for (size_t j = 0; j < 4; ++j)
+				localTransform[i][j] /= localTransform[3][3];
 
-		// No perspective.
-		glm::vec4 Perspective = glm::vec4(0, 0, 0, 1);
-
-		// Next take care of translation (easy).
-		translation = glm::vec3(LocalMatrix[3]);
-		LocalMatrix[3] = glm::vec4(0, 0, 0, LocalMatrix[3].w);
+		// Transform
+		position = glm::vec3(localTransform[3]);
+		localTransform[3] = glm::vec4(0, 0, 0, localTransform[3].w);
 
 		glm::vec3 Row[3], Pdum3;
 
-		// Now get scale and shear.
-		for (glm::length_t i = 0; i < 3; ++i)
-			for (glm::length_t j = 0; j < 3; ++j)
-				Row[i][j] = LocalMatrix[i][j];
+		// Scale
+		for (size_t i = 0; i < 3; ++i)
+			for (size_t j = 0; j < 3; ++j)
+				Row[i][j] = localTransform[i][j];
 
 		// Compute X scale factor and normalize first row.
 		scale.x = length(Row[0]);// v3Length(Row[0]);
 		Row[0] = Scale(Row[0], 1.0f);
 
-		// Now, compute Y scale and normalize 2nd row.
 		scale.y = length(Row[1]);
 		Row[1] = Scale(Row[1], 1.0f);
 
@@ -58,13 +53,14 @@ namespace Locus::Math
 		Pdum3 = cross(Row[1], Row[2]); // v3Cross(row[1], row[2], Pdum3);
 		if (dot(Row[0], Pdum3) < 0)
 		{
-			for (glm::length_t i = 0; i < 3; i++)
+			for (size_t i = 0; i < 3; i++)
 			{
 				scale[i] *= -1.0f;
 				Row[i] *= -1.0f;
 			}
 		}
 
+		// Rotations
 		int i, j, k = 0;
 		float root, trace = Row[0].x + Row[1].y + Row[2].z;
 		if (trace > 0.0f)

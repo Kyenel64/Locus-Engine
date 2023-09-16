@@ -130,12 +130,20 @@ namespace Locus
 			m_SelectedEntity = {};
 		m_PropertiesPanel.SetSelectedEntity(m_SelectedEntity);
 
-
 		if (m_SelectedEntity.IsValid())
+		{
 			ImGuizmo::Enable(true);
+			m_GizmoVisible = true;
+		}
 		else
+		{
 			ImGuizmo::Enable(false);
-		
+			m_GizmoVisible = false;
+		}
+
+		if (m_GizmoType == -1)
+			m_GizmoVisible = false;
+
 		m_Framebuffer->Unbind();
 
 		Renderer2D::StatsEndFrame();
@@ -211,7 +219,12 @@ namespace Locus
 		ProcessViewportDragDrop();
 		// viewport gizmo
 		if (m_SelectedEntity && m_GizmoType != -1)
-			showGizmoUI();
+		{
+			if (!m_GizmoFirstClick)
+				showGizmoUI();
+			else
+				m_GizmoFirstClick = false;
+		}
 		// viewport menu
 		if (ImGui::BeginMenuBar())
 		{
@@ -362,10 +375,13 @@ namespace Locus
 	{
 		if (e.GetMouseButton() == Mouse::ButtonLeft)
 		{
-			if (m_ViewportHovered && !ImGuizmo::IsOver())
+			if (m_ViewportHovered && (!ImGuizmo::IsOver() || ImGuizmo::IsOver() && !m_GizmoVisible))
+			{
 				m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
+				m_SelectedEntity = m_HoveredEntity;
+				m_GizmoFirstClick = true;
+			}
 		}
-
 		return false;
 	}
 
@@ -407,7 +423,7 @@ namespace Locus
 		std::string path = FileDialogs::SaveFile("Locus Scene (*.locus)\0*.locus\0");
 		if (!path.empty())
 		{
-			SceneSerializer serializer(m_ActiveScene);
+			SceneSerializer serializer(m_EditorScene);
 			serializer.Serialize(path);
 			m_SavePath = path;
 			Application::Get().SetIsSavedStatus(true);
@@ -422,7 +438,7 @@ namespace Locus
 		}
 		else
 		{
-			SceneSerializer serializer(m_ActiveScene);
+			SceneSerializer serializer(m_EditorScene);
 			serializer.Serialize(m_SavePath);
 			Application::Get().SetIsSavedStatus(true);
 		}
@@ -440,9 +456,8 @@ namespace Locus
 		glm::mat4 cameraView = m_EditorCamera.GetViewMatrix();
 
 		// Entity transform
-		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
-		auto& tc = selectedEntity.GetComponent<TransformComponent>();
-		glm::mat4& transform = tc.GetWorldTransform();
+		auto& tc = m_SelectedEntity.GetComponent<TransformComponent>();
+		glm::mat4& transform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
 
 		// Snapping
 		bool snap = Input::IsKeyPressed(Key::LeftControl);
@@ -455,10 +470,13 @@ namespace Locus
 			(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform),
 			nullptr, snap ? snapValues : nullptr);
 
+		// Convert back to local space
+		if (tc.Parent != Entity::Null)
+			transform = glm::inverse(m_ActiveScene->GetWorldTransform(tc.Parent)) * transform;
+
 		glm::vec3 translation, scale;
 		glm::quat rotation;
-		//Math::DecomposeTransform(transform, scale, rotation, translation);
-		glm::decompose(transform, scale, rotation, translation, glm::vec3(1.0f), glm::vec4(1.0f));
+		Math::Decompose(transform, scale, rotation, translation);
 
 		if (ImGuizmo::IsUsing())
 		{
@@ -466,7 +484,7 @@ namespace Locus
 			{
 				case ImGuizmo::TRANSLATE:
 				{
-					CommandHistory::AddCommand(new ChangeValueCommand(translation, tc.GetLocalPosition()));
+					CommandHistory::AddCommand(new ChangeValueCommand(translation, tc.LocalPosition));
 					break;
 				}
 				case ImGuizmo::ROTATE:
@@ -487,12 +505,12 @@ namespace Locus
 					if (fabs(deltaRotationEuler.z) < 0.001) deltaRotationEuler.z = 0.0f;
 
 					glm::vec3 rotationEuler = tc.GetLocalRotation();
-					CommandHistory::AddCommand(new ChangeValueCommand(rotationEuler + deltaRotationEuler, tc.GetLocalRotation()));
+					CommandHistory::AddCommand(new ChangeValueCommand(rotationEuler + deltaRotationEuler, tc.LocalRotation));
 					break;
 				}
 				case ImGuizmo::SCALE:
 				{
-					CommandHistory::AddCommand(new ChangeValueCommand(scale, tc.GetLocalScale()));
+					CommandHistory::AddCommand(new ChangeValueCommand(scale, tc.LocalScale));
 					break;
 				}
 			}
@@ -525,6 +543,7 @@ namespace Locus
 
 	void LocusEditorLayer::OnSceneStop()
 	{
+		m_SelectedEntity = {};
 		m_SceneState = SceneState::Edit;
 		m_ActiveScene->OnRuntimeStop();
 
@@ -798,9 +817,21 @@ namespace Locus
 				collisionLayer = std::to_string(m_HoveredEntity.GetComponent<BoxCollider2DComponent>().CollisionLayer);
 		ImGui::Text("Hovered Collision Layer: %s", collisionLayer.c_str());
 
-		// Relationships debug
+		// Child debug
 		if (m_SelectedEntity.IsValid())
 		{
+			if (m_SelectedEntity.HasComponent<ChildComponent>())
+			{
+				auto& cc = m_SelectedEntity.GetComponent<ChildComponent>();
+				ImGui::Separator();
+				ImGui::Text("Children:");
+				ImGui::Indent();
+				for (auto entity : cc.ChildEntities)
+				{
+					auto tag = entity.GetComponent<TagComponent>().Tag;
+					ImGui::Text(tag.c_str());
+				}
+			}
 		}
 
 		// Transforms
@@ -815,14 +846,22 @@ namespace Locus
 			else
 				ImGui::Text("Parent: Entity::Null");
 
-			ImGui::Text("LocalPosition: %f, %f, %f", tc.GetLocalPosition().x, tc.GetLocalPosition().y, tc.GetLocalPosition().z);
-			ImGui::Text("WorldPosition: %f, %f, %f", tc.GetWorldPosition().x, tc.GetWorldPosition().y, tc.GetWorldPosition().z);
+			ImGui::Text("Self: %s", tc.Self.GetComponent<TagComponent>().Tag.c_str());
 
-			ImGui::Text("LocalRotation: %f, %f, %f", glm::degrees(tc.GetLocalRotation().x), glm::degrees(tc.GetLocalRotation()).y, glm::degrees(tc.GetLocalRotation().z));
-			ImGui::Text("WorldRotation: %f, %f, %f", glm::degrees(tc.GetWorldRotation().x), glm::degrees(tc.GetWorldRotation()).y, glm::degrees(tc.GetWorldRotation().z));
+			glm::mat4 worldTransform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
+			glm::vec3 worldPosition, worldScale;
+			glm::quat worldRotationQuat;
+			Math::Decompose(worldTransform, worldScale, worldRotationQuat, worldPosition);
+			glm::vec3 worldRotation = glm::eulerAngles(worldRotationQuat);
 
-			ImGui::Text("LocalScale: %f, %f, %f", tc.GetLocalScale().x, tc.GetLocalScale().y, tc.GetLocalScale().z);
-			ImGui::Text("WorldScale: %f, %f, %f", tc.GetWorldScale().x, tc.GetWorldScale().y, tc.GetWorldScale().z);
+			ImGui::Text("LocalPosition: %f, %f, %f", tc.LocalPosition.x, tc.LocalPosition.y, tc.LocalPosition.z);
+			ImGui::Text("WorldPosition: %f, %f, %f", worldPosition.x, worldPosition.y, worldPosition.z);
+
+			ImGui::Text("LocalRotation: %f, %f, %f", glm::degrees(tc.LocalRotation.x), glm::degrees(tc.LocalRotation.y), glm::degrees(tc.LocalRotation.z));
+			ImGui::Text("WorldRotation: %f, %f, %f", glm::degrees(worldRotation.x), glm::degrees(worldRotation.y), glm::degrees(worldRotation.z));
+
+			ImGui::Text("LocalScale: %f, %f, %f", tc.LocalScale.x, tc.LocalScale.y, tc.LocalScale.z);
+			ImGui::Text("WorldScale: %f, %f, %f", worldScale.x, worldScale.y, worldScale.z);
 		}
 		ImGui::End();
 	}

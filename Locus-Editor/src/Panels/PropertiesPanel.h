@@ -34,7 +34,7 @@ namespace Locus
 		void DrawUInt16Control(const std::string& name, uint16_t& changeValue, uint16_t resetValue = 1);
 		void DrawColorControl(const std::string& name, glm::vec4& colorValue);
 		void DrawVec2Control(const std::string& name, glm::vec2& values, float resetValue = 0.0f);
-		void DrawVec3Control(const std::string& name, glm::vec3& values, float resetValue = 0.0f);
+		bool DrawVec3Control(const std::string& name, glm::vec3& values, float resetValue = 0.0f);
 		
 		template<typename T>
 		void CopyComponentToClipboard(Entity selectedEntity);

@@ -1,47 +1,37 @@
 Scene: Untitled
 Entities:
-  - Entity: 15293030706600441320
+  - Entity: 903762964700320918
     TagComponent:
-      Tag: Main Camera
+      Tag: Child1
       Enabled: true
     TransformComponent:
-      Translation: [0, 2.94245887, 17.5470467]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      ChildCount: 0
-      Parent: 0
-      FirstChild: 0
-      Next: 0
-      Prev: 0
-    CameraComponent:
-      Camera:
-        BackgroundColor: [0.25, 0.5, 0.5, 1]
-        ProjectionType: 0
-        OrthographicSize: 20
-        OrthographicNearClip: -1
-        OrthographicFarClip: 1000
-        PerspectiveFOV: 0.785398185
-        PerspectiveNearClip: 0.00999999978
-        PerspectiveFarClip: 1000
-      Primary: true
-      FixedAspectRatio: false
-  - Entity: 8118316444268235600
+      Self: 903762964700320918
+      Parent: 18090131422620236725
+      LocalPosition: [11.6132545, -0.607208252, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    ChildComponent:
+      ChildCount: 1
+      ChildEntities:
+        Child0: 7597887158590632467
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: ""
+      TilingFactor: 1
+  - Entity: 12952951697756647390
     TagComponent:
       Tag: Platform
       Enabled: true
     TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [15.6000004, 1, 1]
-    RelationshipComponent:
-      ChildCount: 0
+      Self: 12952951697756647390
       Parent: 0
-      FirstChild: 0
-      Next: 0
-      Prev: 0
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [12.8000002, 1, 1]
     SpriteRendererComponent:
-      Color: [0.688311696, 0.214538708, 0.214538708, 1]
+      Color: [1, 1, 1, 1]
       TexturePath: ""
       TilingFactor: 1
     Rigidbody2DComponent:
@@ -58,22 +48,23 @@ Entities:
       CollisionLayer: 1
       Offset: [0, 0]
       Size: [1, 1]
-  - Entity: 12075983115040327258
+  - Entity: 18090131422620236725
     TagComponent:
-      Tag: Cube
+      Tag: Parent
       Enabled: true
     TransformComponent:
-      Translation: [-3.7252903e-09, 4.93546677, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    RelationshipComponent:
-      ChildCount: 0
+      Self: 18090131422620236725
       Parent: 0
-      FirstChild: 0
-      Next: 0
-      Prev: 0
+      LocalPosition: [0.0136561757, 5.24283791, 0]
+      LocalRotation: [0, 0, -0.35953784]
+      LocalRotationQuat: [0, 0, -0.178802222, 0.98388505]
+      LocalScale: [1, 1, 1]
+    ChildComponent:
+      ChildCount: 1
+      ChildEntities:
+        Child0: 903762964700320918
     SpriteRendererComponent:
-      Color: [1, 1, 1, 1]
+      Color: [0.839826822, 0.119975254, 0.119975254, 1]
       TexturePath: ""
       TilingFactor: 1
     Rigidbody2DComponent:
@@ -84,9 +75,55 @@ Entities:
       AngularDrag: 0.0500000007
       FixedRotation: false
       Friction: 0.200000003
-      Restitution: 0
+      Restitution: 0.5
       RestitutionThreshold: 1
     BoxCollider2DComponent:
       CollisionLayer: 1
       Offset: [0, 0]
       Size: [1, 1]
+  - Entity: 5546483057596842680
+    TagComponent:
+      Tag: Main Camera
+      Enabled: true
+    TransformComponent:
+      Self: 5546483057596842680
+      Parent: 0
+      LocalPosition: [0, 0, 8.33333111]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    ChildComponent:
+      ChildCount: 0
+      ChildEntities:
+        {}
+    CameraComponent:
+      Camera:
+        BackgroundColor: [0.25, 0.5, 0.5, 1]
+        ProjectionType: 0
+        OrthographicSize: 15
+        OrthographicNearClip: -1
+        OrthographicFarClip: 1000
+        PerspectiveFOV: 0.785398185
+        PerspectiveNearClip: 0.00999999978
+        PerspectiveFarClip: 1000
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 7597887158590632467
+    TagComponent:
+      Tag: Child2
+      Enabled: true
+    TransformComponent:
+      Self: 7597887158590632467
+      Parent: 903762964700320918
+      LocalPosition: [-2.83858204, 2.12052631, -6.10351562e-05]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    ChildComponent:
+      ChildCount: 0
+      ChildEntities:
+        {}
+    SpriteRendererComponent:
+      Color: [0.05307246, 0.182738215, 0.766233802, 1]
+      TexturePath: ""
+      TilingFactor: 1

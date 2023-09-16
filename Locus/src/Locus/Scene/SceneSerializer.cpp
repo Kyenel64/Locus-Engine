@@ -87,6 +87,33 @@ namespace YAML {
 		}
 	};
 
+	template<>
+	struct convert<glm::quat>
+	{
+		static Node encode(const glm::quat& rhs)
+		{
+			Node node;
+			node.push_back(rhs.x);
+			node.push_back(rhs.y);
+			node.push_back(rhs.z);
+			node.push_back(rhs.w);
+			node.SetStyle(EmitterStyle::Flow);
+			return node;
+		}
+
+		static bool decode(const Node& node, glm::quat& rhs)
+		{
+			if (!node.IsSequence() || node.size() != 4)
+				return false;
+
+			rhs.x = node[0].as<float>();
+			rhs.y = node[1].as<float>();
+			rhs.z = node[2].as<float>();
+			rhs.w = node[3].as<float>();
+			return true;
+		}
+	};
+
 }
 
 namespace Locus
@@ -112,12 +139,19 @@ namespace Locus
 		return out;
 	}
 
+	YAML::Emitter& operator<<(YAML::Emitter& out, const glm::quat& v)
+	{
+		out << YAML::Flow;
+		out << YAML::BeginSeq << v.x << v.y << v.z << v.w << YAML::EndSeq;
+		return out;
+	}
+
 	SceneSerializer::SceneSerializer(const Ref<Scene>& scene)
 		: m_Scene(scene)
 	{
 	}
 
-	static void SerializeEntity(YAML::Emitter& out, Entity entity)
+	void SceneSerializer::SerializeEntity(YAML::Emitter& out, Entity entity)
 	{
 		LOCUS_CORE_ASSERT(entity.HasComponent<IDComponent>(), "Entity does not have ID!");
 		out << YAML::BeginMap; // Begin Entity
@@ -147,12 +181,11 @@ namespace Locus
 				out << YAML::Key << "Parent" << YAML::Value << tc.Parent.GetComponent<IDComponent>().ID;
 			else
 				out << YAML::Key << "Parent" << YAML::Value << 0;
-			out << YAML::Key << "LocalPosition" << YAML::Value << tc.GetLocalPosition();
-			out << YAML::Key << "LocalRotation" << YAML::Value << tc.GetLocalRotation();
-			out << YAML::Key << "LocalScale" << YAML::Value << tc.GetLocalScale();
-			out << YAML::Key << "WorldPosition" << YAML::Value << tc.GetWorldPosition();
-			out << YAML::Key << "WorldRotation" << YAML::Value << tc.GetWorldRotation();
-			out << YAML::Key << "WorldScale" << YAML::Value << tc.GetWorldScale();
+			out << YAML::Key << "LocalPosition" << YAML::Value << tc.LocalPosition;
+			out << YAML::Key << "LocalRotation" << YAML::Value << tc.LocalRotation;
+			out << YAML::Key << "LocalRotationQuat" << YAML::Value << tc.LocalRotationQuat;
+			out << YAML::Key << "LocalScale" << YAML::Value << tc.LocalScale;
+
 			out << YAML::EndMap; // End Transform Component
 		}
 
@@ -318,13 +351,10 @@ namespace Locus
 				{
 					auto& tc = deserializedEntity.GetComponent<TransformComponent>();
 					tc.Self = deserializedEntity;
-					// Set parent entity once all entities have been deserialized.
-					tc.SetLocalPosition(transformComponent["LocalPosition"].as<glm::vec3>());
-					tc.SetLocalRotation(transformComponent["LocalRotation"].as<glm::vec3>());
-					tc.SetLocalScale(transformComponent["LocalScale"].as<glm::vec3>());
-					tc.SetWorldPosition(transformComponent["WorldPosition"].as<glm::vec3>());
-					tc.SetWorldRotation(transformComponent["WorldRotation"].as<glm::vec3>());
-					tc.SetWorldScale(transformComponent["WorldScale"].as<glm::vec3>());
+					tc.LocalPosition = transformComponent["LocalPosition"].as<glm::vec3>();
+					tc.LocalRotation = transformComponent["LocalRotation"].as<glm::vec3>();
+					tc.LocalRotationQuat = transformComponent["LocalRotationQuat"].as<glm::quat>();
+					tc.LocalScale = transformComponent["LocalScale"].as<glm::vec3>();
 				}
 
 				// --- Sprite Renderer Component ------------------------------
@@ -396,10 +426,11 @@ namespace Locus
 				auto transformComponent = e["TransformComponent"];
 				if (transformComponent)
 				{
+					auto& tc = entity.GetComponent<TransformComponent>();
 					if (transformComponent["Parent"].as<uint64_t>() != 0)
 					{
 						Entity parent = m_Scene->GetEntityByUUID(transformComponent["Parent"].as<uint64_t>());
-						entity.GetComponent<TransformComponent>().Parent = parent;
+						tc.Parent = parent;
 					}
 				}
 

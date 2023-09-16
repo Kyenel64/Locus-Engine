@@ -5,21 +5,17 @@ Entities:
       Tag: Main Camera
       Enabled: true
     TransformComponent:
-      Self: 15259710990347280493
+      Self: 15939842933279708774
       Parent: 0
-      LocalPosition: [0, 0, -1]
+      LocalPosition: [0, -1.67383432, 13.070507]
       LocalRotation: [0, 0, 0]
       LocalRotationQuat: [0, 0, 0, 1]
       LocalScale: [1, 1, 1]
-    SpriteRendererComponent:
-      Color: [1, 1, 1, 1]
-      TexturePath: ""
-      TilingFactor: 1
     CameraComponent:
       Camera:
         BackgroundColor: [0.939393938, 0.759616733, 0.565263033, 1]
         ProjectionType: 0
-        OrthographicSize: 5
+        OrthographicSize: 10
         OrthographicNearClip: -1
         OrthographicFarClip: 1000
         PerspectiveFOV: 0.785398185
@@ -32,7 +28,7 @@ Entities:
       Tag: Background2
       Enabled: true
     TransformComponent:
-      Self: 15259710990347280493
+      Self: 9642928867914844756
       Parent: 0
       LocalPosition: [0, 8.18000031, -0.649999976]
       LocalRotation: [0, 0, 0]
@@ -524,7 +520,7 @@ Entities:
       TilingFactor: 1
   - Entity: 873621801631000615
     TagComponent:
-      Tag: Grass
+      Tag: Goblin
       Enabled: true
     TransformComponent:
       Self: 873621801631000615

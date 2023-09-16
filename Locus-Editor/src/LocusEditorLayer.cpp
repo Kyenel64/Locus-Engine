@@ -110,6 +110,10 @@ namespace Locus
 			}
 		}
 
+
+		if (ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+			OnMouseButtonReleased();
+
 		// Read pixel
 		auto [mx, my] = ImGui::GetMousePos();
 		mx -= m_ViewportBounds[0].x;
@@ -130,11 +134,19 @@ namespace Locus
 			m_SelectedEntity = {};
 		m_PropertiesPanel.SetSelectedEntity(m_SelectedEntity);
 
-
 		if (m_SelectedEntity.IsValid())
+		{
 			ImGuizmo::Enable(true);
+			m_GizmoVisible = true;
+		}
 		else
+		{
 			ImGuizmo::Enable(false);
+			m_GizmoVisible = false;
+		}
+
+		if (m_GizmoType == -1)
+			m_GizmoVisible = false;
 
 		m_Framebuffer->Unbind();
 
@@ -360,16 +372,16 @@ namespace Locus
 
 	bool LocusEditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& e)
 	{
-		if (e.GetMouseButton() == Mouse::ButtonLeft)
-		{
-			if (m_ViewportHovered && !ImGuizmo::IsOver())
-			{
-				m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
-				m_SelectedEntity = m_HoveredEntity;
-			}
-		}
-
 		return false;
+	}
+
+	void LocusEditorLayer::OnMouseButtonReleased()
+	{
+		if (m_ViewportHovered && (!ImGuizmo::IsOver() || ImGuizmo::IsOver() && !m_GizmoVisible))
+		{
+			m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
+			m_SelectedEntity = m_HoveredEntity;
+		}
 	}
 
 	void LocusEditorLayer::NewScene()

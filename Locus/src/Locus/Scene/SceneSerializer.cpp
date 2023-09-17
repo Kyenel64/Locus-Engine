@@ -222,6 +222,19 @@ namespace Locus
 			out << YAML::EndMap; // End Sprite Renderer Component
 		}
 
+		// --- Circle Renderer Component --------------------------------------
+		if (entity.HasComponent<CircleRendererComponent>())
+		{
+			auto& crc = entity.GetComponent<CircleRendererComponent>();
+			out << YAML::Key << "CircleRendererComponent";
+
+			out << YAML::BeginMap; // Circle Renderer Component
+			out << YAML::Key << "Color" << YAML::Value << crc.Color;
+			out << YAML::Key << "Thickness" << YAML::Value << crc.Thickness;
+			out << YAML::Key << "Fade" << YAML::Value << crc.Fade;
+			out << YAML::EndMap;
+		}
+
 		// --- Camera Component -----------------------------------------------
 		if (entity.HasComponent<CameraComponent>())
 		{
@@ -367,6 +380,16 @@ namespace Locus
 					if (src.TexturePath != std::string())
 						src.Texture = Texture2D::Create(src.TexturePath);
 					src.TilingFactor = spriteRendererComponent["TilingFactor"].as<float>();
+				}
+
+				// --- Circle Renderer Component ------------------------------
+				auto circleRendererComponent = entity["CircleRendererComponent"];
+				if (circleRendererComponent)
+				{
+					auto& crc = deserializedEntity.AddComponent<CircleRendererComponent>();
+					crc.Color = circleRendererComponent["Color"].as<glm::vec4>();
+					crc.Thickness = circleRendererComponent["Thickness"].as<float>();
+					crc.Fade = circleRendererComponent["Fade"].as<float>();
 				}
 
 				// --- Camera Component ---------------------------------------

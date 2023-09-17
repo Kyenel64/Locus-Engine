@@ -127,3 +127,47 @@ Entities:
       Color: [0.05307246, 0.182738215, 0.766233802, 1]
       TexturePath: ""
       TilingFactor: 1
+  - Entity: 5352762745720887587
+    TagComponent:
+      Tag: Circle
+      Enabled: true
+    TransformComponent:
+      Self: 5352762745720887587
+      Parent: 0
+      LocalPosition: [-3.30451822, 1.61267471, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    ChildComponent:
+      ChildCount: 1
+      ChildEntities:
+        Child0: 3749710963294045755
+    CircleRendererComponent:
+      Color: [0.046831958, 0.636363626, 0.138706893, 1]
+      Thickness: 0.5
+      Fade: 0.400000006
+    Rigidbody2DComponent:
+      BodyType: 1
+      Mass: 1
+      GravityScale: 1
+      LinearDrag: 1
+      AngularDrag: 0.0500000007
+      FixedRotation: false
+      Friction: 0.200000003
+      Restitution: 0
+      RestitutionThreshold: 1
+    BoxCollider2DComponent:
+      CollisionLayer: 1
+      Offset: [0, 0]
+      Size: [1, 1]
+  - Entity: 3749710963294045755
+    TagComponent:
+      Tag: Empty Entity
+      Enabled: true
+    TransformComponent:
+      Self: 3749710963294045755
+      Parent: 5352762745720887587
+      LocalPosition: [4.12866974, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]

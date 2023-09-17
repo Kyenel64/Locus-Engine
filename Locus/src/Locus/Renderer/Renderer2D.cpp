@@ -34,16 +34,14 @@ namespace Locus
 
 	struct Renderer2DData
 	{
-		static const uint32_t QuadVertexCount = 4;
 		static const uint32_t MaxQuads = 20000;
-		static const uint32_t MaxVertices = MaxQuads * 4;
+		static const uint32_t MaxVertices = MaxQuads * 4; // Using indices instead
 		static const uint32_t MaxIndices = MaxQuads * 6;
 		static const uint32_t MaxTextureSlots = 32; //TODO: GPU dependent
 
 		Ref<VertexArray> QuadVA;
 		Ref<VertexBuffer> QuadVB;
 		Ref<Shader> QuadShader;
-		Ref<Texture2D> WhiteTexture;
 
 		Ref<VertexArray> CircleVA;
 		Ref<VertexBuffer> CircleVB;
@@ -59,6 +57,7 @@ namespace Locus
 
 		std::array<Ref<Texture2D>, MaxTextureSlots> TextureSlots;
 		uint32_t TextureSlotIndex = 1; // 0 = white texture
+		Ref<Texture2D> WhiteTexture;
 
 		glm::vec4 QuadVertexPositions[4];
 		glm::vec2 TexCoords[4];
@@ -264,7 +263,7 @@ namespace Locus
 		const float textureIndex = 0.0f;
 		const float tilingFactor = 1.0f;
 
-		for (uint32_t i = 0; i < s_Data.QuadVertexCount; i++)
+		for (uint32_t i = 0; i < 4; i++)
 		{
 			s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[i];
 			s_Data.QuadVertexBufferPtr->Color = color;
@@ -307,7 +306,7 @@ namespace Locus
 			s_Data.TextureSlotIndex++;
 		}
 
-		for (uint32_t i = 0; i < s_Data.QuadVertexCount; i++)
+		for (uint32_t i = 0; i < 4; i++)
 		{
 			s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[i];
 			s_Data.QuadVertexBufferPtr->Color = tintColor;
@@ -352,7 +351,7 @@ namespace Locus
 			s_Data.TextureSlotIndex++;
 		}
 
-		for (uint32_t i = 0; i < s_Data.QuadVertexCount; i++)
+		for (uint32_t i = 0; i < 4; i++)
 		{
 			s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[i];
 			s_Data.QuadVertexBufferPtr->Color = tintColor;

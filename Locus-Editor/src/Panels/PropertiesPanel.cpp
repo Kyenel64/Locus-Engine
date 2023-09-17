@@ -68,6 +68,15 @@ namespace Locus
 					ImGui::CloseCurrentPopup();
 				}
 
+				if (ImGui::MenuItem("Circle Renderer"))
+				{
+					if (!m_SelectedEntity.HasComponent<CircleRendererComponent>())
+						CommandHistory::AddCommand(new AddComponentCommand<CircleRendererComponent>(m_SelectedEntity));
+					else
+						LOCUS_CORE_WARN("This entity already has a Circle Renderer Component");
+					ImGui::CloseCurrentPopup();
+				}
+
 				if (ImGui::MenuItem("Rigidbody 2D"))
 				{
 					if (!m_SelectedEntity.HasComponent<Rigidbody2DComponent>())
@@ -323,6 +332,14 @@ namespace Locus
 				DrawColorControl("Color", component.Color);
 				// Tiling Factor
 				DrawFloatControl("Tiling Factor", component.TilingFactor);
+			});
+
+		// --- Circle Renderer Component --------------------------------------
+		DrawComponentUI<CircleRendererComponent>("Circle Renderer", entity, [this](auto& component)
+			{
+				DrawColorControl("Color", component.Color);
+				DrawFloatControl("Thickness", component.Thickness);
+				DrawFloatControl("Fade", component.Fade);
 			});
 
 		// --- Rigidbody2D Component ------------------------------------------

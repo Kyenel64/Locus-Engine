@@ -85,6 +85,7 @@ namespace Locus
 		CopyComponent<ChildComponent>(from, to);
 		CopyComponent<TransformComponent>(from, to);
 		CopyComponent<SpriteRendererComponent>(from, to);
+		CopyComponent<CircleRendererComponent>(from, to);
 		CopyComponent<CameraComponent>(from, to);
 		CopyComponent<Rigidbody2DComponent>(from, to);
 		CopyComponent<BoxCollider2DComponent>(from, to);
@@ -197,15 +198,31 @@ namespace Locus
 			RenderCommand::Clear();
 
 			Renderer2D::BeginScene(*mainCamera, cameraTransform);
-			auto group = m_Registry.group<TransformComponent, SpriteRendererComponent, TagComponent>();
-			for (auto e : group)
-			{
-				Entity entity = Entity(e, this);
-				bool enabled = entity.GetComponent<TagComponent>().Enabled;
-				auto& sprite = entity.GetComponent<SpriteRendererComponent>();
-				if (enabled)
-					Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
+
+			{ // Sprite
+				auto group = m_Registry.group<TransformComponent, SpriteRendererComponent, TagComponent>();
+				for (auto e : group)
+				{
+					Entity entity = Entity(e, this);
+					bool enabled = entity.GetComponent<TagComponent>().Enabled;
+					auto& sprite = entity.GetComponent<SpriteRendererComponent>();
+					if (enabled)
+						Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
+				}
 			}
+			
+			{ // Circle
+				auto view = m_Registry.view<TransformComponent, CircleRendererComponent, TagComponent>();
+				for (auto e : view)
+				{
+					Entity entity = Entity(e, this);
+					bool enabled = entity.GetComponent<TagComponent>().Enabled;
+					auto& circle = entity.GetComponent<CircleRendererComponent>();
+					if (enabled)
+						Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
+				}
+			}
+			
 			Renderer2D::EndScene();
 		}
 		else
@@ -220,15 +237,28 @@ namespace Locus
 		// Main rendering
 		Renderer2D::BeginScene(camera);
 
-		auto group = m_Registry.group<TransformComponent, SpriteRendererComponent, TagComponent>();
-		for (auto e : group)
-		{
-			Entity entity = Entity(e, this);
+		{ // Sprite
+			auto group = m_Registry.group<TransformComponent, SpriteRendererComponent, TagComponent>();
+			for (auto e : group)
+			{
+				Entity entity = Entity(e, this);
+				bool enabled = entity.GetComponent<TagComponent>().Enabled;
+				auto& sprite = entity.GetComponent<SpriteRendererComponent>();
+				if (enabled)
+					Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
+			}
+		}
 
-			bool enabled = entity.GetComponent<TagComponent>().Enabled;
-			auto& sprite = entity.GetComponent<SpriteRendererComponent>();
-			if (enabled)
-				Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
+		{ // Circle
+			auto view = m_Registry.view<TransformComponent, CircleRendererComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				bool enabled = entity.GetComponent<TagComponent>().Enabled;
+				auto& circle = entity.GetComponent<CircleRendererComponent>();
+				if (enabled)
+					Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
+			}
 		}
 
 		Renderer2D::EndScene();
@@ -246,12 +276,6 @@ namespace Locus
 			{
 				auto& tc = entity.GetComponent<TransformComponent>();
 				auto& rb2D = entity.GetComponent<Rigidbody2DComponent>();
-
-				/*glm::mat4 worldTransform = GetWorldTransform(entity);
-				glm::vec3 worldPosition, worldScale;
-				glm::quat worldRotationQuat;
-				Math::Decompose(worldTransform, worldScale, worldRotationQuat, worldPosition);
-				glm::vec3 worldRotation = glm::eulerAngles(worldRotationQuat);*/
 
 				// Body
 				b2BodyDef bodyDef;
@@ -387,6 +411,12 @@ namespace Locus
 
 	template<>
 	void Scene::OnComponentAdded<SpriteRendererComponent>(Entity entity, SpriteRendererComponent& component)
+	{
+
+	}
+
+	template<>
+	void Scene::OnComponentAdded<CircleRendererComponent>(Entity entity, CircleRendererComponent& component)
 	{
 
 	}

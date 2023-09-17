@@ -125,7 +125,6 @@ namespace Locus
 			});
 		s_Data.CircleVA->AddVertexBuffer(s_Data.CircleVB);
 		// Create IB
-		uint32_t* circleIndices = new uint32_t[s_Data.MaxIndices];
 		s_Data.CircleVA->SetIndexBuffer(quadIB);
 		s_Data.CircleVertexBufferBase = new CircleVertex[s_Data.MaxVertices];
 
@@ -207,6 +206,9 @@ namespace Locus
 		s_Data.QuadIndexCount = 0;
 		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
 
+		s_Data.CircleIndexCount = 0;
+		s_Data.CircleVertexBufferPtr = s_Data.CircleVertexBufferBase;
+
 		s_Data.TextureSlotIndex = 1;
 	}
 
@@ -214,8 +216,8 @@ namespace Locus
 	{
 		if (s_Data.QuadIndexCount)
 		{
-			uint64_t dataSize = (uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase;
-			s_Data.QuadVB->SetData(s_Data.QuadVertexBufferBase, (uint32_t)dataSize);
+			uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase);
+			s_Data.QuadVB->SetData(s_Data.QuadVertexBufferBase, dataSize);
 
 			// Bind textures
 			for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
@@ -229,8 +231,8 @@ namespace Locus
 		
 		if (s_Data.CircleIndexCount)
 		{
-			uint64_t dataSize = (uint8_t*)s_Data.CircleVertexBufferPtr - (uint8_t*)s_Data.CircleVertexBufferBase;
-			s_Data.CircleVB->SetData(s_Data.CircleVertexBufferBase, (uint32_t)dataSize);
+			uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.CircleVertexBufferPtr - (uint8_t*)s_Data.CircleVertexBufferBase);
+			s_Data.CircleVB->SetData(s_Data.CircleVertexBufferBase, dataSize);
 
 			s_Data.CircleShader->Bind();
 			RenderCommand::DrawIndexed(s_Data.CircleVA, s_Data.CircleIndexCount);
@@ -380,7 +382,7 @@ namespace Locus
 
 		// Implement flush and reset for circles
 
-		for (uint32_t i = 0; i < 4; i++)
+		for (size_t i = 0; i < 4; i++)
 		{
 			s_Data.CircleVertexBufferPtr->WorldPosition = transform * s_Data.QuadVertexPositions[i];
 			s_Data.CircleVertexBufferPtr->LocalPosition = s_Data.QuadVertexPositions[i] * 2.0f;

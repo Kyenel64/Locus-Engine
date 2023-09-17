@@ -21,6 +21,17 @@ namespace Locus
 		int EntityID;
 	};
 
+	struct CircleVertex
+	{
+		glm::vec3 WorldPosition;
+		glm::vec3 LocalPosition;
+		glm::vec4 Color;
+		float Thickness;
+		float Fade;
+
+		int EntityID;
+	};
+
 	struct Renderer2DData
 	{
 		static const uint32_t QuadVertexCount = 4;
@@ -31,12 +42,20 @@ namespace Locus
 
 		Ref<VertexArray> QuadVA;
 		Ref<VertexBuffer> QuadVB;
-		Ref<Shader> TextureShader;
+		Ref<Shader> QuadShader;
 		Ref<Texture2D> WhiteTexture;
+
+		Ref<VertexArray> CircleVA;
+		Ref<VertexBuffer> CircleVB;
+		Ref<Shader> CircleShader;
 
 		uint32_t QuadIndexCount = 0;
 		QuadVertex* QuadVertexBufferBase = nullptr;
 		QuadVertex* QuadVertexBufferPtr = nullptr;
+
+		uint32_t CircleIndexCount = 0;
+		CircleVertex* CircleVertexBufferBase = nullptr;
+		CircleVertex* CircleVertexBufferPtr = nullptr;
 
 		std::array<Ref<Texture2D>, MaxTextureSlots> TextureSlots;
 		uint32_t TextureSlotIndex = 1; // 0 = white texture
@@ -59,8 +78,8 @@ namespace Locus
 	void Renderer2D::Init()
 	{
 		LOCUS_PROFILE_FUNCTION();
-		// Create VA
-		s_Data.QuadVA = Locus::VertexArray::Create();
+		// --- Quad -----------------------------------------------------------
+		s_Data.QuadVA = VertexArray::Create();
 		// Create VB
 		s_Data.QuadVB = VertexBuffer::Create(s_Data.MaxVertices * sizeof(QuadVertex));
 		s_Data.QuadVB->SetLayout({
@@ -90,9 +109,25 @@ namespace Locus
 		Ref<IndexBuffer> quadIB = IndexBuffer::Create(quadIndices, s_Data.MaxIndices);
 		s_Data.QuadVA->SetIndexBuffer(quadIB);
 		delete[] quadIndices;
-
 		s_Data.QuadVertexBufferBase = new QuadVertex[s_Data.MaxVertices];
 
+		// --- Circle ---------------------------------------------------------
+		s_Data.CircleVA = VertexArray::Create();
+		// Create VB
+		s_Data.CircleVB = VertexBuffer::Create(s_Data.MaxVertices * sizeof(CircleVertex));
+		s_Data.CircleVB->SetLayout({
+			{ ShaderDataType::Float3, "a_WorldPosition" },
+			{ ShaderDataType::Float3, "a_LocalPosition" },
+			{ ShaderDataType::Float4, "a_Color"},
+			{ ShaderDataType::Float, "a_Thickness"},
+			{ ShaderDataType::Float, "a_Fade"},
+			{ ShaderDataType::Int, "a_EntityID"}
+			});
+		s_Data.CircleVA->AddVertexBuffer(s_Data.CircleVB);
+		// Create IB
+		uint32_t* circleIndices = new uint32_t[s_Data.MaxIndices];
+		s_Data.CircleVA->SetIndexBuffer(quadIB);
+		s_Data.CircleVertexBufferBase = new CircleVertex[s_Data.MaxVertices];
 
 		// --- Initializations ------------------------------------------------
 		// Create a base texture for single color textures.
@@ -105,7 +140,8 @@ namespace Locus
 		for (uint32_t i = 0; i < s_Data.MaxTextureSlots; i++)
 			samplers[i] = i;
 
-		s_Data.TextureShader = Shader::Create("assets/shaders/Texture_Vulkan.glsl");
+		s_Data.QuadShader = Shader::Create("assets/shaders/2DQuad.glsl");
+		s_Data.CircleShader = Shader::Create("assets/shaders/2DCircle.glsl");
 		s_Data.TextureSlots[0] = s_Data.WhiteTexture;
 
 		// Initialize quad data
@@ -176,20 +212,31 @@ namespace Locus
 
 	void Renderer2D::Flush()
 	{
-		if (s_Data.QuadIndexCount == 0)
-			return;
+		if (s_Data.QuadIndexCount)
+		{
+			uint64_t dataSize = (uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase;
+			s_Data.QuadVB->SetData(s_Data.QuadVertexBufferBase, (uint32_t)dataSize);
 
-		uint64_t dataSize = (uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase;
-		s_Data.QuadVB->SetData(s_Data.QuadVertexBufferBase, (uint32_t)dataSize);
+			// Bind textures
+			for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
+				s_Data.TextureSlots[i]->Bind(i);
 
-		// Bind textures
-		for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
-			s_Data.TextureSlots[i]->Bind(i);
+			s_Data.QuadShader->Bind();
+			RenderCommand::DrawIndexed(s_Data.QuadVA, s_Data.QuadIndexCount);
 
-		s_Data.TextureShader->Bind();
-		RenderCommand::DrawIndexed(s_Data.QuadVA, s_Data.QuadIndexCount);
+			s_Data.Stats.DrawCalls++;
+		}
+		
+		if (s_Data.CircleIndexCount)
+		{
+			uint64_t dataSize = (uint8_t*)s_Data.CircleVertexBufferPtr - (uint8_t*)s_Data.CircleVertexBufferBase;
+			s_Data.CircleVB->SetData(s_Data.CircleVertexBufferBase, (uint32_t)dataSize);
 
-		s_Data.Stats.DrawCalls++;
+			s_Data.CircleShader->Bind();
+			RenderCommand::DrawIndexed(s_Data.CircleVA, s_Data.CircleIndexCount);
+
+			s_Data.Stats.DrawCalls++;
+		}
 	}
 
 	void Renderer2D::FlushAndReset()
@@ -198,6 +245,10 @@ namespace Locus
 
 		s_Data.QuadIndexCount = 0;
 		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
+
+		s_Data.CircleIndexCount = 0;
+		s_Data.CircleVertexBufferPtr = s_Data.CircleVertexBufferBase;
+
 		s_Data.TextureSlotIndex = 1;
 	}
 
@@ -321,6 +372,29 @@ namespace Locus
 			DrawQuad(transform, src.Texture, src.TilingFactor, src.Color, entityID);
 		else
 			DrawQuad(transform, src.Color, entityID);
+	}
+
+	void Renderer2D::DrawCircle(const glm::mat4& transform, const glm::vec4& color, float thickness, float fade, int entityID)
+	{
+		LOCUS_PROFILE_FUNCTION();
+
+		// Implement flush and reset for circles
+
+		for (uint32_t i = 0; i < 4; i++)
+		{
+			s_Data.CircleVertexBufferPtr->WorldPosition = transform * s_Data.QuadVertexPositions[i];
+			s_Data.CircleVertexBufferPtr->LocalPosition = s_Data.QuadVertexPositions[i] * 2.0f;
+			s_Data.CircleVertexBufferPtr->Color = color;
+			s_Data.CircleVertexBufferPtr->Thickness = thickness;
+			s_Data.CircleVertexBufferPtr->Fade = fade;
+			s_Data.CircleVertexBufferPtr->EntityID = entityID;
+			s_Data.CircleVertexBufferPtr++;
+		}
+
+		s_Data.CircleIndexCount += 6;
+
+		s_Data.Stats.QuadCount++;
+
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)

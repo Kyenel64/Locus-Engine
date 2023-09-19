@@ -1,4 +1,6 @@
-// --- Vertex Shader ----------------------------------------------------------
+// --- Renderer2D quad shader -------------------------------------------------
+
+// --- Vertex Shader ---
 #type vertex
 #version 450 core
 
@@ -37,7 +39,7 @@ void main()
 }
 
 
-// --- Fragment Shader --------------------------------------------------------
+// --- Fragment Shader ---
 #type fragment
 #version 450 core
 

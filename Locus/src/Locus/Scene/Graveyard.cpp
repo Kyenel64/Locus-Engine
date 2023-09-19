@@ -17,6 +17,8 @@ namespace Locus
 			m_Registry.emplace_or_replace<ChildComponent>(newEntity, entity.GetComponent<ChildComponent>());
 		if (entity.HasComponent<SpriteRendererComponent>())
 			m_Registry.emplace_or_replace<SpriteRendererComponent>(newEntity, entity.GetComponent<SpriteRendererComponent>());
+		if (entity.HasComponent<CircleRendererComponent>())
+			m_Registry.emplace_or_replace<CircleRendererComponent>(newEntity, entity.GetComponent<CircleRendererComponent>());
 		if (entity.HasComponent<CameraComponent>())
 			m_Registry.emplace_or_replace<CameraComponent>(newEntity, entity.GetComponent<CameraComponent>());
 		if (entity.HasComponent<Rigidbody2DComponent>())
@@ -41,6 +43,8 @@ namespace Locus
 			newEntity.AddOrReplaceComponent<ChildComponent>(m_Registry.get<ChildComponent>(entity));
 		if (m_Registry.any_of<SpriteRendererComponent>(entity))
 			newEntity.AddOrReplaceComponent<SpriteRendererComponent>(m_Registry.get<SpriteRendererComponent>(entity));
+		if (m_Registry.any_of<CircleRendererComponent>(entity))
+			newEntity.AddOrReplaceComponent<CircleRendererComponent>(m_Registry.get<CircleRendererComponent>(entity));
 		if (m_Registry.any_of<CameraComponent>(entity))
 			newEntity.AddOrReplaceComponent<CameraComponent>(m_Registry.get<CameraComponent>(entity));
 		if (m_Registry.any_of<Rigidbody2DComponent>(entity))

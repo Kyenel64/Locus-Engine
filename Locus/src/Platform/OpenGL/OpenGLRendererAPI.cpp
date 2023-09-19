@@ -55,6 +55,12 @@ namespace Locus
 		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
 	}
 
+	void OpenGLRendererAPI::DrawLine(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)
+	{
+		vertexArray->Bind();
+		glDrawArrays(GL_LINES, 0, vertexCount);
+	}
+
 	void OpenGLRendererAPI::Resize(int x, int y, int width, int height)
 	{
 		glViewport(x, y, width, height);

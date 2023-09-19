@@ -25,9 +25,14 @@ namespace Locus
 			s_RendererAPI->Clear();
 		}
 
-		inline static void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t count = 0)
+		inline static void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0)
 		{
-			s_RendererAPI->DrawIndexed(vertexArray, count);
+			s_RendererAPI->DrawIndexed(vertexArray, indexCount);
+		}
+
+		inline static void DrawLine(const Ref<VertexArray>& vertexArray, uint32_t vertexCount = 0)
+		{
+			s_RendererAPI->DrawLine(vertexArray, vertexCount);
 		}
 
 		inline static void Resize(uint32_t x, uint32_t y, uint32_t width, uint32_t height)

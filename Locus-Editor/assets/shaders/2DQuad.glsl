@@ -23,17 +23,17 @@ struct VertexOutput
 	float TilingFactor;
 };
 
-layout(location = 0) out VertexOutput Output;
-layout(location = 3) out flat float TexIndex;
-layout(location = 4) out flat int EntityID;
+layout(location = 0) out VertexOutput v_Output;
+layout(location = 3) out flat float v_TexIndex;
+layout(location = 4) out flat int v_EntityID;
 
 void main()
 {
-	Output.Color = a_Color;
-	Output.TexCoord = a_TexCoord;
-	Output.TilingFactor = a_TilingFactor;
-	TexIndex = a_TexIndex;
-	EntityID = a_EntityID;
+	v_Output.Color = a_Color;
+	v_Output.TexCoord = a_TexCoord;
+	v_Output.TilingFactor = a_TilingFactor;
+	v_TexIndex = a_TexIndex;
+	v_EntityID = a_EntityID;
 
 	gl_Position = u_ViewProjection * vec4(a_Position, 1.0f);
 }
@@ -50,12 +50,12 @@ struct VertexOutput
 	float TilingFactor;
 };
 
-layout(location = 0) in VertexOutput Input;
-layout(location = 3) in flat float TexIndex;
-layout(location = 4) in flat int EntityID;
+layout(location = 0) in VertexOutput v_Input;
+layout(location = 3) in flat float v_TexIndex;
+layout(location = 4) in flat int v_EntityID;
 
-layout(location = 0) out vec4 color;
-layout(location = 1) out int entityID;
+layout(location = 0) out vec4 o_Color;
+layout(location = 1) out int o_EntityID;
 
 layout(binding = 0) uniform sampler2D u_Textures[32];
 
@@ -64,48 +64,48 @@ void main()
 	// Not supported on some GPUs
 	//color = texture(u_Textures[int(v_TexIndex)], Input.TexCoord * Input.TilingFactor) * v_Color;
 
-	vec4 texColor = Input.Color;
+	vec4 texColor = v_Input.Color;
 
 	switch(int(TexIndex))
 	{
-		case 0: texColor *= texture(u_Textures[0], Input.TexCoord * Input.TilingFactor); break;
-		case 1: texColor *= texture(u_Textures[1], Input.TexCoord * Input.TilingFactor); break;
-		case 2: texColor *= texture(u_Textures[2], Input.TexCoord * Input.TilingFactor); break;
-		case 3: texColor *= texture(u_Textures[3], Input.TexCoord * Input.TilingFactor); break;
-		case 4: texColor *= texture(u_Textures[4], Input.TexCoord * Input.TilingFactor); break;
-		case 5: texColor *= texture(u_Textures[5], Input.TexCoord * Input.TilingFactor); break;
-		case 6: texColor *= texture(u_Textures[6], Input.TexCoord * Input.TilingFactor); break;
-		case 7: texColor *= texture(u_Textures[7], Input.TexCoord * Input.TilingFactor); break;
-		case 8: texColor *= texture(u_Textures[8], Input.TexCoord * Input.TilingFactor); break;
-		case 9: texColor *= texture(u_Textures[9], Input.TexCoord * Input.TilingFactor); break;
-		case 10: texColor *= texture(u_Textures[10], Input.TexCoord * Input.TilingFactor); break;
-		case 11: texColor *= texture(u_Textures[11], Input.TexCoord * Input.TilingFactor); break;
-		case 12: texColor *= texture(u_Textures[12], Input.TexCoord * Input.TilingFactor); break;
-		case 13: texColor *= texture(u_Textures[13], Input.TexCoord * Input.TilingFactor); break;
-		case 14: texColor *= texture(u_Textures[14], Input.TexCoord * Input.TilingFactor); break;
-		case 15: texColor *= texture(u_Textures[15], Input.TexCoord * Input.TilingFactor); break;
-		case 16: texColor *= texture(u_Textures[16], Input.TexCoord * Input.TilingFactor); break;
-		case 17: texColor *= texture(u_Textures[17], Input.TexCoord * Input.TilingFactor); break;
-		case 18: texColor *= texture(u_Textures[18], Input.TexCoord * Input.TilingFactor); break;
-		case 19: texColor *= texture(u_Textures[19], Input.TexCoord * Input.TilingFactor); break;
-		case 20: texColor *= texture(u_Textures[20], Input.TexCoord * Input.TilingFactor); break;
-		case 21: texColor *= texture(u_Textures[21], Input.TexCoord * Input.TilingFactor); break;
-		case 22: texColor *= texture(u_Textures[22], Input.TexCoord * Input.TilingFactor); break;
-		case 23: texColor *= texture(u_Textures[23], Input.TexCoord * Input.TilingFactor); break;
-		case 24: texColor *= texture(u_Textures[24], Input.TexCoord * Input.TilingFactor); break;
-		case 25: texColor *= texture(u_Textures[25], Input.TexCoord * Input.TilingFactor); break;
-		case 26: texColor *= texture(u_Textures[26], Input.TexCoord * Input.TilingFactor); break;
-		case 27: texColor *= texture(u_Textures[27], Input.TexCoord * Input.TilingFactor); break;
-		case 28: texColor *= texture(u_Textures[28], Input.TexCoord * Input.TilingFactor); break;
-		case 29: texColor *= texture(u_Textures[29], Input.TexCoord * Input.TilingFactor); break;
-		case 30: texColor *= texture(u_Textures[30], Input.TexCoord * Input.TilingFactor); break;
-		case 31: texColor *= texture(u_Textures[31], Input.TexCoord * Input.TilingFactor); break;
+		case 0: texColor *= texture(u_Textures[0], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 1: texColor *= texture(u_Textures[1], Input.TexCoord * v_Input.TilingFactor); break;
+		case 2: texColor *= texture(u_Textures[2], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 3: texColor *= texture(u_Textures[3], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 4: texColor *= texture(u_Textures[4], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 5: texColor *= texture(u_Textures[5], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 6: texColor *= texture(u_Textures[6], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 7: texColor *= texture(u_Textures[7], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 8: texColor *= texture(u_Textures[8], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 9: texColor *= texture(u_Textures[9], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 10: texColor *= texture(u_Textures[10], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 11: texColor *= texture(u_Textures[11], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 12: texColor *= texture(u_Textures[12], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 13: texColor *= texture(u_Textures[13], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 14: texColor *= texture(u_Textures[14], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 15: texColor *= texture(u_Textures[15], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 16: texColor *= texture(u_Textures[16], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 17: texColor *= texture(u_Textures[17], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 18: texColor *= texture(u_Textures[18], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 19: texColor *= texture(u_Textures[19], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 20: texColor *= texture(u_Textures[20], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 21: texColor *= texture(u_Textures[21], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 22: texColor *= texture(u_Textures[22], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 23: texColor *= texture(u_Textures[23], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 24: texColor *= texture(u_Textures[24], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 25: texColor *= texture(u_Textures[25], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 26: texColor *= texture(u_Textures[26], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 27: texColor *= texture(u_Textures[27], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 28: texColor *= texture(u_Textures[28], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 29: texColor *= texture(u_Textures[29], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 30: texColor *= texture(u_Textures[30], v_Input.TexCoord * v_Input.TilingFactor); break;
+		case 31: texColor *= texture(u_Textures[31], v_Input.TexCoord * v_Input.TilingFactor); break;
 	}
 
 	if (texColor.a == 0.0) // TOOD: Implement order independent transparency
 		discard;
 
-	color = texColor;
+	o_Color = texColor;
 
-	entityID = EntityID;
+	o_EntityID = v_EntityID;
 }

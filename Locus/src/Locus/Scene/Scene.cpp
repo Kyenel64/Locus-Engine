@@ -261,6 +261,9 @@ namespace Locus
 			}
 		}
 
+		// temp for testing.
+		Renderer2D::DrawLine(glm::vec3(0.0f), glm::vec3(10.0f), glm::vec4(0.9f, 0.3f, 0.3f, 1.0f));
+
 		Renderer2D::EndScene();
 	}
 

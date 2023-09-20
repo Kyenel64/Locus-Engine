@@ -69,6 +69,8 @@ namespace Locus
 		LineVertex* LineVertexBufferBase = nullptr;
 		LineVertex* LineVertexBufferPtr = nullptr;
 
+		float LineWidth = 2.0f;
+
 		std::array<Ref<Texture2D>, MaxTextureSlots> TextureSlots;
 		uint32_t TextureSlotIndex = 1; // 0 = white texture
 		Ref<Texture2D> WhiteTexture;
@@ -275,6 +277,7 @@ namespace Locus
 			s_Data.LineVB->SetData(s_Data.LineVertexBufferBase, dataSize);
 
 			s_Data.LineShader->Bind();
+			RenderCommand::SetLineWidth(s_Data.LineWidth);
 			RenderCommand::DrawLine(s_Data.LineVA, s_Data.LineVertexCount);
 
 			s_Data.Stats.DrawCalls++;
@@ -557,6 +560,11 @@ namespace Locus
 			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
 		DrawQuad(transform, subTexture, tilingFactor, tintColor);
+	}
+	
+	void Renderer2D::SetLineWidth(float width)
+	{
+		s_Data.LineWidth = width;
 	}
 
 	// --- Stats --------------------------------------------------------------

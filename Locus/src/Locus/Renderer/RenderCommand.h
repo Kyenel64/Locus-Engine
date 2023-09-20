@@ -40,6 +40,11 @@ namespace Locus
 			s_RendererAPI->Resize(x, y, width, height);
 		}
 
+		inline static void SetLineWidth(float width)
+		{
+			s_RendererAPI->SetLineWidth(width);
+		}
+
 	private:
 		static Scope<RendererAPI> s_RendererAPI;
 	};

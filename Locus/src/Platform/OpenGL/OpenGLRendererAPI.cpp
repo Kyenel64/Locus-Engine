@@ -36,6 +36,7 @@ namespace Locus
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		glEnable(GL_DEPTH_TEST);
+		//glEnable(GL_LINE_SMOOTH); // thickness acts weird when zooming while enabled
 	}
 
 	void OpenGLRendererAPI::SetClearColor(const glm::vec4 color)
@@ -64,5 +65,10 @@ namespace Locus
 	void OpenGLRendererAPI::Resize(int x, int y, int width, int height)
 	{
 		glViewport(x, y, width, height);
+	}
+
+	void OpenGLRendererAPI::SetLineWidth(float width)
+	{
+		glLineWidth(width);
 	}
 }

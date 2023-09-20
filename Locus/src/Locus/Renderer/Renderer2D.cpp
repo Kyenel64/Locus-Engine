@@ -462,6 +462,20 @@ namespace Locus
 		s_Data.LineVertexCount += 2;
 	}
 
+	void Renderer2D::DrawRect(const glm::mat4& transform, const glm::vec4& color, int entityID)
+	{
+		LOCUS_PROFILE_FUNCTION();
+
+		glm::vec3 points[4];
+		for (size_t i = 0; i < 4; i++)
+			points[i] = transform * s_Data.QuadVertexPositions[i];
+
+		DrawLine(points[0], points[1], color);
+		DrawLine(points[1], points[2], color);
+		DrawLine(points[2], points[3], color);
+		DrawLine(points[3], points[0], color);
+	}
+
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
 	{
 		DrawQuad({ position.x, position.y, 0.0f }, size, color);

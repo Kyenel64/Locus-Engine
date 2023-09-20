@@ -246,6 +246,8 @@ namespace Locus
 				auto& sprite = entity.GetComponent<SpriteRendererComponent>();
 				if (enabled)
 					Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
+				Renderer2D::SetLineWidth(3.0f);
+				Renderer2D::DrawRect(GetWorldTransform(entity), glm::vec4(0.9f, 0.3f, 0.3f, 1.0f));
 			}
 		}
 

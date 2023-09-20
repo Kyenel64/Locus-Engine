@@ -134,10 +134,10 @@ Entities:
     TransformComponent:
       Self: 5352762745720887587
       Parent: 0
-      LocalPosition: [-3.06988263, 2.72587228, 2.0999999]
-      LocalRotation: [0, 0, 0.758722425]
-      LocalRotationQuat: [0, 0, 0.370327175, 0.928901374]
-      LocalScale: [1, 1, 1]
+      LocalPosition: [-3.06988263, 2.72587228, 0]
+      LocalRotation: [0, 0, 1.39834714]
+      LocalRotationQuat: [0, 0, 0.643585384, 0.765374303]
+      LocalScale: [2.06999993, 2.06999993, 2.06999993]
     ChildComponent:
       ChildCount: 1
       ChildEntities:
@@ -154,7 +154,7 @@ Entities:
       AngularDrag: 0.0500000007
       FixedRotation: false
       Friction: 0.200000003
-      Restitution: 0.300000012
+      Restitution: 0.800000012
       RestitutionThreshold: 1
     CircleCollider2DComponent:
       CollisionLayer: 1

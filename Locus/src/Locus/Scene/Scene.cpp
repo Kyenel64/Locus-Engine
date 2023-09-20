@@ -326,7 +326,7 @@ namespace Locus
 
 					b2CircleShape circle;
 					circle.m_p = offset;
-					circle.m_radius = radius;
+					circle.m_radius = tc.LocalScale.x * radius;
 					fixtureDef.shape = &circle;
 					fixtureDef.filter.categoryBits = c2D.CollisionLayer;
 					b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);

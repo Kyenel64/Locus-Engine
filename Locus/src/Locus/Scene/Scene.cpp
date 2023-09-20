@@ -314,7 +314,8 @@ namespace Locus
 					box.SetAsBox(size.x / 2, size.y / 2, offset, angle);
 					fixtureDef.shape = &box;
 					fixtureDef.filter.categoryBits = b2D.CollisionLayer;
-					entityBody->CreateFixture(&fixtureDef);
+					b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);
+					b2D.RuntimeFixture = fixture;
 				}
 				else if (entity.HasComponent<CircleCollider2DComponent>())
 				{
@@ -328,8 +329,8 @@ namespace Locus
 					circle.m_radius = radius;
 					fixtureDef.shape = &circle;
 					fixtureDef.filter.categoryBits = c2D.CollisionLayer;
-					entityBody->CreateFixture(&fixtureDef);
-					
+					b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);
+					c2D.RuntimeFixture = fixture;
 				}
 				
 			}

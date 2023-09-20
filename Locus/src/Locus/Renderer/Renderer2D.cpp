@@ -28,7 +28,13 @@ namespace Locus
 		glm::vec4 Color;
 		float Thickness;
 		float Fade;
+		int EntityID;
+	};
 
+	struct LineVertex
+	{
+		glm::vec3 Position;
+		glm::vec4 Color;
 		int EntityID;
 	};
 
@@ -47,6 +53,10 @@ namespace Locus
 		Ref<VertexBuffer> CircleVB;
 		Ref<Shader> CircleShader;
 
+		Ref<VertexArray> LineVA;
+		Ref<VertexBuffer> LineVB;
+		Ref<Shader> LineShader;
+
 		uint32_t QuadIndexCount = 0;
 		QuadVertex* QuadVertexBufferBase = nullptr;
 		QuadVertex* QuadVertexBufferPtr = nullptr;
@@ -54,6 +64,12 @@ namespace Locus
 		uint32_t CircleIndexCount = 0;
 		CircleVertex* CircleVertexBufferBase = nullptr;
 		CircleVertex* CircleVertexBufferPtr = nullptr;
+
+		uint32_t LineVertexCount = 0;
+		LineVertex* LineVertexBufferBase = nullptr;
+		LineVertex* LineVertexBufferPtr = nullptr;
+
+		float LineWidth = 2.0f;
 
 		std::array<Ref<Texture2D>, MaxTextureSlots> TextureSlots;
 		uint32_t TextureSlotIndex = 1; // 0 = white texture
@@ -127,6 +143,18 @@ namespace Locus
 		s_Data.CircleVA->SetIndexBuffer(quadIB);
 		s_Data.CircleVertexBufferBase = new CircleVertex[s_Data.MaxVertices];
 
+		// --- Line -----------------------------------------------------------
+		s_Data.LineVA = VertexArray::Create();
+		s_Data.LineVB = VertexBuffer::Create(s_Data.MaxVertices * sizeof(LineVertex));
+		s_Data.LineVB->SetLayout({
+			{ ShaderDataType::Float3, "a_Position" },
+			{ ShaderDataType::Float4, "a_Color"},
+			{ ShaderDataType::Int, "a_EntityID"}
+			});
+		
+		s_Data.LineVA->AddVertexBuffer(s_Data.LineVB);
+		s_Data.LineVertexBufferBase = new LineVertex[s_Data.MaxVertices];
+
 		// --- Initializations ------------------------------------------------
 		// Create a base texture for single color textures.
 		s_Data.WhiteTexture = Texture2D::Create(1, 1);
@@ -140,6 +168,7 @@ namespace Locus
 
 		s_Data.QuadShader = Shader::Create("assets/shaders/2DQuad.glsl");
 		s_Data.CircleShader = Shader::Create("assets/shaders/2DCircle.glsl");
+		s_Data.LineShader = Shader::Create("assets/shaders/2DLine.glsl");
 		s_Data.TextureSlots[0] = s_Data.WhiteTexture;
 
 		// Initialize quad data
@@ -208,6 +237,9 @@ namespace Locus
 		s_Data.CircleIndexCount = 0;
 		s_Data.CircleVertexBufferPtr = s_Data.CircleVertexBufferBase;
 
+		s_Data.LineVertexCount = 0;
+		s_Data.LineVertexBufferPtr = s_Data.LineVertexBufferBase;
+
 		s_Data.TextureSlotIndex = 1;
 	}
 
@@ -238,6 +270,18 @@ namespace Locus
 
 			s_Data.Stats.DrawCalls++;
 		}
+
+		if (s_Data.LineVertexCount)
+		{
+			uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.LineVertexBufferPtr - (uint8_t*)s_Data.LineVertexBufferBase);
+			s_Data.LineVB->SetData(s_Data.LineVertexBufferBase, dataSize);
+
+			s_Data.LineShader->Bind();
+			RenderCommand::SetLineWidth(s_Data.LineWidth);
+			RenderCommand::DrawLine(s_Data.LineVA, s_Data.LineVertexCount);
+
+			s_Data.Stats.DrawCalls++;
+		}
 	}
 
 	void Renderer2D::FlushAndReset()
@@ -249,6 +293,9 @@ namespace Locus
 
 		s_Data.CircleIndexCount = 0;
 		s_Data.CircleVertexBufferPtr = s_Data.CircleVertexBufferBase;
+
+		s_Data.LineVertexCount = 0;
+		s_Data.LineVertexBufferPtr = s_Data.LineVertexBufferBase;
 
 		s_Data.TextureSlotIndex = 1;
 	}
@@ -379,7 +426,7 @@ namespace Locus
 	{
 		LOCUS_PROFILE_FUNCTION();
 
-		// Implement flush and reset for circles
+		// TODO: Implement next batch for circles
 
 		for (size_t i = 0; i < 4; i++)
 		{
@@ -395,7 +442,38 @@ namespace Locus
 		s_Data.CircleIndexCount += 6;
 
 		s_Data.Stats.QuadCount++;
+	}
 
+	void  Renderer2D::DrawLine(const glm::vec3& point1, const glm::vec3& point2, const glm::vec4& color, int entityID)
+	{
+		LOCUS_PROFILE_FUNCTION();
+
+		// TODO: Implement next batch for circles
+		s_Data.LineVertexBufferPtr->Position = point1;
+		s_Data.LineVertexBufferPtr->Color = color;
+		s_Data.LineVertexBufferPtr->EntityID = entityID;
+		s_Data.LineVertexBufferPtr++;
+
+		s_Data.LineVertexBufferPtr->Position = point2;
+		s_Data.LineVertexBufferPtr->Color = color;
+		s_Data.LineVertexBufferPtr->EntityID = entityID;
+		s_Data.LineVertexBufferPtr++;
+
+		s_Data.LineVertexCount += 2;
+	}
+
+	void Renderer2D::DrawRect(const glm::mat4& transform, const glm::vec4& color, int entityID)
+	{
+		LOCUS_PROFILE_FUNCTION();
+
+		glm::vec3 points[4];
+		for (size_t i = 0; i < 4; i++)
+			points[i] = transform * s_Data.QuadVertexPositions[i];
+
+		DrawLine(points[0], points[1], color);
+		DrawLine(points[1], points[2], color);
+		DrawLine(points[2], points[3], color);
+		DrawLine(points[3], points[0], color);
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
@@ -496,6 +574,11 @@ namespace Locus
 			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
 		DrawQuad(transform, subTexture, tilingFactor, tintColor);
+	}
+	
+	void Renderer2D::SetLineWidth(float width)
+	{
+		s_Data.LineWidth = width;
 	}
 
 	// --- Stats --------------------------------------------------------------

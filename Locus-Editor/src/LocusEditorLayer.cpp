@@ -236,6 +236,13 @@ namespace Locus
 			if (ImGui::MenuItem("S", "r"))
 				m_GizmoType = ImGuizmo::OPERATION::SCALE;
 
+			if (ImGui::BeginMenu("Options"))
+			{
+				if (ImGui::MenuItem("Enable collision mesh")) // TODO: Enable/Disable
+					m_ShowAllCollisionMesh = !m_ShowAllCollisionMesh;
+				ImGui::EndMenu();
+			}
+
 			ImGui::EndMenuBar();
 		}
 		ImGui::End();
@@ -900,7 +907,8 @@ namespace Locus
 				glm::mat4 transform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
 				transform *= glm::translate(glm::mat4(1.0f), { c2D.Offset.x, c2D.Offset.y, 0.0f })
 					* glm::scale(glm::mat4(1.0f), { c2D.Radius * 2.0f, c2D.Radius * 2.0f, 1.0f });
-				Renderer2D::DrawCircle(transform, m_CollisionMeshColor, 0.02f);
+				float thickness =  m_EditorCamera.GetDistance() * 0.002f; // TODO: This probably is a wrong way to calculate thickness
+				Renderer2D::DrawCircle(transform, m_CollisionMeshColor, thickness);
 			}
 		}
 		else if (m_ShowAllCollisionMesh)
@@ -929,6 +937,7 @@ namespace Locus
 					glm::mat4 transform = m_ActiveScene->GetWorldTransform(entity);
 					transform *= glm::translate(glm::mat4(1.0f), { c2D.Offset.x, c2D.Offset.y, 0.0f })
 						* glm::scale(glm::mat4(1.0f), { c2D.Radius * 2.0f, c2D.Radius * 2.0f, 1.0f });
+					float thickness = m_EditorCamera.GetDistance() * 0.002f;
 					Renderer2D::DrawCircle(transform, m_CollisionMeshColor, 0.02f);
 				}
 			}

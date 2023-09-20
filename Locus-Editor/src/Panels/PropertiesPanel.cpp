@@ -95,6 +95,15 @@ namespace Locus
 					ImGui::CloseCurrentPopup();
 				}
 
+				if (ImGui::MenuItem("Circle Collider 2D"))
+				{
+					if (!m_SelectedEntity.HasComponent<CircleCollider2DComponent>())
+						CommandHistory::AddCommand(new AddComponentCommand<CircleCollider2DComponent>(m_SelectedEntity));
+					else
+						LOCUS_CORE_WARN("This entity already has a CircleCollider2D Component");
+					ImGui::CloseCurrentPopup();
+				}
+
 				ImGui::EndPopup();
 			}
 		}
@@ -390,12 +399,24 @@ namespace Locus
 				DrawFloatControl("Restitution Threshold", component.RestitutionThreshold);
 			});
 
+		// --- BoxCollider2D Component
 		DrawComponentUI<BoxCollider2DComponent>("Box Collider 2D", entity, [this](auto& component)
 			{
 				// Collision Layer
 				DrawUInt16Control("Collision Layer", component.CollisionLayer);
 				// Size
 				DrawVec2Control("Size", component.Size, 1.0f);
+				// Offset
+				DrawVec2Control("Offset", component.Offset);
+			});
+
+		// --- CircleCollider2D Component
+		DrawComponentUI<CircleCollider2DComponent>("Circle Collider 2D", entity, [this](auto& component)
+			{
+				// Collision Layer
+				DrawUInt16Control("Collision Layer", component.CollisionLayer);
+				// Size
+				DrawFloatControl("radius", component.Radius, 1.0f);
 				// Offset
 				DrawVec2Control("Offset", component.Offset);
 			});
@@ -716,6 +737,11 @@ namespace Locus
 			m_ClipboardComponent.SpriteRenderer = m_SelectedEntity.GetComponent<SpriteRendererComponent>();
 			m_ClipboardComponentType = ComponentType::SpriteRenderer;
 		}
+		if (typeid(T) == typeid(CircleRendererComponent))
+		{
+			m_ClipboardComponent.CircleRenderer = m_SelectedEntity.GetComponent<CircleRendererComponent>();
+			m_ClipboardComponentType = ComponentType::CircleRenderer;
+		}
 		if (typeid(T) == typeid(CameraComponent))
 		{
 			m_ClipboardComponent.Camera = m_SelectedEntity.GetComponent<CameraComponent>();
@@ -730,6 +756,11 @@ namespace Locus
 		{
 			m_ClipboardComponent.BoxCollider2D = m_SelectedEntity.GetComponent<BoxCollider2DComponent>();
 			m_ClipboardComponentType = ComponentType::BoxCollider2D;
+		}
+		if (typeid(T) == typeid(CircleCollider2DComponent))
+		{
+			m_ClipboardComponent.CircleCollider2D = m_SelectedEntity.GetComponent<CircleCollider2DComponent>();
+			m_ClipboardComponentType = ComponentType::CircleCollider2D;
 		}
 		if (typeid(T) == typeid(NativeScriptComponent))
 		{
@@ -748,11 +779,15 @@ namespace Locus
 			break;
 		case Locus::ComponentType::SpriteRenderer: selectedEntity.AddOrReplaceComponent<SpriteRendererComponent>(m_ClipboardComponent.SpriteRenderer);
 			break;
+		case Locus::ComponentType::CircleRenderer: selectedEntity.AddOrReplaceComponent<CircleRendererComponent>(m_ClipboardComponent.CircleRenderer);
+			break;
 		case Locus::ComponentType::Camera: selectedEntity.AddOrReplaceComponent<CameraComponent>(m_ClipboardComponent.Camera);
 			break;
 		case Locus::ComponentType::Rigidbody2D: selectedEntity.AddOrReplaceComponent<Rigidbody2DComponent>(m_ClipboardComponent.Rigidbody2D);
 			break;
 		case Locus::ComponentType::BoxCollider2D: selectedEntity.AddOrReplaceComponent<BoxCollider2DComponent>(m_ClipboardComponent.BoxCollider2D);
+			break;
+		case Locus::ComponentType::CircleCollider2D: selectedEntity.AddOrReplaceComponent<CircleCollider2DComponent>(m_ClipboardComponent.CircleCollider2D);
 			break;
 		case Locus::ComponentType::NativeScript: selectedEntity.AddOrReplaceComponent<NativeScriptComponent>(m_ClipboardComponent.NativeScript);
 			break;

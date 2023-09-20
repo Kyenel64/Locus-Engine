@@ -5,6 +5,7 @@
 #include <box2d/b2_world.h>
 #include <box2d/b2_body.h>
 #include <box2d/b2_polygon_shape.h>
+#include <box2d/b2_circle_shape.h>
 #include <box2d/b2_fixture.h>
 
 #include "Locus/Renderer/Renderer2D.h"
@@ -89,6 +90,7 @@ namespace Locus
 		CopyComponent<CameraComponent>(from, to);
 		CopyComponent<Rigidbody2DComponent>(from, to);
 		CopyComponent<BoxCollider2DComponent>(from, to);
+		CopyComponent<CircleCollider2DComponent>(from, to);
 		CopyComponent<SpriteRendererComponent>(from, to);
 	}
 
@@ -300,24 +302,36 @@ namespace Locus
 				fixtureDef.restitutionThreshold = rb2D.RestitutionThreshold;
 				fixtureDef.filter.categoryBits = 0;
 
-				// Box Collider
-				b2PolygonShape box;
-				b2Vec2 size = { tc.LocalScale.x, tc.LocalScale.y};
-				b2Vec2 offset = { 0.0f, 0.0f };
-				float angle = 0.0f;
-				if (entity.HasComponent<BoxCollider2DComponent>()) // TODO: Reformat this
+				if (entity.HasComponent<BoxCollider2DComponent>())
 				{
 					auto& b2D = entity.GetComponent<BoxCollider2DComponent>();
 
+					b2Vec2 size = { b2D.Size.x * tc.LocalScale.x, b2D.Size.y * tc.LocalScale.y };
+					b2Vec2 offset = { b2D.Offset.x, b2D.Offset.y };
+					float angle = 0.0f; // TODO
+
+					b2PolygonShape box;
+					box.SetAsBox(size.x / 2, size.y / 2, offset, angle);
+					fixtureDef.shape = &box;
 					fixtureDef.filter.categoryBits = b2D.CollisionLayer;
-					size.x = b2D.Size.x * size.x;
-					size.y = b2D.Size.y * size.y;
-					offset.x = b2D.Offset.x;
-					offset.y = b2D.Offset.y;
+					entityBody->CreateFixture(&fixtureDef);
 				}
-				box.SetAsBox(size.x / 2, size.y / 2, offset, angle);
-				fixtureDef.shape = &box;
-				entityBody->CreateFixture(&fixtureDef);
+				else if (entity.HasComponent<CircleCollider2DComponent>())
+				{
+					auto& c2D = entity.GetComponent<CircleCollider2DComponent>();
+
+					b2Vec2 offset = { c2D.Offset.x, c2D.Offset.y };
+					float radius = c2D.Radius;
+
+					b2CircleShape circle;
+					circle.m_p = offset;
+					circle.m_radius = radius;
+					fixtureDef.shape = &circle;
+					fixtureDef.filter.categoryBits = c2D.CollisionLayer;
+					entityBody->CreateFixture(&fixtureDef);
+					
+				}
+				
 			}
 		}
 	}
@@ -436,6 +450,12 @@ namespace Locus
 
 	template<>
 	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& component)
+	{
+
+	}
+
+	template<>
+	void Scene::OnComponentAdded<CircleCollider2DComponent>(Entity entity, CircleCollider2DComponent& component)
 	{
 
 	}

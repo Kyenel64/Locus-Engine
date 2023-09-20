@@ -294,6 +294,19 @@ namespace Locus
 			out << YAML::EndMap; // BoxCollider2D Component
 		}
 
+		// --- CircleCollider2D Component ----------------------------------------
+		if (entity.HasComponent<CircleCollider2DComponent>())
+		{
+			out << YAML::Key << "CircleCollider2DComponent";
+			auto& c2D = entity.GetComponent<CircleCollider2DComponent>();
+
+			out << YAML::BeginMap; // BoxCollider2D Component
+			out << YAML::Key << "CollisionLayer" << YAML::Value << c2D.CollisionLayer;
+			out << YAML::Key << "Radius" << YAML::Value << c2D.Radius;
+			out << YAML::Key << "Offset" << YAML::Value << c2D.Offset;
+			out << YAML::EndMap; // BoxCollider2D Component
+		}
+
 		out << YAML::EndMap; // End Entity
 	}
 
@@ -436,6 +449,16 @@ namespace Locus
 					bc2D.CollisionLayer = boxCollider2DComponent["CollisionLayer"].as<int>();
 					bc2D.Offset = boxCollider2DComponent["Offset"].as<glm::vec2>();
 					bc2D.Size = boxCollider2DComponent["Size"].as<glm::vec2>();
+				}
+
+				// --- CircleCollider2D Component --------------------------------
+				auto circleCollider2DComponent = entity["CircleCollider2DComponent"];
+				if (circleCollider2DComponent)
+				{
+					auto& c2D = deserializedEntity.AddComponent<CircleCollider2DComponent>();
+					c2D.CollisionLayer = circleCollider2DComponent["CollisionLayer"].as<int>();
+					c2D.Offset = circleCollider2DComponent["Offset"].as<glm::vec2>();
+					c2D.Radius = circleCollider2DComponent["Radius"].as<float>();
 				}
 			}
 

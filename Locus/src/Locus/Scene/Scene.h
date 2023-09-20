@@ -44,6 +44,12 @@ namespace Locus
 		Ref<Graveyard> GetGraveyard() const { return m_Graveyard; }
 		Entity GetEntityByUUID(UUID uuid);
 
+		template<typename... T>
+		auto GetEntitiesWith()
+		{
+			return m_Registry.view<T...>();
+		}
+
 		glm::mat4 Scene::GetWorldTransform(Entity entity);
 
 		void SetSceneName(const std::string& name) { m_SceneName = name; }

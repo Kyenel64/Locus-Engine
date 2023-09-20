@@ -870,29 +870,6 @@ namespace Locus
 		if (m_SceneState == SceneState::Edit)
 		{
 			Renderer2D::BeginScene(m_EditorCamera);
-
-			// --- Collision mesh -------------------------------------------------
-			if (m_SelectedEntity.IsValid())
-			{
-				if (m_SelectedEntity.HasComponent<BoxCollider2DComponent>())
-				{
-					auto& b2D = m_SelectedEntity.GetComponent<BoxCollider2DComponent>();
-
-					glm::mat4 transform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
-					transform *= glm::translate(glm::mat4(1.0f), { b2D.Offset.x, b2D.Offset.y, 0.0f })
-						*= glm::scale(glm::mat4(1.0f), { b2D.Size.x, b2D.Size.y, 1.0f });
-					Renderer2D::DrawRect(transform, m_CollisionMeshColor);
-				}
-				else if (m_SelectedEntity.HasComponent<CircleCollider2DComponent>())
-				{
-					auto& c2D = m_SelectedEntity.GetComponent<CircleCollider2DComponent>();
-
-					glm::mat4 transform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
-					transform *= glm::translate(glm::mat4(1.0f), { c2D.Offset.x, c2D.Offset.y, 0.0f })
-						* glm::scale(glm::mat4(1.0f), { c2D.Radius * 2.0f, c2D.Radius * 2.0f, 1.0f });
-					Renderer2D::DrawCircle(transform, m_CollisionMeshColor, 0.02f);
-				}
-			}
 		}
 		else if (m_SceneState == SceneState::Play)
 		{
@@ -902,6 +879,60 @@ namespace Locus
 				glm::mat4 transform = m_ActiveScene->GetWorldTransform(primaryCamera);
 				Renderer2D::BeginScene(primaryCamera.GetComponent<CameraComponent>().Camera, transform);
 			}
+		}
+
+		// --- Collision mesh -------------------------------------------------
+		if (m_SelectedEntity.IsValid() && !m_ShowAllCollisionMesh)
+		{
+			if (m_SelectedEntity.HasComponent<BoxCollider2DComponent>())
+			{
+				auto& b2D = m_SelectedEntity.GetComponent<BoxCollider2DComponent>();
+
+				glm::mat4 transform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
+				transform *= glm::translate(glm::mat4(1.0f), { b2D.Offset.x, b2D.Offset.y, 0.0f })
+					*= glm::scale(glm::mat4(1.0f), { b2D.Size.x, b2D.Size.y, 1.0f });
+				Renderer2D::DrawRect(transform, m_CollisionMeshColor);
+			}
+			else if (m_SelectedEntity.HasComponent<CircleCollider2DComponent>())
+			{
+				auto& c2D = m_SelectedEntity.GetComponent<CircleCollider2DComponent>();
+
+				glm::mat4 transform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
+				transform *= glm::translate(glm::mat4(1.0f), { c2D.Offset.x, c2D.Offset.y, 0.0f })
+					* glm::scale(glm::mat4(1.0f), { c2D.Radius * 2.0f, c2D.Radius * 2.0f, 1.0f });
+				Renderer2D::DrawCircle(transform, m_CollisionMeshColor, 0.02f);
+			}
+		}
+		else if (m_ShowAllCollisionMesh)
+		{
+			{
+				auto view = m_ActiveScene->GetEntitiesWith<BoxCollider2DComponent>();
+				for (auto e : view)
+				{
+					Entity entity = Entity(e, m_ActiveScene.get());
+					auto& b2D = entity.GetComponent<BoxCollider2DComponent>();
+
+					glm::mat4 transform = m_ActiveScene->GetWorldTransform(entity);
+					transform *= glm::translate(glm::mat4(1.0f), { b2D.Offset.x, b2D.Offset.y, 0.0f })
+						*= glm::scale(glm::mat4(1.0f), { b2D.Size.x, b2D.Size.y, 1.0f });
+					Renderer2D::DrawRect(transform, m_CollisionMeshColor);
+				}
+			}
+
+			{
+				auto view = m_ActiveScene->GetEntitiesWith<CircleCollider2DComponent>();
+				for (auto e : view)
+				{
+					Entity entity = Entity(e, m_ActiveScene.get());
+					auto& c2D = entity.GetComponent<CircleCollider2DComponent>();
+
+					glm::mat4 transform = m_ActiveScene->GetWorldTransform(entity);
+					transform *= glm::translate(glm::mat4(1.0f), { c2D.Offset.x, c2D.Offset.y, 0.0f })
+						* glm::scale(glm::mat4(1.0f), { c2D.Radius * 2.0f, c2D.Radius * 2.0f, 1.0f });
+					Renderer2D::DrawCircle(transform, m_CollisionMeshColor, 0.02f);
+				}
+			}
+
 		}
 		
 

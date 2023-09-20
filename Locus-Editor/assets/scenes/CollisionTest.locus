@@ -11,6 +11,14 @@ Entities:
       LocalRotation: [0, 0, 0]
       LocalRotationQuat: [0, 0, 0, 1]
       LocalScale: [1, 1, 1]
+    CircleRendererComponent:
+      Color: [0.670995712, 0.116189748, 0.116189748, 1]
+      Thickness: 1
+      Fade: 0.00499999989
+    CircleCollider2DComponent:
+      CollisionLayer: 1
+      Radius: 0.5
+      Offset: [0, 0]
   - Entity: 18290246622742131237
     TagComponent:
       Tag: Platform

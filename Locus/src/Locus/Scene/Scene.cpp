@@ -246,8 +246,6 @@ namespace Locus
 				auto& sprite = entity.GetComponent<SpriteRendererComponent>();
 				if (enabled)
 					Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
-				Renderer2D::SetLineWidth(3.0f);
-				Renderer2D::DrawRect(GetWorldTransform(entity), glm::vec4(0.9f, 0.3f, 0.3f, 1.0f));
 			}
 		}
 
@@ -262,10 +260,6 @@ namespace Locus
 					Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
 			}
 		}
-
-		// temp for testing.
-		//Renderer2D::SetLineWidth(5.0f);
-		Renderer2D::DrawLine(glm::vec3(0.0f), glm::vec3(10.0f), glm::vec4(0.9f, 0.3f, 0.3f, 1.0f));
 
 		Renderer2D::EndScene();
 	}

@@ -160,6 +160,18 @@ namespace Locus
 		BoxCollider2DComponent(const BoxCollider2DComponent&) = default;
 	};
 
+	struct CircleCollider2DComponent
+	{
+		uint16_t CollisionLayer = 1;
+		glm::vec2 Offset = { 0.0f, 0.0f };
+		float Radius = 0.5f;
+
+		void* RuntimeFixture = nullptr;
+
+		CircleCollider2DComponent() = default;
+		CircleCollider2DComponent(const CircleCollider2DComponent&) = default;
+	};
+
 	class ScriptableEntity;
 
 	struct NativeScriptComponent
@@ -183,11 +195,14 @@ namespace Locus
 	{
 		TagComponent Tag;
 		TransformComponent Transform;
+		ChildComponent Child;
 		SpriteRendererComponent SpriteRenderer;
+		CircleRendererComponent CircleRenderer;
 		CameraComponent Camera;
-		NativeScriptComponent NativeScript;
 		Rigidbody2DComponent Rigidbody2D;
 		BoxCollider2DComponent BoxCollider2D;
+		CircleCollider2DComponent CircleCollider2D;
+		NativeScriptComponent NativeScript;
 	};
 
 	enum class ComponentType
@@ -195,10 +210,13 @@ namespace Locus
 		None = 0,
 		Tag,
 		Transform,
+		ChildComponent,
 		SpriteRenderer,
+		CircleRenderer,
 		Camera,
 		Rigidbody2D,
 		BoxCollider2D,
+		CircleCollider2D,
 		NativeScript
 	};
 }

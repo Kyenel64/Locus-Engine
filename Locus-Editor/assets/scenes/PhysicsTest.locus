@@ -32,7 +32,7 @@ Entities:
       LocalScale: [12.8000002, 1, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
-      TexturePath: ""
+      TexturePath: assets\textures\Checkerboard.png
       TilingFactor: 1
     Rigidbody2DComponent:
       BodyType: 0
@@ -156,10 +156,10 @@ Entities:
       Friction: 0.200000003
       Restitution: 0.300000012
       RestitutionThreshold: 1
-    BoxCollider2DComponent:
+    CircleCollider2DComponent:
       CollisionLayer: 1
+      Radius: 0.5
       Offset: [0, 0]
-      Size: [1, 1]
   - Entity: 3749710963294045755
     TagComponent:
       Tag: Red Circle

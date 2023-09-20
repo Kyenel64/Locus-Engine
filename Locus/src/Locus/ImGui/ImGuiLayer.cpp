@@ -21,8 +21,14 @@ namespace Locus
 	ImVec4 LocusColors::Transparent = { 0.0f, 0.0f, 0.0f, 0.0f };
 	ImVec4 LocusColors::Tan = { 0.41f, 0.375f, 0.313f, 1.0f };
 	ImVec4 LocusColors::Orange = { 0.585f, 0.332f, 0.18f, 1.0f };
+	ImVec4 LocusColors::Green = { 0.0f, 1.0f, 0.0f, 1.0f };
 
 	ImVec4 ToImVec4(const glm::vec4& value)
+	{
+		return { value.x, value.y, value.z, value.w };
+	}
+
+	glm::vec4 ToGLMVec4(const ImVec4& value)
 	{
 		return { value.x, value.y, value.z, value.w };
 	}

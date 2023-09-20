@@ -60,6 +60,8 @@ namespace Locus
 		m_ViewportHeight = 600.0f;
 		m_HierarchyHeight = 400.0f;
 		m_CenterSplitterPos = 1500.0f;
+
+		m_CollisionMeshColor = ToGLMVec4(LocusColors::Green);
 	}
 
 	void LocusEditorLayer::OnDetach()
@@ -110,6 +112,8 @@ namespace Locus
 			}
 		}
 
+		RenderOverlay();
+
 		// Read pixel
 		auto [mx, my] = ImGui::GetMousePos();
 		mx -= m_ViewportBounds[0].x;
@@ -131,15 +135,9 @@ namespace Locus
 		m_PropertiesPanel.SetSelectedEntity(m_SelectedEntity);
 
 		if (m_SelectedEntity.IsValid())
-		{
-			ImGuizmo::Enable(true);
 			m_GizmoVisible = true;
-		}
 		else
-		{
-			ImGuizmo::Enable(false);
 			m_GizmoVisible = false;
-		}
 
 		if (m_GizmoType == -1)
 			m_GizmoVisible = false;
@@ -217,7 +215,8 @@ namespace Locus
 		m_ViewportFocused = ImGui::IsWindowFocused();
 
 		ProcessViewportDragDrop();
-		// viewport gizmo
+
+		// Show gizmo. Checks for first click to prevent moving the object when clicking on the entity.
 		if (m_SelectedEntity && m_GizmoType != -1)
 		{
 			if (!m_GizmoFirstClick)
@@ -864,5 +863,48 @@ namespace Locus
 			ImGui::Text("WorldScale: %f, %f, %f", worldScale.x, worldScale.y, worldScale.z);
 		}
 		ImGui::End();
+	}
+
+	void LocusEditorLayer::RenderOverlay()
+	{
+		if (m_SceneState == SceneState::Edit)
+		{
+			Renderer2D::BeginScene(m_EditorCamera);
+
+			// --- Collision mesh -------------------------------------------------
+			if (m_SelectedEntity.IsValid())
+			{
+				if (m_SelectedEntity.HasComponent<BoxCollider2DComponent>())
+				{
+					auto& b2D = m_SelectedEntity.GetComponent<BoxCollider2DComponent>();
+
+					glm::mat4 transform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
+					transform *= glm::translate(glm::mat4(1.0f), { b2D.Offset.x, b2D.Offset.y, 0.0f })
+						*= glm::scale(glm::mat4(1.0f), { b2D.Size.x, b2D.Size.y, 1.0f });
+					Renderer2D::DrawRect(transform, m_CollisionMeshColor);
+				}
+				else if (m_SelectedEntity.HasComponent<CircleCollider2DComponent>())
+				{
+					auto& c2D = m_SelectedEntity.GetComponent<CircleCollider2DComponent>();
+
+					glm::mat4 transform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
+					transform *= glm::translate(glm::mat4(1.0f), { c2D.Offset.x, c2D.Offset.y, 0.0f })
+						* glm::scale(glm::mat4(1.0f), { c2D.Radius * 2.0f, c2D.Radius * 2.0f, 1.0f });
+					Renderer2D::DrawCircle(transform, m_CollisionMeshColor, 0.02f);
+				}
+			}
+		}
+		else if (m_SceneState == SceneState::Play)
+		{
+			Entity primaryCamera = m_ActiveScene->GetPrimaryCameraEntity();
+			if (primaryCamera)
+			{
+				glm::mat4 transform = m_ActiveScene->GetWorldTransform(primaryCamera);
+				Renderer2D::BeginScene(primaryCamera.GetComponent<CameraComponent>().Camera, transform);
+			}
+		}
+		
+
+		Renderer2D::EndScene();
 	}
 }

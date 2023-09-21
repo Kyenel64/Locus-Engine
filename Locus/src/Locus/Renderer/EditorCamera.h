@@ -27,6 +27,8 @@ namespace Locus
 		inline float GetDistance() const { return m_Distance; }
 		inline void SetDistance(float distance) { m_Distance = distance; }
 
+		inline void SetFocalPoint(const glm::vec3& point) { m_FocalPoint = point; }
+
 		inline void SetViewportSize(float width, float height) { m_ViewportWidth = width; m_ViewportHeight = height; CalculateProjection(); }
 
 		const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; } // Note: Usually only use const& as return if the returning value is a member or static variable.

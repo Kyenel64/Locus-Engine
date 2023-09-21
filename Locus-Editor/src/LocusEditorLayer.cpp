@@ -380,6 +380,19 @@ namespace Locus
 				break;
 			}
 
+			case Key::F:
+			{
+				if (m_SelectedEntity)
+				{
+					glm::mat4 transform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
+					glm::vec3 position;
+					Math::Decompose(transform, glm::vec3(), glm::quat(), position);
+					m_EditorCamera.SetFocalPoint(position);
+					m_EditorCamera.SetDistance(10.0f);
+				}
+				break;
+			}
+
 			// Command History
 			case Key::Y:
 			{

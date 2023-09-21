@@ -29,21 +29,6 @@ Entities:
       CollisionLayer: 1
       Radius: 0.5
       Offset: [0, 0]
-  - Entity: 3749710963294045755
-    TagComponent:
-      Tag: Red Circle
-      Enabled: true
-    TransformComponent:
-      Self: 3749710963294045755
-      Parent: 5352762745720887587
-      LocalPosition: [4.12866974, 0, 0]
-      LocalRotation: [0, 0, 0]
-      LocalRotationQuat: [0, 0, 0, 1]
-      LocalScale: [1, 1, 1]
-    CircleRendererComponent:
-      Color: [0.969696999, 0.0965499356, 0.0965499356, 1]
-      Thickness: 1
-      Fade: 1.005
   - Entity: 5352762745720887587
     TagComponent:
       Tag: Circle
@@ -51,14 +36,10 @@ Entities:
     TransformComponent:
       Self: 5352762745720887587
       Parent: 0
-      LocalPosition: [-3.06988263, 2.72587228, 0]
-      LocalRotation: [0, 0, 1.39834714]
-      LocalRotationQuat: [0, 0, 0.643585384, 0.765374303]
-      LocalScale: [2.06999993, 2.06999993, 2.06999993]
-    ChildComponent:
-      ChildCount: 1
-      ChildEntities:
-        Child0: 3749710963294045755
+      LocalPosition: [-3.67000008, 2.72587228, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 2.06999993]
     CircleRendererComponent:
       Color: [0.046831958, 0.636363626, 0.138706893, 1]
       Thickness: 0.5

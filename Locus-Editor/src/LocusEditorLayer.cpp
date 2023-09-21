@@ -908,11 +908,12 @@ namespace Locus
 				auto& c2D = m_SelectedEntity.GetComponent<CircleCollider2DComponent>();
 				auto& tc = m_SelectedEntity.GetComponent<TransformComponent>();
 
-				glm::vec3 position = tc.LocalPosition + glm::vec3(c2D.Offset, 0.001f);
 				float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
-				glm::vec3 scale = { maxScale * c2D.Radius * 2.0f, maxScale * c2D.Radius * 2.0f, 1.0f };
-				glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-					* glm::scale(glm::mat4(1.0f), scale);
+				glm::mat4 transform = glm::translate(glm::mat4(1.0f), tc.LocalPosition)
+					* glm::rotate(glm::mat4(1.0f), tc.LocalRotation.z, glm::vec3(0, 0, 1))
+					* glm::scale(glm::mat4(1.0f), { maxScale, maxScale, 1.0f });
+				transform *= glm::translate(glm::mat4(1.0f), { c2D.Offset.x, c2D.Offset.y, 0.001f })
+					* glm::scale(glm::mat4(1.0f), { c2D.Radius * 2.0f, c2D.Radius * 2.0f, 1.0f });
 				float thickness = m_EditorCamera.GetDistance() * 0.002f; // TODO: This probably is a wrong way to calculate thickness
 				Renderer2D::DrawCircle(transform, m_CollisionMeshColor, thickness);
 			}
@@ -942,11 +943,12 @@ namespace Locus
 					auto& c2D = entity.GetComponent<CircleCollider2DComponent>();
 					auto& tc = entity.GetComponent<TransformComponent>();
 
-					glm::vec3 position = tc.LocalPosition + glm::vec3(c2D.Offset, 0.001f);
 					float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
-					glm::vec3 scale = { maxScale * c2D.Radius * 2.0f, maxScale * c2D.Radius * 2.0f, 1.0f };
-					glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-						* glm::scale(glm::mat4(1.0f), scale);
+					glm::mat4 transform = glm::translate(glm::mat4(1.0f), tc.LocalPosition)
+						* glm::rotate(glm::mat4(1.0f), tc.LocalRotation.z, glm::vec3(0, 0, 1))
+						* glm::scale(glm::mat4(1.0f), { maxScale, maxScale, 1.0f });
+					transform *= glm::translate(glm::mat4(1.0f), { c2D.Offset.x, c2D.Offset.y, 0.001f })
+						* glm::scale(glm::mat4(1.0f), { c2D.Radius * 2.0f, c2D.Radius * 2.0f, 1.0f });
 					float thickness = m_EditorCamera.GetDistance() * 0.002f; // TODO: This probably is a wrong way to calculate thickness
 					Renderer2D::DrawCircle(transform, m_CollisionMeshColor, thickness);
 				}

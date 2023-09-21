@@ -307,7 +307,7 @@ namespace Locus
 					auto& b2D = entity.GetComponent<BoxCollider2DComponent>();
 
 					b2Vec2 size = { b2D.Size.x * tc.LocalScale.x, b2D.Size.y * tc.LocalScale.y };
-					b2Vec2 offset = { tc.LocalScale.x * b2D.Offset.x, tc.LocalScale.x * b2D.Offset.y };
+					b2Vec2 offset = { tc.LocalScale.x * b2D.Offset.x, tc.LocalScale.y * b2D.Offset.y };
 					float angle = 0.0f; // TODO
 
 					b2PolygonShape box;
@@ -321,13 +321,13 @@ namespace Locus
 				{
 					auto& c2D = entity.GetComponent<CircleCollider2DComponent>();
 
-					b2Vec2 offset = { c2D.Offset.x, c2D.Offset.y };
-					float radius = c2D.Radius;
+					float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
+					b2Vec2 offset = { maxScale * c2D.Offset.x, maxScale * c2D.Offset.y };
+					float radius = maxScale * c2D.Radius;
 
 					b2CircleShape circle;
 					circle.m_p = offset;
-					float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
-					circle.m_radius = maxScale * radius;
+					circle.m_radius = radius;
 					fixtureDef.shape = &circle;
 					fixtureDef.filter.categoryBits = c2D.CollisionLayer;
 					b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);

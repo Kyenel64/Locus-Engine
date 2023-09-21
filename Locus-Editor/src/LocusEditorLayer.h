@@ -76,7 +76,10 @@ namespace Locus
 		bool m_ViewportFocused = false, m_ViewportHovered = false;
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
 		glm::vec2 m_ViewportBounds[2];
+
+		// Overlay
 		glm::vec4 m_CollisionMeshColor;
+		glm::vec4 m_FocusOutlineColor;
 		bool m_ShowAllCollisionMesh = false;
 
 		// Entity
@@ -100,7 +103,6 @@ namespace Locus
 		float m_CenterSplitterPos;
 		glm::vec2 m_FrameSizes[4];
 		glm::vec2 m_FramePositions[4];
-
 		enum class LayoutStyle { Default = 0 };
 		LayoutStyle m_LayoutStyle = LayoutStyle::Default;
 	};

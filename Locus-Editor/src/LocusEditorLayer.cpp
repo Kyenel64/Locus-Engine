@@ -62,6 +62,7 @@ namespace Locus
 		m_CenterSplitterPos = 1500.0f;
 
 		m_CollisionMeshColor = ToGLMVec4(LocusColors::Green);
+		m_FocusOutlineColor = ToGLMVec4(LocusColors::Pink);
 	}
 
 	void LocusEditorLayer::OnDetach()
@@ -112,8 +113,6 @@ namespace Locus
 			}
 		}
 
-		OnRenderOverlay();
-
 		// Read pixel
 		auto [mx, my] = ImGui::GetMousePos();
 		mx -= m_ViewportBounds[0].x;
@@ -141,6 +140,8 @@ namespace Locus
 
 		if (m_GizmoType == -1)
 			m_GizmoVisible = false;
+
+		OnRenderOverlay();
 
 		m_Framebuffer->Unbind();
 
@@ -287,6 +288,19 @@ namespace Locus
 				glm::mat4 transform = m_ActiveScene->GetWorldTransform(primaryCamera);
 				Renderer2D::BeginScene(primaryCamera.GetComponent<CameraComponent>().Camera, transform);
 			}
+		}
+
+
+		if (m_SelectedEntity.IsValid())
+		{
+			// Display focus outline
+			auto& tc = m_SelectedEntity.GetComponent<TransformComponent>();
+			glm::mat4 transform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
+			transform *= glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0.001f));
+			if (m_SelectedEntity.HasComponent<SpriteRendererComponent>())
+				Renderer2D::DrawRect(transform, m_FocusOutlineColor);
+			else if (m_SelectedEntity.HasComponent<CircleRendererComponent>())
+				Renderer2D::DrawCircle(transform, m_FocusOutlineColor, 0.05f);
 		}
 
 		DrawCollisionMesh();

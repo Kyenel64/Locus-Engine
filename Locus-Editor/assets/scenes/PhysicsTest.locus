@@ -1,152 +1,15 @@
 Scene: Untitled
 Entities:
-  - Entity: 1859761259964225266
-    TagComponent:
-      Tag: Circle2
-      Enabled: true
-    TransformComponent:
-      Self: 1859761259964225266
-      Parent: 0
-      LocalPosition: [3.06064034, 2.92671752, 0]
-      LocalRotation: [0, 0, 0]
-      LocalRotationQuat: [0, 0, 0, 1]
-      LocalScale: [1, 1, 1]
-    CircleRendererComponent:
-      Color: [0.523809552, 0.410430849, 0.410430849, 1]
-      Thickness: 1
-      Fade: 0.00499999989
-    Rigidbody2DComponent:
-      BodyType: 1
-      Mass: 1
-      GravityScale: 1
-      LinearDrag: 1
-      AngularDrag: 0.0500000007
-      FixedRotation: false
-      Friction: 0.200000003
-      Restitution: 0
-      RestitutionThreshold: 1
-    CircleCollider2DComponent:
-      CollisionLayer: 1
-      Radius: 0.5
-      Offset: [0, 0]
-  - Entity: 5352762745720887587
-    TagComponent:
-      Tag: Circle
-      Enabled: true
-    TransformComponent:
-      Self: 5352762745720887587
-      Parent: 0
-      LocalPosition: [-4.0382719, 6.32977867, 0]
-      LocalRotation: [0, 0, -1.5987215]
-      LocalRotationQuat: [0, 0, -0.716910601, 0.697165132]
-      LocalScale: [1.60000002, 2.0999999, 2.06999993]
-    CircleRendererComponent:
-      Color: [0.046831958, 0.636363626, 0.138706893, 1]
-      Thickness: 0.5
-      Fade: 0.00499999989
-    Rigidbody2DComponent:
-      BodyType: 1
-      Mass: 1
-      GravityScale: 1
-      LinearDrag: 1
-      AngularDrag: 0.0500000007
-      FixedRotation: false
-      Friction: 0.200000003
-      Restitution: 0.800000012
-      RestitutionThreshold: 1
-    CircleCollider2DComponent:
-      CollisionLayer: 1
-      Radius: 0.699999988
-      Offset: [0.300000012, 0.400000006]
-  - Entity: 7597887158590632467
-    TagComponent:
-      Tag: Child2
-      Enabled: true
-    TransformComponent:
-      Self: 7597887158590632467
-      Parent: 903762964700320918
-      LocalPosition: [-2.83858204, 2.12052631, -6.10351562e-05]
-      LocalRotation: [0, 0, 0]
-      LocalRotationQuat: [0, 0, 0, 1]
-      LocalScale: [1, 1, 1]
-    ChildComponent:
-      ChildCount: 0
-      ChildEntities:
-        {}
-    SpriteRendererComponent:
-      Color: [0.05307246, 0.182738215, 0.766233802, 1]
-      TexturePath: ""
-      TilingFactor: 1
-  - Entity: 5546483057596842680
-    TagComponent:
-      Tag: Main Camera
-      Enabled: true
-    TransformComponent:
-      Self: 5546483057596842680
-      Parent: 0
-      LocalPosition: [0, 0, 8.33333111]
-      LocalRotation: [0, 0, 0]
-      LocalRotationQuat: [0, 0, 0, 1]
-      LocalScale: [1, 1, 1]
-    ChildComponent:
-      ChildCount: 0
-      ChildEntities:
-        {}
-    CameraComponent:
-      Camera:
-        BackgroundColor: [0.25, 0.5, 0.5, 1]
-        ProjectionType: 0
-        OrthographicSize: 15
-        OrthographicNearClip: -1
-        OrthographicFarClip: 1000
-        PerspectiveFOV: 0.785398185
-        PerspectiveNearClip: 0.00999999978
-        PerspectiveFarClip: 1000
-      Primary: true
-      FixedAspectRatio: false
-  - Entity: 18090131422620236725
-    TagComponent:
-      Tag: Parent
-      Enabled: true
-    TransformComponent:
-      Self: 18090131422620236725
-      Parent: 0
-      LocalPosition: [-0.939474165, 6.20112038, 0]
-      LocalRotation: [0, 0, -0.35953784]
-      LocalRotationQuat: [0, 0, -0.178802222, 0.98388505]
-      LocalScale: [1.60000002, 1.5, 1]
-    ChildComponent:
-      ChildCount: 1
-      ChildEntities:
-        Child0: 903762964700320918
-    SpriteRendererComponent:
-      Color: [0.839826822, 0.119975254, 0.119975254, 1]
-      TexturePath: ""
-      TilingFactor: 1
-    Rigidbody2DComponent:
-      BodyType: 1
-      Mass: 5
-      GravityScale: 1
-      LinearDrag: 1
-      AngularDrag: 0.0500000007
-      FixedRotation: false
-      Friction: 0.200000003
-      Restitution: 0.5
-      RestitutionThreshold: 1
-    BoxCollider2DComponent:
-      CollisionLayer: 1
-      Offset: [1.20000005, 1.89999998]
-      Size: [2.20000005, 2.29999995]
-  - Entity: 12952951697756647390
+  - Entity: 531440706684917665
     TagComponent:
       Tag: Platform
       Enabled: true
     TransformComponent:
-      Self: 12952951697756647390
+      Self: 531440706684917665
       Parent: 0
-      LocalPosition: [11.5532904, -4.16902256, 0]
-      LocalRotation: [0, 0, 0.392541528]
-      LocalRotationQuat: [0, 0, 0.195013061, 0.980800629]
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, -0.599729121]
+      LocalRotationQuat: [0, 0, -0.295390815, 0.955376506]
       LocalScale: [12.8000002, 1, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
@@ -185,16 +48,16 @@ Entities:
       Color: [1, 1, 1, 1]
       TexturePath: ""
       TilingFactor: 1
-  - Entity: 531440706684917665
+  - Entity: 12952951697756647390
     TagComponent:
       Tag: Platform
       Enabled: true
     TransformComponent:
-      Self: 531440706684917665
+      Self: 12952951697756647390
       Parent: 0
-      LocalPosition: [0, 0, 0]
-      LocalRotation: [0, 0, -0.599729121]
-      LocalRotationQuat: [0, 0, -0.295390815, 0.955376506]
+      LocalPosition: [11.5532904, -4.16902256, 0]
+      LocalRotation: [0, 0, 0.392541528]
+      LocalRotationQuat: [0, 0, 0.195013061, 0.980800629]
       LocalScale: [12.8000002, 1, 1]
     SpriteRendererComponent:
       Color: [1, 1, 1, 1]
@@ -214,3 +77,140 @@ Entities:
       CollisionLayer: 1
       Offset: [0, 0]
       Size: [1, 1]
+  - Entity: 18090131422620236725
+    TagComponent:
+      Tag: Parent
+      Enabled: true
+    TransformComponent:
+      Self: 18090131422620236725
+      Parent: 0
+      LocalPosition: [-0.939474165, 6.20112038, 0]
+      LocalRotation: [0, 0, -0.35953784]
+      LocalRotationQuat: [0, 0, -0.178802222, 0.98388505]
+      LocalScale: [1.60000002, 1.5, 1]
+    ChildComponent:
+      ChildCount: 1
+      ChildEntities:
+        Child0: 903762964700320918
+    SpriteRendererComponent:
+      Color: [0.839826822, 0.119975254, 0.119975254, 1]
+      TexturePath: ""
+      TilingFactor: 1
+    Rigidbody2DComponent:
+      BodyType: 1
+      Mass: 5
+      GravityScale: 1
+      LinearDrag: 1
+      AngularDrag: 0.0500000007
+      FixedRotation: false
+      Friction: 0.200000003
+      Restitution: 0.5
+      RestitutionThreshold: 1
+    BoxCollider2DComponent:
+      CollisionLayer: 1
+      Offset: [1.20000005, 1.89999998]
+      Size: [2.20000005, 2.29999995]
+  - Entity: 5546483057596842680
+    TagComponent:
+      Tag: Main Camera
+      Enabled: true
+    TransformComponent:
+      Self: 5546483057596842680
+      Parent: 0
+      LocalPosition: [0, 0, 8.33333111]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    ChildComponent:
+      ChildCount: 0
+      ChildEntities:
+        {}
+    CameraComponent:
+      Camera:
+        BackgroundColor: [0.25, 0.5, 0.5, 1]
+        ProjectionType: 0
+        OrthographicSize: 15
+        OrthographicNearClip: -1
+        OrthographicFarClip: 1000
+        PerspectiveFOV: 0.785398185
+        PerspectiveNearClip: 0.00999999978
+        PerspectiveFarClip: 1000
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 7597887158590632467
+    TagComponent:
+      Tag: Child2
+      Enabled: true
+    TransformComponent:
+      Self: 7597887158590632467
+      Parent: 903762964700320918
+      LocalPosition: [-2.83858204, 2.12052631, -6.10351562e-05]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    ChildComponent:
+      ChildCount: 0
+      ChildEntities:
+        {}
+    SpriteRendererComponent:
+      Color: [0.05307246, 0.182738215, 0.766233802, 1]
+      TexturePath: ""
+      TilingFactor: 1
+  - Entity: 5352762745720887587
+    TagComponent:
+      Tag: Circle
+      Enabled: true
+    TransformComponent:
+      Self: 5352762745720887587
+      Parent: 0
+      LocalPosition: [-4.0382719, 6.32977867, 0]
+      LocalRotation: [0, 0, -1.5987215]
+      LocalRotationQuat: [0, 0, -0.716910601, 0.697165132]
+      LocalScale: [1.60000002, 2.0999999, 2.06999993]
+    CircleRendererComponent:
+      Color: [0.046831958, 0.636363626, 0.138706893, 1]
+      Thickness: 0.5
+      Fade: 0.00499999989
+    Rigidbody2DComponent:
+      BodyType: 1
+      Mass: 1
+      GravityScale: 1
+      LinearDrag: 1
+      AngularDrag: 0.0500000007
+      FixedRotation: false
+      Friction: 0.200000003
+      Restitution: 0.800000012
+      RestitutionThreshold: 1
+    CircleCollider2DComponent:
+      CollisionLayer: 1
+      Radius: 0.699999988
+      Offset: [0.300000012, 0.400000006]
+  - Entity: 1859761259964225266
+    TagComponent:
+      Tag: Circle2
+      Enabled: true
+    TransformComponent:
+      Self: 1859761259964225266
+      Parent: 0
+      LocalPosition: [3.06064034, 2.92671752, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    CircleRendererComponent:
+      Color: [0.523809552, 0.410430849, 0.410430849, 1]
+      Thickness: 1
+      Fade: 0.00499999989
+    Rigidbody2DComponent:
+      BodyType: 1
+      Mass: 1
+      GravityScale: 1
+      LinearDrag: 1
+      AngularDrag: 0.0500000007
+      FixedRotation: false
+      Friction: 0.200000003
+      Restitution: 0
+      RestitutionThreshold: 1
+    CircleCollider2DComponent:
+      CollisionLayer: 1
+      Radius: 0.5
+      Offset: [0, 0]

@@ -33,8 +33,6 @@ namespace Locus
 		bool OnKeyPressed(KeyPressedEvent& e);
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 
-		void OnMouseButtonReleased();
-
 		// Serialization
 		void NewScene();
 		void OpenScene();
@@ -45,6 +43,7 @@ namespace Locus
 		// Viewport
 		void showGizmoUI();
 		void ProcessViewportDragDrop();
+		void RenderOverlay();
 		void OnScenePlay();
 		void OnSceneStop();
 		void OnScenePause();
@@ -74,6 +73,8 @@ namespace Locus
 		bool m_ViewportFocused = false, m_ViewportHovered = false;
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
 		glm::vec2 m_ViewportBounds[2];
+		glm::vec4 m_CollisionMeshColor;
+		bool m_ShowAllCollisionMesh = false;
 
 		// Entity
 		Entity m_HoveredEntity;

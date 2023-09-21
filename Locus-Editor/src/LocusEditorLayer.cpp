@@ -60,6 +60,8 @@ namespace Locus
 		m_ViewportHeight = 600.0f;
 		m_HierarchyHeight = 400.0f;
 		m_CenterSplitterPos = 1500.0f;
+
+		m_CollisionMeshColor = ToGLMVec4(LocusColors::Green);
 	}
 
 	void LocusEditorLayer::OnDetach()
@@ -110,6 +112,8 @@ namespace Locus
 			}
 		}
 
+		RenderOverlay();
+
 		// Read pixel
 		auto [mx, my] = ImGui::GetMousePos();
 		mx -= m_ViewportBounds[0].x;
@@ -131,15 +135,9 @@ namespace Locus
 		m_PropertiesPanel.SetSelectedEntity(m_SelectedEntity);
 
 		if (m_SelectedEntity.IsValid())
-		{
-			ImGuizmo::Enable(true);
 			m_GizmoVisible = true;
-		}
 		else
-		{
-			ImGuizmo::Enable(false);
 			m_GizmoVisible = false;
-		}
 
 		if (m_GizmoType == -1)
 			m_GizmoVisible = false;
@@ -217,7 +215,8 @@ namespace Locus
 		m_ViewportFocused = ImGui::IsWindowFocused();
 
 		ProcessViewportDragDrop();
-		// viewport gizmo
+
+		// Show gizmo. Checks for first click to prevent moving the object when clicking on the entity.
 		if (m_SelectedEntity && m_GizmoType != -1)
 		{
 			if (!m_GizmoFirstClick)
@@ -236,6 +235,13 @@ namespace Locus
 				m_GizmoType = ImGuizmo::OPERATION::ROTATE;
 			if (ImGui::MenuItem("S", "r"))
 				m_GizmoType = ImGuizmo::OPERATION::SCALE;
+
+			if (ImGui::BeginMenu("Options"))
+			{
+				if (ImGui::MenuItem("Enable collision mesh")) // TODO: Enable/Disable
+					m_ShowAllCollisionMesh = !m_ShowAllCollisionMesh;
+				ImGui::EndMenu();
+			}
 
 			ImGui::EndMenuBar();
 		}
@@ -387,6 +393,7 @@ namespace Locus
 
 	void LocusEditorLayer::NewScene()
 	{
+		m_SelectedEntity = {};
 		m_EditorScene = CreateRef<Scene>();
 		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_ActiveScene = m_EditorScene;
@@ -406,6 +413,7 @@ namespace Locus
 
 	void LocusEditorLayer::OpenScene(const std::filesystem::path& path)
 	{
+		m_SelectedEntity = {};
 		m_EditorScene = CreateRef<Scene>();
 		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_ActiveScene = m_EditorScene;
@@ -864,5 +872,91 @@ namespace Locus
 			ImGui::Text("WorldScale: %f, %f, %f", worldScale.x, worldScale.y, worldScale.z);
 		}
 		ImGui::End();
+	}
+
+	void LocusEditorLayer::RenderOverlay()
+	{
+		if (m_SceneState == SceneState::Edit)
+		{
+			Renderer2D::BeginScene(m_EditorCamera);
+		}
+		else if (m_SceneState == SceneState::Play)
+		{
+			Entity primaryCamera = m_ActiveScene->GetPrimaryCameraEntity();
+			if (primaryCamera)
+			{
+				glm::mat4 transform = m_ActiveScene->GetWorldTransform(primaryCamera);
+				Renderer2D::BeginScene(primaryCamera.GetComponent<CameraComponent>().Camera, transform);
+			}
+		}
+
+		// --- Collision mesh -------------------------------------------------
+		if (m_SelectedEntity.IsValid() && !m_ShowAllCollisionMesh)
+		{
+			if (m_SelectedEntity.HasComponent<BoxCollider2DComponent>())
+			{
+				auto& b2D = m_SelectedEntity.GetComponent<BoxCollider2DComponent>();
+				auto& tc = m_SelectedEntity.GetComponent<TransformComponent>();
+
+				glm::mat4 transform = tc.GetLocalTransform();
+				transform *= glm::translate(glm::mat4(1.0f), { b2D.Offset.x, b2D.Offset.y, 0.001f })
+					* glm::scale(glm::mat4(1.0f), { b2D.Size.x, b2D.Size.y, 1.0f });
+				Renderer2D::DrawRect(transform, m_CollisionMeshColor);
+			}
+			else if (m_SelectedEntity.HasComponent<CircleCollider2DComponent>())
+			{
+				auto& c2D = m_SelectedEntity.GetComponent<CircleCollider2DComponent>();
+				auto& tc = m_SelectedEntity.GetComponent<TransformComponent>();
+
+				float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
+				glm::mat4 transform = glm::translate(glm::mat4(1.0f), tc.LocalPosition)
+					* glm::rotate(glm::mat4(1.0f), tc.LocalRotation.z, glm::vec3(0, 0, 1))
+					* glm::scale(glm::mat4(1.0f), { maxScale, maxScale, 1.0f });
+				transform *= glm::translate(glm::mat4(1.0f), { c2D.Offset.x, c2D.Offset.y, 0.001f })
+					* glm::scale(glm::mat4(1.0f), { c2D.Radius * 2.0f, c2D.Radius * 2.0f, 1.0f });
+				float thickness = (0.05f / (c2D.Radius + maxScale)); // TODO: This probably is a wrong way to calculate thickness
+				Renderer2D::DrawCircle(transform, m_CollisionMeshColor, thickness);
+			}
+		}
+		else if (m_ShowAllCollisionMesh)
+		{
+			{
+				auto view = m_ActiveScene->GetEntitiesWith<BoxCollider2DComponent>();
+				for (auto e : view)
+				{
+					Entity entity = Entity(e, m_ActiveScene.get());
+					auto& b2D = entity.GetComponent<BoxCollider2DComponent>();
+					auto& tc = entity.GetComponent<TransformComponent>();
+
+					glm::mat4 transform = tc.GetLocalTransform();
+					transform *= glm::translate(glm::mat4(1.0f), { b2D.Offset.x, b2D.Offset.y, 0.001f })
+						* glm::scale(glm::mat4(1.0f), { b2D.Size.x, b2D.Size.y, 1.0f });
+					Renderer2D::DrawRect(transform, m_CollisionMeshColor);
+				}
+			}
+
+			{
+				auto view = m_ActiveScene->GetEntitiesWith<CircleCollider2DComponent>();
+				for (auto e : view)
+				{
+					Entity entity = Entity(e, m_ActiveScene.get());
+					auto& c2D = entity.GetComponent<CircleCollider2DComponent>();
+					auto& tc = entity.GetComponent<TransformComponent>();
+
+					float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
+					glm::mat4 transform = glm::translate(glm::mat4(1.0f), tc.LocalPosition)
+						* glm::rotate(glm::mat4(1.0f), tc.LocalRotation.z, glm::vec3(0, 0, 1))
+						* glm::scale(glm::mat4(1.0f), { maxScale, maxScale, 1.0f });
+					transform *= glm::translate(glm::mat4(1.0f), { c2D.Offset.x, c2D.Offset.y, 0.001f })
+						* glm::scale(glm::mat4(1.0f), { c2D.Radius * 2.0f, c2D.Radius * 2.0f, 1.0f });
+					float thickness = (0.05f / (c2D.Radius + maxScale)); // TODO: This probably is a wrong way to calculate thickness
+					Renderer2D::DrawCircle(transform, m_CollisionMeshColor, thickness);
+				}
+			}
+
+		}
+		
+
+		Renderer2D::EndScene();
 	}
 }

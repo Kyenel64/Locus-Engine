@@ -393,6 +393,7 @@ namespace Locus
 
 	void LocusEditorLayer::NewScene()
 	{
+		m_SelectedEntity = {};
 		m_EditorScene = CreateRef<Scene>();
 		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_ActiveScene = m_EditorScene;
@@ -412,6 +413,7 @@ namespace Locus
 
 	void LocusEditorLayer::OpenScene(const std::filesystem::path& path)
 	{
+		m_SelectedEntity = {};
 		m_EditorScene = CreateRef<Scene>();
 		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_ActiveScene = m_EditorScene;
@@ -894,20 +896,24 @@ namespace Locus
 			if (m_SelectedEntity.HasComponent<BoxCollider2DComponent>())
 			{
 				auto& b2D = m_SelectedEntity.GetComponent<BoxCollider2DComponent>();
+				auto& tc = m_SelectedEntity.GetComponent<TransformComponent>();
 
-				glm::mat4 transform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
-				transform *= glm::translate(glm::mat4(1.0f), { b2D.Offset.x, b2D.Offset.y, 0.0f })
-					*= glm::scale(glm::mat4(1.0f), { b2D.Size.x, b2D.Size.y, 1.0f });
+				glm::mat4 transform = tc.GetLocalTransform();
+				transform *= glm::translate(glm::mat4(1.0f), { b2D.Offset.x, b2D.Offset.y, 0.001f })
+					* glm::scale(glm::mat4(1.0f), { b2D.Size.x, b2D.Size.y, 1.0f });
 				Renderer2D::DrawRect(transform, m_CollisionMeshColor);
 			}
 			else if (m_SelectedEntity.HasComponent<CircleCollider2DComponent>())
 			{
 				auto& c2D = m_SelectedEntity.GetComponent<CircleCollider2DComponent>();
+				auto& tc = m_SelectedEntity.GetComponent<TransformComponent>();
 
-				glm::mat4 transform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
-				transform *= glm::translate(glm::mat4(1.0f), { c2D.Offset.x, c2D.Offset.y, 0.0f })
-					* glm::scale(glm::mat4(1.0f), { c2D.Radius * 2.0f, c2D.Radius * 2.0f, 1.0f });
-				float thickness =  m_EditorCamera.GetDistance() * 0.002f; // TODO: This probably is a wrong way to calculate thickness
+				glm::vec3 position = tc.LocalPosition + glm::vec3(c2D.Offset, 0.001f);
+				float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
+				glm::vec3 scale = { maxScale * c2D.Radius * 2.0f, maxScale * c2D.Radius * 2.0f, 1.0f };
+				glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+					* glm::scale(glm::mat4(1.0f), scale);
+				float thickness = m_EditorCamera.GetDistance() * 0.002f; // TODO: This probably is a wrong way to calculate thickness
 				Renderer2D::DrawCircle(transform, m_CollisionMeshColor, thickness);
 			}
 		}
@@ -919,10 +925,11 @@ namespace Locus
 				{
 					Entity entity = Entity(e, m_ActiveScene.get());
 					auto& b2D = entity.GetComponent<BoxCollider2DComponent>();
+					auto& tc = entity.GetComponent<TransformComponent>();
 
-					glm::mat4 transform = m_ActiveScene->GetWorldTransform(entity);
-					transform *= glm::translate(glm::mat4(1.0f), { b2D.Offset.x, b2D.Offset.y, 0.0f })
-						*= glm::scale(glm::mat4(1.0f), { b2D.Size.x, b2D.Size.y, 1.0f });
+					glm::mat4 transform = tc.GetLocalTransform();
+					transform *= glm::translate(glm::mat4(1.0f), { b2D.Offset.x, b2D.Offset.y, 0.001f })
+						* glm::scale(glm::mat4(1.0f), { b2D.Size.x, b2D.Size.y, 1.0f });
 					Renderer2D::DrawRect(transform, m_CollisionMeshColor);
 				}
 			}
@@ -933,12 +940,15 @@ namespace Locus
 				{
 					Entity entity = Entity(e, m_ActiveScene.get());
 					auto& c2D = entity.GetComponent<CircleCollider2DComponent>();
+					auto& tc = entity.GetComponent<TransformComponent>();
 
-					glm::mat4 transform = m_ActiveScene->GetWorldTransform(entity);
-					transform *= glm::translate(glm::mat4(1.0f), { c2D.Offset.x, c2D.Offset.y, 0.0f })
-						* glm::scale(glm::mat4(1.0f), { c2D.Radius * 2.0f, c2D.Radius * 2.0f, 1.0f });
-					float thickness = m_EditorCamera.GetDistance() * 0.002f;
-					Renderer2D::DrawCircle(transform, m_CollisionMeshColor, 0.02f);
+					glm::vec3 position = tc.LocalPosition + glm::vec3(c2D.Offset, 0.001f);
+					float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
+					glm::vec3 scale = { maxScale * c2D.Radius * 2.0f, maxScale * c2D.Radius * 2.0f, 1.0f };
+					glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+						* glm::scale(glm::mat4(1.0f), scale);
+					float thickness = m_EditorCamera.GetDistance() * 0.002f; // TODO: This probably is a wrong way to calculate thickness
+					Renderer2D::DrawCircle(transform, m_CollisionMeshColor, thickness);
 				}
 			}
 

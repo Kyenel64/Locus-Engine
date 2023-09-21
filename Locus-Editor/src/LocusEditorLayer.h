@@ -74,7 +74,7 @@ namespace Locus
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
 		glm::vec2 m_ViewportBounds[2];
 		glm::vec4 m_CollisionMeshColor;
-		bool m_ShowAllCollisionMesh = true;
+		bool m_ShowAllCollisionMesh = false;
 
 		// Entity
 		Entity m_HoveredEntity;

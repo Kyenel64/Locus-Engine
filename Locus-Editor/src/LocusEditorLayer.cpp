@@ -61,8 +61,8 @@ namespace Locus
 		m_HierarchyHeight = 400.0f;
 		m_CenterSplitterPos = 1500.0f;
 
-		m_CollisionMeshColor = ToGLMVec4(LocusColors::Green);
-		m_FocusOutlineColor = ToGLMVec4(LocusColors::Pink);
+		m_CollisionMeshColor = ToGLMVec4(LocusColors::LightBlue);
+		m_FocusOutlineColor = ToGLMVec4(LocusColors::Green);
 	}
 
 	void LocusEditorLayer::OnDetach()
@@ -88,7 +88,7 @@ namespace Locus
 
 		Renderer2D::ResetStats();
 		m_Framebuffer->Bind();
-		
+
 		// Clears
 		m_Framebuffer->ClearAttachmentInt(1, -1);
 
@@ -298,9 +298,15 @@ namespace Locus
 			glm::mat4 transform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
 			transform *= glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0.001f));
 			if (m_SelectedEntity.HasComponent<SpriteRendererComponent>())
+			{
 				Renderer2D::DrawRect(transform, m_FocusOutlineColor);
+			}
 			else if (m_SelectedEntity.HasComponent<CircleRendererComponent>())
-				Renderer2D::DrawCircle(transform, m_FocusOutlineColor, 0.05f);
+			{
+				float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
+				float thickness = 0.1f / maxScale;
+				Renderer2D::DrawCircle(transform, m_FocusOutlineColor, thickness);
+			}
 		}
 
 		DrawCollisionMesh();

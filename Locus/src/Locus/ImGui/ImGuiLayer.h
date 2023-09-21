@@ -51,6 +51,8 @@ namespace Locus
 		static ImVec4 Tan;
 		static ImVec4 Pink;
 		static ImVec4 Green;
+		static ImVec4 Blue;
+		static ImVec4 LightBlue;
 	};
 
 	ImVec4 ToImVec4(const glm::vec4& value);

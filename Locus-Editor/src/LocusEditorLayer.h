@@ -43,7 +43,6 @@ namespace Locus
 		// Viewport
 		void showGizmoUI();
 		void ProcessViewportDragDrop();
-		void RenderOverlay();
 		void OnScenePlay();
 		void OnSceneStop();
 		void OnScenePause();
@@ -53,6 +52,10 @@ namespace Locus
 		void DrawToolbar();
 		void DrawDebugPanel();
 		void OpenSavePopup();
+
+		// Overlay
+		void OnRenderOverlay();
+		void DrawCollisionMesh();
 
 	private:
 		// Scene

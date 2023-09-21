@@ -112,7 +112,7 @@ namespace Locus
 			}
 		}
 
-		RenderOverlay();
+		OnRenderOverlay();
 
 		// Read pixel
 		auto [mx, my] = ImGui::GetMousePos();
@@ -271,6 +271,27 @@ namespace Locus
 
 
 		ImGui::End(); // End ImGui
+	}
+
+	void LocusEditorLayer::OnRenderOverlay()
+	{
+		if (m_SceneState == SceneState::Edit)
+		{
+			Renderer2D::BeginScene(m_EditorCamera);
+		}
+		else if (m_SceneState == SceneState::Play)
+		{
+			Entity primaryCamera = m_ActiveScene->GetPrimaryCameraEntity();
+			if (primaryCamera)
+			{
+				glm::mat4 transform = m_ActiveScene->GetWorldTransform(primaryCamera);
+				Renderer2D::BeginScene(primaryCamera.GetComponent<CameraComponent>().Camera, transform);
+			}
+		}
+
+		DrawCollisionMesh();
+
+		Renderer2D::EndScene();
 	}
 
 	bool LocusEditorLayer::OnKeyPressed(KeyPressedEvent& e)
@@ -874,22 +895,8 @@ namespace Locus
 		ImGui::End();
 	}
 
-	void LocusEditorLayer::RenderOverlay()
+	void LocusEditorLayer::DrawCollisionMesh()
 	{
-		if (m_SceneState == SceneState::Edit)
-		{
-			Renderer2D::BeginScene(m_EditorCamera);
-		}
-		else if (m_SceneState == SceneState::Play)
-		{
-			Entity primaryCamera = m_ActiveScene->GetPrimaryCameraEntity();
-			if (primaryCamera)
-			{
-				glm::mat4 transform = m_ActiveScene->GetWorldTransform(primaryCamera);
-				Renderer2D::BeginScene(primaryCamera.GetComponent<CameraComponent>().Camera, transform);
-			}
-		}
-
 		// --- Collision mesh -------------------------------------------------
 		if (m_SelectedEntity.IsValid() && !m_ShowAllCollisionMesh)
 		{
@@ -953,10 +960,7 @@ namespace Locus
 					Renderer2D::DrawCircle(transform, m_CollisionMeshColor, thickness);
 				}
 			}
-
 		}
-		
-
-		Renderer2D::EndScene();
 	}
+
 }

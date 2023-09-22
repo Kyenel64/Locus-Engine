@@ -3,6 +3,7 @@
 
 #include <iomanip>
 #include <stack>
+#include <queue>
 
 namespace Locus
 {
@@ -201,36 +202,14 @@ namespace Locus
 		DuplicateEntityCommand(Ref<Scene> activeScene, const std::string& name, Entity copyEntity)
 			: m_ActiveScene(activeScene), m_EntityName(name), m_UUID(UUID()), m_CopyEntity(copyEntity)
 		{
-			auto view = m_ActiveScene->m_Registry.view<TagComponent>();
-			int dupAmount = 0;
-
-			size_t entityNameDupPos = m_EntityName.find_last_of('.'); // TODO: Work with multiple .'s
-
-			if (entityNameDupPos != std::string::npos)
-				m_EntityName = m_EntityName.substr(0, entityNameDupPos);
-
-			LOCUS_CORE_INFO(m_EntityName);
-			for (auto entity : view)
-			{
-				std::string tagWithDup = m_ActiveScene->m_Registry.get<TagComponent>(entity).Tag;
-				size_t dupExtensionPos = tagWithDup.find_last_of('.');
-				std::string tag = tagWithDup.substr(0, dupExtensionPos);
-				if (tag.find(m_EntityName) != std::string::npos)
-					dupAmount++;
-			}
-			if (dupAmount)
-			{
-				std::stringstream ss;
-				ss << std::setw(3) << std::setfill('0') << dupAmount;
-				m_EntityName.append(".");
-				m_EntityName.append(ss.str());
-			}
+			ProcessEntityName();
 		}
 
 		virtual void Execute() override
 		{
-			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_UUID, m_EntityName);
+			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_UUID);
 			m_ActiveScene->CopyAllComponents(m_CopyEntity, m_Entity);
+			m_Entity.GetComponent<TagComponent>().Tag = m_EntityName;
 			Application::Get().SetIsSavedStatus(false);
 		}
 
@@ -243,6 +222,76 @@ namespace Locus
 		virtual bool Merge(Command* other) override
 		{
 			return false;
+		}
+
+	private:
+		// Process to get proper extension number for duplicate entities. This assigns the right value if 
+		// there are gaps in existing extension values. Eg. if .001, .003: adds .002 for the next value.
+		// Seems overkill for such a simple task. Try to clean up.
+		void ProcessEntityName()
+		{
+			LOCUS_PROFILE_FUNCTION();
+
+			#if 1
+			// Extract name without the extension
+			size_t extensionPos = m_EntityName.find_last_of('.');
+			if (extensionPos != std::string::npos)
+				m_EntityName = m_EntityName.substr(0, extensionPos);
+
+			// Store all existing extension values
+			std::priority_queue<int, std::vector<int>, std::greater<int>> queue;
+			auto view = m_ActiveScene->m_Registry.view<TagComponent>();
+			for (auto entity : view)
+			{
+				std::string tag = m_ActiveScene->m_Registry.get<TagComponent>(entity).Tag;
+				extensionPos = tag.find_last_of('.');
+				if (tag.find(m_EntityName) != std::string::npos && extensionPos != std::string::npos)
+					queue.push(std::stoi(tag.substr(extensionPos + 1, tag.back())));
+				else if (tag == m_EntityName && queue.size() && queue.top() != 0)
+					queue.push(0);
+			}
+
+			// Sets the extension value to the largest extension value + 1. Unless there is a gap in 
+			// extension values, then sets the value to fill in those gaps.
+			int duplicateValue = 1;
+			while (!queue.empty())
+			{
+				duplicateValue = queue.top() + 1;
+				queue.pop();
+				if (queue.size() && queue.top() != duplicateValue)
+					break;
+			}
+			#endif
+
+			// Simpler naming but doesnt fill gaps
+			#if 0
+			size_t extensionPos = m_EntityName.find_last_of('.');
+			if (extensionPos != std::string::npos)
+				m_EntityName = m_EntityName.substr(0, extensionPos);
+
+			int duplicateValue = 1;
+			auto view = m_ActiveScene->m_Registry.view<TagComponent>();
+			for (auto entity : view)
+			{
+				std::string tag = m_ActiveScene->m_Registry.get<TagComponent>(entity).Tag;
+				if (tag.find(m_EntityName) != std::string::npos && tag != m_EntityName)
+				{
+					extensionPos = tag.find_last_of('.');
+					int val = std::stoi(tag.substr(extensionPos + 1, tag.back()));
+					if (val + 1 > duplicateValue)
+						duplicateValue = val + 1;
+				}
+			}
+			#endif
+
+
+			// Sets formatting of extension. (entity name + ".___") Eg. "EntityName.005"
+			std::stringstream ss;
+			ss << std::setw(3) << std::setfill('0') << duplicateValue;
+			if (m_EntityName.find_last_of('.') == std::string::npos)
+				m_EntityName.append("." + ss.str());
+			else
+				m_EntityName.replace(m_EntityName.find_last_of('.') + 1, 3, ss.str());
 		}
 
 	private:

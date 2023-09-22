@@ -272,8 +272,8 @@ namespace Locus
 			out << YAML::Key << "BodyType" << YAML::Value << (int)rb2D.BodyType;
 			out << YAML::Key << "Mass" << YAML::Value << rb2D.Mass;
 			out << YAML::Key << "GravityScale" << YAML::Value << rb2D.GravityScale;
-			out << YAML::Key << "LinearDrag" << YAML::Value << rb2D.LinearDrag;
-			out << YAML::Key << "AngularDrag" << YAML::Value << rb2D.AngularDrag;
+			out << YAML::Key << "LinearDamping" << YAML::Value << rb2D.LinearDamping;
+			out << YAML::Key << "AngularDamping" << YAML::Value << rb2D.AngularDamping;
 			out << YAML::Key << "FixedRotation" << YAML::Value << rb2D.FixedRotation;
 			out << YAML::Key << "Friction" << YAML::Value << rb2D.Friction;
 			out << YAML::Key << "Restitution" << YAML::Value << rb2D.Restitution;
@@ -433,8 +433,8 @@ namespace Locus
 					rb2D.BodyType = (Rigidbody2DComponent::Rigidbody2DType)rigidBody2DComponent["BodyType"].as<int>();
 					rb2D.Mass = rigidBody2DComponent["Mass"].as<float>();
 					rb2D.GravityScale = rigidBody2DComponent["GravityScale"].as<float>();
-					rb2D.LinearDrag = rigidBody2DComponent["LinearDrag"].as<float>();
-					rb2D.AngularDrag = rigidBody2DComponent["AngularDrag"].as<float>();
+					rb2D.LinearDamping = rigidBody2DComponent["LinearDamping"].as<float>();
+					rb2D.AngularDamping = rigidBody2DComponent["AngularDamping"].as<float>();
 					rb2D.FixedRotation = rigidBody2DComponent["FixedRotation"].as<bool>();
 					rb2D.Friction = rigidBody2DComponent["Friction"].as<float>();
 					rb2D.Restitution = rigidBody2DComponent["Restitution"].as<float>();

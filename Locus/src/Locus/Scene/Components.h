@@ -132,8 +132,8 @@ namespace Locus
 		// Body
 		float Mass = 1.0f;
 		float GravityScale = 1.0f;
-		float LinearDrag = 1.0f;
-		float AngularDrag = 0.05f;
+		float LinearDamping = 0.2f;
+		float AngularDamping = 0.2f;
 		bool FixedRotation = false;
 
 		// Fixture. TODO: Put in physics material

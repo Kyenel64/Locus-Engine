@@ -285,8 +285,8 @@ namespace Locus
 				
 				bodyDef.position.Set(tc.LocalPosition.x, tc.LocalPosition.y);
 				bodyDef.angle = tc.LocalRotation.z;
-				bodyDef.linearDamping = rb2D.LinearDrag;
-				bodyDef.angularDamping = rb2D.AngularDrag;
+				bodyDef.linearDamping = rb2D.LinearDamping;
+				bodyDef.angularDamping = rb2D.AngularDamping;
 				bodyDef.fixedRotation = rb2D.FixedRotation;
 				bodyDef.gravityScale = rb2D.GravityScale;
 				b2Body* entityBody = m_Box2DWorld->CreateBody(&bodyDef);

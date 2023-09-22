@@ -217,17 +217,17 @@ namespace Locus
 			{
 				// Position
 				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 5.0f, 0.0f });
-				DrawVec3Control("Position", component.LocalPosition);
+				DrawVec3Control("Position", component.LocalPosition, 0.0f, 0.01f, 0.0f, 0.0f, "%.2f");
 				
 				// Rotation
-				DrawVec3Control("Rotation", component.LocalRotation);
+				DrawVec3Control("Rotation", component.LocalRotation, 0.0f, 0.01f, 0.0f, 0.0f, "%.2f");
 				component.SetLocalRotation(component.LocalRotation);
 				ImGui::PopStyleVar();
 
 				// Scale
 				// Bottom spacing is removed if pushing item spacing to all three controls. 
 				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 5.0f, 5.0f });
-				DrawVec3Control("Scale", component.LocalScale, 1.0f);
+				DrawVec3Control("Scale", component.LocalScale, 1.0f, 0.01f, 0.0f, 0.0f, "%.2f");
 				ImGui::PopStyleVar();
 
 			});
@@ -273,11 +273,11 @@ namespace Locus
 				if (camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic)
 				{
 					// Size
-					DrawFloatControl("Size", camera.GetOrthographicSize());
+					DrawFloatControl("Size", camera.GetOrthographicSize(), 5.0f);
 					// Near
-					DrawFloatControl("Near Clip", camera.GetOrthographicNearClip());
+					DrawFloatControl("Near Clip", camera.GetOrthographicNearClip(), -1.0f, 0.1f, 0.0f, 0.0f, "%.1f");
 					// Far
-					DrawFloatControl("Far Clip", camera.GetOrthographicFarClip());
+					DrawFloatControl("Far Clip", camera.GetOrthographicFarClip(), 1000.0f, 0.1f, 0.0f, 0.0f, "%.1f");
 
 					// Fixed Aspect Ratio
 					DrawControlLabel("Fixed Aspect Ratio", { m_LabelWidth, 0.0f });
@@ -291,11 +291,13 @@ namespace Locus
 				if (camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
 				{
 					// FOV
-					DrawFloatControl("FOV", camera.GetPerspectiveFOV());
+					float fov = glm::degrees(camera.GetPerspectiveFOV());
+					DrawFloatControl("FOV", fov, 45.0f);
+					camera.SetPerspectiveFOV(glm::radians(fov));
 					// Near
-					DrawFloatControl("Near Clip", camera.GetPerspectiveNearClip());
+					DrawFloatControl("Near Clip", camera.GetPerspectiveNearClip(), -1.0f, 0.1f, 0.0f, 0.0f, "%.1f");
 					// Far
-					DrawFloatControl("Far Clip", camera.GetPerspectiveFarClip());
+					DrawFloatControl("Far Clip", camera.GetPerspectiveFarClip(), 1000.0f, 0.1f, 0.0f, 0.0f, "%.1f");
 				}
 			});
 
@@ -347,8 +349,8 @@ namespace Locus
 		DrawComponentUI<CircleRendererComponent>("Circle Renderer", entity, [this](auto& component)
 			{
 				DrawColorControl("Color", component.Color);
-				DrawFloatControl("Thickness", component.Thickness);
-				DrawFloatControl("Fade", component.Fade);
+				DrawFloatControl("Thickness", component.Thickness, 1.0f, 0.01f, 0.0f, 1.0f);
+				DrawFloatControl("Fade", component.Fade, 0.005f, 0.01f, 0.0001f, FLT_MAX);
 			});
 
 		// --- Rigidbody2D Component ------------------------------------------
@@ -380,9 +382,9 @@ namespace Locus
 				// Gravity Scale
 				DrawFloatControl("Gravity Scale", component.GravityScale);
 				// Linear Drag
-				DrawFloatControl("Linear Drag", component.LinearDrag);
+				DrawFloatControl("Linear Damping", component.LinearDamping, 0.2f);
 				// Angular Drag
-				DrawFloatControl("Angular Drag", component.AngularDrag);
+				DrawFloatControl("Angular Damping", component.AngularDamping, 0.2f);
 
 				// Fixed Rotation
 				DrawControlLabel("Fixed Rotation", { m_LabelWidth, 0.0f });
@@ -392,11 +394,11 @@ namespace Locus
 					CommandHistory::AddCommand(new ChangeValueCommand(fixedRotation, component.FixedRotation));
 
 				// Friction
-				DrawFloatControl("Friction", component.Friction);
+				DrawFloatControl("Friction", component.Friction, 0.2f);
 				// Restitution
-				DrawFloatControl("Restitution", component.Restitution);
+				DrawFloatControl("Restitution", component.Restitution, 0.0f);
 				// Restitution Threshold
-				DrawFloatControl("Restitution Threshold", component.RestitutionThreshold);
+				DrawFloatControl("Restitution Threshold", component.RestitutionThreshold, 0.0f);
 			});
 
 		// --- BoxCollider2D Component
@@ -416,7 +418,7 @@ namespace Locus
 				// Collision Layer
 				DrawUInt16Control("Collision Layer", component.CollisionLayer);
 				// Size
-				DrawFloatControl("radius", component.Radius, 1.0f);
+				DrawFloatControl("radius", component.Radius, 0.5f);
 				// Offset
 				DrawVec2Control("Offset", component.Offset);
 			});
@@ -431,7 +433,7 @@ namespace Locus
 		ImGui::PopStyleColor(3);
 	}
 
-	void PropertiesPanel::DrawFloatControl(const std::string& name, float& changeValue, float resetValue)
+	void PropertiesPanel::DrawFloatControl(const std::string& name, float& changeValue, float resetValue, float speed, float min, float max, const char* format)
 	{
 		DrawControlLabel(name, { m_LabelWidth, 0.0f });
 		ImGui::SameLine();
@@ -446,14 +448,14 @@ namespace Locus
 		float dragVal = changeValue;
 		std::string label = "##" + name;
 		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-		if (ImGui::DragFloat(label.c_str(), &dragVal))
+		if (ImGui::DragFloat(label.c_str(), &dragVal, speed, min, max, format))
 			CommandHistory::AddCommand(new ChangeValueCommand(dragVal, changeValue));
 		ImGui::PopItemWidth();
 		if (ImGui::IsItemHovered())
 			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
 	}
 
-	void PropertiesPanel::DrawIntControl(const std::string& name, int& changeValue, int resetValue)
+	void PropertiesPanel::DrawIntControl(const std::string& name, int& changeValue, int resetValue, float speed, int min, int max, const char* format)
 	{
 		DrawControlLabel(name, { m_LabelWidth, 0.0f });
 		ImGui::SameLine();
@@ -475,7 +477,7 @@ namespace Locus
 			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
 	}
 
-	void PropertiesPanel::DrawUInt16Control(const std::string& name, uint16_t& changeValue, uint16_t resetValue)
+	void PropertiesPanel::DrawUInt16Control(const std::string& name, uint16_t& changeValue, uint16_t resetValue, float speed, int min, int max, const char* format)
 	{
 		DrawControlLabel(name, { m_LabelWidth, 0.0f });
 		ImGui::SameLine();
@@ -536,7 +538,7 @@ namespace Locus
 		}
 	}
 	
-	void PropertiesPanel::DrawVec2Control(const std::string& name, glm::vec2& values, float resetValue)
+	void PropertiesPanel::DrawVec2Control(const std::string& name, glm::vec2& values, float resetValue, float speed, float min, float max, const char* format)
 	{
 		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
 		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0.0f, 1.0f });
@@ -603,7 +605,7 @@ namespace Locus
 		ImGui::PopStyleVar();
 	}
 
-	bool PropertiesPanel::DrawVec3Control(const std::string& name, glm::vec3& values, float resetValue)
+	bool PropertiesPanel::DrawVec3Control(const std::string& name, glm::vec3& values, float resetValue, float speed, float min, float max, const char* format)
 	{
 		bool isChanged = false;
 		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
@@ -634,7 +636,7 @@ namespace Locus
 		}
 		ImGui::SameLine();
 		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-		if(ImGui::DragFloat("##X", &dragValues.x, 0.1f, 0.0f, 0.0f, "%.2f"))
+		if(ImGui::DragFloat("##X", &dragValues.x, speed, min, max, format))
 		{
 			if (name == "Rotation")
 			{
@@ -665,7 +667,7 @@ namespace Locus
 		}
 		ImGui::SameLine();
 		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-		if (ImGui::DragFloat("##Y", &dragValues.y, 0.1f, 0.0f, 0.0f, "%.2f"))
+		if (ImGui::DragFloat("##Y", &dragValues.y, speed, min, max, format))
 		{
 			if (name == "Rotation")
 			{
@@ -696,7 +698,7 @@ namespace Locus
 		}
 		ImGui::SameLine();
 		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-		if (ImGui::DragFloat("##Z", &dragValues.z, 0.1f, 0.0f, 0.0f, "%.2f"))
+		if (ImGui::DragFloat("##Z", &dragValues.z, speed, min, max, format))
 		{
 			if (name == "Rotation")
 			{

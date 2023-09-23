@@ -184,8 +184,7 @@ namespace Locus
 		entt::entity m_OldEntity;
 		std::stack<entt::entity> m_ChildEntities;
 
-		enum class DeletionCase { FirstChild = 0, MiddleChild = 1, LastChild = 2, Parent = 3 };
-		DeletionCase m_DeletionCase;
+		UUID m_UUID;
 	};
 
 
@@ -198,34 +197,19 @@ namespace Locus
 		~DuplicateEntityCommand() = default;
 
 		DuplicateEntityCommand(Ref<Scene> activeScene, const std::string& name, Entity copyEntity)
-			: m_ActiveScene(activeScene), m_EntityName(name), m_UUID(UUID()), m_CopyEntity(copyEntity), m_Graveyard(m_ActiveScene->m_Graveyard)
+			: m_ActiveScene(activeScene), m_EntityName(name), m_CopyEntity(copyEntity), m_Graveyard(m_ActiveScene->m_Graveyard)
 		{
 			ProcessEntityName();
+			m_Entity = m_ActiveScene->CreateEntityWithUUID(UUID(), m_EntityName, m_CopyEntity.GetComponent<TagComponent>().Enabled);
 
-			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_Entity, m_UUID);
 			m_ActiveScene->CopyAllComponents(m_CopyEntity, m_Entity);
-
 			// Dont want to have m_CopyEntity's children.
 			if (m_CopyEntity.HasComponent<ChildComponent>())
 				m_Entity.RemoveComponent<ChildComponent>();
-
 			// Overriding copied data
 			auto& tc = m_Entity.GetComponent<TransformComponent>();
 			tc.Self = m_Entity;
 			m_Entity.GetComponent<TagComponent>().Tag = m_EntityName;
-
-			m_OldEntity = m_Graveyard->AddEntity(m_Entity);
-
-			CreateChildren(m_CopyEntity, m_Entity);
-			m_ActiveScene->DestroyEntity(m_Entity);
-
-		}
-
-		virtual void Execute() override
-		{
-			
-			m_Entity = m_Graveyard->MoveEntityToScene(m_OldEntity, m_ActiveScene);
-			auto& tc = m_Entity.GetComponent<TransformComponent>();
 			// Add entity to parent's child component
 			if (tc.Parent != Entity::Null)
 			{
@@ -234,6 +218,14 @@ namespace Locus
 				parentCC.ChildCount++;
 			}
 
+			ProcessChildren(m_CopyEntity, m_Entity);
+			m_OldEntity = m_Graveyard->AddEntity(m_Entity);
+			m_ActiveScene->DestroyEntity(m_Entity);
+		}
+
+		virtual void Execute() override
+		{
+			m_Entity = m_Graveyard->MoveEntityToScene(m_OldEntity, m_ActiveScene);
 			while (!m_ChildEntities.empty())
 			{
 				m_Graveyard->MoveEntityToScene(m_ChildEntities.top(), m_ActiveScene);
@@ -246,6 +238,8 @@ namespace Locus
 		virtual void Undo() override
 		{
 			DestroyChildren(m_Entity);
+			m_OldEntity = m_Graveyard->AddEntity(m_Entity);
+
 			m_ActiveScene->DestroyEntity(m_Entity);
 			Application::Get().SetIsSavedStatus(false);
 		}
@@ -325,27 +319,6 @@ namespace Locus
 				m_EntityName.replace(m_EntityName.find_last_of('.') + 1, 3, ss.str());
 		}
 
-		void CreateChildren(Entity from, Entity to)
-		{
-			if (from.HasComponent<ChildComponent>())
-			{
-				to.AddComponent<ChildComponent>();
-				for (auto childEntity : from.GetComponent<ChildComponent>().ChildEntities)
-				{
-					Entity newChildEntity = m_ActiveScene->CreateEntityWithUUID(UUID());
-					auto& cc = to.GetComponent<ChildComponent>();
-					m_ActiveScene->CopyAllComponents(childEntity, newChildEntity);
-					newChildEntity.GetComponent<TransformComponent>().Self = newChildEntity;
-					newChildEntity.GetComponent<TransformComponent>().Parent = to;
-					cc.ChildEntities.push_back(newChildEntity);
-					cc.ChildCount++;
-					m_ChildEntities.push(m_Graveyard->AddEntity(newChildEntity));
-					CreateChildren(childEntity, newChildEntity);
-					m_ActiveScene->DestroyEntity(newChildEntity);
-				}
-			}
-		}
-
 		void DestroyChildren(Entity entity)
 		{
 			if (entity.HasComponent<ChildComponent>())
@@ -353,21 +326,53 @@ namespace Locus
 				for (auto childEntity : entity.GetComponent<ChildComponent>().ChildEntities)
 				{
 					DestroyChildren(childEntity);
+					m_ChildEntities.push((entt::entity)childEntity);
+					m_Graveyard->AddEntity(childEntity);
 					m_ActiveScene->DestroyEntity(childEntity);
 				}
 			}
 		}
 
+		void ProcessChildren(Entity from, Entity to)
+		{
+			if (from.HasComponent<ChildComponent>())
+			{
+				to.AddComponent<ChildComponent>();
+				for (auto copyEntity : from.GetComponent<ChildComponent>().ChildEntities)
+				{
+					auto& copyTag = copyEntity.GetComponent<TagComponent>();
+					Entity newEntity = m_ActiveScene->CreateEntityWithUUID(UUID(), copyTag.Tag, copyTag.Enabled);
+
+					m_ActiveScene->CopyAllComponents(copyEntity, newEntity);
+					// Dont want to have m_CopyEntity's children.
+					if (copyEntity.HasComponent<ChildComponent>())
+						newEntity.RemoveComponent<ChildComponent>();
+					// Overriding copied data
+					auto& tc = newEntity.GetComponent<TransformComponent>();
+					newEntity.GetComponent<TagComponent>().Tag = copyTag.Tag;
+					tc.Self = newEntity;
+					tc.Parent = to;
+					// Add entity to parent's child component
+					auto& parentCC = tc.Parent.GetComponent<ChildComponent>();
+					parentCC.ChildEntities.push_back(newEntity);
+					parentCC.ChildCount++;
+
+					ProcessChildren(copyEntity, newEntity);
+					m_ChildEntities.push((entt::entity)newEntity);
+					m_Graveyard->AddEntity(newEntity);
+					m_ActiveScene->DestroyEntity(newEntity);
+				}
+			}
+		}
 
 	private:
 		Ref<Scene> m_ActiveScene;
+		std::string m_EntityName;
 		Entity m_Entity;
 		Entity m_CopyEntity;
 		entt::entity m_OldEntity;
-		UUID m_UUID;
-		std::string m_EntityName;
-		std::stack<entt::entity> m_ChildEntities;
 		Ref<Graveyard> m_Graveyard;
+		std::stack<entt::entity> m_ChildEntities;
 	};
 
 

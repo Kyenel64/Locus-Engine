@@ -107,7 +107,7 @@ namespace Locus
 		~DestroyEntityCommand() = default;
 
 		DestroyEntityCommand(Ref<Scene> activeScene, Entity entity)
-			: m_ActiveScene(activeScene), m_Entity(entity), m_UUID(UUID()), m_Graveyard(m_ActiveScene->GetGraveyard())
+			: m_ActiveScene(activeScene), m_Entity(entity), m_Graveyard(m_ActiveScene->GetGraveyard())
 		{
 		}
 
@@ -183,7 +183,6 @@ namespace Locus
 		Entity m_Entity;
 		entt::entity m_OldEntity;
 		std::stack<entt::entity> m_ChildEntities;
-		UUID m_UUID;
 
 		enum class DeletionCase { FirstChild = 0, MiddleChild = 1, LastChild = 2, Parent = 3 };
 		DeletionCase m_DeletionCase;
@@ -198,23 +197,55 @@ namespace Locus
 		DuplicateEntityCommand() = default;
 		~DuplicateEntityCommand() = default;
 
-		// Used for duplicating existing entities
 		DuplicateEntityCommand(Ref<Scene> activeScene, const std::string& name, Entity copyEntity)
-			: m_ActiveScene(activeScene), m_EntityName(name), m_UUID(UUID()), m_CopyEntity(copyEntity)
+			: m_ActiveScene(activeScene), m_EntityName(name), m_UUID(UUID()), m_CopyEntity(copyEntity), m_Graveyard(m_ActiveScene->m_Graveyard)
 		{
 			ProcessEntityName();
+
+			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_Entity, m_UUID);
+			m_ActiveScene->CopyAllComponents(m_CopyEntity, m_Entity);
+
+			// Dont want to have m_CopyEntity's children.
+			if (m_CopyEntity.HasComponent<ChildComponent>())
+				m_Entity.RemoveComponent<ChildComponent>();
+
+			// Overriding copied data
+			auto& tc = m_Entity.GetComponent<TransformComponent>();
+			tc.Self = m_Entity;
+			m_Entity.GetComponent<TagComponent>().Tag = m_EntityName;
+
+			m_OldEntity = m_Graveyard->AddEntity(m_Entity);
+
+			CreateChildren(m_CopyEntity, m_Entity);
+			m_ActiveScene->DestroyEntity(m_Entity);
+
 		}
 
 		virtual void Execute() override
 		{
-			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_UUID);
-			m_ActiveScene->CopyAllComponents(m_CopyEntity, m_Entity);
-			m_Entity.GetComponent<TagComponent>().Tag = m_EntityName;
+			
+			m_Entity = m_Graveyard->MoveEntityToScene(m_OldEntity, m_ActiveScene);
+			auto& tc = m_Entity.GetComponent<TransformComponent>();
+			// Add entity to parent's child component
+			if (tc.Parent != Entity::Null)
+			{
+				auto& parentCC = tc.Parent.GetComponent<ChildComponent>();
+				parentCC.ChildEntities.push_back(m_Entity);
+				parentCC.ChildCount++;
+			}
+
+			while (!m_ChildEntities.empty())
+			{
+				m_Graveyard->MoveEntityToScene(m_ChildEntities.top(), m_ActiveScene);
+				m_ChildEntities.pop();
+			}
+
 			Application::Get().SetIsSavedStatus(false);
 		}
 
 		virtual void Undo() override
 		{
+			DestroyChildren(m_Entity);
 			m_ActiveScene->DestroyEntity(m_Entity);
 			Application::Get().SetIsSavedStatus(false);
 		}
@@ -294,12 +325,49 @@ namespace Locus
 				m_EntityName.replace(m_EntityName.find_last_of('.') + 1, 3, ss.str());
 		}
 
+		void CreateChildren(Entity from, Entity to)
+		{
+			if (from.HasComponent<ChildComponent>())
+			{
+				to.AddComponent<ChildComponent>();
+				for (auto childEntity : from.GetComponent<ChildComponent>().ChildEntities)
+				{
+					Entity newChildEntity = m_ActiveScene->CreateEntityWithUUID(UUID());
+					auto& cc = to.GetComponent<ChildComponent>();
+					m_ActiveScene->CopyAllComponents(childEntity, newChildEntity);
+					newChildEntity.GetComponent<TransformComponent>().Self = newChildEntity;
+					newChildEntity.GetComponent<TransformComponent>().Parent = to;
+					cc.ChildEntities.push_back(newChildEntity);
+					cc.ChildCount++;
+					m_ChildEntities.push(m_Graveyard->AddEntity(newChildEntity));
+					CreateChildren(childEntity, newChildEntity);
+					m_ActiveScene->DestroyEntity(newChildEntity);
+				}
+			}
+		}
+
+		void DestroyChildren(Entity entity)
+		{
+			if (entity.HasComponent<ChildComponent>())
+			{
+				for (auto childEntity : entity.GetComponent<ChildComponent>().ChildEntities)
+				{
+					DestroyChildren(childEntity);
+					m_ActiveScene->DestroyEntity(childEntity);
+				}
+			}
+		}
+
+
 	private:
 		Ref<Scene> m_ActiveScene;
 		Entity m_Entity;
 		Entity m_CopyEntity;
+		entt::entity m_OldEntity;
 		UUID m_UUID;
 		std::string m_EntityName;
+		std::stack<entt::entity> m_ChildEntities;
+		Ref<Graveyard> m_Graveyard;
 	};
 
 

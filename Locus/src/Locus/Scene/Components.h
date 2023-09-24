@@ -2,6 +2,8 @@
 // Holds all component classes for Locus's ECS.
 #pragma once
 
+#include <stack>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
@@ -191,26 +193,12 @@ namespace Locus
 		}
 	};
 
-	struct ComponentsList
-	{
-		TagComponent Tag;
-		TransformComponent Transform;
-		ChildComponent Child;
-		SpriteRendererComponent SpriteRenderer;
-		CircleRendererComponent CircleRenderer;
-		CameraComponent Camera;
-		Rigidbody2DComponent Rigidbody2D;
-		BoxCollider2DComponent BoxCollider2D;
-		CircleCollider2DComponent CircleCollider2D;
-		NativeScriptComponent NativeScript;
-	};
-
 	enum class ComponentType
 	{
 		None = 0,
 		Tag,
 		Transform,
-		ChildComponent,
+		Child,
 		SpriteRenderer,
 		CircleRenderer,
 		Camera,
@@ -219,4 +207,25 @@ namespace Locus
 		CircleCollider2D,
 		NativeScript
 	};
+
+	struct ComponentData
+	{
+		Entity EntityID;
+		IDComponent ID;
+		TagComponent Tag;
+		ChildComponent Child;
+		TransformComponent Transform;
+		SpriteRendererComponent SpriteRenderer;
+		CircleRendererComponent CircleRenderer;
+		CameraComponent Camera;
+		Rigidbody2DComponent Rigidbody2D;
+		BoxCollider2DComponent BoxCollider2D;
+		CircleCollider2DComponent CircleCollider2D;
+		NativeScriptComponent NativeScript;
+
+		// Used if you need to keep track of what components an entity contains.
+		std::stack<ComponentType> Components;
+	};
+
+	
 }

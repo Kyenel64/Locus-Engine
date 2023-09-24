@@ -7,6 +7,79 @@
 
 namespace Locus
 {
+
+	static void SaveEntityData(Ref<ComponentData> data, Entity entity)
+	{
+		data->EntityID = entity;
+		data->ID = entity.GetComponent<IDComponent>();
+		data->Tag = entity.GetComponent<TagComponent>();
+		data->Transform = entity.GetComponent<TransformComponent>();
+		if (entity.HasComponent<ChildComponent>())
+		{
+			data->Child = entity.GetComponent<ChildComponent>();
+			data->Components.push(ComponentType::Child);
+		}
+		if (entity.HasComponent<SpriteRendererComponent>())
+		{
+			data->SpriteRenderer = entity.GetComponent<SpriteRendererComponent>();
+			data->Components.push(ComponentType::SpriteRenderer);
+		}
+		if (entity.HasComponent<CircleRendererComponent>())
+		{
+			data->CircleRenderer = entity.GetComponent<CircleRendererComponent>();
+			data->Components.push(ComponentType::CircleRenderer);
+		}
+		if (entity.HasComponent<CameraComponent>())
+		{
+			data->Camera = entity.GetComponent<CameraComponent>();
+			data->Components.push(ComponentType::Camera);
+		}
+		if (entity.HasComponent<Rigidbody2DComponent>())
+		{
+			data->Rigidbody2D = entity.GetComponent<Rigidbody2DComponent>();
+			data->Components.push(ComponentType::Rigidbody2D);
+		}
+		if (entity.HasComponent<BoxCollider2DComponent>())
+		{
+			data->BoxCollider2D = entity.GetComponent<BoxCollider2DComponent>();
+			data->Components.push(ComponentType::BoxCollider2D);
+		}
+		if (entity.HasComponent<CircleCollider2DComponent>())
+		{
+			data->CircleCollider2D = entity.GetComponent<CircleCollider2DComponent>();
+			data->Components.push(ComponentType::CircleCollider2D);
+		}
+		if (entity.HasComponent<NativeScriptComponent>())
+		{
+			data->NativeScript = entity.GetComponent<NativeScriptComponent>();
+			data->Components.push(ComponentType::NativeScript);
+		}
+	}
+
+	static void LoadEntityData(Ref<ComponentData> data, Entity entity)
+	{
+		entity.AddOrReplaceComponent<TagComponent>(data->Tag);
+		entity.AddOrReplaceComponent<TransformComponent>(data->Transform);
+
+		while (!data->Components.empty())
+		{
+			switch (data->Components.top())
+			{
+			case ComponentType::Child: entity.AddComponent<ChildComponent>(data->Child); break;
+			case ComponentType::SpriteRenderer: entity.AddComponent<SpriteRendererComponent>(data->SpriteRenderer); break;
+			case ComponentType::CircleRenderer: entity.AddComponent<CircleRendererComponent>(data->CircleRenderer); break;
+			case ComponentType::Camera: entity.AddComponent<CameraComponent>(data->Camera); break;
+			case ComponentType::Rigidbody2D: entity.AddComponent<Rigidbody2DComponent>(data->Rigidbody2D); break;
+			case ComponentType::BoxCollider2D: entity.AddComponent<BoxCollider2DComponent>(data->BoxCollider2D); break;
+			case ComponentType::CircleCollider2D: entity.AddComponent<CircleCollider2DComponent>(data->CircleCollider2D); break;
+			case ComponentType::NativeScript: entity.AddComponent<NativeScriptComponent>(data->NativeScript); break;
+			}
+			data->Components.pop();
+		}
+	}
+
+
+
 	// --- CreateEntityCommand ------------------------------------------------
 	class CreateEntityCommand : public Command
 	{
@@ -107,14 +180,14 @@ namespace Locus
 		~DestroyEntityCommand() = default;
 
 		DestroyEntityCommand(Ref<Scene> activeScene, Entity entity)
-			: m_ActiveScene(activeScene), m_Entity(entity), m_Graveyard(m_ActiveScene->GetGraveyard())
+			: m_ActiveScene(activeScene), m_Entity(entity)
 		{
+			m_EntityData = CreateRef<ComponentData>();
 		}
 
 		virtual void Execute() override
 		{
-			DestroyChildren(m_Entity);
-
+			// Remove entity from parent's child component
 			if (m_Entity.GetComponent<TransformComponent>().Parent != Entity::Null)
 			{
 				Entity parent = m_Entity.GetComponent<TransformComponent>().Parent;
@@ -126,22 +199,18 @@ namespace Locus
 					parent.RemoveComponent<ChildComponent>();
 			}
 
-			m_OldEntity = m_Graveyard->AddEntity(m_Entity);
+			SaveEntityData(m_EntityData, m_Entity);
+			SaveChildEntityData(m_Entity);
+
+			DestroyChildren(m_Entity);
 			m_ActiveScene->DestroyEntity(m_Entity);
 			Application::Get().SetIsSavedStatus(false);
 		}
 
 		virtual void Undo() override
 		{
-			m_Entity = m_Graveyard->MoveEntityToScene(m_OldEntity, m_ActiveScene);
-			if (!m_Entity.HasComponent<ChildComponent>())
-				m_Entity.AddComponent<ChildComponent>();
-
-			while (!m_ChildEntities.empty())
-			{
-				m_Graveyard->MoveEntityToScene(m_ChildEntities.top(), m_ActiveScene);
-				m_ChildEntities.pop();
-			}
+			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_EntityData->EntityID, m_EntityData->ID.ID);
+			LoadEntityData(m_EntityData, m_Entity);
 
 			if (m_Entity.GetComponent<TransformComponent>().Parent != Entity::Null)
 			{
@@ -153,6 +222,13 @@ namespace Locus
 				parentCC.ChildCount++;
 			}
 
+			while (!m_ChildEntityData.empty())
+			{
+				Ref<ComponentData> childData = m_ChildEntityData.top();
+				Entity childEntity = m_ActiveScene->CreateEntityWithUUID(childData->EntityID, childData->ID.ID);
+				LoadEntityData(childData, childEntity);
+				m_ChildEntityData.pop();
+			}
 			Application::Get().SetIsSavedStatus(false);
 		}
 
@@ -162,6 +238,19 @@ namespace Locus
 		}
 
 	private:
+		void SaveChildEntityData(Entity entity)
+		{
+			if (entity.HasComponent<ChildComponent>())
+			{
+				for (Entity childEntity : entity.GetComponent<ChildComponent>().ChildEntities)
+				{
+					Ref<ComponentData> data = CreateRef<ComponentData>();
+					SaveEntityData(data, childEntity);
+					m_ChildEntityData.push(data);
+					SaveChildEntityData(childEntity);
+				}
+			}
+		}
 		void DestroyChildren(Entity entity)
 		{
 			if (entity.HasComponent<ChildComponent>())
@@ -169,22 +258,16 @@ namespace Locus
 				for (auto childEntity : entity.GetComponent<ChildComponent>().ChildEntities)
 				{
 					DestroyChildren(childEntity);
-					m_ChildEntities.push((entt::entity)childEntity);
-					m_Graveyard->AddEntity(childEntity);
 					m_ActiveScene->DestroyEntity(childEntity);
 				}
 			}
-			
 		}
 
 	private:
 		Ref<Scene> m_ActiveScene;
-		Ref<Graveyard> m_Graveyard;
 		Entity m_Entity;
-		entt::entity m_OldEntity;
-		std::stack<entt::entity> m_ChildEntities;
-
-		UUID m_UUID;
+		Ref<ComponentData> m_EntityData;
+		std::stack<Ref<ComponentData>> m_ChildEntityData;
 	};
 
 
@@ -206,13 +289,11 @@ namespace Locus
 		{
 			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_Entity, m_UUID, m_EntityName, m_CopyEntity.GetComponent<TagComponent>().Enabled);
 			m_ActiveScene->CopyAllComponents(m_CopyEntity, m_Entity);
-			// Dont want to have m_CopyEntity's children.
-			if (m_CopyEntity.HasComponent<ChildComponent>())
-				m_Entity.RemoveComponent<ChildComponent>();
 			// Overriding copied data
 			auto& tc = m_Entity.GetComponent<TransformComponent>();
 			tc.Self = m_Entity;
 			m_Entity.GetComponent<TagComponent>().Tag = m_EntityName;
+
 			// Add entity to parent's child component
 			if (tc.Parent != Entity::Null)
 			{
@@ -221,18 +302,11 @@ namespace Locus
 				parentCC.ChildCount++;
 			}
 
+			// Duplicate child entities
 			if (m_CopyEntity.HasComponent<ChildComponent>())
 			{
-				if (m_First)
-				{
-					CreateChildren(m_CopyEntity, m_Entity);
-					m_ChildComponent = m_Entity.GetComponent<ChildComponent>();
-				}
-				else
-				{
-					m_Entity.AddComponent<ChildComponent>(m_ChildComponent);
-				}
-				m_First = false;
+				m_Entity.RemoveComponent<ChildComponent>(); // Dont want to store m_CopyEntity's children.
+				CreateChildren(m_CopyEntity, m_Entity);
 			}
 			
 			Application::Get().SetIsSavedStatus(false);
@@ -358,7 +432,6 @@ namespace Locus
 		Entity m_Entity;
 		Entity m_CopyEntity;
 		UUID m_UUID;
-		bool m_First;
 		ChildComponent m_ChildComponent;
 	};
 

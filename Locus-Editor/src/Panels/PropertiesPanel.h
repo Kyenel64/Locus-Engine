@@ -50,7 +50,7 @@ namespace Locus
 		Ref<Texture2D> m_ShowMoreButton;
 		Ref<Texture2D> m_FolderIcon;
 
-		ComponentsList m_ClipboardComponent;
+		ComponentData m_ClipboardComponent;
 		ComponentType m_ClipboardComponentType = ComponentType::None;
 	};
 }

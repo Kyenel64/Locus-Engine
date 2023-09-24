@@ -1,90 +1,54 @@
 Scene: Untitled
 Entities:
-  - Entity: 5369130935688279589
-    TagComponent:
-      Tag: Child2
-      Enabled: true
-    TransformComponent:
-      Self: 5369130935688279589
-      Parent: 16606607085268834200
-      LocalPosition: [0, 0, 0]
-      LocalRotation: [0, 0, 0]
-      LocalRotationQuat: [0, 0, 0, 0]
-      LocalScale: [1, 1, 1]
-  - Entity: 13018913752481338128
-    TagComponent:
-      Tag: Parent2
-      Enabled: true
-    TransformComponent:
-      Self: 13018913752481338128
-      Parent: 0
-      LocalPosition: [0, 0, 0]
-      LocalRotation: [0, 0, 0]
-      LocalRotationQuat: [0, 0, 0, 0]
-      LocalScale: [1, 1, 1]
-    ChildComponent:
-      ChildCount: 0
-      ChildEntities:
-        {}
-  - Entity: 9934209754193523836
-    TagComponent:
-      Tag: Child1Child2
-      Enabled: true
-    TransformComponent:
-      Self: 9934209754193523836
-      Parent: 7351636993572280863
-      LocalPosition: [0, 0, 0]
-      LocalRotation: [0, 0, 0]
-      LocalRotationQuat: [0, 0, 0, 0]
-      LocalScale: [1, 1, 1]
-    ChildComponent:
-      ChildCount: 0
-      ChildEntities:
-        {}
-  - Entity: 11611117511532301325
-    TagComponent:
-      Tag: Child1Child1
-      Enabled: true
-    TransformComponent:
-      Self: 11611117511532301325
-      Parent: 7351636993572280863
-      LocalPosition: [0, 0, 0]
-      LocalRotation: [0, 0, 0]
-      LocalRotationQuat: [0, 0, 0, 1]
-      LocalScale: [1, 1, 1]
-    ChildComponent:
-      ChildCount: 0
-      ChildEntities:
-        {}
-  - Entity: 7351636993572280863
+  - Entity: 2043148372889574660
     TagComponent:
       Tag: Child1
       Enabled: true
     TransformComponent:
-      Self: 7351636993572280863
-      Parent: 16606607085268834200
+      Self: 2043148372889574660
+      Parent: 406895866449235694
       LocalPosition: [0, 0, 0]
       LocalRotation: [0, 0, 0]
       LocalRotationQuat: [0, 0, 0, 1]
       LocalScale: [1, 1, 1]
-    ChildComponent:
-      ChildCount: 2
-      ChildEntities:
-        Child0: 9934209754193523836
-        Child1: 11611117511532301325
-  - Entity: 16606607085268834200
+  - Entity: 406895866449235694
     TagComponent:
-      Tag: Parent
+      Tag: Parent1.001
       Enabled: true
     TransformComponent:
-      Self: 16606607085268834200
+      Self: 406895866449235694
       Parent: 0
       LocalPosition: [0, 0, 0]
       LocalRotation: [0, 0, 0]
       LocalRotationQuat: [0, 0, 0, 1]
       LocalScale: [1, 1, 1]
     ChildComponent:
-      ChildCount: 2
+      ChildCount: 1
       ChildEntities:
-        Child0: 7351636993572280863
-        Child1: 5369130935688279589
+        Child0: 2043148372889574660
+  - Entity: 412057522061903492
+    TagComponent:
+      Tag: Child1
+      Enabled: true
+    TransformComponent:
+      Self: 412057522061903492
+      Parent: 17974278813648990347
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+  - Entity: 17974278813648990347
+    TagComponent:
+      Tag: Parent1
+      Enabled: true
+    TransformComponent:
+      Self: 17974278813648990347
+      Parent: 0
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    ChildComponent:
+      ChildCount: 1
+      ChildEntities:
+        Child0: 412057522061903492

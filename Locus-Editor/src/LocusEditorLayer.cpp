@@ -359,8 +359,7 @@ namespace Locus
 				{
 					if (m_ClipboardEntity)
 					{
-						std::string& tag = m_ClipboardEntity.GetComponent<TagComponent>().Tag;
-						CommandHistory::AddCommand(new DuplicateEntityCommand(m_ActiveScene, tag, m_ClipboardEntity));
+						CommandHistory::AddCommand(new DuplicateEntityCommand(m_ActiveScene, m_ClipboardEntity));
 					}
 				}
 				break;
@@ -372,8 +371,7 @@ namespace Locus
 				{
 					if (m_SelectedEntity)
 					{
-						std::string& tag = m_SelectedEntity.GetComponent<TagComponent>().Tag;
-						CommandHistory::AddCommand(new DuplicateEntityCommand(m_ActiveScene, tag, m_SelectedEntity));
+						CommandHistory::AddCommand(new DuplicateEntityCommand(m_ActiveScene, m_SelectedEntity));
 					}
 				}
 				break;

@@ -279,21 +279,32 @@ namespace Locus
 		DuplicateEntityCommand() = default;
 		~DuplicateEntityCommand() = default;
 
-		DuplicateEntityCommand(Ref<Scene> activeScene, const std::string& name, Entity copyEntity)
-			: m_ActiveScene(activeScene), m_EntityName(name), m_UUID(UUID()), m_CopyEntity(copyEntity)
+		DuplicateEntityCommand(Ref<Scene> activeScene, Entity copyEntity)
+			: m_ActiveScene(activeScene), m_CopyEntity(copyEntity)
 		{
 			ProcessEntityName();
+			m_EntityData = CreateRef<ComponentData>();
+
+			// Initially create an entity and store its data.
+			m_Entity = m_ActiveScene->CreateEntityWithUUID(UUID(), m_EntityName, m_CopyEntity.GetComponent<TagComponent>().Enabled);
+			m_ActiveScene->CopyAllComponents(m_CopyEntity, m_Entity);
+			if (m_Entity.HasComponent<ChildComponent>())
+				m_Entity.RemoveComponent<ChildComponent>();
+
+			CreateChildren(m_CopyEntity, m_Entity);
+
+			SaveEntityData(m_EntityData, m_Entity);
+			m_ActiveScene->DestroyEntity(m_Entity);
 		}
 
 		virtual void Execute() override
 		{
-			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_Entity, m_UUID, m_EntityName, m_CopyEntity.GetComponent<TagComponent>().Enabled);
-			m_ActiveScene->CopyAllComponents(m_CopyEntity, m_Entity);
+			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_EntityData->EntityID, m_EntityData->ID.ID);
+			LoadEntityData(m_EntityData, m_Entity);
 			// Overriding copied data
 			auto& tc = m_Entity.GetComponent<TransformComponent>();
 			tc.Self = m_Entity;
 			m_Entity.GetComponent<TagComponent>().Tag = m_EntityName;
-
 			// Add entity to parent's child component
 			if (tc.Parent != Entity::Null)
 			{
@@ -302,26 +313,37 @@ namespace Locus
 				parentCC.ChildCount++;
 			}
 
-			// Duplicate child entities
-			if (m_CopyEntity.HasComponent<ChildComponent>())
+			while (!m_ChildEntityData.empty())
 			{
-				m_Entity.RemoveComponent<ChildComponent>(); // Dont want to store m_CopyEntity's children.
-				CreateChildren(m_CopyEntity, m_Entity);
+				Ref<ComponentData> childData = m_ChildEntityData.top();
+				Entity childEntity = m_ActiveScene->CreateEntityWithUUID(childData->EntityID, childData->ID.ID);
+				LoadEntityData(childData, childEntity);
+				m_ChildEntityData.pop();
 			}
-			
+
 			Application::Get().SetIsSavedStatus(false);
 		}
 
 		virtual void Undo() override
 		{
-			auto& tc = m_Entity.GetComponent<TransformComponent>();
-			if (tc.Parent != Entity::Null)
+			// Remove entity from parent's child component
+			if (m_Entity.GetComponent<TransformComponent>().Parent != Entity::Null)
 			{
-				auto& parentCC = tc.Parent.GetComponent<ChildComponent>();
+				Entity parent = m_Entity.GetComponent<TransformComponent>().Parent;
+				auto& parentCC = parent.GetComponent<ChildComponent>();
 				parentCC.ChildEntities.erase(std::find(parentCC.ChildEntities.begin(), parentCC.ChildEntities.end(), m_Entity));
 				parentCC.ChildCount--;
+
+				if (parentCC.ChildCount == 0)
+					parent.RemoveComponent<ChildComponent>();
 			}
+
+			SaveEntityData(m_EntityData, m_Entity);
+			SaveChildEntityData(m_Entity);
+
+			DestroyChildren(m_Entity);
 			m_ActiveScene->DestroyEntity(m_Entity);
+
 			Application::Get().SetIsSavedStatus(false);
 		}
 
@@ -337,6 +359,7 @@ namespace Locus
 		void ProcessEntityName()
 		{
 			LOCUS_PROFILE_FUNCTION();
+			m_EntityName = m_CopyEntity.GetComponent<TagComponent>().Tag;
 
 			#if 1
 			// Extract name without the extension
@@ -421,6 +444,37 @@ namespace Locus
 					parentCC.ChildEntities.push_back(newEntity);
 					parentCC.ChildCount++;
 					CreateChildren(copyEntity, newEntity);
+
+					Ref<ComponentData> childData = CreateRef<ComponentData>();
+					SaveEntityData(childData, newEntity);
+					m_ChildEntityData.push(childData);
+					m_ActiveScene->DestroyEntity(newEntity);
+				}
+			}
+		}
+
+		void SaveChildEntityData(Entity entity)
+		{
+			if (entity.HasComponent<ChildComponent>())
+			{
+				for (Entity childEntity : entity.GetComponent<ChildComponent>().ChildEntities)
+				{
+					Ref<ComponentData> data = CreateRef<ComponentData>();
+					SaveEntityData(data, childEntity);
+					m_ChildEntityData.push(data);
+					SaveChildEntityData(childEntity);
+				}
+			}
+		}
+
+		void DestroyChildren(Entity entity)
+		{
+			if (entity.HasComponent<ChildComponent>())
+			{
+				for (auto childEntity : entity.GetComponent<ChildComponent>().ChildEntities)
+				{
+					DestroyChildren(childEntity);
+					m_ActiveScene->DestroyEntity(childEntity);
 				}
 			}
 		}
@@ -432,7 +486,8 @@ namespace Locus
 		Entity m_Entity;
 		Entity m_CopyEntity;
 		UUID m_UUID;
-		ChildComponent m_ChildComponent;
+		Ref<ComponentData> m_EntityData;
+		std::stack<Ref<ComponentData>> m_ChildEntityData;
 	};
 
 

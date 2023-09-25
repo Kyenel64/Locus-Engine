@@ -32,7 +32,6 @@ namespace Locus
 
 	Scene::Scene()
 	{
-		m_Graveyard = CreateRef<Graveyard>();
 	}
 
 	Ref<Scene> Scene::Copy(Ref<Scene> other)

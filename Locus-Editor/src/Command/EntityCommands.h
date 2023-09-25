@@ -8,74 +8,55 @@
 namespace Locus
 {
 
+	// Used to store entity data before destroying the entity from the registry.
+	// It is important we store the actual entity id so relationship components don't
+	// point to a destroyed entity.
 	static void SaveEntityData(Ref<ComponentData> data, Entity entity)
 	{
 		data->EntityID = entity;
-		data->ID = entity.GetComponent<IDComponent>();
-		data->Tag = entity.GetComponent<TagComponent>();
-		data->Transform = entity.GetComponent<TransformComponent>();
+		data->ID = CreateRef<IDComponent>(entity.GetComponent<IDComponent>());
+		data->Tag = CreateRef<TagComponent>(entity.GetComponent<TagComponent>());
+		data->Transform = CreateRef<TransformComponent>(entity.GetComponent<TransformComponent>());
 		if (entity.HasComponent<ChildComponent>())
-		{
-			data->Child = entity.GetComponent<ChildComponent>();
-			data->Components.push(ComponentType::Child);
-		}
+			data->Child = CreateRef<ChildComponent>(entity.GetComponent<ChildComponent>());
 		if (entity.HasComponent<SpriteRendererComponent>())
-		{
-			data->SpriteRenderer = entity.GetComponent<SpriteRendererComponent>();
-			data->Components.push(ComponentType::SpriteRenderer);
-		}
+			data->SpriteRenderer = CreateRef<SpriteRendererComponent>(entity.GetComponent<SpriteRendererComponent>());
 		if (entity.HasComponent<CircleRendererComponent>())
-		{
-			data->CircleRenderer = entity.GetComponent<CircleRendererComponent>();
-			data->Components.push(ComponentType::CircleRenderer);
-		}
+			data->CircleRenderer = CreateRef<CircleRendererComponent>(entity.GetComponent<CircleRendererComponent>());
 		if (entity.HasComponent<CameraComponent>())
-		{
-			data->Camera = entity.GetComponent<CameraComponent>();
-			data->Components.push(ComponentType::Camera);
-		}
+			data->Camera = CreateRef<CameraComponent>(entity.GetComponent<CameraComponent>());
 		if (entity.HasComponent<Rigidbody2DComponent>())
-		{
-			data->Rigidbody2D = entity.GetComponent<Rigidbody2DComponent>();
-			data->Components.push(ComponentType::Rigidbody2D);
-		}
+			data->Rigidbody2D = CreateRef<Rigidbody2DComponent>(entity.GetComponent<Rigidbody2DComponent>());
 		if (entity.HasComponent<BoxCollider2DComponent>())
-		{
-			data->BoxCollider2D = entity.GetComponent<BoxCollider2DComponent>();
-			data->Components.push(ComponentType::BoxCollider2D);
-		}
+			data->BoxCollider2D = CreateRef<BoxCollider2DComponent>(entity.GetComponent<BoxCollider2DComponent>());
 		if (entity.HasComponent<CircleCollider2DComponent>())
-		{
-			data->CircleCollider2D = entity.GetComponent<CircleCollider2DComponent>();
-			data->Components.push(ComponentType::CircleCollider2D);
-		}
+			data->CircleCollider2D = CreateRef<CircleCollider2DComponent>(entity.GetComponent<CircleCollider2DComponent>());
 		if (entity.HasComponent<NativeScriptComponent>())
-		{
-			data->NativeScript = entity.GetComponent<NativeScriptComponent>();
-			data->Components.push(ComponentType::NativeScript);
-		}
+			data->NativeScript = CreateRef<NativeScriptComponent>(entity.GetComponent<NativeScriptComponent>());
 	}
-
+	
+	// Assigns component data to entity. ID component is redundant since entities require ID to be created.
 	static void LoadEntityData(Ref<ComponentData> data, Entity entity)
 	{
-		entity.AddOrReplaceComponent<TagComponent>(data->Tag);
-		entity.AddOrReplaceComponent<TransformComponent>(data->Transform);
-
-		while (!data->Components.empty())
-		{
-			switch (data->Components.top())
-			{
-			case ComponentType::Child: entity.AddComponent<ChildComponent>(data->Child); break;
-			case ComponentType::SpriteRenderer: entity.AddComponent<SpriteRendererComponent>(data->SpriteRenderer); break;
-			case ComponentType::CircleRenderer: entity.AddComponent<CircleRendererComponent>(data->CircleRenderer); break;
-			case ComponentType::Camera: entity.AddComponent<CameraComponent>(data->Camera); break;
-			case ComponentType::Rigidbody2D: entity.AddComponent<Rigidbody2DComponent>(data->Rigidbody2D); break;
-			case ComponentType::BoxCollider2D: entity.AddComponent<BoxCollider2DComponent>(data->BoxCollider2D); break;
-			case ComponentType::CircleCollider2D: entity.AddComponent<CircleCollider2DComponent>(data->CircleCollider2D); break;
-			case ComponentType::NativeScript: entity.AddComponent<NativeScriptComponent>(data->NativeScript); break;
-			}
-			data->Components.pop();
-		}
+		entity.GetComponent<IDComponent>() = *data->ID;
+		entity.GetComponent<TagComponent>() = *data->Tag;
+		entity.GetComponent<TransformComponent>() = *data->Transform;
+		if (data->Child)
+			entity.AddComponent<ChildComponent>(*data->Child);
+		if (data->SpriteRenderer)
+			entity.AddComponent<SpriteRendererComponent>(*data->SpriteRenderer);
+		if (data->CircleRenderer)
+			entity.AddComponent<CircleRendererComponent>(*data->CircleRenderer);
+		if (data->Camera)
+			entity.AddComponent<CameraComponent>(*data->Camera);
+		if (data->Rigidbody2D)
+			entity.AddComponent<Rigidbody2DComponent>(*data->Rigidbody2D);
+		if (data->BoxCollider2D)
+			entity.AddComponent<BoxCollider2DComponent>(*data->BoxCollider2D);
+		if (data->CircleCollider2D)
+			entity.AddComponent<CircleCollider2DComponent>(*data->CircleCollider2D);
+		if (data->NativeScript)
+			entity.AddComponent<NativeScriptComponent>(*data->NativeScript);
 	}
 
 
@@ -173,6 +154,8 @@ namespace Locus
 
 
 	// --- DestroyEntityCommand -----------------------------------------------
+	// We need a way to store the data of the destroyed entity so we can
+	// recreate the entity when undoing. Stored in the ComponentData struct.
 	class DestroyEntityCommand : public Command
 	{
 	public:
@@ -199,6 +182,7 @@ namespace Locus
 					parent.RemoveComponent<ChildComponent>();
 			}
 
+			// Save data of entity and all its children
 			SaveEntityData(m_EntityData, m_Entity);
 			SaveChildEntityData(m_Entity);
 
@@ -209,9 +193,10 @@ namespace Locus
 
 		virtual void Undo() override
 		{
-			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_EntityData->EntityID, m_EntityData->ID.ID);
+			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_EntityData->EntityID, m_EntityData->ID->ID);
 			LoadEntityData(m_EntityData, m_Entity);
 
+			// Add entity to parent's child component
 			if (m_Entity.GetComponent<TransformComponent>().Parent != Entity::Null)
 			{
 				Entity parent = m_Entity.GetComponent<TransformComponent>().Parent;
@@ -222,10 +207,11 @@ namespace Locus
 				parentCC.ChildCount++;
 			}
 
+			// Create all child entities
 			while (!m_ChildEntityData.empty())
 			{
 				Ref<ComponentData> childData = m_ChildEntityData.top();
-				Entity childEntity = m_ActiveScene->CreateEntityWithUUID(childData->EntityID, childData->ID.ID);
+				Entity childEntity = m_ActiveScene->CreateEntityWithUUID(childData->EntityID, childData->ID->ID);
 				LoadEntityData(childData, childEntity);
 				m_ChildEntityData.pop();
 			}
@@ -273,6 +259,8 @@ namespace Locus
 
 
 	// --- DuplicateEntityCommand ------------------------------------------------
+	// By far the most complicated command since data and relationships need to be properly
+	// stored and assigned. Naming is also overly complicated.
 	class DuplicateEntityCommand : public Command
 	{
 	public:
@@ -285,9 +273,10 @@ namespace Locus
 			ProcessEntityName();
 			m_EntityData = CreateRef<ComponentData>();
 
-			// Initially create an entity and store its data.
+			// Initially create an entity and store its data. 
 			m_Entity = m_ActiveScene->CreateEntityWithUUID(UUID(), m_EntityName, m_CopyEntity.GetComponent<TagComponent>().Enabled);
 			m_ActiveScene->CopyAllComponents(m_CopyEntity, m_Entity);
+			// Dont want to store the copy entity's children.
 			if (m_Entity.HasComponent<ChildComponent>())
 				m_Entity.RemoveComponent<ChildComponent>();
 
@@ -300,7 +289,7 @@ namespace Locus
 
 		virtual void Execute() override
 		{
-			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_EntityData->EntityID, m_EntityData->ID.ID);
+			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_EntityData->EntityID, m_EntityData->ID->ID);
 			LoadEntityData(m_EntityData, m_Entity);
 			// Overriding copied data
 			auto& tc = m_Entity.GetComponent<TransformComponent>();
@@ -317,7 +306,7 @@ namespace Locus
 			while (!m_ChildEntityData.empty())
 			{
 				Ref<ComponentData> childData = m_ChildEntityData.top();
-				Entity childEntity = m_ActiveScene->CreateEntityWithUUID(childData->EntityID, childData->ID.ID);
+				Entity childEntity = m_ActiveScene->CreateEntityWithUUID(childData->EntityID, childData->ID->ID);
 				LoadEntityData(childData, childEntity);
 				m_ChildEntityData.pop();
 			}
@@ -354,8 +343,8 @@ namespace Locus
 		}
 
 	private:
-		// Process to get proper extension number for duplicate entities. This assigns the right value if 
-		// there are gaps in existing extension values. Eg. if .001, .003: adds .002 for the next value.
+		// Process to assign proper extension for duplicate entities. Works with gaps too.
+		// Eg. if "Entity.001", "Entity.003": adds "Entity.002" for the next value.
 		// Seems overkill for such a simple task. Try to clean up.
 		void ProcessEntityName()
 		{
@@ -434,7 +423,7 @@ namespace Locus
 					auto copyTag = copyEntity.GetComponent<TagComponent>();
 					Entity newEntity = m_ActiveScene->CreateEntityWithUUID(UUID(), copyTag.Tag, copyTag.Enabled);
 					m_ActiveScene->CopyAllComponents(copyEntity, newEntity);
-					// Dont want to have m_CopyEntity's children.
+					// Dont want to store the copy entity's children.
 					if (copyEntity.HasComponent<ChildComponent>())
 						newEntity.RemoveComponent<ChildComponent>();
 					// Overriding copied data

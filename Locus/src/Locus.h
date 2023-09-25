@@ -36,7 +36,6 @@
 
 // --- Scene ---
 #include "Locus/Scene/Scene.h"
-#include "Locus/Scene/Graveyard.h"
 #include "Locus/Scene/Entity.h"
 #include "Locus/Scene/ScriptableEntity.h"
 #include "Locus/Scene/Components.h"

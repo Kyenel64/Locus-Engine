@@ -211,20 +211,17 @@ namespace Locus
 	struct ComponentData
 	{
 		Entity EntityID;
-		IDComponent ID;
-		TagComponent Tag;
-		ChildComponent Child;
-		TransformComponent Transform;
-		SpriteRendererComponent SpriteRenderer;
-		CircleRendererComponent CircleRenderer;
-		CameraComponent Camera;
-		Rigidbody2DComponent Rigidbody2D;
-		BoxCollider2DComponent BoxCollider2D;
-		CircleCollider2DComponent CircleCollider2D;
-		NativeScriptComponent NativeScript;
-
-		// Used if you need to keep track of what components an entity contains.
-		std::stack<ComponentType> Components;
+		Ref<IDComponent> ID;
+		Ref<TagComponent> Tag;
+		Ref<ChildComponent> Child;
+		Ref<TransformComponent> Transform;
+		Ref<SpriteRendererComponent> SpriteRenderer;
+		Ref<CircleRendererComponent> CircleRenderer;
+		Ref<CameraComponent> Camera;
+		Ref<Rigidbody2DComponent> Rigidbody2D;
+		Ref<BoxCollider2DComponent> BoxCollider2D;
+		Ref<CircleCollider2DComponent> CircleCollider2D;
+		Ref<NativeScriptComponent> NativeScript;
 	};
 
 	

@@ -294,6 +294,7 @@ namespace Locus
 			CreateChildren(m_CopyEntity, m_Entity);
 
 			SaveEntityData(m_EntityData, m_Entity);
+			DestroyChildren(m_Entity);
 			m_ActiveScene->DestroyEntity(m_Entity);
 		}
 
@@ -448,7 +449,6 @@ namespace Locus
 					Ref<ComponentData> childData = CreateRef<ComponentData>();
 					SaveEntityData(childData, newEntity);
 					m_ChildEntityData.push(childData);
-					m_ActiveScene->DestroyEntity(newEntity);
 				}
 			}
 		}

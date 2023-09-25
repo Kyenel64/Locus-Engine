@@ -2,7 +2,7 @@
 // Holds all component classes for Locus's ECS.
 #pragma once
 
-#include <stack>
+#include <stack> // This could be causing a COMDAT linking error
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

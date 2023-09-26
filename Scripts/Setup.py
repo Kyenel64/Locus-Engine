@@ -16,4 +16,4 @@ SetupPremake.ValidatePackages()
 
 print("Running premake...")
 subprocess.call(["premake/bin/premake5.exe", "vs2022"])
-print("Finished setting up SideA Engine.")
+print("Finished setting up Locus Engine.")

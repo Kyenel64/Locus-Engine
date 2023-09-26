@@ -145,13 +145,6 @@ namespace Locus
 				bool enabled = view.get<TagComponent>(entity).Enabled;
 				if (enabled)
 				{
-					// temp. move this if statement to OnScenePlay
-					if (!nsc.Instance)
-					{
-						nsc.Instance = nsc.InstantiateScript();
-						nsc.Instance->m_Entity = Entity(entity, this);
-						nsc.Instance->OnCreate();
-					}
 					nsc.Instance->OnUpdate(deltaTime);
 				}
 			}
@@ -272,74 +265,93 @@ namespace Locus
 
 	void Scene::OnRuntimeStart()
 	{
-		m_Box2DWorld = new b2World({ 0.0f, -9.8f });
-
-		auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
-		for (auto e : view)
+		// --- Native Script --------------------------------------------------
 		{
-			Entity entity = Entity(e, this);
-			if (entity.GetComponent<TagComponent>().Enabled)
+			auto view = m_Registry.view<NativeScriptComponent, TagComponent>();
+			for (auto entity : view)
 			{
-				auto& tc = entity.GetComponent<TransformComponent>();
-				auto& rb2D = entity.GetComponent<Rigidbody2DComponent>();
-
-				// Body
-				b2BodyDef bodyDef;
-				bodyDef.type = Rigidbody2DTypeToBox2DType(rb2D.BodyType);
-				
-				bodyDef.position.Set(tc.LocalPosition.x, tc.LocalPosition.y);
-				bodyDef.angle = tc.LocalRotation.z;
-				bodyDef.linearDamping = rb2D.LinearDamping;
-				bodyDef.angularDamping = rb2D.AngularDamping;
-				bodyDef.fixedRotation = rb2D.FixedRotation;
-				bodyDef.gravityScale = rb2D.GravityScale;
-				b2Body* entityBody = m_Box2DWorld->CreateBody(&bodyDef);
-				rb2D.RuntimeBody = entityBody;
-				b2MassData massData;
-				massData.mass = rb2D.Mass;
-				entityBody->SetMassData(&massData);
-
-				b2FixtureDef fixtureDef;
-				fixtureDef.density = rb2D.Mass;
-				fixtureDef.friction = rb2D.Friction;
-				fixtureDef.restitution = rb2D.Restitution;
-				fixtureDef.restitutionThreshold = rb2D.RestitutionThreshold;
-				fixtureDef.filter.categoryBits = 0;
-
-				if (entity.HasComponent<BoxCollider2DComponent>())
+				auto& nsc = view.get<NativeScriptComponent>(entity);
+				bool enabled = view.get<TagComponent>(entity).Enabled;
+				if (enabled)
 				{
-					auto& b2D = entity.GetComponent<BoxCollider2DComponent>();
-
-					b2Vec2 size = { b2D.Size.x * tc.LocalScale.x, b2D.Size.y * tc.LocalScale.y };
-					b2Vec2 offset = { tc.LocalScale.x * b2D.Offset.x, tc.LocalScale.y * b2D.Offset.y };
-					float angle = 0.0f; // TODO
-
-					b2PolygonShape box;
-					box.SetAsBox(size.x / 2, size.y / 2, offset, angle);
-					fixtureDef.shape = &box;
-					fixtureDef.filter.categoryBits = b2D.CollisionLayer;
-					b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);
-					b2D.RuntimeFixture = fixture;
+					nsc.Instance = nsc.InstantiateScript();
+					nsc.Instance->m_Entity = Entity(entity, this);
+					nsc.Instance->OnCreate();
 				}
-				else if (entity.HasComponent<CircleCollider2DComponent>())
-				{
-					auto& c2D = entity.GetComponent<CircleCollider2DComponent>();
-
-					float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
-					b2Vec2 offset = { maxScale * c2D.Offset.x, maxScale * c2D.Offset.y };
-					float radius = maxScale * c2D.Radius;
-
-					b2CircleShape circle;
-					circle.m_p = offset;
-					circle.m_radius = radius;
-					fixtureDef.shape = &circle;
-					fixtureDef.filter.categoryBits = c2D.CollisionLayer;
-					b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);
-					c2D.RuntimeFixture = fixture;
-				}
-				
 			}
 		}
+		
+		// --- Physics --------------------------------------------------------
+		{
+			m_Box2DWorld = new b2World({ 0.0f, -9.8f });
+			auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				if (entity.GetComponent<TagComponent>().Enabled)
+				{
+					auto& tc = entity.GetComponent<TransformComponent>();
+					auto& rb2D = entity.GetComponent<Rigidbody2DComponent>();
+
+					// Body
+					b2BodyDef bodyDef;
+					bodyDef.type = Rigidbody2DTypeToBox2DType(rb2D.BodyType);
+
+					bodyDef.position.Set(tc.LocalPosition.x, tc.LocalPosition.y);
+					bodyDef.angle = tc.LocalRotation.z;
+					bodyDef.linearDamping = rb2D.LinearDamping;
+					bodyDef.angularDamping = rb2D.AngularDamping;
+					bodyDef.fixedRotation = rb2D.FixedRotation;
+					bodyDef.gravityScale = rb2D.GravityScale;
+					b2Body* entityBody = m_Box2DWorld->CreateBody(&bodyDef);
+					rb2D.RuntimeBody = entityBody;
+					b2MassData massData;
+					massData.mass = rb2D.Mass;
+					entityBody->SetMassData(&massData);
+
+					b2FixtureDef fixtureDef;
+					fixtureDef.density = rb2D.Mass;
+					fixtureDef.friction = rb2D.Friction;
+					fixtureDef.restitution = rb2D.Restitution;
+					fixtureDef.restitutionThreshold = rb2D.RestitutionThreshold;
+					fixtureDef.filter.categoryBits = 0;
+
+					if (entity.HasComponent<BoxCollider2DComponent>())
+					{
+						auto& b2D = entity.GetComponent<BoxCollider2DComponent>();
+
+						b2Vec2 size = { b2D.Size.x * tc.LocalScale.x, b2D.Size.y * tc.LocalScale.y };
+						b2Vec2 offset = { tc.LocalScale.x * b2D.Offset.x, tc.LocalScale.y * b2D.Offset.y };
+						float angle = 0.0f; // TODO
+
+						b2PolygonShape box;
+						box.SetAsBox(size.x / 2, size.y / 2, offset, angle);
+						fixtureDef.shape = &box;
+						fixtureDef.filter.categoryBits = b2D.CollisionLayer;
+						b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);
+						b2D.RuntimeFixture = fixture;
+					}
+					else if (entity.HasComponent<CircleCollider2DComponent>())
+					{
+						auto& c2D = entity.GetComponent<CircleCollider2DComponent>();
+
+						float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
+						b2Vec2 offset = { maxScale * c2D.Offset.x, maxScale * c2D.Offset.y };
+						float radius = maxScale * c2D.Radius;
+
+						b2CircleShape circle;
+						circle.m_p = offset;
+						circle.m_radius = radius;
+						fixtureDef.shape = &circle;
+						fixtureDef.filter.categoryBits = c2D.CollisionLayer;
+						b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);
+						c2D.RuntimeFixture = fixture;
+					}
+				}
+			}
+		}
+		
+
 	}
 
 	void Scene::OnRuntimeStop()

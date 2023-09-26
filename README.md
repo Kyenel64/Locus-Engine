@@ -1,6 +1,6 @@
 # Locus Game Engine
 <p align="center">
-  <img src="./Resources/Branding/Logo/LocusLogoWithName_Small.png" alt="Locus Logo"/>
+  <img src="./Resources/Branding/Logo/LocusLogoWithName.png" alt="Locus Logo" width="800"/>
 </p>
 Locus is an open-source 2D/3D game engine written in C++ for Windows. The engine currently uses OpenGL but Vulkan and other graphics APIs may be implemented in the future.
 

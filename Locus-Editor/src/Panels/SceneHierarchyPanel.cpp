@@ -106,6 +106,25 @@ namespace Locus
 		if (ImGui::IsItemClicked())
 			m_SelectedEntity = entity;
 
+		// Process drag drop
+		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+		{
+			ImGui::SetDragDropPayload("ENTITY_POSITION", &entity, sizeof(Entity));
+			ImGui::EndDragDropSource();
+		}
+
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_POSITION"))
+			{
+				uint32_t curPos = entity.GetComponent<TagComponent>().HierarchyPos;
+				Entity* payloadEntity = (Entity*)payload->Data;
+				entity.GetComponent<TagComponent>().HierarchyPos = payloadEntity->GetComponent<TagComponent>().HierarchyPos;
+				payloadEntity->GetComponent<TagComponent>().HierarchyPos = curPos;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
 		bool entityDeleted = false;
 		bool openOnCreate = false;
 		if (m_SelectedEntity && ImGui::BeginPopupContextItem()) // TODO: Create child when hovering too
@@ -137,26 +156,6 @@ namespace Locus
 			}
 			ImGui::TreePop();
 		}
-
-		// Process drag drop
-		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
-		{
-			ImGui::SetDragDropPayload("ENTITY_POSITION", &entity, sizeof(Entity));
-			ImGui::EndDragDropSource();
-		}
-
-		if (ImGui::BeginDragDropTarget())
-		{
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_POSITION"))
-			{
-				uint32_t curPos = entity.GetComponent<TagComponent>().HierarchyPos;
-				Entity* payloadEntity = (Entity*)payload->Data;
-				entity.GetComponent<TagComponent>().HierarchyPos = payloadEntity->GetComponent<TagComponent>().HierarchyPos;
-				payloadEntity->GetComponent<TagComponent>().HierarchyPos = curPos;
-			}
-			ImGui::EndDragDropTarget();
-		}
-
 
 		if (entityDeleted)
 		{

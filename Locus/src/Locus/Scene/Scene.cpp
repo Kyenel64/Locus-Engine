@@ -90,7 +90,7 @@ namespace Locus
 		CopyComponent<Rigidbody2DComponent>(from, to);
 		CopyComponent<BoxCollider2DComponent>(from, to);
 		CopyComponent<CircleCollider2DComponent>(from, to);
-		CopyComponent<SpriteRendererComponent>(from, to);
+		CopyComponent<NativeScriptComponent>(from, to);
 	}
 
 	Entity Scene::CreateEntity(const std::string& name)
@@ -190,6 +190,7 @@ namespace Locus
 				if (camera.Primary)
 				{
 					mainCamera = &camera.Camera;
+					mainCamera->SetViewportSize(m_ViewportWidth, m_ViewportHeight);
 					cameraTransform = GetWorldTransform(entity);
 					break;
 				}

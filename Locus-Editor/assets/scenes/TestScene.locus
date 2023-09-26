@@ -1,0 +1,43 @@
+Scene: Untitled
+RootEntityCount: 3
+Entities:
+  - Entity: 8545352253048965181
+    TagComponent:
+      Tag: Entity1
+      Enabled: true
+      HierarchyPos: 2
+    TransformComponent:
+      Self: 8545352253048965181
+      Parent: 0
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [0.844155848, 0.230224296, 0.230224296, 1]
+      TexturePath: ""
+      TilingFactor: 1
+  - Entity: 16478834291806201826
+    TagComponent:
+      Tag: Main Camera
+      Enabled: true
+      HierarchyPos: 1
+    TransformComponent:
+      Self: 16478834291806201826
+      Parent: 0
+      LocalPosition: [0, 0, 9.0019989]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        BackgroundColor: [0.25, 0.5, 0.5, 1]
+        ProjectionType: 1
+        OrthographicSize: 10.3000002
+        OrthographicNearClip: -1
+        OrthographicFarClip: 1000
+        PerspectiveFOV: 0.785398185
+        PerspectiveNearClip: 0.00999999978
+        PerspectiveFarClip: 1000
+      Primary: true
+      FixedAspectRatio: false

@@ -15,6 +15,39 @@ namespace Locus
 {
 	extern const std::filesystem::path g_ProjectPath;
 
+	// temp
+	class CameraControllerScript : public ScriptableEntity
+	{
+	public:
+		virtual void OnCreate()
+		{
+			
+		}
+
+		virtual void OnDestroy()
+		{
+
+		}
+
+		virtual void OnUpdate(Timestep deltaTime)
+		{
+			glm::vec3& pos = GetComponent<TransformComponent>().LocalPosition;
+			float speed = 5.0f;
+
+			if (Input::IsKeyPressed(Key::A))
+				pos.x -= speed * deltaTime;
+			if (Input::IsKeyPressed(Key::D))
+				pos.x += speed * deltaTime;
+			if (Input::IsKeyPressed(Key::W))
+				pos.y += speed * deltaTime;
+			if (Input::IsKeyPressed(Key::S))
+				pos.y -= speed * deltaTime;
+		}
+
+	private:
+
+	};
+
 	PropertiesPanel::PropertiesPanel(const Ref<Scene>& context)
 	{
 		SetContext(context);
@@ -101,6 +134,18 @@ namespace Locus
 						CommandHistory::AddCommand(new AddComponentCommand<CircleCollider2DComponent>(m_SelectedEntity));
 					else
 						LOCUS_CORE_WARN("This entity already has a CircleCollider2D Component");
+					ImGui::CloseCurrentPopup();
+				}
+
+				if (ImGui::MenuItem("Native Script"))
+				{
+					if (!m_SelectedEntity.HasComponent<NativeScriptComponent>())
+					{
+						CommandHistory::AddCommand(new AddComponentCommand<NativeScriptComponent>(m_SelectedEntity));
+						m_SelectedEntity.GetComponent<NativeScriptComponent>().Bind<CameraControllerScript>(); // temp
+					}
+					else
+						LOCUS_CORE_WARN("This entity already has a NativeScript Component");
 					ImGui::CloseCurrentPopup();
 				}
 
@@ -401,7 +446,7 @@ namespace Locus
 				DrawFloatControl("Restitution Threshold", component.RestitutionThreshold, 0.0f);
 			});
 
-		// --- BoxCollider2D Component
+		// --- BoxCollider2D Component ----------------------------------------
 		DrawComponentUI<BoxCollider2DComponent>("Box Collider 2D", entity, [this](auto& component)
 			{
 				// Collision Layer
@@ -412,7 +457,7 @@ namespace Locus
 				DrawVec2Control("Offset", component.Offset);
 			});
 
-		// --- CircleCollider2D Component
+		// --- CircleCollider2D Component -------------------------------------
 		DrawComponentUI<CircleCollider2DComponent>("Circle Collider 2D", entity, [this](auto& component)
 			{
 				// Collision Layer
@@ -421,6 +466,13 @@ namespace Locus
 				DrawFloatControl("radius", component.Radius, 0.5f);
 				// Offset
 				DrawVec2Control("Offset", component.Offset);
+			});
+
+		// --- Native Script --------------------------------------------------
+		DrawComponentUI<NativeScriptComponent>("Native Script", entity, [this](auto& component)
+			{
+				// Collision Layer
+				ImGui::Button("CameraControllerScript"); // temp
 			});
 	}
 

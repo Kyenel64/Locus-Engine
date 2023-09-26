@@ -71,11 +71,15 @@ namespace Locus
 		CreateEntityCommand(Ref<Scene> activeScene, const std::string& name)
 			: m_ActiveScene(activeScene), m_EntityName(name), m_UUID(UUID())
 		{
+			m_HierarchyPos = m_ActiveScene->m_RootEntityCount;
+			m_ActiveScene->m_RootEntityCount++;
 		}
 
 		virtual void Execute() override
 		{
 			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_Entity, m_UUID, m_EntityName);
+			m_Entity.GetComponent<TagComponent>().HierarchyPos = m_HierarchyPos;
+			m_ActiveScene->m_RootEntityCount--;
 			Application::Get().SetIsSavedStatus(false);
 		}
 
@@ -94,6 +98,7 @@ namespace Locus
 		Ref<Scene> m_ActiveScene;
 		Entity m_Entity;
 		UUID m_UUID;
+		uint32_t m_HierarchyPos;
 		std::string m_EntityName;
 	};
 
@@ -114,6 +119,8 @@ namespace Locus
 		virtual void Execute() override
 		{
 			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_Entity, m_UUID, m_EntityName);
+			m_Entity.GetComponent<TagComponent>().HierarchyPos = 0;
+			m_ActiveScene->m_RootEntityCount--;
 			
 			if (!m_ParentEntity.HasComponent<ChildComponent>())
 				m_ParentEntity.AddComponent<ChildComponent>();
@@ -194,6 +201,7 @@ namespace Locus
 		virtual void Undo() override
 		{
 			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_EntityData->EntityID, m_EntityData->ID->ID);
+			m_ActiveScene->m_RootEntityCount--;
 			LoadEntityData(m_EntityData, m_Entity);
 
 			// Add entity to parent's child component
@@ -212,6 +220,7 @@ namespace Locus
 			{
 				Ref<ComponentData> childData = m_ChildEntityData.top();
 				Entity childEntity = m_ActiveScene->CreateEntityWithUUID(childData->EntityID, childData->ID->ID);
+				m_ActiveScene->m_RootEntityCount--;
 				LoadEntityData(childData, childEntity);
 				m_ChildEntityData.pop();
 			}
@@ -275,7 +284,9 @@ namespace Locus
 
 			// Initially create an entity and store its data. 
 			m_Entity = m_ActiveScene->CreateEntityWithUUID(UUID(), m_EntityName, m_CopyEntity.GetComponent<TagComponent>().Enabled);
+			uint32_t hierarchyPos = m_Entity.GetComponent<TagComponent>().HierarchyPos;
 			m_ActiveScene->CopyAllComponents(m_CopyEntity, m_Entity);
+			m_Entity.GetComponent<TagComponent>().HierarchyPos = hierarchyPos;
 			// Dont want to store the copy entity's children.
 			if (m_Entity.HasComponent<ChildComponent>())
 				m_Entity.RemoveComponent<ChildComponent>();
@@ -290,6 +301,7 @@ namespace Locus
 		virtual void Execute() override
 		{
 			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_EntityData->EntityID, m_EntityData->ID->ID);
+			m_ActiveScene->m_RootEntityCount--;
 			LoadEntityData(m_EntityData, m_Entity);
 			// Overriding copied data
 			auto& tc = m_Entity.GetComponent<TransformComponent>();
@@ -307,6 +319,7 @@ namespace Locus
 			{
 				Ref<ComponentData> childData = m_ChildEntityData.top();
 				Entity childEntity = m_ActiveScene->CreateEntityWithUUID(childData->EntityID, childData->ID->ID);
+				m_ActiveScene->m_RootEntityCount--;
 				LoadEntityData(childData, childEntity);
 				m_ChildEntityData.pop();
 			}
@@ -427,6 +440,8 @@ namespace Locus
 					if (copyEntity.HasComponent<ChildComponent>())
 						newEntity.RemoveComponent<ChildComponent>();
 					// Overriding copied data
+					newEntity.GetComponent<TagComponent>().HierarchyPos = 0;
+					m_ActiveScene->m_RootEntityCount--;
 					auto& tc = newEntity.GetComponent<TransformComponent>();
 					tc.Self = newEntity;
 					tc.Parent = to;

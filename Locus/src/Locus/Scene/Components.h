@@ -31,6 +31,7 @@ namespace Locus
 	{
 		std::string Tag;
 		bool Enabled = true;
+		uint32_t HierarchyPos;
 
 		TagComponent() = default;
 		TagComponent(const TagComponent&) = default;

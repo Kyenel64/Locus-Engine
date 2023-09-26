@@ -166,6 +166,7 @@ namespace Locus
 			auto& tag = entity.GetComponent<TagComponent>();
 			out << YAML::Key << "Tag" << YAML::Value << tag.Tag;
 			out << YAML::Key << "Enabled" << YAML::Value << tag.Enabled;
+			out << YAML::Key << "HierarchyPos" << YAML::Value << tag.HierarchyPos;
 			out << YAML::EndMap; // End Tag Component
 		}
 
@@ -314,8 +315,8 @@ namespace Locus
 	{
 		YAML::Emitter out;
 		out << YAML::BeginMap; // Scene
-		out << YAML::Key << "Scene" << YAML::Value << m_Scene->GetSceneName(); 
-
+		out << YAML::Key << "Scene" << YAML::Value << m_Scene->GetSceneName();
+		out << YAML::Key << "RootEntityCount" << YAML::Value << m_Scene->m_RootEntityCount;
 		// Array of Entities
 		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
 		m_Scene->m_Registry.each([&](auto entityID)
@@ -347,6 +348,7 @@ namespace Locus
 		// Deserialize scene data
 		std::string sceneName = data["Scene"].as<std::string>();
 		m_Scene->SetSceneName(sceneName);
+		m_Scene->m_RootEntityCount = data["RootEntityCount"].as<uint32_t>();
 		LOCUS_CORE_TRACE("Deserializing scene '{0}'", sceneName);
 
 		// Deserialize every entity data
@@ -370,6 +372,8 @@ namespace Locus
 
 				LOCUS_CORE_TRACE("Deserializing Entity: {0}, ID: {1}", name, uuid);
 				Entity deserializedEntity = m_Scene->CreateEntityWithUUID(uuid, name, enabled);
+				m_Scene->m_RootEntityCount--;
+				deserializedEntity.GetComponent<TagComponent>().HierarchyPos = tagComponent["HierarchyPos"].as<uint32_t>();
 
 				// --- Transform Component ------------------------------------
 				auto transformComponent = entity["TransformComponent"];

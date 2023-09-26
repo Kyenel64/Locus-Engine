@@ -872,6 +872,8 @@ namespace Locus
 		ImGui::Text("Hovered Entity: %s", name.c_str());
 
 		ImGui::Text("Entity Value: %d", (entt::entity)m_SelectedEntity);
+		if (m_SelectedEntity.IsValid())
+			ImGui::Text("Hierarchy position: %d", m_SelectedEntity.GetComponent<TagComponent>().HierarchyPos);
 
 		// Collision
 		std::string collisionLayer = "None";

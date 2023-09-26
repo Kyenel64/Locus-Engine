@@ -59,6 +59,7 @@ namespace Locus
 		std::string m_SceneName = "Untitled";
 		entt::registry m_Registry;
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
+		uint32_t m_RootEntityCount = 1;
 
 		b2World* m_Box2DWorld = nullptr;
 

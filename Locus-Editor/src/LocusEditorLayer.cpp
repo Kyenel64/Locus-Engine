@@ -359,8 +359,7 @@ namespace Locus
 				{
 					if (m_ClipboardEntity)
 					{
-						std::string& tag = m_ClipboardEntity.GetComponent<TagComponent>().Tag;
-						CommandHistory::AddCommand(new DuplicateEntityCommand(m_ActiveScene, tag, m_ClipboardEntity));
+						CommandHistory::AddCommand(new DuplicateEntityCommand(m_ActiveScene, m_ClipboardEntity));
 					}
 				}
 				break;
@@ -372,8 +371,7 @@ namespace Locus
 				{
 					if (m_SelectedEntity)
 					{
-						std::string& tag = m_SelectedEntity.GetComponent<TagComponent>().Tag;
-						CommandHistory::AddCommand(new DuplicateEntityCommand(m_ActiveScene, tag, m_SelectedEntity));
+						CommandHistory::AddCommand(new DuplicateEntityCommand(m_ActiveScene, m_SelectedEntity));
 					}
 				}
 				break;
@@ -873,6 +871,11 @@ namespace Locus
 				name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
 		ImGui::Text("Hovered Entity: %s", name.c_str());
 
+		ImGui::Text("Entity Value: %d", (entt::entity)m_SelectedEntity);
+		if (m_SelectedEntity.IsValid())
+			ImGui::Text("Hierarchy position: %d", m_SelectedEntity.GetComponent<TagComponent>().HierarchyPos);
+
+		// Collision
 		std::string collisionLayer = "None";
 		if (m_HoveredEntity)
 			if (m_HoveredEntity.HasComponent<BoxCollider2DComponent>())

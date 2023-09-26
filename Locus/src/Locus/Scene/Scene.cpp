@@ -32,7 +32,6 @@ namespace Locus
 
 	Scene::Scene()
 	{
-		m_Graveyard = CreateRef<Graveyard>();
 	}
 
 	Ref<Scene> Scene::Copy(Ref<Scene> other)
@@ -108,6 +107,8 @@ namespace Locus
 		auto& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Entity" : name;
 		tag.Enabled = enabled;
+		tag.HierarchyPos = m_RootEntityCount;
+		m_RootEntityCount++;
 		return entity;
 	}
 
@@ -123,6 +124,8 @@ namespace Locus
 		auto& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Entity" : name;
 		tag.Enabled = enabled;
+		tag.HierarchyPos = m_RootEntityCount;
+		m_RootEntityCount++;
 		return entity;
 	}
 
@@ -202,8 +205,8 @@ namespace Locus
 			Renderer2D::BeginScene(*mainCamera, cameraTransform);
 
 			{ // Sprite
-				auto group = m_Registry.group<TransformComponent, SpriteRendererComponent, TagComponent>();
-				for (auto e : group)
+				auto view = m_Registry.view<TransformComponent, SpriteRendererComponent, TagComponent>();
+				for (auto e : view)
 				{
 					Entity entity = Entity(e, this);
 					bool enabled = entity.GetComponent<TagComponent>().Enabled;
@@ -240,8 +243,8 @@ namespace Locus
 		Renderer2D::BeginScene(camera);
 
 		{ // Sprite
-			auto group = m_Registry.group<TransformComponent, SpriteRendererComponent, TagComponent>();
-			for (auto e : group)
+			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent, TagComponent>();
+			for (auto e : view)
 			{
 				Entity entity = Entity(e, this);
 				bool enabled = entity.GetComponent<TagComponent>().Enabled;

@@ -55,15 +55,21 @@ namespace Locus
 		if (m_ActiveScene)
 		{
 			// Display each entity
-			m_ActiveScene->m_Registry.each([&](auto entityID)
+			m_ActiveScene->m_Registry.sort<TagComponent>([&](entt::entity lhs, entt::entity rhs)
 				{
-					Entity entity = Entity(entityID, m_ActiveScene.get());
-					if (entity.HasComponent<TransformComponent>())
-					{
-						if (entity.GetComponent<TransformComponent>().Parent == Entity::Null)
-							DrawEntityNode(entity);
-					}
+					return m_ActiveScene->m_Registry.get<TagComponent>(lhs).HierarchyPos < m_ActiveScene->m_Registry.get<TagComponent>(rhs).HierarchyPos;
 				});
+
+			auto view = m_ActiveScene->m_Registry.view<TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, m_ActiveScene.get());
+				if (entity.HasComponent<TransformComponent>())
+				{
+					if (entity.GetComponent<TransformComponent>().Parent == Entity::Null)
+						DrawEntityNode(entity);
+				}
+			}
 
 			// Select nothing if clicking in blank space
 			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered() || !m_SelectedEntity.IsValid())
@@ -131,6 +137,26 @@ namespace Locus
 			}
 			ImGui::TreePop();
 		}
+
+		// Process drag drop
+		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+		{
+			ImGui::SetDragDropPayload("ENTITY_POSITION", &entity, sizeof(Entity));
+			ImGui::EndDragDropSource();
+		}
+
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_POSITION"))
+			{
+				uint32_t curPos = entity.GetComponent<TagComponent>().HierarchyPos;
+				Entity* payloadEntity = (Entity*)payload->Data;
+				entity.GetComponent<TagComponent>().HierarchyPos = payloadEntity->GetComponent<TagComponent>().HierarchyPos;
+				payloadEntity->GetComponent<TagComponent>().HierarchyPos = curPos;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
 
 		if (entityDeleted)
 		{

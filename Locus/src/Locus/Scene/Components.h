@@ -2,6 +2,8 @@
 // Holds all component classes for Locus's ECS.
 #pragma once
 
+#include <stack> // This could be causing a COMDAT linking error
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
@@ -29,6 +31,7 @@ namespace Locus
 	{
 		std::string Tag;
 		bool Enabled = true;
+		uint32_t HierarchyPos;
 
 		TagComponent() = default;
 		TagComponent(const TagComponent&) = default;
@@ -191,26 +194,12 @@ namespace Locus
 		}
 	};
 
-	struct ComponentsList
-	{
-		TagComponent Tag;
-		TransformComponent Transform;
-		ChildComponent Child;
-		SpriteRendererComponent SpriteRenderer;
-		CircleRendererComponent CircleRenderer;
-		CameraComponent Camera;
-		Rigidbody2DComponent Rigidbody2D;
-		BoxCollider2DComponent BoxCollider2D;
-		CircleCollider2DComponent CircleCollider2D;
-		NativeScriptComponent NativeScript;
-	};
-
 	enum class ComponentType
 	{
 		None = 0,
 		Tag,
 		Transform,
-		ChildComponent,
+		Child,
 		SpriteRenderer,
 		CircleRenderer,
 		Camera,
@@ -219,4 +208,22 @@ namespace Locus
 		CircleCollider2D,
 		NativeScript
 	};
+
+	struct ComponentData
+	{
+		Entity EntityID;
+		Ref<IDComponent> ID;
+		Ref<TagComponent> Tag;
+		Ref<ChildComponent> Child;
+		Ref<TransformComponent> Transform;
+		Ref<SpriteRendererComponent> SpriteRenderer;
+		Ref<CircleRendererComponent> CircleRenderer;
+		Ref<CameraComponent> Camera;
+		Ref<Rigidbody2DComponent> Rigidbody2D;
+		Ref<BoxCollider2DComponent> BoxCollider2D;
+		Ref<CircleCollider2DComponent> CircleCollider2D;
+		Ref<NativeScriptComponent> NativeScript;
+	};
+
+	
 }

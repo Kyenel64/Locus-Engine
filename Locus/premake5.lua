@@ -40,7 +40,8 @@ project "Locus"
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.Box2D}",
-		"%{IncludeDir.VulkanSDK}"
+		"%{IncludeDir.VulkanSDK}",
+		"%{IncludeDir.mono}"
 	}
 
 	links
@@ -50,7 +51,8 @@ project "Locus"
 		"ImGui",
 		"opengl32.lib",
 		"yaml-cpp",
-		"Box2D"
+		"Box2D",
+		"%{Library.mono}"
 	}
 
 	filter "system:windows"
@@ -59,6 +61,14 @@ project "Locus"
 		defines
 		{
 			"GLFW_INCLUDE_NONE"
+		}
+
+		links
+		{
+			"%{Library.WinSock}",
+			"%{Library.WinMM}",
+			"%{Library.WinVersion}",
+			"%{Library.BCrypt}",
 		}
 
 	filter "configurations:Debug"

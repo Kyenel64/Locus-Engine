@@ -14,12 +14,14 @@ IncludeDir["ImGuizmo"] = "%{wks.location}/Locus/vendor/ImGuizmo"
 IncludeDir["shaderc"] = "%{wks.location}/Locus/vendor/shaderc/include"
 IncludeDir["SPIRV_Cross"] = "%{wks.location}/Locus/vendor/SPIRV-Cross"
 IncludeDir["Box2D"] = "%{wks.location}/Locus/vendor/Box2D/include"
+IncludeDir["mono"] = "%{wks.location}/Locus/vendor/mono/include"
 IncludeDir["VulkanSDK"] = "%{VULKAN_SDK}/Include"
 
 LibraryDir = {}
 
 LibraryDir["VulkanSDK"] = "%{VULKAN_SDK}/Lib"
 LibraryDir["VulkanSDK_Debug"] = "%{wks.location}/Locus/vendor/VulkanSDK/Lib"
+LibraryDir["mono"] = "%{wks.location}/Locus/vendor/mono/lib/%{cfg.buildcfg}"
 
 Library = {}
 Library["Vulkan"] = "%{LibraryDir.VulkanSDK}/vulkan-1.lib"
@@ -33,3 +35,11 @@ Library["SPIRV_Tools_Debug"] = "%{LibraryDir.VulkanSDK_Debug}/SPIRV-Toolsd.lib"
 Library["ShaderC_Release"] = "%{LibraryDir.VulkanSDK}/shaderc_shared.lib"
 Library["SPIRV_Cross_Release"] = "%{LibraryDir.VulkanSDK}/spirv-cross-core.lib"
 Library["SPIRV_Cross_GLSL_Release"] = "%{LibraryDir.VulkanSDK}/spirv-cross-glsl.lib"
+
+Library["mono"] = "%{LibraryDir.mono}/libmono-static-sgen.lib"
+
+-- Windows
+Library["WinSock"] = "Ws2_32.lib"
+Library["WinMM"] = "Winmm.lib"
+Library["WinVersion"] = "Version.lib"
+Library["BCrypt"] = "Bcrypt.lib"

@@ -1,6 +1,0 @@
-C:\Users\Kye\Desktop\Locus-Engine\Locus-Editor\resources\scripts\int\Debug\Locus-Script.csproj.AssemblyReference.cache
-C:\Users\Kye\Desktop\Locus-Engine\Locus-Editor\resources\scripts\int\Debug\Locus-Script.csproj.CoreCompileInputs.cache
-C:\Users\Kye\Desktop\Locus-Engine\Locus-Editor\resources\scripts\int\Debug\Locus-Script.dll
-C:\Users\Kye\Desktop\Locus-Engine\Locus-Editor\resources\scripts\int\Debug\Locus-Script.pdb
-C:\Users\Kye\Desktop\Locus-Engine\Locus-Editor\resources\scripts\Locus-Script.dll
-C:\Users\Kye\Desktop\Locus-Engine\Locus-Editor\resources\scripts\Locus-Script.pdb

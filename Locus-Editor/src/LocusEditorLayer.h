@@ -44,6 +44,7 @@ namespace Locus
 		void showGizmoUI();
 		void ProcessViewportDragDrop();
 		void OnScenePlay();
+		void OnPhysicsPlay();
 		void OnSceneStop();
 		void OnScenePause();
 
@@ -62,13 +63,14 @@ namespace Locus
 		std::string m_SavePath;
 		Ref<Scene> m_ActiveScene;
 		Ref<Scene> m_EditorScene;
-		enum class SceneState { Edit = 0, Play = 1, Pause = 2};
+		enum class SceneState { Edit = 0, Play = 1, Pause = 2, Physics = 3};
 		SceneState m_SceneState = SceneState::Edit;
 
 		// Textures
 		Ref<Texture2D> m_PlayButton;
 		Ref<Texture2D> m_PauseButton;
 		Ref<Texture2D> m_StopButton;
+		Ref<Texture2D> m_SimulatePhysicsButton;
 
 		// Viewport
 		Ref<Framebuffer> m_Framebuffer;

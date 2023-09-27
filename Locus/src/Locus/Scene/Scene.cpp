@@ -151,25 +151,25 @@ namespace Locus
 		}
 
 		// --- Physics --------------------------------------------------------
-		m_Box2DWorld->Step(deltaTime, 6, 2); // TODO: paremeterize
-
-		auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
-		for (auto e : view)
 		{
-			Entity entity = Entity(e, this);
-			if (entity.GetComponent<TagComponent>().Enabled)
+			m_Box2DWorld->Step(deltaTime, 6, 2); // TODO: paremeterize
+			auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
+			for (auto e : view)
 			{
-				auto& transform = entity.GetComponent<TransformComponent>();
-				auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+				Entity entity = Entity(e, this);
+				if (entity.GetComponent<TagComponent>().Enabled)
+				{
+					auto& transform = entity.GetComponent<TransformComponent>();
+					auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
 			
-				b2Body* body = (b2Body*)rb2d.RuntimeBody;
-				const b2Vec2& position = body->GetPosition();
-				transform.LocalPosition = { position.x, position.y , 0.0f };
-				transform.SetLocalRotation( {0, 0, body->GetAngle()} );
+					b2Body* body = (b2Body*)rb2d.RuntimeBody;
+					const b2Vec2& position = body->GetPosition();
+					transform.LocalPosition = { position.x, position.y , 0.0f };
+					transform.SetLocalRotation( {0, 0, body->GetAngle()} );
+				}
 			}
-			
 		}
-
+		
 		// --- Rendering 2D ---------------------------------------------------
 		// Find first main camera
 		SceneCamera* mainCamera = nullptr;
@@ -263,6 +263,58 @@ namespace Locus
 		Renderer2D::EndScene();
 	}
 
+	void Scene::OnUpdatePhysics(Timestep deltaTime, EditorCamera& camera)
+	{
+		// Main rendering
+		Renderer2D::BeginScene(camera);
+
+		// --- Physics --------------------------------------------------------
+		{
+			m_Box2DWorld->Step(deltaTime, 6, 2); // TODO: paremeterize
+			auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				if (entity.GetComponent<TagComponent>().Enabled)
+				{
+					auto& transform = entity.GetComponent<TransformComponent>();
+					auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+
+					b2Body* body = (b2Body*)rb2d.RuntimeBody;
+					const b2Vec2& position = body->GetPosition();
+					transform.LocalPosition = { position.x, position.y , 0.0f };
+					transform.SetLocalRotation({ 0, 0, body->GetAngle() });
+				}
+			}
+		}
+
+		{ // Sprite
+			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				bool enabled = entity.GetComponent<TagComponent>().Enabled;
+				auto& sprite = entity.GetComponent<SpriteRendererComponent>();
+				if (enabled)
+					Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
+			}
+		}
+
+		{ // Circle
+			auto view = m_Registry.view<TransformComponent, CircleRendererComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				bool enabled = entity.GetComponent<TagComponent>().Enabled;
+				auto& circle = entity.GetComponent<CircleRendererComponent>();
+				if (enabled)
+					Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
+			}
+		}
+
+		Renderer2D::EndScene();
+	}
+
 	void Scene::OnRuntimeStart()
 	{
 		// --- Native Script --------------------------------------------------
@@ -307,6 +359,8 @@ namespace Locus
 					rb2D.RuntimeBody = entityBody;
 					b2MassData massData;
 					massData.mass = rb2D.Mass;
+					massData.I = entityBody->GetInertia();
+					massData.center = entityBody->GetLocalCenter();
 					entityBody->SetMassData(&massData);
 
 					b2FixtureDef fixtureDef;
@@ -350,8 +404,81 @@ namespace Locus
 				}
 			}
 		}
-		
+	}
 
+	void Scene::OnPhysicsStart()
+	{
+		// --- Physics --------------------------------------------------------
+		{
+			m_Box2DWorld = new b2World({ 0.0f, -9.8f });
+			auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				if (entity.GetComponent<TagComponent>().Enabled)
+				{
+					auto& tc = entity.GetComponent<TransformComponent>();
+					auto& rb2D = entity.GetComponent<Rigidbody2DComponent>();
+
+					// Body
+					b2BodyDef bodyDef;
+					bodyDef.type = Rigidbody2DTypeToBox2DType(rb2D.BodyType);
+
+					bodyDef.position.Set(tc.LocalPosition.x, tc.LocalPosition.y);
+					bodyDef.angle = tc.LocalRotation.z;
+					bodyDef.linearDamping = rb2D.LinearDamping;
+					bodyDef.angularDamping = rb2D.AngularDamping;
+					bodyDef.fixedRotation = rb2D.FixedRotation;
+					bodyDef.gravityScale = rb2D.GravityScale;
+					b2Body* entityBody = m_Box2DWorld->CreateBody(&bodyDef);
+					rb2D.RuntimeBody = entityBody;
+					b2MassData massData;
+					massData.mass = rb2D.Mass;
+					massData.I = entityBody->GetInertia();
+					massData.center = entityBody->GetLocalCenter();
+					entityBody->SetMassData(&massData);
+
+					b2FixtureDef fixtureDef;
+					fixtureDef.density = rb2D.Mass;
+					fixtureDef.friction = rb2D.Friction;
+					fixtureDef.restitution = rb2D.Restitution;
+					fixtureDef.restitutionThreshold = rb2D.RestitutionThreshold;
+					fixtureDef.filter.categoryBits = 0;
+
+					if (entity.HasComponent<BoxCollider2DComponent>())
+					{
+						auto& b2D = entity.GetComponent<BoxCollider2DComponent>();
+
+						b2Vec2 size = { b2D.Size.x * tc.LocalScale.x, b2D.Size.y * tc.LocalScale.y };
+						b2Vec2 offset = { tc.LocalScale.x * b2D.Offset.x, tc.LocalScale.y * b2D.Offset.y };
+						float angle = 0.0f; // TODO
+
+						b2PolygonShape box;
+						box.SetAsBox(size.x / 2, size.y / 2, offset, angle);
+						fixtureDef.shape = &box;
+						fixtureDef.filter.categoryBits = b2D.CollisionLayer;
+						b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);
+						b2D.RuntimeFixture = fixture;
+					}
+					else if (entity.HasComponent<CircleCollider2DComponent>())
+					{
+						auto& c2D = entity.GetComponent<CircleCollider2DComponent>();
+
+						float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
+						b2Vec2 offset = { maxScale * c2D.Offset.x, maxScale * c2D.Offset.y };
+						float radius = maxScale * c2D.Radius;
+
+						b2CircleShape circle;
+						circle.m_p = offset;
+						circle.m_radius = radius;
+						fixtureDef.shape = &circle;
+						fixtureDef.filter.categoryBits = c2D.CollisionLayer;
+						b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);
+						c2D.RuntimeFixture = fixture;
+					}
+				}
+			}
+		}
 	}
 
 	void Scene::OnRuntimeStop()

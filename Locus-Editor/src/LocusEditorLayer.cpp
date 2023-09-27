@@ -17,6 +17,7 @@ namespace Locus
 		m_PlayButton = Texture2D::Create("resources/icons/PlayButton.png");
 		m_StopButton = Texture2D::Create("resources/icons/StopButton.png");
 		m_PauseButton = Texture2D::Create("resources/icons/PauseButton.png");
+		m_SimulatePhysicsButton = Texture2D::Create("resources/icons/SimulatePhysicsButton.png");
 	}
 
 	LocusEditorLayer::~LocusEditorLayer()
@@ -109,6 +110,14 @@ namespace Locus
 			case SceneState::Play:
 			{
 				m_ActiveScene->OnUpdateRuntime(deltaTime);
+				break;
+			}
+			case SceneState::Physics:
+			{
+				RenderCommand::SetClearColor(m_EditorCamera.GetBackgroundColor());
+				RenderCommand::Clear();
+				m_ActiveScene->OnUpdatePhysics(deltaTime, m_EditorCamera);
+				m_EditorCamera.OnUpdate(deltaTime); // These are camera specific update commands. Actual rendering is in scene object.
 				break;
 			}
 		}
@@ -598,7 +607,14 @@ namespace Locus
 		m_ActiveScene = Scene::Copy(m_EditorScene);
 		m_ActiveScene->OnRuntimeStart();
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+	}
 
+	void LocusEditorLayer::OnPhysicsPlay()
+	{
+		m_SceneState = SceneState::Physics;
+		m_ActiveScene = Scene::Copy(m_EditorScene);
+		m_ActiveScene->OnPhysicsStart();
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
 	void LocusEditorLayer::OnSceneStop()
@@ -812,8 +828,14 @@ namespace Locus
 			ImGui::SetCursorPosY(11.0f);
 			if (ImGui::ImageButton((ImTextureID)(uint64_t)m_StopButton->GetRendererID(), ImVec2(buttonSize, buttonSize), ImVec2(0, 0), ImVec2(1, 1), 0))
 			{
-				if (m_SceneState == SceneState::Play || m_SceneState == SceneState::Pause)
+				if (m_SceneState == SceneState::Play || m_SceneState == SceneState::Pause || m_SceneState == SceneState::Physics)
 					OnSceneStop();
+			}
+
+			if (ImGui::ImageButton((ImTextureID)(uint64_t)m_SimulatePhysicsButton->GetRendererID(), ImVec2(buttonSize, buttonSize), ImVec2(0, 1), ImVec2(1, 0), 0))
+			{
+				if (m_SceneState == SceneState::Edit)
+					OnPhysicsPlay();
 			}
 
 			ImGui::PopStyleColor(3);

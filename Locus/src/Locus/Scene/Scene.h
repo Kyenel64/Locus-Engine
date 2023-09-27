@@ -32,8 +32,10 @@ namespace Locus
 
 		void OnUpdateRuntime(Timestep deltaTime);
 		void OnUpdateEditor(Timestep deltaTime, EditorCamera& camera);
+		void OnUpdatePhysics(Timestep deltaTime, EditorCamera& camera);
 
 		void OnRuntimeStart();
+		void OnPhysicsStart();
 		void OnRuntimeStop();
 
 		void OnViewportResize(uint32_t width, uint32_t height);

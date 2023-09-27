@@ -1,27 +1,28 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Locus
 {
     public class CSharpTest
     {
-        public float val = 5.0f;
-
-        public CSharpTest()
+        public void OnUpdate()
         {
-            Console.WriteLine("Created CSharpTest class");
+            Console.WriteLine("CSharpTest::OnUpdate()");
         }
 
-        public void PrintVal()
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void CSharpLog();
+    }
+
+    public class Entity
+    {
+        UInt32 m_EntityID = 1929234923;
+        public void PrintID()
         {
-            Console.WriteLine("Value: {0:F}", val);
+            Console.WriteLine(m_EntityID);
         }
 
-        public void PrintValWithParam(float val)
-        {
-            Console.WriteLine("Value: {0:F}", val);
-        }
-
-        public void PrintString(string str)
+        public void PrintAString(string str)
         {
             Console.WriteLine(str);
         }

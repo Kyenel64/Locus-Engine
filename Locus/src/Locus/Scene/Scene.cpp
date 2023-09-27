@@ -14,6 +14,7 @@
 #include "Locus/Scene/Components.h"
 #include "Locus/Scene/ScriptableEntity.h"
 #include "Locus/Scene/Entity.h"
+#include "Locus/Scripting/ScriptEngine.h"
 
 namespace Locus
 {
@@ -136,7 +137,7 @@ namespace Locus
 
 	void Scene::OnUpdateRuntime(Timestep deltaTime)
 	{
-		// --- Update Scripts -------------------------------------------------
+		// --- Update Native Scripts ------------------------------------------
 		{
 			auto view = m_Registry.view<NativeScriptComponent, TagComponent>();
 			for (auto entity : view)
@@ -148,6 +149,16 @@ namespace Locus
 					nsc.Instance->OnUpdate(deltaTime);
 				}
 			}
+		}
+
+		// --- Update C# Scripts ----------------------------------------------
+		{
+			// Example API
+			ScriptClass entityClass = ScriptClass("Locus", "CSharpTest");
+			MonoObject* entityInstance = entityClass.Instantiate();
+
+			MonoMethod* printIDFunc = entityClass.GetMethod("OnUpdate", 0);
+			entityClass.InvokeMethod(entityInstance, printIDFunc);
 		}
 
 		// --- Physics --------------------------------------------------------

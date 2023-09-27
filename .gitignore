@@ -365,13 +365,16 @@ FodyWeavers.xsd
 # Newly added
 bin/
 bin-int/
+int/
 *.sln
 *.vcxproj
 *.vcxproj.filters
 *.vcxproj.user
+**.csproj
 *.log
 
 Locus/vendor/VulkanSDK
 Locus-Editor/assets/cache
+Locus-Editor/resources/scripts/*.dll
 scripts/__pycache__
 premake/

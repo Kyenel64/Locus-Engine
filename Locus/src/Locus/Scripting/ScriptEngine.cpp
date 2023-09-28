@@ -5,6 +5,7 @@
 #include <mono/metadata/assembly.h>
 
 #include "Locus/Utils/FileSystem.h"
+#include "Locus/Scripting/ScriptLink.h"
 
 namespace Locus
 {
@@ -80,7 +81,7 @@ namespace Locus
 		LoadAssembly("resources/scripts/Locus-Script.dll");
 
 		// Link C++ functions to C# declarations
-		//ScriptLink::RegisterFunctions();
+		ScriptLink::RegisterFunctions();
 
 		// --- Example API ---
 		ScriptClass entityClass = ScriptClass("Locus", "Entity");

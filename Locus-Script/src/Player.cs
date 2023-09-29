@@ -18,6 +18,19 @@ namespace Test
     }
 }
 
+public class TestNoNamespace : Entity
+{
+    void OnCreate()
+    {
+        Console.WriteLine("TestNoNamespace::OnCreate()");
+    }
+
+    void OnUpdate(float deltaTime)
+    {
+
+    }
+}
+
 namespace Sandbox
 {
     // Sample class to demonstrate C# API

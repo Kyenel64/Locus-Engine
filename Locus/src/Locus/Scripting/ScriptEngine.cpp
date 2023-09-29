@@ -111,8 +111,13 @@ namespace Locus
 
 			if (std::string(namespaceName) != "Locus")
 			{
-				s_Data->ScriptClasses[std::string(className)] = CreateRef<ScriptClass>(namespaceName, className);
-				LOCUS_CORE_TRACE("Loaded: {}.{}", namespaceName, className);
+				std::string classNameStr;
+				if (std::string(namespaceName) != std::string())
+					classNameStr = std::string(namespaceName) + "::" + std::string(className);
+				else
+					classNameStr = std::string(className);
+				s_Data->ScriptClasses[classNameStr] = CreateRef<ScriptClass>(namespaceName, className);
+				LOCUS_CORE_TRACE("Loaded: {}::{}", namespaceName, className);
 			}
 
 		}
@@ -157,7 +162,6 @@ namespace Locus
 	}
 
 	MonoImage* ScriptEngine::GetImage() { return s_Data->CoreAssemblyImage; }
-
 	Scene* ScriptEngine::GetScene() { return s_Data->Scene; }
 
 
@@ -165,8 +169,8 @@ namespace Locus
 	ScriptClass::ScriptClass(const std::string& namespaceName, const std::string& className)
 		: m_NamespaceName(namespaceName), m_ClassName(className)
 	{
-		// Get class from C# assembly
-		m_MonoClass = mono_class_from_name(s_Data->CoreAssemblyImage, m_NamespaceName.c_str(), m_ClassName.c_str());
+		// Get class from C# assembly. Case sensitive
+		m_MonoClass = mono_class_from_name_case(s_Data->CoreAssemblyImage, m_NamespaceName.c_str(), m_ClassName.c_str());
 		LOCUS_CORE_ASSERT(m_MonoClass, "Could not create mono class!");
 	}
 

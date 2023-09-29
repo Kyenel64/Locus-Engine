@@ -438,12 +438,12 @@ namespace Locus
 				// Script Class
 				DrawControlLabel("Script Class", { m_LabelWidth, 0.0f });
 				ImGui::SameLine();
-				std::string scriptClasses[] = { "Player", "TestClass"}; // TODO: Detect all classes
+				std::string scriptClasses[] = { "Sandbox::Player", "Test::TestClass", "TestNoNamespace"}; // TODO: Detect all classes
 				std::string curClass = component.ScriptClass;
 				ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
 				if (ImGui::BeginCombo("##Script Class", curClass.c_str()))
 				{
-					for (int i = 0; i < 2; i++)
+					for (int i = 0; i < 3; i++)
 					{
 						bool isSelected = curClass == scriptClasses[i];
 						if (ImGui::Selectable(scriptClasses[i].c_str(), isSelected))

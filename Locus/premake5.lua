@@ -55,6 +55,8 @@ project "Locus"
 		"%{Library.mono}"
 	}
 
+	linkoptions { "-IGNORE:4006" }
+
 	filter "system:windows"
 		systemversion "latest"
 

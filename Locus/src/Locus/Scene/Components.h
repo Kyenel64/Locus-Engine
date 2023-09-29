@@ -194,6 +194,17 @@ namespace Locus
 		}
 	};
 
+	struct ScriptComponent
+	{
+		std::string ScriptClass;
+		// TODO: std::string Path;
+
+		ScriptComponent() = default;
+		ScriptComponent(const ScriptComponent&) = default;
+		ScriptComponent(const std::string& scriptClass) : ScriptClass(scriptClass) {}
+	};
+
+	// Make sure to update Scene, PropertiesPanel, and ScriptLink class when adding new components
 	enum class ComponentType
 	{
 		None = 0,
@@ -206,7 +217,8 @@ namespace Locus
 		Rigidbody2D,
 		BoxCollider2D,
 		CircleCollider2D,
-		NativeScript
+		NativeScript,
+		Script
 	};
 
 	struct ComponentData
@@ -223,7 +235,7 @@ namespace Locus
 		Ref<BoxCollider2DComponent> BoxCollider2D;
 		Ref<CircleCollider2DComponent> CircleCollider2D;
 		Ref<NativeScriptComponent> NativeScript;
+		Ref<ScriptComponent> Script;
 	};
-
 	
 }

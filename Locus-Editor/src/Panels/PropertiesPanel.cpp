@@ -15,39 +15,6 @@ namespace Locus
 {
 	extern const std::filesystem::path g_ProjectPath;
 
-	// temp
-	class CameraControllerScript : public ScriptableEntity
-	{
-	public:
-		virtual void OnCreate()
-		{
-			
-		}
-
-		virtual void OnDestroy()
-		{
-
-		}
-
-		virtual void OnUpdate(Timestep deltaTime)
-		{
-			glm::vec3& pos = GetComponent<TransformComponent>().LocalPosition;
-			float speed = 5.0f;
-
-			if (Input::IsKeyPressed(Key::A))
-				pos.x -= speed * deltaTime;
-			if (Input::IsKeyPressed(Key::D))
-				pos.x += speed * deltaTime;
-			if (Input::IsKeyPressed(Key::W))
-				pos.y += speed * deltaTime;
-			if (Input::IsKeyPressed(Key::S))
-				pos.y -= speed * deltaTime;
-		}
-
-	private:
-
-	};
-
 	PropertiesPanel::PropertiesPanel(const Ref<Scene>& context)
 	{
 		SetContext(context);
@@ -137,15 +104,12 @@ namespace Locus
 					ImGui::CloseCurrentPopup();
 				}
 
-				if (ImGui::MenuItem("Native Script"))
+				if (ImGui::MenuItem("Script"))
 				{
-					if (!m_SelectedEntity.HasComponent<NativeScriptComponent>())
-					{
-						CommandHistory::AddCommand(new AddComponentCommand<NativeScriptComponent>(m_SelectedEntity));
-						m_SelectedEntity.GetComponent<NativeScriptComponent>().Bind<CameraControllerScript>(); // temp
-					}
+					if (!m_SelectedEntity.HasComponent<ScriptComponent>())
+						CommandHistory::AddCommand(new AddComponentCommand<ScriptComponent>(m_SelectedEntity));
 					else
-						LOCUS_CORE_WARN("This entity already has a NativeScript Component");
+						LOCUS_CORE_WARN("This entity already has a Script Component");
 					ImGui::CloseCurrentPopup();
 				}
 
@@ -462,17 +426,35 @@ namespace Locus
 			{
 				// Collision Layer
 				DrawUInt16Control("Collision Layer", component.CollisionLayer);
-				// Size
-				DrawFloatControl("radius", component.Radius, 0.5f);
+				// Radius
+				DrawFloatControl("Radius", component.Radius, 0.5f);
 				// Offset
 				DrawVec2Control("Offset", component.Offset);
 			});
 
-		// --- Native Script --------------------------------------------------
-		DrawComponentUI<NativeScriptComponent>("Native Script", entity, [this](auto& component)
+		// --- Script ---------------------------------------------------------
+		DrawComponentUI<ScriptComponent>("Script", entity, [this](auto& component)
 			{
-				// Collision Layer
-				ImGui::Button("CameraControllerScript"); // temp
+				// Script Class
+				DrawControlLabel("Script Class", { m_LabelWidth, 0.0f });
+				ImGui::SameLine();
+				std::string scriptClasses[] = { "Player", "TestClass"}; // TODO: Detect all classes
+				std::string curClass = component.ScriptClass;
+				ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
+				if (ImGui::BeginCombo("##Script Class", curClass.c_str()))
+				{
+					for (int i = 0; i < 2; i++)
+					{
+						bool isSelected = curClass == scriptClasses[i];
+						if (ImGui::Selectable(scriptClasses[i].c_str(), isSelected))
+							CommandHistory::AddCommand(new ChangeValueCommand(scriptClasses[i], component.ScriptClass));
+
+						if (isSelected)
+							ImGui::SetItemDefaultFocus();
+					}
+					ImGui::EndCombo();
+				}
+				ImGui::PopItemWidth();
 			});
 	}
 

@@ -4,8 +4,10 @@
 #include <mono/jit/jit.h>
 #include <mono/metadata/assembly.h>
 
-#include "Locus/Utils/FileSystem.h"
+#include "Locus/Core/UUID.h"
+#include "Locus/Scene/Components.h"
 #include "Locus/Scripting/ScriptLink.h"
+#include "Locus/Utils/FileSystem.h"
 
 namespace Locus
 {
@@ -35,24 +37,6 @@ namespace Locus
 
 			return assembly;
 		}
-
-		void PrintAssemblyTypes(MonoAssembly* assembly)
-		{
-			MonoImage* image = mono_assembly_get_image(assembly);
-			const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(image, MONO_TABLE_TYPEDEF);
-			int32_t numTypes = mono_table_info_get_rows(typeDefinitionsTable);
-
-			for (int32_t i = 0; i < numTypes; i++)
-			{
-				uint32_t cols[MONO_TYPEDEF_SIZE];
-				mono_metadata_decode_row(typeDefinitionsTable, i, cols, MONO_TYPEDEF_SIZE);
-
-				const char* nameSpace = mono_metadata_string_heap(image, cols[MONO_TYPEDEF_NAMESPACE]);
-				const char* name = mono_metadata_string_heap(image, cols[MONO_TYPEDEF_NAME]);
-
-				LOCUS_CORE_TRACE("{}.{}", nameSpace, name);
-			}
-		}
 	}
 
 	struct ScriptEngineData
@@ -62,6 +46,12 @@ namespace Locus
 
 		MonoAssembly* CoreAssembly = nullptr;
 		MonoImage* CoreAssemblyImage = nullptr;
+		Scene* Scene = nullptr;
+
+		std::unordered_map<std::string, Ref<ScriptClass>> ScriptClasses;
+		std::unordered_map<UUID, Ref<ScriptInstance>> ScriptInstances;
+
+		Ref<ScriptClass> EntityBaseClass;
 	};
 
 	extern ScriptEngineData* s_Data = nullptr;
@@ -79,22 +69,12 @@ namespace Locus
 		s_Data->RootDomain = rootDomain;
 
 		LoadAssembly("resources/scripts/Locus-Script.dll");
+		LoadAssemblyClasses();
+
+		s_Data->EntityBaseClass = CreateRef<ScriptClass>("Locus", "Entity");
 
 		// Link C++ functions to C# declarations
 		ScriptLink::RegisterFunctions();
-
-		// --- Example API ---
-		ScriptClass entityClass = ScriptClass("Locus", "Entity");
-		MonoObject* entityInstance = entityClass.Instantiate();
-		// Example function
-		MonoMethod* printIDFunc = entityClass.GetMethod("PrintID", 0);
-		entityClass.InvokeMethod(entityInstance, printIDFunc);
-		// Example function with string params
-		MonoString* monoStr = mono_string_new(s_Data->AppDomain, "Hello from C++");
-		void* strParam = monoStr;
-		MonoMethod* printAStringFunc = entityClass.GetMethod("PrintAString", 1);
-		entityClass.InvokeMethod(entityInstance, printAStringFunc, &strParam);
-
 	}
 
 	void ScriptEngine::Shutdown()
@@ -108,12 +88,77 @@ namespace Locus
 	{
 		// Create app domain. App domains are like separate processes within mono
 		s_Data->AppDomain = mono_domain_create_appdomain("LocusAppDomain", nullptr);
+		LOCUS_CORE_ASSERT(s_Data->AppDomain, "Failed to create mono app domain!");
 		mono_domain_set(s_Data->AppDomain, true);
 
 		s_Data->CoreAssembly = Utils::LoadCSharpAssembly("resources/scripts/Locus-Script.dll");
 		s_Data->CoreAssemblyImage = mono_assembly_get_image(s_Data->CoreAssembly);
 	}
 
+	void ScriptEngine::LoadAssemblyClasses()
+	{
+		s_Data->ScriptClasses.clear();
+		const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(s_Data->CoreAssemblyImage, MONO_TABLE_TYPEDEF);
+		int32_t numTypes = mono_table_info_get_rows(typeDefinitionsTable);
+
+		for (int32_t i = 0; i < numTypes; i++)
+		{
+			uint32_t cols[MONO_TYPEDEF_SIZE];
+			mono_metadata_decode_row(typeDefinitionsTable, i, cols, MONO_TYPEDEF_SIZE);
+
+			const char* namespaceName = mono_metadata_string_heap(s_Data->CoreAssemblyImage, cols[MONO_TYPEDEF_NAMESPACE]);
+			const char* className = mono_metadata_string_heap(s_Data->CoreAssemblyImage, cols[MONO_TYPEDEF_NAME]);
+
+			if (std::string(namespaceName) != "Locus")
+			{
+				s_Data->ScriptClasses[std::string(className)] = CreateRef<ScriptClass>(namespaceName, className);
+				LOCUS_CORE_TRACE("Loaded: {}.{}", namespaceName, className);
+			}
+
+		}
+	}
+
+	void ScriptEngine::OnRuntimeStart(Scene* scene)
+	{
+		s_Data->Scene = scene; 
+	}
+
+	void ScriptEngine::OnRuntimeStop()
+	{ 
+		s_Data->ScriptInstances.clear();
+		s_Data->Scene = nullptr; 
+	}
+
+	// Creates an instance of the script class and calls Entity
+	void ScriptEngine::OnCreateEntityScript(Entity entity)
+	{
+		auto& sc = entity.GetComponent<ScriptComponent>();
+		if (s_Data->ScriptClasses.find(sc.ScriptClass) != s_Data->ScriptClasses.end())
+		{
+			s_Data->ScriptInstances[entity.GetUUID()] = CreateRef<ScriptInstance>(s_Data->ScriptClasses[sc.ScriptClass], entity);
+			s_Data->ScriptInstances[entity.GetUUID()]->InvokeOnCreate();
+		}
+		else
+		{
+			LOCUS_CORE_ERROR("Unable to find class!");
+		}
+	}
+
+	void ScriptEngine::OnUpdateEntityScript(Entity entity, Timestep deltaTime)
+	{
+		if (s_Data->ScriptInstances.find(entity.GetUUID()) != s_Data->ScriptInstances.end())
+		{
+			s_Data->ScriptInstances[entity.GetUUID()]->InvokeOnUpdate(deltaTime);
+		}
+		else
+		{
+			LOCUS_CORE_ERROR("Unable to find class!");
+		}
+	}
+
+	MonoImage* ScriptEngine::GetImage() { return s_Data->CoreAssemblyImage; }
+
+	Scene* ScriptEngine::GetScene() { return s_Data->Scene; }
 
 
 	// --- ScriptClass --------------------------------------------------------
@@ -122,6 +167,7 @@ namespace Locus
 	{
 		// Get class from C# assembly
 		m_MonoClass = mono_class_from_name(s_Data->CoreAssemblyImage, m_NamespaceName.c_str(), m_ClassName.c_str());
+		LOCUS_CORE_ASSERT(m_MonoClass, "Could not create mono class!");
 	}
 
 	MonoObject* ScriptClass::Instantiate()
@@ -140,5 +186,36 @@ namespace Locus
 	MonoObject* ScriptClass::InvokeMethod(MonoObject* instance, MonoMethod* method, void** params)
 	{
 		return mono_runtime_invoke(method, instance, params, nullptr);
+	}
+
+
+	// --- ScriptInstance -----------------------------------------------------
+	ScriptInstance::ScriptInstance(Ref<ScriptClass> scriptClass, Entity entity)
+		: m_ScriptClass(scriptClass), m_Entity(entity)
+	{
+		UUID id = m_Entity.GetComponent<IDComponent>().ID;
+		// Create instance of class linked to entity.
+		m_ScriptInstance = m_ScriptClass->Instantiate();
+
+		m_OnCreateFunc = m_ScriptClass->GetMethod("OnCreate", 0);
+		m_OnUpdateFunc = m_ScriptClass->GetMethod("OnUpdate", 1);
+
+		// Call Entity base class constructor
+		MonoMethod* entityBaseConstructor = s_Data->EntityBaseClass->GetMethod(".ctor", 1);
+		void* idPtr = &id;
+		// Make sure class derives from Entity and functions are correct including params
+		m_ScriptClass->InvokeMethod(m_ScriptInstance, entityBaseConstructor, &idPtr);
+
+	}
+
+	void ScriptInstance::InvokeOnCreate()
+	{
+		m_ScriptClass->InvokeMethod(m_ScriptInstance, m_OnCreateFunc);
+	}
+
+	void ScriptInstance::InvokeOnUpdate(Timestep deltaTime)
+	{
+		void* dTParam = &deltaTime;
+		m_ScriptClass->InvokeMethod(m_ScriptInstance, m_OnUpdateFunc, &dTParam);
 	}
 }

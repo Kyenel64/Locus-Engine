@@ -26,6 +26,8 @@ namespace Locus
 		m_SelectedEntity = {};
 		m_ShowMoreButton = Texture2D::Create("resources/icons/ShowMoreButton.png");
 		m_FolderIcon = Texture2D::Create("resources/icons/FolderIcon.png");
+
+		m_ScriptClasses = ScriptEngine::GetClassNames(); // TODO: Move this to when hot reloading.
 	}
 
 	void PropertiesPanel::OnImGuiRender()
@@ -438,19 +440,23 @@ namespace Locus
 				// Script Class
 				DrawControlLabel("Script Class", { m_LabelWidth, 0.0f });
 				ImGui::SameLine();
-				std::string scriptClasses[] = { "Sandbox::Player", "Test::TestClass", "TestNoNamespace"}; // TODO: Detect all classes
 				std::string curClass = component.ScriptClass;
 				ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
 				if (ImGui::BeginCombo("##Script Class", curClass.c_str()))
 				{
-					for (int i = 0; i < 3; i++)
+					static ImGuiTextFilter filter;
+					filter.Draw("##Search");
+					// First class is <Module> which we don't use.
+					for (int i = 1; i < m_ScriptClasses.size(); i++)
 					{
-						bool isSelected = curClass == scriptClasses[i];
-						if (ImGui::Selectable(scriptClasses[i].c_str(), isSelected))
-							CommandHistory::AddCommand(new ChangeValueCommand(scriptClasses[i], component.ScriptClass));
-
-						if (isSelected)
-							ImGui::SetItemDefaultFocus();
+						if (filter.PassFilter(m_ScriptClasses[i].c_str()))
+						{
+							bool isSelected = curClass == m_ScriptClasses[i];
+								if (ImGui::Selectable(m_ScriptClasses[i].c_str(), isSelected))
+									CommandHistory::AddCommand(new ChangeValueCommand(m_ScriptClasses[i], component.ScriptClass));
+								if (isSelected)
+									ImGui::SetItemDefaultFocus();
+						}
 					}
 					ImGui::EndCombo();
 				}

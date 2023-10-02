@@ -42,5 +42,8 @@
 #include "Locus/Scene/SceneCamera.h"
 #include "Locus/Scene/SceneSerializer.h"
 
+// --- Scripting ---
+#include "Locus/Scripting/ScriptEngine.h"
+
 // --- Utils ---
 #include "Locus/Utils/PlatformUtils.h"

@@ -36,6 +36,7 @@ namespace Locus
 
 		static MonoImage* GetImage();
 		static Scene* GetScene();
+		static std::vector<std::string> GetClassNames();
 
 	private:
 		static void LoadAssembly(const std::string& assemblyPath);

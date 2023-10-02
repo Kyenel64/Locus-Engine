@@ -50,11 +50,12 @@ namespace Locus
 
 		std::unordered_map<std::string, Ref<ScriptClass>> ScriptClasses;
 		std::unordered_map<UUID, Ref<ScriptInstance>> ScriptInstances;
+		std::vector<std::string> ScriptClassNames;
 
 		Ref<ScriptClass> EntityBaseClass;
 	};
 
-	extern ScriptEngineData* s_Data = nullptr;
+	static ScriptEngineData* s_Data = nullptr;
 
 	void ScriptEngine::Init()
 	{
@@ -98,6 +99,7 @@ namespace Locus
 	void ScriptEngine::LoadAssemblyClasses()
 	{
 		s_Data->ScriptClasses.clear();
+		s_Data->ScriptClassNames.clear();
 		const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(s_Data->CoreAssemblyImage, MONO_TABLE_TYPEDEF);
 		int32_t numTypes = mono_table_info_get_rows(typeDefinitionsTable);
 
@@ -117,6 +119,7 @@ namespace Locus
 				else
 					classNameStr = std::string(className);
 				s_Data->ScriptClasses[classNameStr] = CreateRef<ScriptClass>(namespaceName, className);
+				s_Data->ScriptClassNames.push_back(classNameStr);
 				LOCUS_CORE_TRACE("Loaded: {}::{}", namespaceName, className);
 			}
 
@@ -163,6 +166,7 @@ namespace Locus
 
 	MonoImage* ScriptEngine::GetImage() { return s_Data->CoreAssemblyImage; }
 	Scene* ScriptEngine::GetScene() { return s_Data->Scene; }
+	std::vector<std::string> ScriptEngine::GetClassNames() { return s_Data->ScriptClassNames; }
 
 
 	// --- ScriptClass --------------------------------------------------------

@@ -50,6 +50,9 @@ namespace Locus
 		Ref<Texture2D> m_ShowMoreButton;
 		Ref<Texture2D> m_FolderIcon;
 
+		// Script
+		std::vector<std::string> m_ScriptClasses;
+
 		ComponentData m_ClipboardComponent;
 		ComponentType m_ClipboardComponentType = ComponentType::None;
 	};

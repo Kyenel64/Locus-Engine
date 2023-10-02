@@ -196,7 +196,7 @@ namespace Locus
 
 		DrawLayoutTable();
 
-		//ImGui::ShowDemoWindow();
+		ImGui::ShowDemoWindow();
 
 		// --- Save Popup -----------------------------------------------------
 		OpenSavePopup();

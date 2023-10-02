@@ -7,13 +7,14 @@
 namespace Locus
 {
 	// TODO: move to project folder in the future when we create project folders
-	extern const std::filesystem::path g_ProjectPath = "assets";
+	extern const std::filesystem::path g_ProjectPath = "SandboxProject";
 
 	ContentBrowserPanel::ContentBrowserPanel()
 		: m_CurrentDirectory(g_ProjectPath)
 	{
 		m_FolderIcon = Texture2D::Create("resources/icons/FolderIcon.png");
 		m_FileIcon = Texture2D::Create("resources/icons/FileIcon.png");
+		ScriptEngine::SetProjectPath(g_ProjectPath);
 	}
 
 	void ContentBrowserPanel::OnImGuiRender()

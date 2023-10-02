@@ -44,13 +44,20 @@ namespace Locus
 		MonoDomain* RootDomain = nullptr;
 		MonoDomain* AppDomain = nullptr;
 
+		// Core C# assembly
 		MonoAssembly* CoreAssembly = nullptr;
 		MonoImage* CoreAssemblyImage = nullptr;
+		// Application C# assembly
+		MonoAssembly* AppAssembly = nullptr;
+		MonoImage* AppAssemblyImage = nullptr;
+
 		Scene* Scene = nullptr;
 
 		std::unordered_map<std::string, Ref<ScriptClass>> ScriptClasses;
 		std::unordered_map<UUID, Ref<ScriptInstance>> ScriptInstances;
 		std::vector<std::string> ScriptClassNames;
+
+		std::filesystem::path ProjectPath;
 
 		Ref<ScriptClass> EntityBaseClass;
 	};
@@ -70,9 +77,10 @@ namespace Locus
 		s_Data->RootDomain = rootDomain;
 
 		LoadAssembly("resources/scripts/Locus-Script.dll");
-		LoadAssemblyClasses();
+		LoadAppAssembly("SandboxProject/bin/Sandbox.dll"); // TODO: set to project path
+		LoadAppAssemblyClasses();
 
-		s_Data->EntityBaseClass = CreateRef<ScriptClass>("Locus", "Entity");
+		s_Data->EntityBaseClass = CreateRef<ScriptClass>(s_Data->CoreAssemblyImage, "Locus", "Entity");
 
 		// Link C++ functions to C# declarations
 		ScriptLink::RegisterFunctions();
@@ -92,15 +100,21 @@ namespace Locus
 		LOCUS_CORE_ASSERT(s_Data->AppDomain, "Failed to create mono app domain!");
 		mono_domain_set(s_Data->AppDomain, true);
 
-		s_Data->CoreAssembly = Utils::LoadCSharpAssembly("resources/scripts/Locus-Script.dll");
+		s_Data->CoreAssembly = Utils::LoadCSharpAssembly(assemblyPath);
 		s_Data->CoreAssemblyImage = mono_assembly_get_image(s_Data->CoreAssembly);
 	}
 
-	void ScriptEngine::LoadAssemblyClasses()
+	void ScriptEngine::LoadAppAssembly(const std::string& assemblyPath)
+	{
+		s_Data->AppAssembly = Utils::LoadCSharpAssembly(assemblyPath);
+		s_Data->AppAssemblyImage = mono_assembly_get_image(s_Data->AppAssembly);
+	}
+
+	void ScriptEngine::LoadAppAssemblyClasses()
 	{
 		s_Data->ScriptClasses.clear();
 		s_Data->ScriptClassNames.clear();
-		const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(s_Data->CoreAssemblyImage, MONO_TABLE_TYPEDEF);
+		const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(s_Data->AppAssemblyImage, MONO_TABLE_TYPEDEF);
 		int32_t numTypes = mono_table_info_get_rows(typeDefinitionsTable);
 
 		for (int32_t i = 0; i < numTypes; i++)
@@ -108,20 +122,17 @@ namespace Locus
 			uint32_t cols[MONO_TYPEDEF_SIZE];
 			mono_metadata_decode_row(typeDefinitionsTable, i, cols, MONO_TYPEDEF_SIZE);
 
-			const char* namespaceName = mono_metadata_string_heap(s_Data->CoreAssemblyImage, cols[MONO_TYPEDEF_NAMESPACE]);
-			const char* className = mono_metadata_string_heap(s_Data->CoreAssemblyImage, cols[MONO_TYPEDEF_NAME]);
+			const char* namespaceName = mono_metadata_string_heap(s_Data->AppAssemblyImage, cols[MONO_TYPEDEF_NAMESPACE]);
+			const char* className = mono_metadata_string_heap(s_Data->AppAssemblyImage, cols[MONO_TYPEDEF_NAME]);
 
-			if (std::string(namespaceName) != "Locus")
-			{
-				std::string classNameStr;
-				if (std::string(namespaceName) != std::string())
-					classNameStr = std::string(namespaceName) + "::" + std::string(className);
-				else
-					classNameStr = std::string(className);
-				s_Data->ScriptClasses[classNameStr] = CreateRef<ScriptClass>(namespaceName, className);
-				s_Data->ScriptClassNames.push_back(classNameStr);
-				LOCUS_CORE_TRACE("Loaded: {}::{}", namespaceName, className);
-			}
+			std::string classNameStr;
+			if (std::string(namespaceName) != std::string())
+				classNameStr = std::string(namespaceName) + "::" + std::string(className);
+			else
+				classNameStr = std::string(className);
+			s_Data->ScriptClasses[classNameStr] = CreateRef<ScriptClass>(s_Data->AppAssemblyImage, namespaceName, className);
+			s_Data->ScriptClassNames.push_back(classNameStr);
+			LOCUS_CORE_TRACE("Loaded: {}::{}", namespaceName, className);
 
 		}
 	}
@@ -168,13 +179,15 @@ namespace Locus
 	Scene* ScriptEngine::GetScene() { return s_Data->Scene; }
 	std::vector<std::string> ScriptEngine::GetClassNames() { return s_Data->ScriptClassNames; }
 
+	void ScriptEngine::SetProjectPath(const std::filesystem::path& path) { s_Data->ProjectPath = path; }
+
 
 	// --- ScriptClass --------------------------------------------------------
-	ScriptClass::ScriptClass(const std::string& namespaceName, const std::string& className)
-		: m_NamespaceName(namespaceName), m_ClassName(className)
+	ScriptClass::ScriptClass(MonoImage* image, const std::string& namespaceName, const std::string& className)
+		: m_NamespaceName(namespaceName), m_ClassName(className), m_MonoImage(image)
 	{
 		// Get class from C# assembly. Case sensitive
-		m_MonoClass = mono_class_from_name_case(s_Data->CoreAssemblyImage, m_NamespaceName.c_str(), m_ClassName.c_str());
+		m_MonoClass = mono_class_from_name_case(m_MonoImage, m_NamespaceName.c_str(), m_ClassName.c_str());
 		LOCUS_CORE_ASSERT(m_MonoClass, "Could not create mono class!");
 	}
 

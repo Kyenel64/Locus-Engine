@@ -166,9 +166,9 @@ namespace Locus
 		for (uint32_t i = 0; i < s_Data.MaxTextureSlots; i++)
 			samplers[i] = i;
 
-		s_Data.QuadShader = Shader::Create("assets/shaders/2DQuad.glsl");
-		s_Data.CircleShader = Shader::Create("assets/shaders/2DCircle.glsl");
-		s_Data.LineShader = Shader::Create("assets/shaders/2DLine.glsl");
+		s_Data.QuadShader = Shader::Create("resources/shaders/2DQuad.glsl");
+		s_Data.CircleShader = Shader::Create("resources/shaders/2DCircle.glsl");
+		s_Data.LineShader = Shader::Create("resources/shaders/2DLine.glsl");
 		s_Data.TextureSlots[0] = s_Data.WhiteTexture;
 
 		// Initialize quad data

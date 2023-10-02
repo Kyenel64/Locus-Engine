@@ -38,9 +38,12 @@ namespace Locus
 		static Scene* GetScene();
 		static std::vector<std::string> GetClassNames();
 
+		static void SetProjectPath(const std::filesystem::path& path);
+
 	private:
 		static void LoadAssembly(const std::string& assemblyPath);
-		static void LoadAssemblyClasses();
+		static void LoadAppAssembly(const std::string& assemblyPath);
+		static void LoadAppAssemblyClasses();
 	};
 
 
@@ -49,13 +52,14 @@ namespace Locus
 	{
 	public:
 		ScriptClass() = default;
-		ScriptClass(const std::string& namespaceName, const std::string& className);
+		ScriptClass(MonoImage* image, const std::string& namespaceName, const std::string& className);
 
 		MonoObject* Instantiate();
 		MonoMethod* GetMethod(const std::string& name, int paramCount);
 		MonoObject* InvokeMethod(MonoObject* instance, MonoMethod* method, void** params = nullptr);
 
 	private:
+		MonoImage* m_MonoImage = nullptr;
 		MonoClass* m_MonoClass = nullptr;
 		std::string m_NamespaceName;
 		std::string m_ClassName;

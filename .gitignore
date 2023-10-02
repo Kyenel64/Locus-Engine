@@ -374,7 +374,7 @@ int/
 *.log
 
 Locus/vendor/VulkanSDK
-Locus-Editor/assets/cache
+Locus-Editor/resources/cache
 Locus-Editor/resources/scripts/*.dll
 scripts/__pycache__
 premake/

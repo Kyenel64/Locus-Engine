@@ -38,8 +38,6 @@ namespace Locus
 		static Scene* GetScene();
 		static std::vector<std::string> GetClassNames();
 
-		static void SetProjectPath(const std::filesystem::path& path);
-
 	private:
 		static void LoadAssembly(const std::string& assemblyPath);
 		static void LoadAppAssembly(const std::string& assemblyPath);

@@ -57,8 +57,6 @@ namespace Locus
 		std::unordered_map<UUID, Ref<ScriptInstance>> ScriptInstances;
 		std::vector<std::string> ScriptClassNames;
 
-		std::filesystem::path ProjectPath;
-
 		Ref<ScriptClass> EntityBaseClass;
 	};
 
@@ -178,8 +176,6 @@ namespace Locus
 	MonoImage* ScriptEngine::GetImage() { return s_Data->CoreAssemblyImage; }
 	Scene* ScriptEngine::GetScene() { return s_Data->Scene; }
 	std::vector<std::string> ScriptEngine::GetClassNames() { return s_Data->ScriptClassNames; }
-
-	void ScriptEngine::SetProjectPath(const std::filesystem::path& path) { s_Data->ProjectPath = path; }
 
 
 	// --- ScriptClass --------------------------------------------------------

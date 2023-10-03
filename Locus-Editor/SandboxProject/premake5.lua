@@ -31,7 +31,7 @@ project "Sandbox"
 
     links
     {
-        "Locus-Script"
+        "../../../Locus-Engine/Locus-Editor/resources/scripts/Locus-Script"
     }
 
 	filter "configurations:Debug"
@@ -45,7 +45,3 @@ project "Sandbox"
 	filter "configurations:Dist"
 		optimize "full"
 		symbols "off"
-
-group "Locus"
-    include ("C:/Users/Kye/Desktop/Locus-Engine/Locus-Script")
-group ""

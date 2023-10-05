@@ -2,39 +2,38 @@
 #include "ScriptLink.h"
 
 #include <mono/jit/jit.h>
+#include <mono/metadata/assembly.h>
 
 #include "Locus/Scripting/ScriptEngine.h"
 #include "Locus/Scene/Entity.h"
 #include "Locus/Scene/Components.h"
 
+// Include last
+#include "Locus/Scripting/InternalCalls.h"
+
 namespace Locus
 {
-	static std::unordered_map<MonoType*, std::function<bool(Entity)>> s_HasComponentFunctions;
-
-	// --- Functions ----------------------------------------------------------
-	static void Log(float val)
-	{
-		std::cout << val << std::endl;
-	}
-
-	static bool Entity_HasComponent(UUID entityID, MonoReflectionType* componentType)
-	{
-		Scene* scene = ScriptEngine::GetScene();
-		Entity entity = scene->GetEntityByUUID(entityID);
-
-		MonoType* type = mono_reflection_type_get_type(componentType);
-		return s_HasComponentFunctions[type](entity);
-	}
-
-
-
-	// --- ScriptLink ---------------------------------------------------------
 	void ScriptLink::RegisterFunctions()
 	{
 		RegisterComponents();
 
-		mono_add_internal_call("Locus.InternalCalls::Log", Log);
-		mono_add_internal_call("Locus.InternalCalls::Entity_HasComponent", Entity_HasComponent);
+		LINK_INTERNAL_CALL(DebugLog);
+		LINK_INTERNAL_CALL(CreateEntity);
+
+		LINK_INTERNAL_CALL(Entity_HasComponent);
+		LINK_INTERNAL_CALL(Entity_AddComponent);
+
+		LINK_INTERNAL_CALL(Vec3_Cross);
+		LINK_INTERNAL_CALL(Vec3_Distance);
+		LINK_INTERNAL_CALL(Vec3_Length);
+
+		LINK_INTERNAL_CALL(TagComponent_GetTag);
+		LINK_INTERNAL_CALL(TagComponent_SetTag);
+		LINK_INTERNAL_CALL(TagComponent_GetEnabled);
+		LINK_INTERNAL_CALL(TagComponent_SetEnabled);
+
+		LINK_INTERNAL_CALL(TransformComponent_GetLocalPosition);
+		LINK_INTERNAL_CALL(TransformComponent_SetLocalPosition);
 	}
 
 	template<typename T>
@@ -53,6 +52,7 @@ namespace Locus
 		}
 		// Add to map
 		s_HasComponentFunctions[managedType] = [](Entity entity) { return entity.HasComponent<T>(); };
+		s_AddComponentFunctions[managedType] = [](Entity entity) { entity.AddOrReplaceComponent<T>(); };
 	}
 
 	void ScriptLink::RegisterComponents()

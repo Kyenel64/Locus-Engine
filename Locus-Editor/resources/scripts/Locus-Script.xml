@@ -1,0 +1,153 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Locus-Script</name>
+    </assembly>
+    <members>
+        <member name="T:Locus.Vec3">
+            <summary>
+            Vector 3 class. Contains static methods for common vector operations.
+            </summary>
+        </member>
+        <member name="F:Locus.Vec3.x">
+            <summary>
+            x value.
+            </summary>
+        </member>
+        <member name="F:Locus.Vec3.y">
+            <summary>
+            y value.
+            </summary>
+        </member>
+        <member name="F:Locus.Vec3.z">
+            <summary>
+            z value.
+            </summary>
+        </member>
+        <member name="P:Locus.Vec3.Zero">
+            <summary>
+            Returns a new zero vector.
+            </summary>
+        </member>
+        <member name="M:Locus.Vec3.#ctor(System.Single)">
+            <summary>
+            Sets all values to the given value.
+            </summary>
+        </member>
+        <member name="M:Locus.Vec3.#ctor(System.Single,System.Single,System.Single)">
+            <summary>
+            Sets each value.
+            </summary>
+        </member>
+        <member name="M:Locus.Vec3.Cross(Locus.Vec3,Locus.Vec3)">
+            <summary>
+            Cross product of two vectors.
+            </summary>
+        </member>
+        <member name="M:Locus.Vec3.Distance(Locus.Vec3,Locus.Vec3)">
+            <summary>
+            Distance between two vectors.
+            </summary>
+        </member>
+        <member name="M:Locus.Vec3.Length(Locus.Vec3)">
+            <summary>
+            Length of a vector.
+            </summary>
+        </member>
+        <member name="T:Locus.Component">
+            <summary>
+            Base class for all components.
+            </summary>
+        </member>
+        <member name="P:Locus.Component.Entity">
+            <summary>
+            The entity this component is attached to.
+            </summary>
+        </member>
+        <member name="T:Locus.TransformComponent">
+            <summary>
+            Transform component.
+            </summary>
+        </member>
+        <member name="F:Locus.TransformComponent.LocalTransform">
+            <summary>
+            Local transform matrix of the entity relative to its parent.
+            </summary>
+        </member>
+        <member name="F:Locus.TransformComponent.WorldTransform">
+            <summary>
+            World transform matrix of the entity relative to its parent.
+            </summary>
+        </member>
+        <member name="P:Locus.TransformComponent.LocalPosition">
+            <summary>
+            Local position of the entity relative to its parent.
+            </summary>
+        </member>
+        <member name="F:Locus.TransformComponent.LocalRotation">
+            <summary>
+            Local rotation of the entity relative to its parent.
+            </summary>
+        </member>
+        <member name="F:Locus.TransformComponent.LocalScale">
+            <summary>
+            Local scale of the entity relative to its parent.
+            </summary>
+        </member>
+        <member name="F:Locus.TransformComponent.WorldPosition">
+            <summary>
+            World position of the entity relative to its parent.
+            </summary>
+        </member>
+        <member name="F:Locus.TransformComponent.WorldRotation">
+            <summary>
+            World rotation of the entity relative to its parent.
+            </summary>
+        </member>
+        <member name="F:Locus.TransformComponent.WorldScale">
+            <summary>
+            World scale of the entity relative to its parent.
+            </summary>
+        </member>
+        <member name="T:Locus.Entity">
+            <summary>
+            Base class for all entities. 
+            </summary>
+        </member>
+        <member name="F:Locus.Entity.ID">
+            <summary>
+            UUID of the entity.
+            </summary>
+        </member>
+        <member name="P:Locus.Entity.Tag">
+            <summary>
+            Name of the entity.
+            </summary>
+        </member>
+        <member name="P:Locus.Entity.Enabled">
+            <summary>
+            The enabled status of the entity.
+            </summary>
+        </member>
+        <member name="P:Locus.Entity.Transform">
+            <summary>
+            The transform component of the entity.
+            </summary>
+        </member>
+        <member name="M:Locus.Entity.HasComponent``1">
+            <summary>
+            Checks if entity has component of type T. 
+            </summary>
+        </member>
+        <member name="M:Locus.Entity.GetComponent``1">
+            <summary>
+            Gets the component of type T attached to the entity. Returns null if not found.
+            </summary>
+        </member>
+        <member name="M:Locus.Entity.AddComponent``1">
+            <summary>
+            Adds the component of type T to the entity.
+            </summary>
+        </member>
+    </members>
+</doc>

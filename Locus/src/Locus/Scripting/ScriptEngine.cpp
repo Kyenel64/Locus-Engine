@@ -176,6 +176,7 @@ namespace Locus
 	MonoImage* ScriptEngine::GetImage() { return s_Data->CoreAssemblyImage; }
 	Scene* ScriptEngine::GetScene() { return s_Data->Scene; }
 	std::vector<std::string> ScriptEngine::GetClassNames() { return s_Data->ScriptClassNames; }
+	MonoDomain* ScriptEngine::GetAppDomain() { return s_Data->AppDomain; }
 
 
 	// --- ScriptClass --------------------------------------------------------

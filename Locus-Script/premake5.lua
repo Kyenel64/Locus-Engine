@@ -3,8 +3,10 @@ project "Locus-Script"
 	language "C#"
 	dotnetframework "4.7.2"
 	
-	targetdir ("%{wks.location}/Locus-Editor/resources/scripts")
-	objdir ("%{wks.location}/Locus-Editor/resources/scripts/int")
+	targetdir ("../Locus-Editor/resources/scripts")
+	objdir ("../Locus-Editor/resources/scripts/int")
+
+	documentationFile ""
 	
 	files
 	{

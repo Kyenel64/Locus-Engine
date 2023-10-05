@@ -1,59 +1,38 @@
 ﻿using System;
-
+using System.Runtime;
 using Locus;
-
-namespace Test
-{
-    public class TestClass : Entity
-    {
-        void OnCreate()
-        {
-            Console.WriteLine("TestClass::OnCreate()");
-        }
-
-        void OnUpdate(float deltaTime)
-        {
-
-        }
-    }
-}
-
-public class TestNoNamespace : Entity
-{
-    void OnCreate()
-    {
-        Console.WriteLine("TestNoNamespace::OnCreate()");
-    }
-
-    void OnUpdate(float deltaTime)
-    {
-
-    }
-}
 
 namespace Sandbox
 {
     // Sample class to demonstrate C# API
     public class Player : Entity
     {
-        //private TransformComponent m_Transform;
+        private TransformComponent m_Transform;
         //private Rigidbody2DComponent m_Rigidbody;
 
 
         void OnCreate()
         {
-            Console.WriteLine("Player.OnCreate - {0}", ID);
-            //m_Transform = GetComponent<TransformComponent>();
-            //m_Rigidbody = GetComponent<Rigidbody2DComponent>();
-            if (HasComponent<IDComponent>())
-            {
-                Console.WriteLine("Player has ID Component!");
-            }
+            GetComponent<TagComponent>().Tag = "Player Entity";
+            m_Transform = GetComponent<TransformComponent>();
+            Vec3 transform = new Vec3(2, 2, 0);
+            m_Transform.LocalPosition = transform;
+
+            Vec3 cross = Vec3.Cross(new Vec3(0, 1, 0), new Vec3(1, 0, 0));
+            Console.WriteLine("Cross of (0, 1, 0) and (1, 0, 0) = {0}, {1}, {2}", cross.x, cross.y, cross.z);
+            float distance = Vec3.Distance(new Vec3(10, 5, 0), new Vec3(20, 5, 20));
+            Console.WriteLine("Distance between (10, 5, 0) and (20, 5, 20) = {0}", distance);
         }
 
         void OnUpdate(float deltaTime)
         {
-            Console.WriteLine("Player.OnUpdate - {0}", ID);
+            float speed = 0.5f;
+            Vec3 vel = Vec3.Zero;
+            vel.x += speed * deltaTime;
+            Vec3 newPos = m_Transform.LocalPosition;
+            newPos.x += speed * deltaTime;
+            m_Transform.LocalPosition = newPos;
+            //Console.WriteLine("Player.OnUpdate - {0}", ID);
 
             /*float speed = 0.01f;
             Vec3 velocity = Vec3.Zero;

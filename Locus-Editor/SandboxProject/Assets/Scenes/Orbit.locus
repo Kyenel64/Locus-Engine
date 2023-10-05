@@ -1,0 +1,61 @@
+Scene: Untitled
+RootEntityCount: 4
+Entities:
+  - Entity: 785250229868369602
+    TagComponent:
+      Tag: Moon
+      Enabled: true
+      HierarchyPos: 2
+    TransformComponent:
+      Self: 785250229868369602
+      Parent: 0
+      LocalPosition: [-6.99763918, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [0.460000008, 0.460000008, 0.460000008]
+    CircleRendererComponent:
+      Color: [0.523809552, 0.523809552, 0.523809552, 1]
+      Thickness: 1
+      Fade: 0.00499999989
+    ScriptComponent:
+      ScriptClass: Sandbox::OrbitPlanet
+  - Entity: 2433011861349912028
+    TagComponent:
+      Tag: Camera
+      Enabled: true
+      HierarchyPos: 1
+    TransformComponent:
+      Self: 2433011861349912028
+      Parent: 0
+      LocalPosition: [0, 0, 0.449826121]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        BackgroundColor: [0, 0, 0, 1]
+        ProjectionType: 0
+        OrthographicSize: 15
+        OrthographicNearClip: -1
+        OrthographicFarClip: 1000
+        PerspectiveFOV: 0.785398185
+        PerspectiveNearClip: 0.00999999978
+        PerspectiveFarClip: 1000
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 4172512803253741771
+    TagComponent:
+      Tag: Earth
+      Enabled: true
+      HierarchyPos: 3
+    TransformComponent:
+      Self: 4172512803253741771
+      Parent: 0
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1.41999996, 1.41999996, 1.41999996]
+    CircleRendererComponent:
+      Color: [0, 0.166076407, 0.913419902, 1]
+      Thickness: 1
+      Fade: 0.00499999989

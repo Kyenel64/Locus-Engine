@@ -15,6 +15,7 @@ extern "C" {
 	typedef struct _MonoMethod MonoMethod;
 	typedef struct _MonoImage MonoImage;
 	typedef struct _MonoAssembly MonoAssembly;
+	typedef struct _MonoDomain MonoDomain;
 }
 
 
@@ -37,6 +38,7 @@ namespace Locus
 		static MonoImage* GetImage();
 		static Scene* GetScene();
 		static std::vector<std::string> GetClassNames();
+		static MonoDomain* GetAppDomain();
 
 	private:
 		static void LoadAssembly(const std::string& assemblyPath);

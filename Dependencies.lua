@@ -21,7 +21,8 @@ LibraryDir = {}
 
 LibraryDir["VulkanSDK"] = "%{VULKAN_SDK}/Lib"
 LibraryDir["VulkanSDK_Debug"] = "%{wks.location}/Locus/vendor/VulkanSDK/Lib"
-LibraryDir["mono"] = "%{wks.location}/Locus/vendor/mono/lib/%{cfg.buildcfg}"
+LibraryDir["monoDebug"] = "%{wks.location}/Locus/vendor/mono/lib/Debug"
+LibraryDir["monoRelease"] = "%{wks.location}/Locus/vendor/mono/lib/Release"
 
 Library = {}
 Library["Vulkan"] = "%{LibraryDir.VulkanSDK}/vulkan-1.lib"
@@ -36,7 +37,8 @@ Library["ShaderC_Release"] = "%{LibraryDir.VulkanSDK}/shaderc_shared.lib"
 Library["SPIRV_Cross_Release"] = "%{LibraryDir.VulkanSDK}/spirv-cross-core.lib"
 Library["SPIRV_Cross_GLSL_Release"] = "%{LibraryDir.VulkanSDK}/spirv-cross-glsl.lib"
 
-Library["mono"] = "%{LibraryDir.mono}/libmono-static-sgen.lib"
+Library["monoDebug"] = "%{LibraryDir.monoDebug}/libmono-static-sgen.lib"
+Library["monoRelease"] = "%{LibraryDir.monoRelease}/libmono-static-sgen.lib"
 
 -- Windows
 Library["WinSock"] = "Ws2_32.lib"

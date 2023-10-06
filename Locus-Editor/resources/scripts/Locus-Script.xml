@@ -4,6 +4,16 @@
         <name>Locus-Script</name>
     </assembly>
     <members>
+        <member name="T:Locus.Mat4">
+            <summary>
+            Matrix 4 class.
+            </summary>
+        </member>
+        <member name="M:Locus.Mat4.#ctor(System.Single)">
+            <summary>
+            Sets the diagonal to the given value.
+            </summary>
+        </member>
         <member name="T:Locus.Vec3">
             <summary>
             Vector 3 class. Contains static methods for common vector operations.

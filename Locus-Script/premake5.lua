@@ -6,8 +6,6 @@ project "Locus-Script"
 	targetdir ("../Locus-Editor/resources/scripts")
 	objdir ("../Locus-Editor/resources/scripts/int")
 
-	documentationFile ""
-	
 	files
 	{
 		"src/**.cs"

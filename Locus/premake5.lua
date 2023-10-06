@@ -51,8 +51,7 @@ project "Locus"
 		"ImGui",
 		"opengl32.lib",
 		"yaml-cpp",
-		"Box2D",
-		"%{Library.mono}"
+		"Box2D"
 	}
 
 	linkoptions { "-IGNORE:4006" }
@@ -82,7 +81,8 @@ project "Locus"
 		{
 			"%{Library.ShaderC_Debug}",
 			"%{Library.SPIRV_Cross_Debug}",
-			"%{Library.SPIRV_Cross_GLSL_Debug}"
+			"%{Library.SPIRV_Cross_GLSL_Debug}",
+			"%{Library.monoDebug}"
 		}
 
 	filter "configurations:Release"
@@ -94,7 +94,8 @@ project "Locus"
 		{
 			"%{Library.ShaderC_Release}",
 			"%{Library.SPIRV_Cross_Release}",
-			"%{Library.SPIRV_Cross_GLSL_Release}"
+			"%{Library.SPIRV_Cross_GLSL_Release}",
+			"%{Library.monoRelease}"
 		}
 
 	filter "configurations:Dist"
@@ -106,5 +107,6 @@ project "Locus"
 		{
 			"%{Library.ShaderC_Release}",
 			"%{Library.SPIRV_Cross_Release}",
-			"%{Library.SPIRV_Cross_GLSL_Release}"
+			"%{Library.SPIRV_Cross_GLSL_Release}",
+			"%{Library.monoRelease}"
 		}

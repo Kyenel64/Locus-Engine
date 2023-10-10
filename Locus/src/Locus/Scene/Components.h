@@ -56,6 +56,7 @@ namespace Locus
 		glm::vec3 LocalScale = { 1.0f, 1.0f, 1.0f };
 
 	private:
+		// In radians
 		glm::vec3 LocalRotation = { 0.0f, 0.0f, 0.0f };
 		glm::quat LocalRotationQuat = { 0.0f, 0.0f, 0.0f, 0.0f };
 
@@ -72,13 +73,18 @@ namespace Locus
 				 * glm::scale(glm::mat4(1.0f), LocalScale);
 		}
 
-		// Position
 		glm::vec3 GetLocalRotation() const { return LocalRotation; }
 		glm::quat GetLocalRotationQuat() const { return LocalRotationQuat; }
 
 		void SetLocalRotation(const glm::vec3& rotation)
 		{
 			LocalRotation = rotation;
+			LocalRotationQuat = glm::quat(LocalRotation);
+		}
+
+		void SetLocalRotationDegrees(const glm::vec3& rotation)
+		{
+			LocalRotation = glm::radians(rotation);
 			LocalRotationQuat = glm::quat(LocalRotation);
 		}
 

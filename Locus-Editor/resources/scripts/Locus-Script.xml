@@ -4,6 +4,146 @@
         <name>Locus-Script</name>
     </assembly>
     <members>
+        <member name="T:Locus.Debug">
+            <summary>
+            Debugging functions for Locus.
+            </summary>
+        </member>
+        <member name="T:Locus.Input">
+            <summary>
+            Input system for Locus.
+            </summary>
+        </member>
+        <member name="M:Locus.Input.IsKeyPressed(Locus.KeyCode)">
+            <summary>
+            Checks if a key is pressed.
+            </summary>
+        </member>
+        <member name="T:Locus.KeyCode">
+            <summary>
+            KeyCodes used in Locus. Same as GLFW3's keycodes.
+            </summary>
+        </member>
+        <member name="F:Locus.KeyCode.Space">
+            <summary>
+            Spacebar
+            </summary>
+        </member>
+        <member name="F:Locus.KeyCode.Apostrophe">
+            <summary>
+            '
+            </summary>
+        </member>
+        <member name="F:Locus.KeyCode.Comma">
+            <summary>
+            ,
+            </summary>
+        </member>
+        <member name="F:Locus.KeyCode.Minus">
+            <summary>
+            -
+            </summary>
+        </member>
+        <member name="F:Locus.KeyCode.Period">
+            <summary>
+            .
+            </summary>
+        </member>
+        <member name="F:Locus.KeyCode.Slash">
+            <summary>
+            /
+            </summary>
+        </member>
+        <member name="F:Locus.KeyCode.D0">
+            <summary>
+            0
+            </summary>
+        </member>
+        <member name="F:Locus.KeyCode.D1">
+            <summary>
+            1
+            </summary>
+        </member>
+        <member name="F:Locus.KeyCode.D2">
+            <summary>
+            2
+            </summary>
+        </member>
+        <member name="F:Locus.KeyCode.D3">
+            <summary>
+            3
+            </summary>
+        </member>
+        <member name="F:Locus.KeyCode.D4">
+            <summary>
+            4
+            </summary>
+        </member>
+        <member name="F:Locus.KeyCode.D5">
+            <summary>
+            5
+            </summary>
+        </member>
+        <member name="F:Locus.KeyCode.D6">
+            <summary>
+            6
+            </summary>
+        </member>
+        <member name="F:Locus.KeyCode.D7">
+            <summary>
+            7
+            </summary>
+        </member>
+        <member name="F:Locus.KeyCode.D8">
+            <summary>
+            8
+            </summary>
+        </member>
+        <member name="F:Locus.KeyCode.D9">
+            <summary>
+            9
+            </summary>
+        </member>
+        <member name="F:Locus.KeyCode.Semicolon">
+            <summary>
+            ;
+            </summary>
+        </member>
+        <member name="F:Locus.KeyCode.Equal">
+            <summary>
+            =
+            </summary>
+        </member>
+        <member name="F:Locus.KeyCode.LeftBracket">
+            <summary>
+            [
+            </summary>
+        </member>
+        <member name="F:Locus.KeyCode.Backslash">
+            <summary>
+            \
+            </summary>
+        </member>
+        <member name="F:Locus.KeyCode.RightBracket">
+            <summary>
+            ]
+            </summary>
+        </member>
+        <member name="F:Locus.KeyCode.GraveAccent">
+            <summary>
+            `
+            </summary>
+        </member>
+        <member name="F:Locus.KeyCode.World1">
+            <summary>
+            non-US #1
+            </summary>
+        </member>
+        <member name="F:Locus.KeyCode.World2">
+            <summary>
+            non-US #2
+            </summary>
+        </member>
         <member name="T:Locus.Mat4">
             <summary>
             Matrix 4 class.
@@ -79,44 +219,39 @@
             Transform component.
             </summary>
         </member>
-        <member name="F:Locus.TransformComponent.LocalTransform">
+        <member name="P:Locus.TransformComponent.LocalTransform">
             <summary>
             Local transform matrix of the entity relative to its parent.
             </summary>
         </member>
-        <member name="F:Locus.TransformComponent.WorldTransform">
+        <member name="P:Locus.TransformComponent.WorldTransform">
             <summary>
-            World transform matrix of the entity relative to its parent.
+            World transform matrix of the entity relative to its parent. Can be used to convert from local space to world space.
             </summary>
         </member>
-        <member name="P:Locus.TransformComponent.LocalPosition">
+        <member name="P:Locus.TransformComponent.Position">
             <summary>
-            Local position of the entity relative to its parent.
+            Position of the entity local to its parent.
             </summary>
         </member>
-        <member name="F:Locus.TransformComponent.LocalRotation">
+        <member name="P:Locus.TransformComponent.EulerRotation">
             <summary>
-            Local rotation of the entity relative to its parent.
+            Rotation of the entity local to its parent. Represented in euler angles.
             </summary>
         </member>
-        <member name="F:Locus.TransformComponent.LocalScale">
+        <member name="P:Locus.TransformComponent.Scale">
             <summary>
-            Local scale of the entity relative to its parent.
+            Scale of the entity local to its parent.
             </summary>
         </member>
-        <member name="F:Locus.TransformComponent.WorldPosition">
+        <member name="P:Locus.TransformComponent.WorldToLocal">
             <summary>
-            World position of the entity relative to its parent.
+            Matrix to convert world space coordinates to local space.
             </summary>
         </member>
-        <member name="F:Locus.TransformComponent.WorldRotation">
+        <member name="T:Locus.SpriteRendererComponent">
             <summary>
-            World rotation of the entity relative to its parent.
-            </summary>
-        </member>
-        <member name="F:Locus.TransformComponent.WorldScale">
-            <summary>
-            World scale of the entity relative to its parent.
+            Sprite renderer component.
             </summary>
         </member>
         <member name="T:Locus.Entity">
@@ -157,6 +292,16 @@
         <member name="M:Locus.Entity.AddComponent``1">
             <summary>
             Adds the component of type T to the entity.
+            </summary>
+        </member>
+        <member name="M:Locus.Entity.CreateEntity(System.String)">
+            <summary>
+            Creates an empty entity. Optionally sets the tag of the newly created entity.
+            </summary>
+        </member>
+        <member name="M:Locus.Entity.Find(System.String)">
+            <summary>
+            Searches for an entity with the given tag.
             </summary>
         </member>
     </members>

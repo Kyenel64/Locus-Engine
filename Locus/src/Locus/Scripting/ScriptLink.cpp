@@ -22,18 +22,28 @@ namespace Locus
 
 		LINK_INTERNAL_CALL(Entity_HasComponent);
 		LINK_INTERNAL_CALL(Entity_AddComponent);
+		LINK_INTERNAL_CALL(Entity_GetTag);
+		LINK_INTERNAL_CALL(Entity_SetTag);
+		LINK_INTERNAL_CALL(Entity_GetEnabled);
+		LINK_INTERNAL_CALL(Entity_SetEnabled);
+		LINK_INTERNAL_CALL(Entity_Find);
 
 		LINK_INTERNAL_CALL(Vec3_Cross);
 		LINK_INTERNAL_CALL(Vec3_Distance);
 		LINK_INTERNAL_CALL(Vec3_Length);
 
-		LINK_INTERNAL_CALL(TagComponent_GetTag);
-		LINK_INTERNAL_CALL(TagComponent_SetTag);
-		LINK_INTERNAL_CALL(TagComponent_GetEnabled);
-		LINK_INTERNAL_CALL(TagComponent_SetEnabled);
-
+		LINK_INTERNAL_CALL(TransformComponent_GetLocalTransform);
+		LINK_INTERNAL_CALL(TransformComponent_GetWorldTransform);
+		LINK_INTERNAL_CALL(TransformComponent_GetWorldToLocal);
 		LINK_INTERNAL_CALL(TransformComponent_GetLocalPosition);
 		LINK_INTERNAL_CALL(TransformComponent_SetLocalPosition);
+		LINK_INTERNAL_CALL(TransformComponent_GetLocalRotationEuler);
+		LINK_INTERNAL_CALL(TransformComponent_SetLocalRotationEuler);
+		LINK_INTERNAL_CALL(TransformComponent_GetLocalScale);
+		LINK_INTERNAL_CALL(TransformComponent_SetLocalScale);
+
+		LINK_INTERNAL_CALL(Input_IsKeyPressed);
+		
 	}
 
 	template<typename T>

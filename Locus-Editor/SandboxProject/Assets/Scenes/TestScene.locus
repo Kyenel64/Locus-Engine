@@ -1,13 +1,13 @@
 Scene: Untitled
 RootEntityCount: 3
 Entities:
-  - Entity: 7065958586047804732
+  - Entity: 10340983657204881902
     TagComponent:
       Tag: Empty Entity
       Enabled: true
-      HierarchyPos: 1
+      HierarchyPos: 2
     TransformComponent:
-      Self: 7065958586047804732
+      Self: 10340983657204881902
       Parent: 0
       LocalPosition: [0, 0, 0]
       LocalRotation: [0, 0, 0]
@@ -19,22 +19,22 @@ Entities:
       TilingFactor: 1
     ScriptComponent:
       ScriptClass: Sandbox::Player
-  - Entity: 17802933764692076100
+  - Entity: 8835880168986104072
     TagComponent:
-      Tag: Camera
+      Tag: Empty Entity
       Enabled: true
-      HierarchyPos: 2
+      HierarchyPos: 1
     TransformComponent:
-      Self: 17802933764692076100
+      Self: 8835880168986104072
       Parent: 0
-      LocalPosition: [0, 0, 12.6198359]
+      LocalPosition: [0, 0, 0]
       LocalRotation: [0, 0, 0]
       LocalRotationQuat: [0, 0, 0, 1]
       LocalScale: [1, 1, 1]
     CameraComponent:
       Camera:
         BackgroundColor: [0.25, 0.5, 0.5, 1]
-        ProjectionType: 1
+        ProjectionType: 0
         OrthographicSize: 5
         OrthographicNearClip: -1
         OrthographicFarClip: 1000

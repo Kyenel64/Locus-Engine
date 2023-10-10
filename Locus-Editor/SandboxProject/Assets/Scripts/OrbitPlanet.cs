@@ -1,6 +1,7 @@
 ﻿// Example script to simulate orbital motion in 2D.
 using Locus;
 using System;
+using System.Diagnostics;
 
 namespace Sandbox
 {
@@ -19,9 +20,9 @@ namespace Sandbox
         private Vec3 position;
         void OnCreate()
         {
-            position = GetComponent<TransformComponent>().LocalPosition;
+            position = GetComponent<TransformComponent>().Position;
 
-            Vec3 dir = new Vec3(0, 0, 0) - GetComponent<TransformComponent>().LocalPosition;
+            Vec3 dir = new Vec3(0, 0, 0) - GetComponent<TransformComponent>().Position;
             Vec3 intertialForce = Vec3.Cross(new Vec3(0, 0, 1), (dir / Vec3.Length(dir))) * initialForce;
 
             velocity = intertialForce;
@@ -39,7 +40,7 @@ namespace Sandbox
             velocity = (newPosition - originalPosition) / time;
 
             position = newPosition;
-            GetComponent<TransformComponent>().LocalPosition = newPosition;
+            GetComponent<TransformComponent>().Position = newPosition;
         }
 
         Vec3 CalculateForceDirection()

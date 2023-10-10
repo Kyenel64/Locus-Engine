@@ -20,16 +20,16 @@ namespace Locus
         /// </summary>
         public string Tag
         {
-            get => InternalCalls.TagComponent_GetTag(ID);
-            set => InternalCalls.TagComponent_SetTag(ID, value);
+            get => InternalCalls.Entity_GetTag(ID);
+            set => InternalCalls.Entity_SetTag(ID, value);
         }
         /// <summary>
         /// The enabled status of the entity.
         /// </summary>
         public bool Enabled
         {
-            get => InternalCalls.TagComponent_GetEnabled(ID);
-            set => InternalCalls.TagComponent_SetEnabled(ID, value);
+            get => InternalCalls.Entity_GetEnabled(ID);
+            set => InternalCalls.Entity_SetEnabled(ID, value);
         }
         /// <summary>
         /// The transform component of the entity.
@@ -81,6 +81,26 @@ namespace Locus
             Type componentType = typeof(T);
             InternalCalls.Entity_AddComponent(ID, componentType);
             return component;
+        }
+
+        // --- Static Methods ---
+
+        /// <summary>
+        /// Creates an empty entity. Optionally sets the tag of the newly created entity.
+        /// </summary>
+        public static Entity CreateEntity(string tag = "Emtpty Entity")
+        {
+            Entity entity = new Entity(InternalCalls.CreateEntity());
+            entity.Tag = tag;
+            return entity;
+        }
+        /// <summary>
+        /// Searches for an entity with the given tag.
+        /// </summary>
+        public static Entity Find(string tag)
+        {
+            Entity entity = new Entity(InternalCalls.Entity_Find(tag));
+            return entity;
         }
     }
 }

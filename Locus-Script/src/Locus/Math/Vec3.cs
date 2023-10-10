@@ -105,6 +105,14 @@ namespace Locus
         {
             return new Vec3(s * vec.x, s * vec.y, s * vec.z);
         }
+        public static Vec3 operator *(Vec3 vec, Mat4 mat)
+        {
+            Vec3 result = new Vec3();
+            result.x = vec.x * mat.m00 + vec.y * mat.m10 + vec.z * mat.m20 + 1.0f * mat.m30;
+            result.y = vec.x * mat.m01 + vec.y * mat.m11 + vec.z * mat.m21 + 1.0f * mat.m31;
+            result.z = vec.x * mat.m02 + vec.y * mat.m12 + vec.z * mat.m22 + 1.0f * mat.m32;
+            return result;
+        }
         public static Vec3 operator /(Vec3 v1, Vec3 v2)
         {
             return new Vec3(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z);

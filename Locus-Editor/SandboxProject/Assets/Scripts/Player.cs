@@ -10,50 +10,57 @@ namespace Sandbox
         private TransformComponent m_Transform;
         //private Rigidbody2DComponent m_Rigidbody;
 
-
-        void OnCreate()
+        void Test1()
         {
-            GetComponent<TagComponent>().Tag = "Player Entity";
+            Tag = "Player Entity";
             m_Transform = GetComponent<TransformComponent>();
-            Vec3 transform = new Vec3(2, 2, 0);
-            m_Transform.LocalPosition = transform;
+            Vec3 position = new Vec3(2, 2, 0);
+            m_Transform.Position = position;
 
             Vec3 cross = Vec3.Cross(new Vec3(0, 1, 0), new Vec3(1, 0, 0));
             Console.WriteLine("Cross of (0, 1, 0) and (1, 0, 0) = {0}, {1}, {2}", cross.x, cross.y, cross.z);
             float distance = Vec3.Distance(new Vec3(10, 5, 0), new Vec3(20, 5, 20));
             Console.WriteLine("Distance between (10, 5, 0) and (20, 5, 20) = {0}", distance);
+            Entity.CreateEntity("New Entity");
+            Debug.Log();
+
+            Transform.EulerRotation = new Vec3(0, 0, 45);
+            Console.WriteLine(Transform.EulerRotation.z);
+
+            Transform.Scale = new Vec3(10, 1, 1);
+            Console.WriteLine(Transform.Scale.x);
+        }
+        void Test2()
+        {
+            // Setting the world transform from local coordinates.
+            Transform.Position = new Vec3(2, 2, 0) * Transform.WorldToLocal;
+        }
+
+        void OnCreate()
+        {
+            //Test1();
+            Test2();
+
         }
 
         void OnUpdate(float deltaTime)
         {
-            float speed = 0.5f;
-            Vec3 vel = Vec3.Zero;
-            vel.x += speed * deltaTime;
-            Vec3 newPos = m_Transform.LocalPosition;
-            newPos.x += speed * deltaTime;
-            m_Transform.LocalPosition = newPos;
-            //Console.WriteLine("Player.OnUpdate - {0}", ID);
 
-            /*float speed = 0.01f;
+            float speed = 5.0f;
             Vec3 velocity = Vec3.Zero;
 
-            if (Input.IsKeyDown(KeyCode.W))
+            if (Input.IsKeyPressed(KeyCode.W))
                 velocity.y = 1.0f;
-            else if (Input.IsKeyDown(KeyCode.S))
+            else if (Input.IsKeyPressed(KeyCode.S))
                 velocity.y = -1.0f;
 
-            if (Input.IsKeyDown(KeyCode.A))
+            if (Input.IsKeyPressed(KeyCode.A))
                 velocity.x = -1.0f;
-            else if (Input.IsKeyDown(KeyCode.D))
+            else if (Input.IsKeyPressed(KeyCode.D))
                 velocity.x = 1.0f;
 
             velocity *= speed;
-
-            //m_Rigidbody.ApplyLinearImpulse(velocity.XY, true);
-
-            Vec3 position = m_Transform.Position;
-            position += velocity * deltaTime;
-            m_Transform.Position = position;*/
+            Transform.Position += velocity * deltaTime;
         }
     }
 }

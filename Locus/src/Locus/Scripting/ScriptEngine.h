@@ -35,6 +35,8 @@ namespace Locus
 		static void OnCreateEntityScript(Entity entity);
 		static void OnUpdateEntityScript(Entity entity, Timestep deltaTime);
 
+		static void ReloadScripts();
+
 		static MonoImage* GetImage();
 		static Scene* GetScene();
 		static std::vector<std::string> GetClassNames();

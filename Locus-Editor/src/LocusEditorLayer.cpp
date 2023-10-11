@@ -405,7 +405,7 @@ namespace Locus
 				}
 				break;
 			}
-
+				
 			// Command History
 			case Key::Y:
 			{
@@ -775,6 +775,11 @@ namespace Locus
 
 			if (ImGui::BeginMenu("Project"))
 			{
+				if (ImGui::MenuItem("Reload Scripts", "Ctrl+Shift+R"))
+				{
+					ScriptEngine::ReloadScripts();
+					m_PropertiesPanel.m_ScriptClasses = ScriptEngine::GetClassNames();
+				}
 				ImGui::EndMenu();
 			}
 

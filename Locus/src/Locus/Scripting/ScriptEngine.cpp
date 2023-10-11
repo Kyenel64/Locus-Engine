@@ -84,6 +84,20 @@ namespace Locus
 		ScriptLink::RegisterFunctions();
 	}
 
+	void ScriptEngine::ReloadScripts()
+	{
+		mono_domain_set(mono_get_root_domain(), false);
+		mono_domain_unload(s_Data->AppDomain);
+
+		LoadAssembly("resources/scripts/Locus-Script.dll");
+		LoadAppAssembly("SandboxProject/bin/Sandbox.dll"); // TODO: set to project path
+		LoadAppAssemblyClasses();
+
+		s_Data->EntityBaseClass = CreateRef<ScriptClass>(s_Data->CoreAssemblyImage, "Locus", "Entity");
+		// Link C++ functions to C# declarations
+		ScriptLink::RegisterFunctions();
+	}
+
 	void ScriptEngine::Shutdown()
 	{
 		s_Data->RootDomain = nullptr;

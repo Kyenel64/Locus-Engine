@@ -41,6 +41,7 @@ namespace Sandbox
             //Test1();
             Test2();
 
+            Console.WriteLine("New Reload");
         }
 
         void OnUpdate(float deltaTime)

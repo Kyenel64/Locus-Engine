@@ -55,5 +55,8 @@ namespace Locus
 
 		ComponentData m_ClipboardComponent;
 		ComponentType m_ClipboardComponentType = ComponentType::None;
+
+	public:
+		friend class LocusEditorLayer;
 	};
 }

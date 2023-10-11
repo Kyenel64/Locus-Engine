@@ -67,6 +67,8 @@ namespace Locus
 
 	void ScriptLink::RegisterComponents()
 	{
+		s_HasComponentFunctions.clear();
+		s_AddComponentFunctions.clear();
 		RegisterComponent<IDComponent>();
 		RegisterComponent<TagComponent>();
 		RegisterComponent<TransformComponent>();

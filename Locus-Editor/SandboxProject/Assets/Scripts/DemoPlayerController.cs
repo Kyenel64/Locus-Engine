@@ -6,26 +6,30 @@ using Locus;
 namespace Sandbox
 {
     // Sample class to demonstrate C# API
-    public class DemoPlayerController : Entity
+    public class TestClass : Entity
     {
-        private Vec3 velocity;
-        public Vec3 acceleration;
-        public Vec3 originalPosition;
-        public Vec3 newPosition;
-        public Vec3 position;
+        public float testFloat = 10.0f;
+        public float testFloatNoDefault;
 
-        private Vec3 downVector = new Vec3(0, -1, 0);
+        //public double testFloat = 200.0f;
+        //public double testFloatNoDefault;
+
+        public int testInt = 10;
+        public int testIntNoDefault;
+
+        public bool testBool = true;
+        public bool testBoolNoDefault;
         void OnCreate()
         {
-            originalPosition = Transform.Position;
-            position = Transform.Position;
+            Console.WriteLine("\rtestFloat:{0} ", testFloat);
+            Console.WriteLine("\rtestFloatNoDefault:{0} ", testFloatNoDefault);
+            Console.WriteLine("\rtestInt:{0} ", testInt);
+            Console.WriteLine("\rtestIntNoDefault:{0} ", testIntNoDefault);
         }
 
         void OnUpdate(float deltaTime)
         {
-            acceleration = (downVector / 0.001f);
-            position += acceleration;
-            Transform.Position = position;
+            
         }
     }
 }

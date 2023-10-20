@@ -56,6 +56,8 @@ namespace Locus
 		void SetIsSavedStatus(bool isSaved) { m_IsSaved = isSaved; }
 		bool GetIsSavedStatus() const { return m_IsSaved; }
 
+		bool IsRunning() const { return m_Running; }
+
 		ApplicationCommandLineArgs GetCommandLineArgs() const { return m_CommandLineArgs; }
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);

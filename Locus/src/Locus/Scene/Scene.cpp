@@ -159,9 +159,7 @@ namespace Locus
 			for (auto e : view)
 			{
 				Entity entity = Entity(e, this);
-				auto& sc = view.get<ScriptComponent>(e);
-				bool enabled = view.get<TagComponent>(e).Enabled;
-				if (enabled)
+				if (view.get<TagComponent>(e).Enabled)
 				{
 					ScriptEngine::OnUpdateEntityScript(entity, deltaTime);
 				}

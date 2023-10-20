@@ -7,8 +7,8 @@ namespace Sandbox
 {
     public class OrbitPlanet : Entity
     {
-        float thisMass = 1.0f;
-        float centerMass = 1000000.0f;
+        public float thisMass = 1.0f;
+        public float centerMass = 1000000.0f;
 
         public float initialForce = 5.0f;
 

@@ -435,7 +435,7 @@ namespace Locus
 			});
 
 		// --- Script ---------------------------------------------------------
-		DrawComponentUI<ScriptComponent>("Script", entity, [this](auto& component)
+		DrawComponentUI<ScriptComponent>("Script", entity, [this, entity](auto& component) mutable
 			{
 				// Script Class
 				DrawControlLabel("Script Class", { m_LabelWidth, 0.0f });
@@ -452,15 +452,39 @@ namespace Locus
 						if (filter.PassFilter(m_ScriptClasses[i].c_str()))
 						{
 							bool isSelected = curClass == m_ScriptClasses[i];
-								if (ImGui::Selectable(m_ScriptClasses[i].c_str(), isSelected))
-									CommandHistory::AddCommand(new ChangeValueCommand(m_ScriptClasses[i], component.ScriptClass));
-								if (isSelected)
-									ImGui::SetItemDefaultFocus();
+							if (ImGui::Selectable(m_ScriptClasses[i].c_str(), isSelected))
+							{
+								CommandHistory::AddCommand(new ChangeValueCommand(m_ScriptClasses[i], component.ScriptClass));
+								ScriptEngine::GetFieldInstances(entity.GetUUID()).clear(); // Could cause error if undoing
+							}
+							if (isSelected)
+								ImGui::SetItemDefaultFocus();
 						}
 					}
 					ImGui::EndCombo();
 				}
 				ImGui::PopItemWidth();
+
+				// Public Fields
+				if (Application::Get().IsRunning())
+				{
+					Ref<ScriptClass> scriptClass = ScriptEngine::GetScriptClass(component.ScriptClass);
+					Ref<ScriptInstance> instance = ScriptEngine::GetScriptInstance(entity.GetUUID());
+					if (scriptClass)
+					{
+						const auto& fields = scriptClass->GetPublicFields();
+						for (const auto& [name, field] : fields)
+						{
+							switch (field.Type)
+							{
+								// TODO: Add the rest of data types
+								case FieldType::SystemSingle:  DrawFieldControl<float>(entity, name, field, scriptClass, instance); break;
+								case FieldType::SystemInt:     DrawFieldControl<int>(entity, name, field, scriptClass, instance); break;
+								case FieldType::SystemBoolean: DrawFieldControl<bool>(entity, name, field, scriptClass, instance); break;
+							}
+						}
+					}
+				}
 			});
 	}
 
@@ -537,6 +561,26 @@ namespace Locus
 		ImGui::PopItemWidth();
 		if (ImGui::IsItemHovered())
 			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+	}
+
+	void PropertiesPanel::DrawBoolControl(const std::string& name, bool& changeValue)
+	{
+		DrawControlLabel(name, { m_LabelWidth, 0.0f });
+		ImGui::SameLine();
+
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+			if (ImGui::IsMouseDoubleClicked(0))
+				CommandHistory::AddCommand(new ChangeValueCommand(false, changeValue));
+		}
+
+		bool val = static_cast<bool>(changeValue);
+		std::string label = "##" + name;
+		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
+		if (ImGui::Checkbox(label.c_str(), &val))
+			CommandHistory::AddCommand(new ChangeValueCommand(val, changeValue));
+		ImGui::PopItemWidth();
 	}
 
 	void PropertiesPanel::DrawColorControl(const std::string& name, glm::vec4& colorValue)
@@ -764,6 +808,60 @@ namespace Locus
 		if (Input::IsKeyPressed(Key::Z) && Input::IsKeyPressed(Key::LeftControl))
 			isChanged = true;
 		return isChanged;
+	}
+
+	template<typename T>
+	void PropertiesPanel::DrawFieldControl(Entity entity, const std::string& name, const ScriptClassField& field, Ref<ScriptClass> scriptClass, Ref<ScriptInstance> instance)
+	{
+		// During scene runtime
+		if (instance)
+		{
+			DrawControlLabel(name, { m_LabelWidth, 0.0f });
+			T data = instance->GetFieldValue<T>(name);
+			std::string label = "##" + name;
+
+			if (typeid(T) == typeid(float))
+			{
+				if (ImGui::DragFloat(label.c_str(), &(float)data))
+					instance->SetFieldValue(name, data); // TODO: Use command pattern
+				
+			}
+			if (typeid(T) == typeid(int))
+			{
+				if (ImGui::DragInt(label.c_str(), &(int)data))
+					instance->SetFieldValue(name, data);
+			}
+			if (typeid(T) == typeid(bool))
+			{
+				bool checked = &data;
+				if (ImGui::Checkbox(label.c_str(), &checked))
+					instance->SetFieldValue(name, checked);
+			}
+		}
+		// During editor
+		else
+		{
+			const auto& fields = scriptClass->GetPublicFields();
+			auto& fieldInstances = ScriptEngine::GetFieldInstances(entity.GetUUID());
+
+			if (fieldInstances.find(name) == fieldInstances.end())
+			{
+				ScriptClassFieldInstance& scriptField = fieldInstances[name];
+				scriptField.Field = field;
+				T data = scriptClass->GetFieldValue<T>(name);
+				scriptField.SetValue(data);
+			}
+			else
+			{
+				ScriptClassFieldInstance& scriptField = fieldInstances[name];
+				if (typeid(T) == typeid(float))
+					DrawFloatControl(name, *(float*)scriptField.m_Buffer, scriptClass->GetFieldValue<float>(name));
+				if (typeid(T) == typeid(int))
+					DrawIntControl(name, *(int*)scriptField.m_Buffer, scriptClass->GetFieldValue<int>(name));
+				if (typeid(T) == typeid(bool))
+					DrawBoolControl(name, *(bool*)scriptField.m_Buffer);
+			}
+		}
 	}
 
 	template<typename T>

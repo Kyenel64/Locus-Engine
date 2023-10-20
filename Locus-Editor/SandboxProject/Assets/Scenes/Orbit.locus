@@ -29,9 +29,13 @@ Entities:
       LocalRotation: [0, 0, 0]
       LocalRotationQuat: [0, 0, 0, 1]
       LocalScale: [1, 1, 1]
+    ChildComponent:
+      ChildCount: 1
+      ChildEntities:
+        Child0: 5979509514547691761
     CameraComponent:
       Camera:
-        BackgroundColor: [0, 0, 0, 1]
+        BackgroundColor: [0.0173160434, 0.0173160434, 0.0173160434, 1]
         ProjectionType: 1
         OrthographicSize: 15
         OrthographicNearClip: -1
@@ -52,8 +56,8 @@ Entities:
       Self: 785250229868369602
       Parent: 0
       LocalPosition: [-6.99763918, 0, 0]
-      LocalRotation: [0, 0, 0]
-      LocalRotationQuat: [0, 0, 0, 1]
+      LocalRotation: [0, 0, 0.785398185]
+      LocalRotationQuat: [0, 0, 0.382683456, 0.923879504]
       LocalScale: [0.460000008, 0.460000008, 0.460000008]
     SpriteRendererComponent:
       Color: [0.389610529, 1, 0, 1]
@@ -61,3 +65,19 @@ Entities:
       TilingFactor: 1
     ScriptComponent:
       ScriptClass: Sandbox::OrbitPlanet
+  - Entity: 5979509514547691761
+    TagComponent:
+      Tag: Mesh
+      Enabled: false
+      HierarchyPos: 0
+    TransformComponent:
+      Self: 5979509514547691761
+      Parent: 2433011861349912028
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [0.560000002, 0.560000002, 0.560000002]
+    CircleRendererComponent:
+      Color: [1, 0, 0, 1]
+      Thickness: 1
+      Fade: 0.00499999989

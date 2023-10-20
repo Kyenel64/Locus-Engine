@@ -6,13 +6,15 @@ namespace Sandbox
     // Sample class to demonstrate C# API
     public class CameraController2D : Entity
     {
+        public float testValue;
         void OnCreate()
         {
-            
+            Console.WriteLine(testValue);
         }
 
         void OnUpdate(float deltaTime)
         {
+            //Console.WriteLine(testValue);
             float speed = 5.0f;
             Vec3 velocity = Vec3.Zero;
 

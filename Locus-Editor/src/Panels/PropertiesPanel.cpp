@@ -284,11 +284,11 @@ namespace Locus
 				if (camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic)
 				{
 					// Size
-					DrawFloatControl("Size", camera.GetOrthographicSize(), 5.0f);
+					DrawValueControl("Size", camera.GetOrthographicSize(), 5.0f);
 					// Near
-					DrawFloatControl("Near Clip", camera.GetOrthographicNearClip(), -1.0f, 0.1f, 0.0f, 0.0f, "%.1f");
+					DrawValueControl("Near Clip", camera.GetOrthographicNearClip(), -1.0f, 0.1f, "%.1f");
 					// Far
-					DrawFloatControl("Far Clip", camera.GetOrthographicFarClip(), 1000.0f, 0.1f, 0.0f, 0.0f, "%.1f");
+					DrawValueControl("Far Clip", camera.GetOrthographicFarClip(), 1000.0f, 0.1f, "%.1f");
 
 					// Fixed Aspect Ratio
 					DrawControlLabel("Fixed Aspect Ratio", { m_LabelWidth, 0.0f });
@@ -303,12 +303,12 @@ namespace Locus
 				{
 					// FOV
 					float fov = glm::degrees(camera.GetPerspectiveFOV());
-					DrawFloatControl("FOV", fov, 45.0f);
+					DrawValueControl("FOV", fov, 45.0f);
 					camera.SetPerspectiveFOV(glm::radians(fov));
 					// Near
-					DrawFloatControl("Near Clip", camera.GetPerspectiveNearClip(), -1.0f, 0.1f, 0.0f, 0.0f, "%.1f");
+					DrawValueControl("Near Clip", camera.GetPerspectiveNearClip(), -1.0f, 0.1f, "%.1f");
 					// Far
-					DrawFloatControl("Far Clip", camera.GetPerspectiveFarClip(), 1000.0f, 0.1f, 0.0f, 0.0f, "%.1f");
+					DrawValueControl("Far Clip", camera.GetPerspectiveFarClip(), 1000.0f, 0.1f, "%.1f");
 				}
 			});
 
@@ -353,15 +353,15 @@ namespace Locus
 				// Color
 				DrawColorControl("Color", component.Color);
 				// Tiling Factor
-				DrawFloatControl("Tiling Factor", component.TilingFactor);
+				DrawValueControl("Tiling Factor", component.TilingFactor);
 			});
 
 		// --- Circle Renderer Component --------------------------------------
 		DrawComponentUI<CircleRendererComponent>("Circle Renderer", entity, [this](auto& component)
 			{
 				DrawColorControl("Color", component.Color);
-				DrawFloatControl("Thickness", component.Thickness, 1.0f, 0.01f, 0.0f, 1.0f);
-				DrawFloatControl("Fade", component.Fade, 0.005f, 0.01f, 0.0001f, FLT_MAX);
+				DrawValueControl("Thickness", component.Thickness, 1.0f, 0.01f, "%.3f", true, 0.0f, 1.0f);
+				DrawValueControl("Fade", component.Fade, 0.005f, 0.01f, "%.3f", true, 0.0001f, FLT_MAX);
 			});
 
 		// --- Rigidbody2D Component ------------------------------------------
@@ -389,13 +389,13 @@ namespace Locus
 				ImGui::PopItemWidth();
 
 				// Mass
-				DrawFloatControl("Mass", component.Mass);
+				DrawValueControl("Mass", component.Mass);
 				// Gravity Scale
-				DrawFloatControl("Gravity Scale", component.GravityScale);
+				DrawValueControl("Gravity Scale", component.GravityScale);
 				// Linear Drag
-				DrawFloatControl("Linear Damping", component.LinearDamping, 0.2f);
+				DrawValueControl("Linear Damping", component.LinearDamping, 0.2f);
 				// Angular Drag
-				DrawFloatControl("Angular Damping", component.AngularDamping, 0.2f);
+				DrawValueControl("Angular Damping", component.AngularDamping, 0.2f);
 
 				// Fixed Rotation
 				DrawControlLabel("Fixed Rotation", { m_LabelWidth, 0.0f });
@@ -405,18 +405,18 @@ namespace Locus
 					CommandHistory::AddCommand(new ChangeValueCommand(fixedRotation, component.FixedRotation));
 
 				// Friction
-				DrawFloatControl("Friction", component.Friction, 0.2f);
+				DrawValueControl("Friction", component.Friction, 0.2f);
 				// Restitution
-				DrawFloatControl("Restitution", component.Restitution, 0.0f);
+				DrawValueControl("Restitution", component.Restitution, 0.0f);
 				// Restitution Threshold
-				DrawFloatControl("Restitution Threshold", component.RestitutionThreshold, 0.0f);
+				DrawValueControl("Restitution Threshold", component.RestitutionThreshold, 0.0f);
 			});
 
 		// --- BoxCollider2D Component ----------------------------------------
 		DrawComponentUI<BoxCollider2DComponent>("Box Collider 2D", entity, [this](auto& component)
 			{
 				// Collision Layer
-				DrawIntControl("Collision Layer", component.CollisionLayer);
+				DrawValueControl<uint16_t>("Collision Layer", component.CollisionLayer, 1, 1, "%u");
 				// Size
 				DrawVec2Control("Size", component.Size, 1.0f);
 				// Offset
@@ -427,9 +427,9 @@ namespace Locus
 		DrawComponentUI<CircleCollider2DComponent>("Circle Collider 2D", entity, [this](auto& component)
 			{
 				// Collision Layer
-				DrawIntControl("Collision Layer", component.CollisionLayer);
+				DrawValueControl("Collision Layer", component.CollisionLayer);
 				// Radius
-				DrawFloatControl("Radius", component.Radius, 0.5f);
+				DrawValueControl("Radius", component.Radius, 0.5f);
 				// Offset
 				DrawVec2Control("Offset", component.Offset);
 			});
@@ -497,7 +497,8 @@ namespace Locus
 		ImGui::PopStyleColor(3);
 	}
 
-	void PropertiesPanel::DrawFloatControl(const std::string& name, float& changeValue, float resetValue, float speed, float min, float max, const char* format)
+	template<typename T>
+	void PropertiesPanel::DrawValueControl(const std::string& name, T& changeValue, T resetValue, float speed, const char* format, bool dragClamp, T min, T max)
 	{
 		DrawControlLabel(name, { m_LabelWidth, 0.0f });
 		ImGui::SameLine();
@@ -509,37 +510,24 @@ namespace Locus
 				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, changeValue));
 		}
 
-		float dragVal = changeValue;
+		ImGuiDataType type;
+		if (typeid(T) == typeid(float))    type = ImGuiDataType_Float;
+		else if (typeid(T) == typeid(double))   type = ImGuiDataType_Double;
+		else if (typeid(T) == typeid(int16_t))  type = ImGuiDataType_S16;
+		else if (typeid(T) == typeid(int))      type = ImGuiDataType_S32;
+		else if (typeid(T) == typeid(int32_t))  type = ImGuiDataType_S32;
+		else if (typeid(T) == typeid(int64_t))  type = ImGuiDataType_S64;
+		else if (typeid(T) == typeid(uint16_t)) type = ImGuiDataType_U16;
+		else if (typeid(T) == typeid(uint32_t)) type = ImGuiDataType_U32;
+		else if (typeid(T) == typeid(uint64_t)) type = ImGuiDataType_U64;
+		else LOCUS_CORE_ASSERT(false, "Invalid template type!");
+
+		T dragVal = changeValue;
 		std::string label = "##" + name;
 		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-		if (ImGui::DragFloat(label.c_str(), &dragVal, speed, min, max, format))
+		if (ImGui::DragScalar(label.c_str(), type, &dragVal, speed, dragClamp ? &min : NULL, dragClamp ? &max : NULL, format))
 			CommandHistory::AddCommand(new ChangeValueCommand(dragVal, changeValue));
 		ImGui::PopItemWidth();
-		if (ImGui::IsItemHovered())
-			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-	}
-
-	template<typename T>
-	void PropertiesPanel::DrawIntControl(const std::string& name, T& changeValue, T resetValue, float speed, int min, int max, const char* format)
-	{
-		DrawControlLabel(name, { m_LabelWidth, 0.0f });
-		ImGui::SameLine();
-
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			if (ImGui::IsMouseDoubleClicked(0))
-				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, changeValue));
-		}
-
-		std::string label = "##" + name;
-		int dragVal = static_cast<int>(changeValue);
-
-		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-		if (ImGui::DragInt(label.c_str(), &dragVal, 1.0f, 0))
-			CommandHistory::AddCommand(new ChangeValueCommand<T>(dragVal, (T&)changeValue));
-		ImGui::PopItemWidth();
-
 		if (ImGui::IsItemHovered())
 			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
 	}
@@ -836,9 +824,9 @@ namespace Locus
 			{
 				ScriptClassFieldInstance& scriptField = fieldInstances[name];
 				if (typeid(T) == typeid(float))
-					DrawFloatControl(name, *(float*)scriptField.m_Buffer, scriptClass->GetFieldValue<float>(name));
+					DrawValueControl(name, *(float*)scriptField.m_Buffer, scriptClass->GetFieldValue<float>(name));
 				if (typeid(T) == typeid(int))
-					DrawIntControl(name, *(int*)scriptField.m_Buffer, scriptClass->GetFieldValue<int>(name));
+					DrawValueControl(name, *(int*)scriptField.m_Buffer, scriptClass->GetFieldValue<int>(name));
 				if (typeid(T) == typeid(bool))
 					DrawBoolControl(name, *(bool*)scriptField.m_Buffer);
 			}

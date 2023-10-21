@@ -376,5 +376,7 @@ int/
 Locus/vendor/VulkanSDK
 Locus-Editor/resources/cache
 Locus-Editor/resources/scripts/*.dll
+Locus-Editor/imgui.ini
 scripts/__pycache__
 premake/
+

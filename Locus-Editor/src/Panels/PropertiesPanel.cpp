@@ -416,7 +416,7 @@ namespace Locus
 		DrawComponentUI<BoxCollider2DComponent>("Box Collider 2D", entity, [this](auto& component)
 			{
 				// Collision Layer
-				DrawUInt16Control("Collision Layer", component.CollisionLayer);
+				DrawIntControl("Collision Layer", component.CollisionLayer);
 				// Size
 				DrawVec2Control("Size", component.Size, 1.0f);
 				// Offset
@@ -427,7 +427,7 @@ namespace Locus
 		DrawComponentUI<CircleCollider2DComponent>("Circle Collider 2D", entity, [this](auto& component)
 			{
 				// Collision Layer
-				DrawUInt16Control("Collision Layer", component.CollisionLayer);
+				DrawIntControl("Collision Layer", component.CollisionLayer);
 				// Radius
 				DrawFloatControl("Radius", component.Radius, 0.5f);
 				// Offset
@@ -519,7 +519,8 @@ namespace Locus
 			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
 	}
 
-	void PropertiesPanel::DrawIntControl(const std::string& name, int& changeValue, int resetValue, float speed, int min, int max, const char* format)
+	template<typename T>
+	void PropertiesPanel::DrawIntControl(const std::string& name, T& changeValue, T resetValue, float speed, int min, int max, const char* format)
 	{
 		DrawControlLabel(name, { m_LabelWidth, 0.0f });
 		ImGui::SameLine();
@@ -531,34 +532,14 @@ namespace Locus
 				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, changeValue));
 		}
 
-		int dragVal = changeValue;
 		std::string label = "##" + name;
-		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-		if (ImGui::DragInt(label.c_str(), &dragVal, 1.0f, 0))
-			CommandHistory::AddCommand(new ChangeValueCommand(dragVal, changeValue));
-		ImGui::PopItemWidth();
-		if (ImGui::IsItemHovered())
-			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-	}
-
-	void PropertiesPanel::DrawUInt16Control(const std::string& name, uint16_t& changeValue, uint16_t resetValue, float speed, int min, int max, const char* format)
-	{
-		DrawControlLabel(name, { m_LabelWidth, 0.0f });
-		ImGui::SameLine();
-
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			if (ImGui::IsMouseDoubleClicked(0))
-				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, changeValue));
-		}
-
 		int dragVal = static_cast<int>(changeValue);
-		std::string label = "##" + name;
+
 		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
 		if (ImGui::DragInt(label.c_str(), &dragVal, 1.0f, 0))
-			CommandHistory::AddCommand(new ChangeValueCommand(static_cast<uint16_t>(dragVal), changeValue));
+			CommandHistory::AddCommand(new ChangeValueCommand<T>(dragVal, (T&)changeValue));
 		ImGui::PopItemWidth();
+
 		if (ImGui::IsItemHovered())
 			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
 	}

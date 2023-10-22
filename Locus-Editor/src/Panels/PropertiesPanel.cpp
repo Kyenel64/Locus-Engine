@@ -10,6 +10,7 @@
 #include "Command/CommandHistory.h"
 #include "Command/EntityCommands.h"
 #include "Command/ValueCommands.h"
+#include "Widgets/Widgets.h"
 
 namespace Locus
 {
@@ -24,14 +25,17 @@ namespace Locus
 	{
 		m_ActiveScene = context;
 		m_SelectedEntity = {};
+		
+		// Create textures
 		m_ShowMoreButton = Texture2D::Create("resources/icons/ShowMoreButton.png");
 		m_FolderIcon = Texture2D::Create("resources/icons/FolderIcon.png");
 
-		m_ScriptClasses = ScriptEngine::GetClassNames(); // TODO: Move this to when hot reloading.
+		m_ScriptClasses = ScriptEngine::GetClassNames();
 	}
 
 	void PropertiesPanel::OnImGuiRender()
 	{
+		// Panel styling
 		float windowWidth = ImGui::GetWindowSize().x;
 		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar;
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 10.0f, 10.0f });
@@ -41,7 +45,7 @@ namespace Locus
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Orange);
 		ImGui::Begin(" Properties ", false, windowFlags);
 
-		m_LabelWidth =  60.0f * ( 1.0f + ((ImGui::GetWindowSize().x / windowWidth) * 5.0f));
+		m_LabelWidth = 60.0f * ( 1.0f + ((ImGui::GetWindowSize().x / windowWidth) * 5.0f));
 
 		if (m_SelectedEntity.IsValid())
 		{
@@ -136,6 +140,8 @@ namespace Locus
 		ImGui::PopStyleColor();
 	}
 
+	// Draws the component to the panel. Takes in a function for component specific data to display. 
+	// Styling is all done in this function so all components have the same general styling.
 	template<typename T, typename UIFunction>
 	void PropertiesPanel::DrawComponentUI(const std::string& name, Entity entity, UIFunction uiFunction)
 	{
@@ -146,7 +152,6 @@ namespace Locus
 
 		if (entity.HasComponent<T>())
 		{
-
 			auto& component = entity.GetComponent<T>();
 			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
 
@@ -164,14 +169,13 @@ namespace Locus
 			ImGui::PopStyleColor(3);
 
 			bool removeComponent = false;
+			// Component dropdown when clicking on three dots on the right.
 			if (ImGui::BeginPopup("Component Settings"))
 			{
 				if (name != "Transform")
 				{
 					if (ImGui::MenuItem("Remove Component"))
-					{
 						removeComponent = true;
-					}
 				}
 				if (ImGui::MenuItem("Copy Component"))
 					CopyComponentToClipboard<T>(m_SelectedEntity);
@@ -194,6 +198,7 @@ namespace Locus
 		// --- Tag Component --------------------------------------------------
 		if (entity.HasComponent<TagComponent>())
 		{
+			// Tag
 			auto& tag = entity.GetComponent<TagComponent>().Tag;
 			char buffer[256];
 			memset(buffer, 0, sizeof(buffer));
@@ -207,6 +212,7 @@ namespace Locus
 
 			ImGui::SameLine();
 
+			// Enabled
 			bool enabled = entity.GetComponent<TagComponent>().Enabled;
 			if (ImGui::Checkbox("##Enabled", &enabled))
 				entity.GetComponent<TagComponent>().Enabled = enabled;
@@ -216,10 +222,9 @@ namespace Locus
 			else
 				Application::Get().GetImGuiLayer()->BlockEvents(false);
 
-			DrawControlLabel("Group", { 0.0f, 0.0f });
-
+			// Groups (Not yet implemented)
+			Widgets::DrawControlLabel("Group", { 0.0f, 0.0f });
 			ImGui::SameLine();
-
 			ImGui::Button("Enemy (temp)", { 150.0f, 0.0f });
 		}
 
@@ -228,17 +233,17 @@ namespace Locus
 			{
 				// Position
 				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 5.0f, 0.0f });
-				DrawVec3Control("Position", component.LocalPosition, 0.0f, 0.01f, 0.0f, 0.0f, "%.2f");
+				Widgets::DrawVec3Control("Position", component.LocalPosition, m_LabelWidth, 0.0f, 0.01f, "%.2f");
 				
 				// Rotation
-				DrawVec3Control("Rotation", component.LocalRotation, 0.0f, 0.01f, 0.0f, 0.0f, "%.2f");
+				Widgets::DrawVec3Control("Rotation", component.LocalRotation, m_LabelWidth, 0.0f, 0.01f, "%.2f");
 				component.SetLocalRotation(component.LocalRotation);
 				ImGui::PopStyleVar();
 
 				// Scale
-				// Bottom spacing is removed if pushing item spacing to all three controls. 
+				// Bottom spacing gets removed if applying styling to all three controls. 
 				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 5.0f, 5.0f });
-				DrawVec3Control("Scale", component.LocalScale, 1.0f, 0.01f, 0.0f, 0.0f, "%.2f");
+				Widgets::DrawVec3Control("Scale", component.LocalScale, m_LabelWidth, 1.0f, 0.01f, "%.2f");
 				ImGui::PopStyleVar();
 
 			});
@@ -249,18 +254,13 @@ namespace Locus
 				SceneCamera& camera = component.Camera;
 
 				// Primary camera check
-				DrawControlLabel("Primary", { m_LabelWidth, 0.0f });
-				ImGui::SameLine();
-				bool primaryCheck = component.Primary;
-				if (ImGui::Checkbox("##Primary", &primaryCheck))
-					CommandHistory::AddCommand(new ChangeValueCommand(primaryCheck, component.Primary));
+				Widgets::DrawBoolControl("Primary", m_LabelWidth, component.Primary);
 
 				// Background color
-				glm::vec4 backgroundColor = camera.GetBackgroundColor();
-				DrawColorControl("Background Color", camera.GetBackgroundColor());
+				Widgets::DrawColorControl("Background Color", camera.GetBackgroundColor(), m_LabelWidth);
 
-				// Projection mode
-				DrawControlLabel("Projection", { m_LabelWidth, 0.0f });
+				// Projection mode dropdown
+				Widgets::DrawControlLabel("Projection", { m_LabelWidth, 0.0f });
 				ImGui::SameLine();
 				const char* projectionTypeString[] = { "Orthographic", "Perspective" };
 				const char* currentProjectionTypeString = projectionTypeString[(int)camera.GetProjectionType()];
@@ -284,31 +284,26 @@ namespace Locus
 				if (camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic)
 				{
 					// Size
-					DrawValueControl("Size", camera.GetOrthographicSize(), 5.0f);
+					Widgets::DrawValueControl("Size", m_LabelWidth, camera.GetOrthographicSize(), 5.0f);
 					// Near
-					DrawValueControl("Near Clip", camera.GetOrthographicNearClip(), -1.0f, 0.1f, "%.1f");
+					Widgets::DrawValueControl("Near Clip", m_LabelWidth, camera.GetOrthographicNearClip(), -1.0f, 0.1f, "%.1f");
 					// Far
-					DrawValueControl("Far Clip", camera.GetOrthographicFarClip(), 1000.0f, 0.1f, "%.1f");
-
+					Widgets::DrawValueControl("Far Clip", m_LabelWidth, camera.GetOrthographicFarClip(), 1000.0f, 0.1f, "%.1f");
 					// Fixed Aspect Ratio
-					DrawControlLabel("Fixed Aspect Ratio", { m_LabelWidth, 0.0f });
-					ImGui::SameLine();
-					bool isFixed = component.FixedAspectRatio;
-					if (ImGui::Checkbox("##FixedAspectRatio", &isFixed))
-						CommandHistory::AddCommand(new ChangeValueCommand(isFixed, component.FixedAspectRatio));
+					Widgets::DrawBoolControl("Fixed Aspect Ratio", m_LabelWidth, component.FixedAspectRatio);
 				}
 
 				// Perspective settings
 				if (camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
 				{
-					// FOV
+					// FOV TODO: Fix
 					float fov = glm::degrees(camera.GetPerspectiveFOV());
-					DrawValueControl("FOV", fov, 45.0f);
+					Widgets::DrawValueControl("FOV", m_LabelWidth, fov, 45.0f);
 					camera.SetPerspectiveFOV(glm::radians(fov));
 					// Near
-					DrawValueControl("Near Clip", camera.GetPerspectiveNearClip(), -1.0f, 0.1f, "%.1f");
+					Widgets::DrawValueControl("Near Clip", m_LabelWidth, camera.GetPerspectiveNearClip(), -1.0f, 0.1f, "%.1f");
 					// Far
-					DrawValueControl("Far Clip", camera.GetPerspectiveFarClip(), 1000.0f, 0.1f, "%.1f");
+					Widgets::DrawValueControl("Far Clip", m_LabelWidth, camera.GetPerspectiveFarClip(), 1000.0f, 0.1f, "%.1f");
 				}
 			});
 
@@ -316,9 +311,8 @@ namespace Locus
 		DrawComponentUI<SpriteRendererComponent>("Sprite Renderer", entity, [this](auto& component)
 			{
 				// Sprite
-				DrawControlLabel("Sprite", { m_LabelWidth, 50.0f });
+				Widgets::DrawControlLabel("Sprite", { m_LabelWidth, 50.0f });
 				ImGui::SameLine();
-
 				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Grey);
 				ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Grey);
 				if (component.Texture == nullptr)
@@ -336,9 +330,7 @@ namespace Locus
 					}
 					ImGui::EndDragDropTarget();
 				}
-
 				ImGui::SameLine();
-
 				ImGui::SetCursorPosY(ImGui::GetCursorPos().y + 25.0f - ImGui::GetFontSize() * 0.5f);
 				if (component.Texture == nullptr)
 					ImGui::Button("##EmptyTexturePath", { -1.0f, 0.0f });
@@ -351,24 +343,24 @@ namespace Locus
 				ImGui::PopStyleColor();
 
 				// Color
-				DrawColorControl("Color", component.Color);
+				Widgets::DrawColorControl("Color", component.Color, m_LabelWidth);
 				// Tiling Factor
-				DrawValueControl("Tiling Factor", component.TilingFactor);
+				Widgets::DrawValueControl("Tiling Factor", m_LabelWidth, component.TilingFactor);
 			});
 
 		// --- Circle Renderer Component --------------------------------------
 		DrawComponentUI<CircleRendererComponent>("Circle Renderer", entity, [this](auto& component)
 			{
-				DrawColorControl("Color", component.Color);
-				DrawValueControl("Thickness", component.Thickness, 1.0f, 0.01f, "%.3f", true, 0.0f, 1.0f);
-				DrawValueControl("Fade", component.Fade, 0.005f, 0.01f, "%.3f", true, 0.0001f, FLT_MAX);
+				Widgets::DrawColorControl("Color", component.Color, m_LabelWidth);
+				Widgets::DrawValueControl("Thickness", m_LabelWidth, component.Thickness, 1.0f, 0.01f, "%.3f", true, 0.0f, 1.0f);
+				Widgets::DrawValueControl("Fade", m_LabelWidth, component.Fade, 0.005f, 0.01f, "%.3f", true, 0.0001f, FLT_MAX);
 			});
 
 		// --- Rigidbody2D Component ------------------------------------------
 		DrawComponentUI<Rigidbody2DComponent>("Rigidbody 2D", entity, [this](auto& component)
 			{
-				// Body type
-				DrawControlLabel("Body Type", { m_LabelWidth, 0.0f });
+				// Body type dropdown
+				Widgets::DrawControlLabel("Body Type", { m_LabelWidth, 0.0f });
 				ImGui::SameLine();
 				const char* RigidbodyTypeString[] = { "Static", "Dynamic", "Kinematic" };
 				const char* currentRigidbodyTypeString = RigidbodyTypeString[(int)component.BodyType];
@@ -389,56 +381,52 @@ namespace Locus
 				ImGui::PopItemWidth();
 
 				// Mass
-				DrawValueControl("Mass", component.Mass);
+				Widgets::DrawValueControl("Mass", m_LabelWidth, component.Mass);
 				// Gravity Scale
-				DrawValueControl("Gravity Scale", component.GravityScale);
+				Widgets::DrawValueControl("Gravity Scale", m_LabelWidth, component.GravityScale);
 				// Linear Drag
-				DrawValueControl("Linear Damping", component.LinearDamping, 0.2f);
+				Widgets::DrawValueControl("Linear Damping", m_LabelWidth, component.LinearDamping, 0.2f);
 				// Angular Drag
-				DrawValueControl("Angular Damping", component.AngularDamping, 0.2f);
+				Widgets::DrawValueControl("Angular Damping", m_LabelWidth, component.AngularDamping, 0.2f);
 
 				// Fixed Rotation
-				DrawControlLabel("Fixed Rotation", { m_LabelWidth, 0.0f });
-				ImGui::SameLine();
-				bool fixedRotation = component.FixedRotation;
-				if (ImGui::Checkbox("##Fixed Rotation", &fixedRotation))
-					CommandHistory::AddCommand(new ChangeValueCommand(fixedRotation, component.FixedRotation));
+				Widgets::DrawBoolControl("Fixed Rotation", m_LabelWidth, component.FixedRotation);
 
 				// Friction
-				DrawValueControl("Friction", component.Friction, 0.2f);
+				Widgets::DrawValueControl("Friction", m_LabelWidth, component.Friction, 0.2f);
 				// Restitution
-				DrawValueControl("Restitution", component.Restitution, 0.0f);
+				Widgets::DrawValueControl("Restitution", m_LabelWidth, component.Restitution, 0.0f);
 				// Restitution Threshold
-				DrawValueControl("Restitution Threshold", component.RestitutionThreshold, 0.0f);
+				Widgets::DrawValueControl("Restitution Threshold", m_LabelWidth, component.RestitutionThreshold, 0.0f);
 			});
 
 		// --- BoxCollider2D Component ----------------------------------------
 		DrawComponentUI<BoxCollider2DComponent>("Box Collider 2D", entity, [this](auto& component)
 			{
 				// Collision Layer
-				DrawValueControl<uint16_t>("Collision Layer", component.CollisionLayer, 1, 1, "%u");
+				Widgets::DrawValueControl("Collision Layer", m_LabelWidth, component.CollisionLayer);
 				// Size
-				DrawVec2Control("Size", component.Size, 1.0f);
+				Widgets::DrawVec2Control("Size", component.Size, m_LabelWidth, 1.0f);
 				// Offset
-				DrawVec2Control("Offset", component.Offset);
+				Widgets::DrawVec2Control("Offset", component.Offset, m_LabelWidth);
 			});
 
 		// --- CircleCollider2D Component -------------------------------------
 		DrawComponentUI<CircleCollider2DComponent>("Circle Collider 2D", entity, [this](auto& component)
 			{
 				// Collision Layer
-				DrawValueControl("Collision Layer", component.CollisionLayer);
+				Widgets::DrawValueControl("Collision Layer", m_LabelWidth, component.CollisionLayer);
 				// Radius
-				DrawValueControl("Radius", component.Radius, 0.5f);
+				Widgets::DrawValueControl("Radius", m_LabelWidth, component.Radius, 0.5f);
 				// Offset
-				DrawVec2Control("Offset", component.Offset);
+				Widgets::DrawVec2Control("Offset", component.Offset, m_LabelWidth);
 			});
 
 		// --- Script ---------------------------------------------------------
 		DrawComponentUI<ScriptComponent>("Script", entity, [this, entity](auto& component) mutable
 			{
-				// Script Class
-				DrawControlLabel("Script Class", { m_LabelWidth, 0.0f });
+				// Script Class dropdown
+				Widgets::DrawControlLabel("Script Class", { m_LabelWidth, 0.0f });
 				ImGui::SameLine();
 				std::string curClass = component.ScriptClass;
 				ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
@@ -467,368 +455,98 @@ namespace Locus
 
 				// Public Fields
 				if (Application::Get().IsRunning())
-				{
-					Ref<ScriptClass> scriptClass = ScriptEngine::GetScriptClass(component.ScriptClass);
-					Ref<ScriptInstance> instance = ScriptEngine::GetScriptInstance(entity.GetUUID());
-					if (scriptClass)
-					{
-						const auto& fields = scriptClass->GetPublicFields();
-						for (const auto& [name, field] : fields)
-						{
-							switch (field.Type)
-							{
-								// TODO: Add the rest of data types
-								case FieldType::SystemSingle:  DrawFieldControl<float>(entity, name, field, scriptClass, instance); break;
-								case FieldType::SystemInt:     DrawFieldControl<int>(entity, name, field, scriptClass, instance); break;
-								case FieldType::SystemBoolean: DrawFieldControl<bool>(entity, name, field, scriptClass, instance); break;
-							}
-						}
-					}
-				}
+					DrawScriptFields(entity, component);
 			});
 	}
 
-	void PropertiesPanel::DrawControlLabel(const std::string& name, const glm::vec2& size)
+	void PropertiesPanel::DrawScriptFields(Entity entity, ScriptComponent& component)
 	{
-		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Transparent);
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Transparent);
-		ImGui::Button(name.c_str(), { size.x, size.y });
-		ImGui::PopStyleColor(3);
-	}
+		// This function is very repetitive but works for now. 
 
-	template<typename T>
-	void PropertiesPanel::DrawValueControl(const std::string& name, T& changeValue, T resetValue, float speed, const char* format, bool dragClamp, T min, T max)
-	{
-		DrawControlLabel(name, { m_LabelWidth, 0.0f });
-		ImGui::SameLine();
+		Ref<ScriptClass> scriptClass = ScriptEngine::GetScriptClass(component.ScriptClass);
+		Ref<ScriptInstance> instance = ScriptEngine::GetScriptInstance(entity.GetUUID());
 
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			if (ImGui::IsMouseDoubleClicked(0))
-				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, changeValue));
-		}
-
-		ImGuiDataType type;
-		if (typeid(T) == typeid(float))    type = ImGuiDataType_Float;
-		else if (typeid(T) == typeid(double))   type = ImGuiDataType_Double;
-		else if (typeid(T) == typeid(int16_t))  type = ImGuiDataType_S16;
-		else if (typeid(T) == typeid(int))      type = ImGuiDataType_S32;
-		else if (typeid(T) == typeid(int32_t))  type = ImGuiDataType_S32;
-		else if (typeid(T) == typeid(int64_t))  type = ImGuiDataType_S64;
-		else if (typeid(T) == typeid(uint16_t)) type = ImGuiDataType_U16;
-		else if (typeid(T) == typeid(uint32_t)) type = ImGuiDataType_U32;
-		else if (typeid(T) == typeid(uint64_t)) type = ImGuiDataType_U64;
-		else LOCUS_CORE_ASSERT(false, "Invalid template type!");
-
-		T dragVal = changeValue;
-		std::string label = "##" + name;
-		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-		if (ImGui::DragScalar(label.c_str(), type, &dragVal, speed, dragClamp ? &min : NULL, dragClamp ? &max : NULL, format))
-			CommandHistory::AddCommand(new ChangeValueCommand(dragVal, changeValue));
-		ImGui::PopItemWidth();
-		if (ImGui::IsItemHovered())
-			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-	}
-
-	void PropertiesPanel::DrawBoolControl(const std::string& name, bool& changeValue)
-	{
-		DrawControlLabel(name, { m_LabelWidth, 0.0f });
-		ImGui::SameLine();
-
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			if (ImGui::IsMouseDoubleClicked(0))
-				CommandHistory::AddCommand(new ChangeValueCommand(false, changeValue));
-		}
-
-		bool val = static_cast<bool>(changeValue);
-		std::string label = "##" + name;
-		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-		if (ImGui::Checkbox(label.c_str(), &val))
-			CommandHistory::AddCommand(new ChangeValueCommand(val, changeValue));
-		ImGui::PopItemWidth();
-	}
-
-	void PropertiesPanel::DrawColorControl(const std::string& name, glm::vec4& colorValue)
-	{
-		DrawControlLabel("Color", { m_LabelWidth, 0.0f });
-		ImGui::SameLine();
-
-		glm::vec4 color = colorValue;
-		static glm::vec4 backupColor;
-		ImGui::PushStyleColor(ImGuiCol_Button, ToImVec4(color));
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ToImVec4(color));
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ToImVec4(color));
-		if (ImGui::Button("##Color", { ImGui::GetContentRegionAvail().x, 0.0f }))
-		{
-			ImGui::OpenPopup("mypicker");
-			backupColor = color;
-		}
-		ImGui::PopStyleColor(3);
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::ColorTooltip("Color", glm::value_ptr(color), ImGuiColorEditFlags_None);
-		}
-		if (ImGui::BeginPopup("mypicker"))
-		{
-			ImGui::Text("Color");
-			ImGui::Separator();
-			if (ImGui::ColorPicker4("##picker", glm::value_ptr(color), ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview))
-				CommandHistory::AddCommand(new ChangeValueCommand(color, colorValue));
-			ImGui::SameLine();
-
-			ImGui::BeginGroup(); // Lock X position
-			ImGui::Text("Current");
-			ImGui::ColorButton("##current", ToImVec4(color), ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40));
-			ImGui::Text("Previous");
-			if (ImGui::ColorButton("##previous", ToImVec4(backupColor), ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40)))
-				color = backupColor;
-			ImGui::EndGroup();
-			ImGui::EndPopup();
-		}
-	}
-	
-	void PropertiesPanel::DrawVec2Control(const std::string& name, glm::vec2& values, float resetValue, float speed, float min, float max, const char* format)
-	{
-		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
-		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0.0f, 1.0f });
-
-		glm::vec2 dragValues = values;
-		if (name == "Rotation")
-			dragValues = glm::degrees(dragValues);
-
-		DrawControlLabel(name.c_str(), { m_LabelWidth, 0.0f });
-
-		ImGui::SameLine();
-
-		ImGui::BeginTable("Vec3Control", 2);
-
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 0.0f });
-		// X
-		ImGui::TableNextColumn();
-		ImGui::Button("X", { 0.0f, 0.0f });
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			if (ImGui::IsMouseDoubleClicked(0))
-				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.x));
-		}
-		ImGui::SameLine();
-		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-		if (ImGui::DragFloat("##X", &dragValues.x, 0.1f, 0.0f, 0.0f, "%.2f"))
-		{
-			if (name == "Rotation")
-				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.x), values.x));
-			else
-				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.x, values.x));
-		}
-		if (ImGui::IsItemHovered())
-			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-		ImGui::PopItemWidth();
-
-		// Y
-		ImGui::TableNextColumn();
-		ImGui::Button("Y", { 0.0f, 0.0f });
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			if (ImGui::IsMouseDoubleClicked(0))
-				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.y));
-		}
-		ImGui::SameLine();
-		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-		if (ImGui::DragFloat("##Y", &dragValues.y, 0.1f, 0.0f, 0.0f, "%.2f"))
-		{
-			if (name == "Rotation")
-				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.y), values.y));
-			else
-				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.y, values.y));
-		}
-		if (ImGui::IsItemHovered())
-			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-		ImGui::PopItemWidth();
-
-		ImGui::PopStyleVar();
-
-		ImGui::EndTable();
-		ImGui::PopStyleColor();
-		ImGui::PopStyleVar();
-	}
-
-	bool PropertiesPanel::DrawVec3Control(const std::string& name, glm::vec3& values, float resetValue, float speed, float min, float max, const char* format)
-	{
-		bool isChanged = false;
-		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
-		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0.0f, 1.0f });
-
-		glm::vec3 dragValues = values;
-		if (name == "Rotation")
-			dragValues = glm::degrees(dragValues);
-
-		DrawControlLabel(name.c_str(), { m_LabelWidth, 0.0f });
-
-		ImGui::SameLine();
-
-		ImGui::BeginTable("Vec3Control", 3);
-
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 0.0f });
-		// X
-		ImGui::TableNextColumn();
-		ImGui::Button("X", { 0.0f, 0.0f });
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			if (ImGui::IsMouseDoubleClicked(0))
-			{
-				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.x));
-				isChanged = true;
-			}
-		}
-		ImGui::SameLine();
-		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-		if(ImGui::DragFloat("##X", &dragValues.x, speed, min, max, format))
-		{
-			if (name == "Rotation")
-			{
-				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.x), values.x));
-				isChanged = true;
-			}
-			else
-			{
-				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.x, values.x));
-				isChanged = true;
-			}
-		}
-		if (ImGui::IsItemHovered())
-			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-		ImGui::PopItemWidth();
-
-		// Y
-		ImGui::TableNextColumn();
-		ImGui::Button("Y", { 0.0f, 0.0f });
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			if (ImGui::IsMouseDoubleClicked(0))
-			{
-				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.y));
-				isChanged = true;
-			}
-		}
-		ImGui::SameLine();
-		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-		if (ImGui::DragFloat("##Y", &dragValues.y, speed, min, max, format))
-		{
-			if (name == "Rotation")
-			{
-				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.y), values.y));
-				isChanged = true;
-			}
-			else
-			{
-				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.y, values.y));
-				isChanged = true;
-			}
-		}
-		if (ImGui::IsItemHovered())
-			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-		ImGui::PopItemWidth();
-
-		// Z
-		ImGui::TableNextColumn();
-		ImGui::Button("Z", { 0.0f, 0.0f });
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			if (ImGui::IsMouseDoubleClicked(0))
-			{
-				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.z));
-				isChanged = true;
-			}
-		}
-		ImGui::SameLine();
-		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-		if (ImGui::DragFloat("##Z", &dragValues.z, speed, min, max, format))
-		{
-			if (name == "Rotation")
-			{
-				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.z), values.z));
-				isChanged = true;
-			}
-			else
-			{
-				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.z, values.z));
-				isChanged = true;
-			}
-		}
-		if (ImGui::IsItemHovered())
-			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-		ImGui::PopItemWidth();
-
-		ImGui::PopStyleVar();
-
-		ImGui::EndTable();
-		ImGui::PopStyleColor();
-		ImGui::PopStyleVar();
-
-		if (Input::IsKeyPressed(Key::Z) && Input::IsKeyPressed(Key::LeftControl))
-			isChanged = true;
-		return isChanged;
-	}
-
-	template<typename T>
-	void PropertiesPanel::DrawFieldControl(Entity entity, const std::string& name, const ScriptClassField& field, Ref<ScriptClass> scriptClass, Ref<ScriptInstance> instance)
-	{
-		// During scene runtime
-		if (instance)
-		{
-			DrawControlLabel(name, { m_LabelWidth, 0.0f });
-			T data = instance->GetFieldValue<T>(name);
-			std::string label = "##" + name;
-
-			if (typeid(T) == typeid(float))
-			{
-				if (ImGui::DragFloat(label.c_str(), &(float)data))
-					instance->SetFieldValue(name, data); // TODO: Use command pattern
-				
-			}
-			if (typeid(T) == typeid(int))
-			{
-				if (ImGui::DragInt(label.c_str(), &(int)data))
-					instance->SetFieldValue(name, data);
-			}
-			if (typeid(T) == typeid(bool))
-			{
-				bool checked = &data;
-				if (ImGui::Checkbox(label.c_str(), &checked))
-					instance->SetFieldValue(name, checked);
-			}
-		}
-		// During editor
-		else
+		if (scriptClass)
 		{
 			const auto& fields = scriptClass->GetPublicFields();
-			auto& fieldInstances = ScriptEngine::GetFieldInstances(entity.GetUUID());
+			for (const auto& [name, field] : fields)
+			{
+				std::string label = "##" + name;
+				if (instance) // Runtime controls
+				{
+					// TODO: Implement char, string vec, and entity controls.
+					if (field.Type == FieldType::SystemSingle)
+						Widgets::DrawFieldValueControl<float>(name, m_LabelWidth, instance->GetFieldValue<float>(name), scriptClass->GetFieldValue<float>(name), instance);
+					else if (field.Type == FieldType::SystemDouble)
+						Widgets::DrawFieldValueControl<double>(name, m_LabelWidth, instance->GetFieldValue<double>(name), scriptClass->GetFieldValue<double>(name), instance);
+					else if (field.Type == FieldType::SystemShort)
+						Widgets::DrawFieldValueControl<int16_t>(name, m_LabelWidth, instance->GetFieldValue<int16_t>(name), scriptClass->GetFieldValue<int16_t>(name), instance);
+					else if (field.Type == FieldType::SystemInt)
+						Widgets::DrawFieldValueControl<int>(name, m_LabelWidth, instance->GetFieldValue<int>(name), scriptClass->GetFieldValue<int>(name), instance);
+					else if (field.Type == FieldType::SystemLong)
+						Widgets::DrawFieldValueControl<int64_t>(name, m_LabelWidth, instance->GetFieldValue<int64_t>(name), scriptClass->GetFieldValue<int64_t>(name), instance);
+					else if (field.Type == FieldType::SystemUShort)
+						Widgets::DrawFieldValueControl<uint16_t>(name, m_LabelWidth, instance->GetFieldValue<uint16_t>(name), scriptClass->GetFieldValue<uint16_t>(name), instance);
+					else if (field.Type == FieldType::SystemUInt)
+						Widgets::DrawFieldValueControl<uint32_t>(name, m_LabelWidth, instance->GetFieldValue<uint32_t>(name), scriptClass->GetFieldValue<uint32_t>(name), instance);
+					else if (field.Type == FieldType::SystemULong)
+						Widgets::DrawFieldValueControl<uint64_t>(name, m_LabelWidth, instance->GetFieldValue<uint64_t>(name), scriptClass->GetFieldValue<uint64_t>(name), instance);
+					else if (field.Type == FieldType::SystemBoolean)
+						Widgets::DrawFieldBoolControl(name, m_LabelWidth, instance->GetFieldValue<bool>(name), scriptClass->GetFieldValue<bool>(name), instance);
+				}
+				else // Editor controls
+				{
+					auto& fieldInstances = ScriptEngine::GetFieldInstances(entity.GetUUID());
+					// Createa a ScriptClassFieldInstance if not contained in fieldInstances. Then set the default value defined in the C# script.
+					if (fieldInstances.find(name) == fieldInstances.end())
+					{
+						ScriptClassFieldInstance& scriptField = fieldInstances[name];
+						scriptField.Field = field;
+						
+						if (field.Type == FieldType::SystemSingle)
+							scriptField.SetValue(scriptClass->GetFieldValue<float>(name));
+						else if (field.Type == FieldType::SystemDouble)
+							scriptField.SetValue(scriptClass->GetFieldValue<double>(name));
+						else if (field.Type == FieldType::SystemShort)
+							scriptField.SetValue(scriptClass->GetFieldValue<int16_t>(name));
+						else if (field.Type == FieldType::SystemInt)
+							scriptField.SetValue(scriptClass->GetFieldValue<int>(name));
+						else if (field.Type == FieldType::SystemLong)
+							scriptField.SetValue(scriptClass->GetFieldValue<int64_t>(name));
+						else if (field.Type == FieldType::SystemUShort)
+							scriptField.SetValue(scriptClass->GetFieldValue<uint16_t>(name));
+						else if (field.Type == FieldType::SystemUInt)
+							scriptField.SetValue(scriptClass->GetFieldValue<uint32_t>(name));
+						else if (field.Type == FieldType::SystemULong)
+							scriptField.SetValue(scriptClass->GetFieldValue<uint64_t>(name));
+						else if (field.Type == FieldType::SystemBoolean)
+							scriptField.SetValue(scriptClass->GetFieldValue<bool>(name));
+					}
+					else
+					{
+						// Draw field controls to editor.
+						ScriptClassFieldInstance& scriptField = fieldInstances.at(name);
 
-			if (fieldInstances.find(name) == fieldInstances.end())
-			{
-				ScriptClassFieldInstance& scriptField = fieldInstances[name];
-				scriptField.Field = field;
-				T data = scriptClass->GetFieldValue<T>(name);
-				scriptField.SetValue(data);
-			}
-			else
-			{
-				ScriptClassFieldInstance& scriptField = fieldInstances[name];
-				if (typeid(T) == typeid(float))
-					DrawValueControl(name, *(float*)scriptField.m_Buffer, scriptClass->GetFieldValue<float>(name));
-				if (typeid(T) == typeid(int))
-					DrawValueControl(name, *(int*)scriptField.m_Buffer, scriptClass->GetFieldValue<int>(name));
-				if (typeid(T) == typeid(bool))
-					DrawBoolControl(name, *(bool*)scriptField.m_Buffer);
+						if (field.Type == FieldType::SystemSingle)
+							Widgets::DrawValueControl<float>(name, m_LabelWidth, *(float*)scriptField.m_Buffer, scriptClass->GetFieldValue<float>(name));
+						else if (field.Type == FieldType::SystemDouble)
+							Widgets::DrawValueControl<double>(name, m_LabelWidth, *(double*)scriptField.m_Buffer, scriptClass->GetFieldValue<double>(name));
+						else if (field.Type == FieldType::SystemShort)
+							Widgets::DrawValueControl<int16_t>(name, m_LabelWidth, *(int16_t*)scriptField.m_Buffer, scriptClass->GetFieldValue<int16_t>(name));
+						else if (field.Type == FieldType::SystemInt)
+							Widgets::DrawValueControl<int>(name, m_LabelWidth, *(int*)scriptField.m_Buffer, scriptClass->GetFieldValue<int>(name));
+						else if (field.Type == FieldType::SystemLong)
+							Widgets::DrawValueControl<int64_t>(name, m_LabelWidth, *(int64_t*)scriptField.m_Buffer, scriptClass->GetFieldValue<int64_t>(name));
+						else if (field.Type == FieldType::SystemUShort)
+							Widgets::DrawValueControl<uint16_t>(name, m_LabelWidth, *(uint16_t*)scriptField.m_Buffer, scriptClass->GetFieldValue<uint16_t>(name));
+						else if (field.Type == FieldType::SystemUInt)
+							Widgets::DrawValueControl<uint32_t>(name, m_LabelWidth, *(uint32_t*)scriptField.m_Buffer, scriptClass->GetFieldValue<uint32_t>(name));
+						else if (field.Type == FieldType::SystemULong)
+							Widgets::DrawValueControl<uint64_t>(name, m_LabelWidth, *(uint64_t*)scriptField.m_Buffer, scriptClass->GetFieldValue<uint64_t>(name));
+						else if (field.Type == FieldType::SystemBoolean)
+							Widgets::DrawBoolControl(name, m_LabelWidth, *(bool*)scriptField.m_Buffer, scriptClass->GetFieldValue<bool>(name));
+					}
+				}
 			}
 		}
 	}

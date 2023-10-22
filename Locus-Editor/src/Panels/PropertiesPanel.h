@@ -4,7 +4,6 @@
 
 #include <glm/glm.hpp>
 
-#include <Locus/Core/Core.h>
 #include <Locus.h>
 
 namespace Locus
@@ -28,17 +27,7 @@ namespace Locus
 		template<typename T, typename UIFunction>
 		void DrawComponentUI(const std::string& name, Entity entity, UIFunction uiFunction);
 
-		void DrawControlLabel(const std::string& name, const glm::vec2& size = { 110.0f, 0.0f });
-		
-		template<typename T>
-		void DrawValueControl(const std::string& name, T& changeValue, T resetValue = 1.0f, float speed = 0.1f, const char* format = "%.3f", bool dragClamp = false, T min = 0.0f, T max = 0.0f);
-		void DrawBoolControl(const std::string& name, bool& changeValue);
-		void DrawColorControl(const std::string& name, glm::vec4& colorValue);
-		void DrawVec2Control(const std::string& name, glm::vec2& values, float resetValue = 0.0f, float speed = 0.1f, float min = 0.0f, float max = 0.0f, const char* format = "%.3f");
-		bool DrawVec3Control(const std::string& name, glm::vec3& values, float resetValue = 0.0f, float speed = 0.1f, float min = 0.0f, float max = 0.0f, const char* format = "%.3f");
-
-		template<typename T>
-		void DrawFieldControl(Entity entity, const std::string& name, const ScriptClassField& field, Ref<ScriptClass> scriptClass, Ref<ScriptInstance> instance);
+		void DrawScriptFields(Entity entity, ScriptComponent& component);
 
 		template<typename T>
 		void CopyComponentToClipboard(Entity selectedEntity);

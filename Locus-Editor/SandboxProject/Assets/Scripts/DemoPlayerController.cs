@@ -13,9 +13,12 @@ namespace Sandbox
 
         //public double testFloat = 200.0f;
         //public double testFloatNoDefault;
-
+        
         public int testInt = 10;
         public int testIntNoDefault;
+
+        public short testShort;
+        public long testLong;
 
         public bool testBool = true;
         public bool testBoolNoDefault;

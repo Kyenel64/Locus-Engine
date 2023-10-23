@@ -18,6 +18,9 @@ namespace Locus::Widgets
 	void DrawBoolControl(const std::string& name, float labelWidth, bool& changeValue, bool resetValue = false);
 	void DrawFieldBoolControl(const std::string& name, float labelWidth, bool changeValue, bool resetValue, Ref<ScriptInstance> instance);
 
+	void DrawCharControl(const std::string& name, float labelWidth, char& changeValue, char resetValue);
+	void DrawFieldCharControl(const std::string& name, float labelWidth, char changeValue, char resetValue, Ref<ScriptInstance> instance);
+
 	void DrawColorControl(const std::string& name, glm::vec4& colorValue, float labelWidth);
 	void DrawVec2Control(const std::string& name, glm::vec2& values, float labelWidth, float resetValue = 1.0f, float speed = 0.1f, const char* format = "%.3f", float min = 0.0f, float max = 0.0f);
 	bool DrawVec3Control(const std::string& name, glm::vec3& values, float labelWidth, float resetValue = 1.0f, float speed = 0.1f, const char* format = "%.3f", float min = 0.0f, float max = 0.0f);

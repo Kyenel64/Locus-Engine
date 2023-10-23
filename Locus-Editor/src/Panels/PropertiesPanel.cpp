@@ -474,7 +474,7 @@ namespace Locus
 				std::string label = "##" + name;
 				if (instance) // Runtime controls
 				{
-					// TODO: Implement char, string vec, and entity controls.
+					// TODO: Implement string, vec, and entity controls.
 					if (field.Type == FieldType::SystemSingle)
 						Widgets::DrawFieldValueControl<float>(name, m_LabelWidth, instance->GetFieldValue<float>(name), scriptClass->GetFieldValue<float>(name), instance);
 					else if (field.Type == FieldType::SystemDouble)
@@ -493,6 +493,8 @@ namespace Locus
 						Widgets::DrawFieldValueControl<uint64_t>(name, m_LabelWidth, instance->GetFieldValue<uint64_t>(name), scriptClass->GetFieldValue<uint64_t>(name), instance);
 					else if (field.Type == FieldType::SystemBoolean)
 						Widgets::DrawFieldBoolControl(name, m_LabelWidth, instance->GetFieldValue<bool>(name), scriptClass->GetFieldValue<bool>(name), instance);
+					else if (field.Type == FieldType::SystemChar)
+						Widgets::DrawFieldCharControl(name, m_LabelWidth, instance->GetFieldValue<char>(name), scriptClass->GetFieldValue<char>(name), instance);
 				}
 				else // Editor controls
 				{
@@ -521,6 +523,8 @@ namespace Locus
 							scriptField.SetValue(scriptClass->GetFieldValue<uint64_t>(name));
 						else if (field.Type == FieldType::SystemBoolean)
 							scriptField.SetValue(scriptClass->GetFieldValue<bool>(name));
+						else if (field.Type == FieldType::SystemChar)
+							scriptField.SetValue(scriptClass->GetFieldValue<char>(name));
 					}
 					else
 					{
@@ -545,6 +549,8 @@ namespace Locus
 							Widgets::DrawValueControl<uint64_t>(name, m_LabelWidth, *(uint64_t*)scriptField.m_Buffer, scriptClass->GetFieldValue<uint64_t>(name));
 						else if (field.Type == FieldType::SystemBoolean)
 							Widgets::DrawBoolControl(name, m_LabelWidth, *(bool*)scriptField.m_Buffer, scriptClass->GetFieldValue<bool>(name));
+						else if (field.Type == FieldType::SystemChar)
+							Widgets::DrawCharControl(name, m_LabelWidth, *(char*)scriptField.m_Buffer, scriptClass->GetFieldValue<char>(name));
 					}
 				}
 			}

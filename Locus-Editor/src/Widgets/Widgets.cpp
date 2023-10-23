@@ -60,6 +60,57 @@ namespace Locus::Widgets
 		ImGui::PopItemWidth();
 	}
 
+	void DrawCharControl(const std::string& name, float labelWidth, char& changeValue, char resetValue)
+	{
+		Widgets::DrawControlLabel(name, { labelWidth, 0.0f });
+		ImGui::SameLine();
+
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+			if (ImGui::IsMouseDoubleClicked(0))
+				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, changeValue));
+		}
+
+		// For some reason ImGui::InputText doesnt like a single char*
+		char buffer[2];
+		memset(buffer, 0, sizeof(buffer));
+		buffer[0] = changeValue;
+		std::string label = "##" + name;
+		ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
+		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
+		if (ImGui::InputText("##Tag", buffer, sizeof(buffer), flags))
+			CommandHistory::AddCommand(new ChangeValueCommand(buffer[0], changeValue));
+		
+		ImGui::PopItemWidth();
+	}
+
+	void DrawFieldCharControl(const std::string& name, float labelWidth, char changeValue, char resetValue, Ref<ScriptInstance> instance)
+	{
+		std::function<void(char)> func = [=](char val) { instance->SetFieldValue<char>(name, val); };
+
+		Widgets::DrawControlLabel(name, { labelWidth, 0.0f });
+		ImGui::SameLine();
+
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+			if (ImGui::IsMouseDoubleClicked(0))
+				CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, resetValue, changeValue));
+		}
+
+		char buffer[2];
+		memset(buffer, 0, sizeof(buffer));
+		buffer[0] = changeValue;
+		std::string label = "##" + name;
+		ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
+		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
+		if (ImGui::InputText("##Tag", buffer, sizeof(buffer), flags))
+			CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, buffer[0], changeValue));
+
+		ImGui::PopItemWidth();
+	}
+
 	void DrawColorControl(const std::string& name, glm::vec4& colorValue, float labelWidth)
 	{
 		Widgets::DrawControlLabel("Color", { labelWidth, 0.0f });

@@ -22,6 +22,8 @@ namespace Sandbox
 
         public bool testBool = true;
         public bool testBoolNoDefault;
+
+        public char testChar;
         void OnCreate()
         {
             Console.WriteLine("\rtestFloat:{0} ", testFloat);
@@ -32,7 +34,7 @@ namespace Sandbox
 
         void OnUpdate(float deltaTime)
         {
-            
+            Console.WriteLine("\rtestChar:{0} ", testChar);
         }
     }
 }

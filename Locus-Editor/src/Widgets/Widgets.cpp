@@ -19,8 +19,12 @@ namespace Locus::Widgets
 		ImGui::PopStyleColor(3);
 	}
 
-	void DrawBoolControl(const std::string& name, float labelWidth, bool& changeValue, bool resetValue)
+	void DrawBoolControl(const std::string& name, float labelWidth, bool& changeValue, bool resetValue, Ref<ScriptInstance> instance)
 	{
+		std::function<void(bool)> func = nullptr;
+		if (instance)
+			func = [=](bool val) { instance->SetFieldValue<bool>(name, val); };
+
 		Widgets::DrawControlLabel(name, { labelWidth, 0.0f });
 		ImGui::SameLine();
 
@@ -28,40 +32,33 @@ namespace Locus::Widgets
 		{
 			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 			if (ImGui::IsMouseDoubleClicked(0))
-				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, changeValue));
+			{
+				if (instance)
+					CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, resetValue, changeValue));
+				else
+					CommandHistory::AddCommand(new ChangeValueCommand(resetValue, changeValue));
+			}
 		}
 
 		bool val = changeValue;
 		std::string label = "##" + name;
 		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
 		if (ImGui::Checkbox(label.c_str(), &val))
-			CommandHistory::AddCommand(new ChangeValueCommand(val, changeValue));
-		ImGui::PopItemWidth();
-	}
-
-	void DrawFieldBoolControl(const std::string& name, float labelWidth, bool changeValue, bool resetValue, Ref<ScriptInstance> instance)
-	{
-		std::function<void(bool)> func = [=](bool val) { instance->SetFieldValue<bool>(name, val); };
-		Widgets::DrawControlLabel(name, { labelWidth, 0.0f });
-		ImGui::SameLine();
-
-		if (ImGui::IsItemHovered())
 		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			if (ImGui::IsMouseDoubleClicked(0))
-				CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, resetValue, changeValue));
+			if (instance)
+				CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, val, changeValue));
+			else
+				CommandHistory::AddCommand(new ChangeValueCommand(val, changeValue));
 		}
-
-		bool val = changeValue;
-		std::string label = "##" + name;
-		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-		if (ImGui::Checkbox(label.c_str(), &val))
-			CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, val, changeValue));
 		ImGui::PopItemWidth();
 	}
 
-	void DrawCharControl(const std::string& name, float labelWidth, char& changeValue, char resetValue)
+	void DrawCharControl(const std::string& name, float labelWidth, char& changeValue, char resetValue, Ref<ScriptInstance> instance)
 	{
+		std::function<void(char)> func = nullptr;
+		if (instance)
+			func = [=](char val) { instance->SetFieldValue<char>(name, val); };
+
 		Widgets::DrawControlLabel(name, { labelWidth, 0.0f });
 		ImGui::SameLine();
 
@@ -69,7 +66,12 @@ namespace Locus::Widgets
 		{
 			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 			if (ImGui::IsMouseDoubleClicked(0))
-				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, changeValue));
+			{
+				if (instance)
+					CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, resetValue, changeValue));
+				else
+					CommandHistory::AddCommand(new ChangeValueCommand(resetValue, changeValue));
+			}
 		}
 
 		// For some reason ImGui::InputText doesnt like a single char*
@@ -80,34 +82,13 @@ namespace Locus::Widgets
 		ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
 		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
 		if (ImGui::InputText("##Tag", buffer, sizeof(buffer), flags))
-			CommandHistory::AddCommand(new ChangeValueCommand(buffer[0], changeValue));
-		
-		ImGui::PopItemWidth();
-	}
-
-	void DrawFieldCharControl(const std::string& name, float labelWidth, char changeValue, char resetValue, Ref<ScriptInstance> instance)
-	{
-		std::function<void(char)> func = [=](char val) { instance->SetFieldValue<char>(name, val); };
-
-		Widgets::DrawControlLabel(name, { labelWidth, 0.0f });
-		ImGui::SameLine();
-
-		if (ImGui::IsItemHovered())
 		{
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-			if (ImGui::IsMouseDoubleClicked(0))
-				CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, resetValue, changeValue));
+			if (instance)
+				CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, buffer[0], changeValue));
+			else
+				CommandHistory::AddCommand(new ChangeValueCommand(buffer[0], changeValue));
 		}
-
-		char buffer[2];
-		memset(buffer, 0, sizeof(buffer));
-		buffer[0] = changeValue;
-		std::string label = "##" + name;
-		ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
-		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-		if (ImGui::InputText("##Tag", buffer, sizeof(buffer), flags))
-			CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, buffer[0], changeValue));
-
+		
 		ImGui::PopItemWidth();
 	}
 
@@ -150,8 +131,12 @@ namespace Locus::Widgets
 		}
 	}
 
-	void DrawVec2Control(const std::string& name, glm::vec2& values, float labelWidth, float resetValue, float speed, const char* format, float min, float max)
+	void DrawVec2Control(const std::string& name, float labelWidth, glm::vec2& values, const glm::vec2& resetValue, Ref<ScriptInstance> instance, float speed, const char* format, float min, float max)
 	{
+		std::function<void(glm::vec2)> func = nullptr;
+		if (instance)
+			func = [=](glm::vec2 val) { instance->SetFieldValue<glm::vec2>(name, val); };
+
 		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
 		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0.0f, 1.0f });
 
@@ -173,16 +158,32 @@ namespace Locus::Widgets
 		{
 			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 			if (ImGui::IsMouseDoubleClicked(0))
-				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.x));
+			{
+				if (instance)
+					CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, { resetValue.x, values.y }, values));
+				else
+					CommandHistory::AddCommand(new ChangeValueCommand({ resetValue.x, values.y }, values));
+			}
+				
 		}
 		ImGui::SameLine();
 		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
 		if (ImGui::DragFloat("##X", &dragValues.x, 0.1f, 0.0f, 0.0f, "%.2f"))
 		{
 			if (name == "Rotation")
-				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.x), values.x));
+			{
+				if (instance)
+					CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, { glm::radians(dragValues.x), values.y }, values));
+				else
+					CommandHistory::AddCommand(new ChangeValueCommand({ glm::radians(dragValues.x), values.y }, values));
+			}
 			else
-				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.x, values.x));
+			{
+				if (instance)
+					CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, { dragValues.x, values.y }, values));
+				else
+					CommandHistory::AddCommand(new ChangeValueCommand({ dragValues.x, values.y }, values));
+			}
 		}
 		if (ImGui::IsItemHovered())
 			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
@@ -195,16 +196,31 @@ namespace Locus::Widgets
 		{
 			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 			if (ImGui::IsMouseDoubleClicked(0))
-				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.y));
+			{
+				if (instance)
+					CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, { values.x, resetValue.y }, values));
+				else
+					CommandHistory::AddCommand(new ChangeValueCommand({ values.x, resetValue.y }, values));
+			}
 		}
 		ImGui::SameLine();
 		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
 		if (ImGui::DragFloat("##Y", &dragValues.y, 0.1f, 0.0f, 0.0f, "%.2f"))
 		{
 			if (name == "Rotation")
-				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.y), values.y));
+			{
+				if (instance)
+					CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, { values.x, glm::radians(dragValues.x) }, values));
+				else
+					CommandHistory::AddCommand(new ChangeValueCommand({ values.x, glm::radians(dragValues.x) }, values));
+			}
 			else
-				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.y, values.y));
+			{
+				if (instance)
+					CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, { values.x, dragValues.y }, values));
+				else
+					CommandHistory::AddCommand(new ChangeValueCommand({ values.x, dragValues.y }, values));
+			}
 		}
 		if (ImGui::IsItemHovered())
 			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
@@ -217,9 +233,12 @@ namespace Locus::Widgets
 		ImGui::PopStyleVar();
 	}
 
-	bool DrawVec3Control(const std::string& name, glm::vec3& values, float labelWidth, float resetValue, float speed, const char* format, float min, float max)
+	void DrawVec3Control(const std::string& name, float labelWidth, glm::vec3& values, const glm::vec3& resetValue, Ref<ScriptInstance> instance, float speed, const char* format, float min, float max)
 	{
-		bool isChanged = false;
+		std::function<void(glm::vec3)> func = nullptr;
+		if (instance)
+			func = [=](glm::vec3 val) { instance->SetFieldValue<glm::vec3>(name, val); };
+
 		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
 		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0.0f, 1.0f });
 
@@ -242,8 +261,10 @@ namespace Locus::Widgets
 			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 			if (ImGui::IsMouseDoubleClicked(0))
 			{
-				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.x));
-				isChanged = true;
+				if (instance)
+					CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, { resetValue.x, values.y, values.z}, values));
+				else
+					CommandHistory::AddCommand(new ChangeValueCommand({ resetValue.x, values.y, values.z }, values));
 			}
 		}
 		ImGui::SameLine();
@@ -252,13 +273,17 @@ namespace Locus::Widgets
 		{
 			if (name == "Rotation")
 			{
-				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.x), values.x));
-				isChanged = true;
+				if (instance)
+					CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, { glm::radians(dragValues.x), values.y, values.z }, values));
+				else
+					CommandHistory::AddCommand(new ChangeValueCommand({ glm::radians(dragValues.x), values.y, values.z }, values));
 			}
 			else
 			{
-				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.x, values.x));
-				isChanged = true;
+				if (instance)
+					CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, { dragValues.x, values.y, values.z }, values));
+				else
+					CommandHistory::AddCommand(new ChangeValueCommand({ dragValues.x, values.y, values.z }, values));
 			}
 		}
 		if (ImGui::IsItemHovered())
@@ -273,8 +298,10 @@ namespace Locus::Widgets
 			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 			if (ImGui::IsMouseDoubleClicked(0))
 			{
-				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.y));
-				isChanged = true;
+				if (instance)
+					CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, { values.x, resetValue.y, values.z }, values));
+				else
+					CommandHistory::AddCommand(new ChangeValueCommand({ values.x, resetValue.y, values.z }, values));
 			}
 		}
 		ImGui::SameLine();
@@ -283,13 +310,17 @@ namespace Locus::Widgets
 		{
 			if (name == "Rotation")
 			{
-				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.y), values.y));
-				isChanged = true;
+				if (instance)
+					CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, { values.x, glm::radians(dragValues.y), values.z }, values));
+				else
+					CommandHistory::AddCommand(new ChangeValueCommand({ values.x, glm::radians(dragValues.y), values.z }, values));
 			}
 			else
 			{
-				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.y, values.y));
-				isChanged = true;
+				if (instance)
+					CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, { values.x, dragValues.y, values.z }, values));
+				else
+					CommandHistory::AddCommand(new ChangeValueCommand({ values.x, dragValues.y, values.z }, values));
 			}
 		}
 		if (ImGui::IsItemHovered())
@@ -304,8 +335,10 @@ namespace Locus::Widgets
 			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 			if (ImGui::IsMouseDoubleClicked(0))
 			{
-				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, values.z));
-				isChanged = true;
+				if (instance)
+					CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, { values.x, values.y, resetValue.z }, values));
+				else
+					CommandHistory::AddCommand(new ChangeValueCommand({ values.x, values.y, resetValue.z }, values));
 			}
 		}
 		ImGui::SameLine();
@@ -314,13 +347,17 @@ namespace Locus::Widgets
 		{
 			if (name == "Rotation")
 			{
-				CommandHistory::AddCommand(new ChangeValueCommand(glm::radians(dragValues.z), values.z));
-				isChanged = true;
+				if (instance)
+					CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, { values.x, values.y, glm::radians(dragValues.z) }, values));
+				else
+					CommandHistory::AddCommand(new ChangeValueCommand({ values.x, values.y, glm::radians(dragValues.z) }, values));
 			}
 			else
 			{
-				CommandHistory::AddCommand(new ChangeValueCommand(dragValues.z, values.z));
-				isChanged = true;
+				if (instance)
+					CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, { values.x, values.y, dragValues.z }, values));
+				else
+					CommandHistory::AddCommand(new ChangeValueCommand({ values.x, values.y, dragValues.z }, values));
 			}
 		}
 		if (ImGui::IsItemHovered())
@@ -332,9 +369,5 @@ namespace Locus::Widgets
 		ImGui::EndTable();
 		ImGui::PopStyleColor();
 		ImGui::PopStyleVar();
-
-		if (Input::IsKeyPressed(Key::Z) && Input::IsKeyPressed(Key::LeftControl))
-			isChanged = true;
-		return isChanged;
 	}
 }

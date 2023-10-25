@@ -233,17 +233,17 @@ namespace Locus
 			{
 				// Position
 				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 5.0f, 0.0f });
-				Widgets::DrawVec3Control("Position", component.LocalPosition, m_LabelWidth, 0.0f, 0.01f, "%.2f");
+				Widgets::DrawVec3Control("Position", m_LabelWidth, component.LocalPosition, { 0.0f, 0.0f, 0.0f }, nullptr, 0.01f, "%.2f");
 				
 				// Rotation
-				Widgets::DrawVec3Control("Rotation", component.LocalRotation, m_LabelWidth, 0.0f, 0.01f, "%.2f");
+				Widgets::DrawVec3Control("Rotation", m_LabelWidth, component.LocalRotation, { 0.0f, 0.0f, 0.0f }, nullptr, 0.01f, "%.2f");
 				component.SetLocalRotation(component.LocalRotation);
 				ImGui::PopStyleVar();
 
 				// Scale
 				// Bottom spacing gets removed if applying styling to all three controls. 
 				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 5.0f, 5.0f });
-				Widgets::DrawVec3Control("Scale", component.LocalScale, m_LabelWidth, 1.0f, 0.01f, "%.2f");
+				Widgets::DrawVec3Control("Scale", m_LabelWidth, component.LocalScale, { 1.0f, 1.0f, 1.0f }, nullptr, 0.01f, "%.2f");
 				ImGui::PopStyleVar();
 
 			});
@@ -286,9 +286,9 @@ namespace Locus
 					// Size
 					Widgets::DrawValueControl("Size", m_LabelWidth, camera.GetOrthographicSize(), 5.0f);
 					// Near
-					Widgets::DrawValueControl("Near Clip", m_LabelWidth, camera.GetOrthographicNearClip(), -1.0f, 0.1f, "%.1f");
+					Widgets::DrawValueControl("Near Clip", m_LabelWidth, camera.GetOrthographicNearClip(), -1.0f, nullptr, 0.1f, "%.1f");
 					// Far
-					Widgets::DrawValueControl("Far Clip", m_LabelWidth, camera.GetOrthographicFarClip(), 1000.0f, 0.1f, "%.1f");
+					Widgets::DrawValueControl("Far Clip", m_LabelWidth, camera.GetOrthographicFarClip(), 1000.0f, nullptr, 0.1f, "%.1f");
 					// Fixed Aspect Ratio
 					Widgets::DrawBoolControl("Fixed Aspect Ratio", m_LabelWidth, component.FixedAspectRatio);
 				}
@@ -301,9 +301,9 @@ namespace Locus
 					Widgets::DrawValueControl("FOV", m_LabelWidth, fov, 45.0f);
 					camera.SetPerspectiveFOV(glm::radians(fov));
 					// Near
-					Widgets::DrawValueControl("Near Clip", m_LabelWidth, camera.GetPerspectiveNearClip(), -1.0f, 0.1f, "%.1f");
+					Widgets::DrawValueControl("Near Clip", m_LabelWidth, camera.GetPerspectiveNearClip(), -1.0f, nullptr, 0.1f, "%.1f");
 					// Far
-					Widgets::DrawValueControl("Far Clip", m_LabelWidth, camera.GetPerspectiveFarClip(), 1000.0f, 0.1f, "%.1f");
+					Widgets::DrawValueControl("Far Clip", m_LabelWidth, camera.GetPerspectiveFarClip(), 1000.0f, nullptr, 0.1f, "%.1f");
 				}
 			});
 
@@ -352,8 +352,8 @@ namespace Locus
 		DrawComponentUI<CircleRendererComponent>("Circle Renderer", entity, [this](auto& component)
 			{
 				Widgets::DrawColorControl("Color", component.Color, m_LabelWidth);
-				Widgets::DrawValueControl("Thickness", m_LabelWidth, component.Thickness, 1.0f, 0.01f, "%.3f", true, 0.0f, 1.0f);
-				Widgets::DrawValueControl("Fade", m_LabelWidth, component.Fade, 0.005f, 0.01f, "%.3f", true, 0.0001f, FLT_MAX);
+				Widgets::DrawValueControl("Thickness", m_LabelWidth, component.Thickness, 1.0f, nullptr, 0.01f, "%.3f", true, 0.0f, 1.0f);
+				Widgets::DrawValueControl("Fade", m_LabelWidth, component.Fade, 0.005f, nullptr, 0.01f, "%.3f", true, 0.0001f, FLT_MAX);
 			});
 
 		// --- Rigidbody2D Component ------------------------------------------
@@ -406,9 +406,9 @@ namespace Locus
 				// Collision Layer
 				Widgets::DrawValueControl("Collision Layer", m_LabelWidth, component.CollisionLayer);
 				// Size
-				Widgets::DrawVec2Control("Size", component.Size, m_LabelWidth, 1.0f);
+				Widgets::DrawVec2Control("Size", m_LabelWidth, component.Size);
 				// Offset
-				Widgets::DrawVec2Control("Offset", component.Offset, m_LabelWidth);
+				Widgets::DrawVec2Control("Offset", m_LabelWidth, component.Offset, { 0.0f, 0.0f });
 			});
 
 		// --- CircleCollider2D Component -------------------------------------
@@ -419,7 +419,7 @@ namespace Locus
 				// Radius
 				Widgets::DrawValueControl("Radius", m_LabelWidth, component.Radius, 0.5f);
 				// Offset
-				Widgets::DrawVec2Control("Offset", component.Offset, m_LabelWidth);
+				Widgets::DrawVec2Control("Offset", m_LabelWidth, component.Offset, { 0.0f, 0.0f });
 			});
 
 		// --- Script ---------------------------------------------------------
@@ -474,32 +474,72 @@ namespace Locus
 				std::string label = "##" + name;
 				if (instance) // Runtime controls
 				{
-					// TODO: Implement string, vec, and entity controls.
+					// TODO: Implement string, vec4, and entity controls.
 					if (field.Type == FieldType::SystemSingle)
-						Widgets::DrawFieldValueControl<float>(name, m_LabelWidth, instance->GetFieldValue<float>(name), scriptClass->GetFieldValue<float>(name), instance);
+					{
+						float changeVal = instance->GetFieldValue<float>(name);
+						Widgets::DrawValueControl<float>(name, m_LabelWidth, changeVal, scriptClass->GetFieldValue<float>(name), instance);
+					}
 					else if (field.Type == FieldType::SystemDouble)
-						Widgets::DrawFieldValueControl<double>(name, m_LabelWidth, instance->GetFieldValue<double>(name), scriptClass->GetFieldValue<double>(name), instance);
+					{
+						double changeVal = instance->GetFieldValue<double>(name);
+						Widgets::DrawValueControl<double>(name, m_LabelWidth, changeVal, scriptClass->GetFieldValue<double>(name), instance);
+					}
 					else if (field.Type == FieldType::SystemShort)
-						Widgets::DrawFieldValueControl<int16_t>(name, m_LabelWidth, instance->GetFieldValue<int16_t>(name), scriptClass->GetFieldValue<int16_t>(name), instance);
+					{
+						int16_t changeVal = instance->GetFieldValue<int16_t>(name);
+						Widgets::DrawValueControl<int16_t>(name, m_LabelWidth, changeVal, scriptClass->GetFieldValue<int16_t>(name), instance);
+					}
 					else if (field.Type == FieldType::SystemInt)
-						Widgets::DrawFieldValueControl<int>(name, m_LabelWidth, instance->GetFieldValue<int>(name), scriptClass->GetFieldValue<int>(name), instance);
+					{
+						int changeVal = instance->GetFieldValue<int>(name);
+						Widgets::DrawValueControl<int>(name, m_LabelWidth, changeVal, scriptClass->GetFieldValue<int>(name), instance);
+					}
 					else if (field.Type == FieldType::SystemLong)
-						Widgets::DrawFieldValueControl<int64_t>(name, m_LabelWidth, instance->GetFieldValue<int64_t>(name), scriptClass->GetFieldValue<int64_t>(name), instance);
+					{
+						int64_t changeVal = instance->GetFieldValue<int64_t>(name);
+						Widgets::DrawValueControl<int64_t>(name, m_LabelWidth, changeVal, scriptClass->GetFieldValue<int64_t>(name), instance);
+					}
 					else if (field.Type == FieldType::SystemUShort)
-						Widgets::DrawFieldValueControl<uint16_t>(name, m_LabelWidth, instance->GetFieldValue<uint16_t>(name), scriptClass->GetFieldValue<uint16_t>(name), instance);
+					{
+						uint16_t changeVal = instance->GetFieldValue<uint16_t>(name);
+						Widgets::DrawValueControl<uint16_t>(name, m_LabelWidth, changeVal, scriptClass->GetFieldValue<uint16_t>(name), instance);
+					}
 					else if (field.Type == FieldType::SystemUInt)
-						Widgets::DrawFieldValueControl<uint32_t>(name, m_LabelWidth, instance->GetFieldValue<uint32_t>(name), scriptClass->GetFieldValue<uint32_t>(name), instance);
+					{
+						uint32_t changeVal = instance->GetFieldValue<uint32_t>(name);
+						Widgets::DrawValueControl<uint32_t>(name, m_LabelWidth, changeVal, scriptClass->GetFieldValue<uint32_t>(name), instance);
+					}
 					else if (field.Type == FieldType::SystemULong)
-						Widgets::DrawFieldValueControl<uint64_t>(name, m_LabelWidth, instance->GetFieldValue<uint64_t>(name), scriptClass->GetFieldValue<uint64_t>(name), instance);
+					{
+						uint64_t changeVal = instance->GetFieldValue<uint64_t>(name);
+						Widgets::DrawValueControl<uint64_t>(name, m_LabelWidth, changeVal, scriptClass->GetFieldValue<uint64_t>(name), instance);
+					}
 					else if (field.Type == FieldType::SystemBoolean)
-						Widgets::DrawFieldBoolControl(name, m_LabelWidth, instance->GetFieldValue<bool>(name), scriptClass->GetFieldValue<bool>(name), instance);
+					{
+						bool changeVal = instance->GetFieldValue<bool>(name);
+						Widgets::DrawBoolControl(name, m_LabelWidth, changeVal, scriptClass->GetFieldValue<bool>(name), instance);
+					}
 					else if (field.Type == FieldType::SystemChar)
-						Widgets::DrawFieldCharControl(name, m_LabelWidth, instance->GetFieldValue<char>(name), scriptClass->GetFieldValue<char>(name), instance);
+					{
+						char changeVal = instance->GetFieldValue<char>(name);
+						Widgets::DrawCharControl(name, m_LabelWidth, changeVal, scriptClass->GetFieldValue<char>(name), instance);
+					}
+					else if (field.Type == FieldType::LocusVec2)
+					{
+						glm::vec2 changeVal = instance->GetFieldValue<glm::vec2>(name);
+						Widgets::DrawVec2Control(name, m_LabelWidth, changeVal, scriptClass->GetFieldValue<glm::vec2>(name), instance);
+					}
+					else if (field.Type == FieldType::LocusVec3)
+					{
+						glm::vec3 changeVal = instance->GetFieldValue<glm::vec3>(name);
+						Widgets::DrawVec3Control(name, m_LabelWidth, changeVal, scriptClass->GetFieldValue<glm::vec3>(name), instance);
+					}
 				}
 				else // Editor controls
 				{
 					auto& fieldInstances = ScriptEngine::GetFieldInstances(entity.GetUUID());
-					// Createa a ScriptClassFieldInstance if not contained in fieldInstances. Then set the default value defined in the C# script.
+					// Create a ScriptClassFieldInstance if not contained in fieldInstances. Then set the default value defined in the C# script.
 					if (fieldInstances.find(name) == fieldInstances.end())
 					{
 						ScriptClassFieldInstance& scriptField = fieldInstances[name];
@@ -525,6 +565,10 @@ namespace Locus
 							scriptField.SetValue(scriptClass->GetFieldValue<bool>(name));
 						else if (field.Type == FieldType::SystemChar)
 							scriptField.SetValue(scriptClass->GetFieldValue<char>(name));
+						else if (field.Type == FieldType::LocusVec2)
+							scriptField.SetValue(scriptClass->GetFieldValue<glm::vec2>(name));
+						else if (field.Type == FieldType::LocusVec3)
+							scriptField.SetValue(scriptClass->GetFieldValue<glm::vec3>(name));
 					}
 					else
 					{
@@ -551,6 +595,10 @@ namespace Locus
 							Widgets::DrawBoolControl(name, m_LabelWidth, *(bool*)scriptField.m_Buffer, scriptClass->GetFieldValue<bool>(name));
 						else if (field.Type == FieldType::SystemChar)
 							Widgets::DrawCharControl(name, m_LabelWidth, *(char*)scriptField.m_Buffer, scriptClass->GetFieldValue<char>(name));
+						else if (field.Type == FieldType::LocusVec2)
+							Widgets::DrawVec2Control(name, m_LabelWidth, *(glm::vec2*)scriptField.m_Buffer, scriptClass->GetFieldValue<glm::vec2>(name));
+						else if (field.Type == FieldType::LocusVec3)
+							Widgets::DrawVec3Control(name, m_LabelWidth, *(glm::vec3*)scriptField.m_Buffer, scriptClass->GetFieldValue<glm::vec3>(name));
 					}
 				}
 			}

@@ -11,8 +11,8 @@ namespace Sandbox
         public float testFloat = 10.0f;
         public float testFloatNoDefault;
 
-        //public double testFloat = 200.0f;
-        //public double testFloatNoDefault;
+        public double testDouble = 200.0f;
+        public double testDoubleNoDefault;
         
         public int testInt = 10;
         public int testIntNoDefault;
@@ -24,6 +24,8 @@ namespace Sandbox
         public bool testBoolNoDefault;
 
         public char testChar;
+
+        public Vec3 testVec3;
         void OnCreate()
         {
             Console.WriteLine("\rtestFloat:{0} ", testFloat);
@@ -34,7 +36,8 @@ namespace Sandbox
 
         void OnUpdate(float deltaTime)
         {
-            Console.WriteLine("\rtestChar:{0} ", testChar);
+            //Console.WriteLine("\rtestChar:{0} ", testChar);
+            Console.WriteLine("testVec3: {0}, {1}, {2}", testVec3.x, testVec3.y, testVec3.z);
         }
     }
 }

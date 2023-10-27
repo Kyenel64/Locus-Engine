@@ -1,0 +1,83 @@
+Scene: Untitled
+RootEntityCount: 4
+Entities:
+  - Entity: 4172512803253741771
+    TagComponent:
+      Tag: Earth
+      Enabled: true
+      HierarchyPos: 3
+    TransformComponent:
+      Self: 4172512803253741771
+      Parent: 0
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1.41999996, 1.41999996, 1.41999996]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: SandboxProject/Assets\Textures\Sprite-0001.png
+      TilingFactor: 1
+  - Entity: 2433011861349912028
+    TagComponent:
+      Tag: Camera
+      Enabled: true
+      HierarchyPos: 1
+    TransformComponent:
+      Self: 2433011861349912028
+      Parent: 0
+      LocalPosition: [0, 0, 14.5357084]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    ChildComponent:
+      ChildCount: 1
+      ChildEntities:
+        Child0: 5979509514547691761
+    CameraComponent:
+      Camera:
+        BackgroundColor: [0.0173160434, 0.0173160434, 0.0173160434, 1]
+        ProjectionType: 1
+        OrthographicSize: 15
+        OrthographicNearClip: -1
+        OrthographicFarClip: 1000
+        PerspectiveFOV: 0.785398185
+        PerspectiveNearClip: 0.00999999978
+        PerspectiveFarClip: 1000
+      Primary: true
+      FixedAspectRatio: false
+    ScriptComponent:
+      ScriptClass: Sandbox::CameraController2D
+  - Entity: 785250229868369602
+    TagComponent:
+      Tag: Moon
+      Enabled: true
+      HierarchyPos: 2
+    TransformComponent:
+      Self: 785250229868369602
+      Parent: 0
+      LocalPosition: [-6.99763918, 0, 0]
+      LocalRotation: [0, 0, 0.785398185]
+      LocalRotationQuat: [0, 0, 0.382683456, 0.923879504]
+      LocalScale: [0.460000008, 0.460000008, 0.460000008]
+    SpriteRendererComponent:
+      Color: [0.389610529, 1, 0, 1]
+      TexturePath: SandboxProject/Assets\Textures\Sprite-0001.png
+      TilingFactor: 1
+    ScriptComponent:
+      ScriptClass: Sandbox::OrbitPlanet
+  - Entity: 5979509514547691761
+    TagComponent:
+      Tag: Mesh
+      Enabled: false
+      HierarchyPos: 0
+    TransformComponent:
+      Self: 5979509514547691761
+      Parent: 2433011861349912028
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [0.560000002, 0.560000002, 0.560000002]
+    CircleRendererComponent:
+      Color: [1, 0, 0, 1]
+      Thickness: 1
+      Fade: 0.00499999989

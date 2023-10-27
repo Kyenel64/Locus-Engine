@@ -1,0 +1,29 @@
+Scene: Untitled
+RootEntityCount: 3
+Entities:
+  - Entity: 3348179176376308620
+    TagComponent:
+      Tag: Other Entity
+      Enabled: true
+      HierarchyPos: 2
+    TransformComponent:
+      Self: 3348179176376308620
+      Parent: 0
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+  - Entity: 7352724189592751854
+    TagComponent:
+      Tag: Empty Entity
+      Enabled: true
+      HierarchyPos: 1
+    TransformComponent:
+      Self: 7352724189592751854
+      Parent: 0
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    ScriptComponent:
+      ScriptClass: Sandbox::TestClass

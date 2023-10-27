@@ -160,10 +160,10 @@ namespace Locus
 		// --- Tag Component --------------------------------------------------
 		if (entity.HasComponent<TagComponent>())
 		{
-			out << YAML::Key << "TagComponent";
-
-			out << YAML::BeginMap; // Tag Component
 			auto& tag = entity.GetComponent<TagComponent>();
+
+			out << YAML::Key << "TagComponent";
+			out << YAML::BeginMap; // Tag Component
 			out << YAML::Key << "Tag" << YAML::Value << tag.Tag;
 			out << YAML::Key << "Enabled" << YAML::Value << tag.Enabled;
 			out << YAML::Key << "HierarchyPos" << YAML::Value << tag.HierarchyPos;
@@ -173,10 +173,10 @@ namespace Locus
 		// --- Transform Component --------------------------------------------
 		if (entity.HasComponent<TransformComponent>())
 		{
-			out << YAML::Key << "TransformComponent";
-
-			out << YAML::BeginMap; // Transform Component
 			auto& tc = entity.GetComponent<TransformComponent>();
+
+			out << YAML::Key << "TransformComponent";
+			out << YAML::BeginMap; // Transform Component
 			out << YAML::Key << "Self" << YAML::Value << tc.Self.GetComponent<IDComponent>().ID;
 			if (tc.Parent.IsValid())
 				out << YAML::Key << "Parent" << YAML::Value << tc.Parent.GetComponent<IDComponent>().ID;
@@ -186,7 +186,6 @@ namespace Locus
 			out << YAML::Key << "LocalRotation" << YAML::Value << tc.LocalRotation;
 			out << YAML::Key << "LocalRotationQuat" << YAML::Value << tc.LocalRotationQuat;
 			out << YAML::Key << "LocalScale" << YAML::Value << tc.LocalScale;
-
 			out << YAML::EndMap; // End Transform Component
 		}
 
@@ -194,10 +193,10 @@ namespace Locus
 		if (entity.HasComponent<ChildComponent>())
 		{
 			auto& cc = entity.GetComponent<ChildComponent>();
+
 			out << YAML::Key << "ChildComponent";
 			out << YAML::BeginMap; // Child Component
 			out << YAML::Key << "ChildCount" << YAML::Value << cc.ChildCount;
-
 			out << YAML::Key << "ChildEntities";
 			out << YAML::BeginMap; // Child Entities
 			for (uint32_t i = 0; i < cc.ChildCount; i++)
@@ -206,7 +205,6 @@ namespace Locus
 				out << YAML::Key << childWithVal << YAML::Value << cc.ChildEntities[i].GetComponent<IDComponent>().ID;
 			}
 			out << YAML::EndMap; // End Child Entities
-
 			out << YAML::EndMap; // End Child Component
 		}
 
@@ -214,8 +212,8 @@ namespace Locus
 		if (entity.HasComponent<SpriteRendererComponent>())
 		{
 			auto& src = entity.GetComponent<SpriteRendererComponent>();
-			out << YAML::Key << "SpriteRendererComponent";
 
+			out << YAML::Key << "SpriteRendererComponent";
 			out << YAML::BeginMap; // Sprite Renderer Component
 			out << YAML::Key << "Color" << YAML::Value << src.Color;
 			out << YAML::Key << "TexturePath" << YAML::Value << src.TexturePath;
@@ -227,8 +225,8 @@ namespace Locus
 		if (entity.HasComponent<CircleRendererComponent>())
 		{
 			auto& crc = entity.GetComponent<CircleRendererComponent>();
-			out << YAML::Key << "CircleRendererComponent";
 
+			out << YAML::Key << "CircleRendererComponent";
 			out << YAML::BeginMap; // Circle Renderer Component
 			out << YAML::Key << "Color" << YAML::Value << crc.Color;
 			out << YAML::Key << "Thickness" << YAML::Value << crc.Thickness;
@@ -239,12 +237,11 @@ namespace Locus
 		// --- Camera Component -----------------------------------------------
 		if (entity.HasComponent<CameraComponent>())
 		{
-			out << YAML::Key << "CameraComponent";
-
 			auto& cc = entity.GetComponent<CameraComponent>();
 			auto& camera = entity.GetComponent<CameraComponent>().Camera;
-			out << YAML::BeginMap; // Camera Component
 
+			out << YAML::Key << "CameraComponent";
+			out << YAML::BeginMap; // Camera Component
 			out << YAML::Key << "Camera" << YAML::Value;
 			out << YAML::BeginMap; // Camera
 			out << YAML::Key << "BackgroundColor" << YAML::Value << camera.GetBackgroundColor();
@@ -256,19 +253,17 @@ namespace Locus
 			out << YAML::Key << "PerspectiveNearClip" << YAML::Value << camera.GetPerspectiveNearClip();
 			out << YAML::Key << "PerspectiveFarClip" << YAML::Value << camera.GetPerspectiveFarClip();
 			out << YAML::EndMap; // End Camera
-
 			out << YAML::Key << "Primary" << YAML::Value << cc.Primary;
 			out << YAML::Key << "FixedAspectRatio" << YAML::Value << cc.FixedAspectRatio;
-
 			out << YAML::EndMap; // End Camera Component
 		}
 
 		// --- Rigidbody2D Component ------------------------------------------
 		if (entity.HasComponent<Rigidbody2DComponent>())
 		{
-			out << YAML::Key << "Rigidbody2DComponent";
 			auto& rb2D = entity.GetComponent<Rigidbody2DComponent>();
 
+			out << YAML::Key << "Rigidbody2DComponent";
 			out << YAML::BeginMap; // Rigidbody2D Component
 			out << YAML::Key << "BodyType" << YAML::Value << (int)rb2D.BodyType;
 			out << YAML::Key << "Mass" << YAML::Value << rb2D.Mass;
@@ -285,9 +280,9 @@ namespace Locus
 		// --- BoxCollider2D Component ----------------------------------------
 		if (entity.HasComponent<BoxCollider2DComponent>())
 		{
-			out << YAML::Key << "BoxCollider2DComponent";
 			auto& bc2D = entity.GetComponent<BoxCollider2DComponent>();
 
+			out << YAML::Key << "BoxCollider2DComponent";
 			out << YAML::BeginMap; // BoxCollider2D Component
 			out << YAML::Key << "CollisionLayer" << YAML::Value << bc2D.CollisionLayer;
 			out << YAML::Key << "Offset" << YAML::Value << bc2D.Offset;
@@ -298,14 +293,25 @@ namespace Locus
 		// --- CircleCollider2D Component ----------------------------------------
 		if (entity.HasComponent<CircleCollider2DComponent>())
 		{
-			out << YAML::Key << "CircleCollider2DComponent";
 			auto& c2D = entity.GetComponent<CircleCollider2DComponent>();
 
+			out << YAML::Key << "CircleCollider2DComponent";
 			out << YAML::BeginMap; // BoxCollider2D Component
 			out << YAML::Key << "CollisionLayer" << YAML::Value << c2D.CollisionLayer;
 			out << YAML::Key << "Radius" << YAML::Value << c2D.Radius;
 			out << YAML::Key << "Offset" << YAML::Value << c2D.Offset;
 			out << YAML::EndMap; // BoxCollider2D Component
+		}
+
+		// --- Script Component -----------------------------------------------
+		if (entity.HasComponent<ScriptComponent>())
+		{
+			auto& sc = entity.GetComponent<ScriptComponent>();
+
+			out << YAML::Key << "ScriptComponent";
+			out << YAML::BeginMap;
+			out << YAML::Key << "ScriptClass" << YAML::Value << sc.ScriptClass;
+			out << YAML::EndMap; // Script Component
 		}
 
 		out << YAML::EndMap; // End Entity
@@ -455,7 +461,7 @@ namespace Locus
 					bc2D.Size = boxCollider2DComponent["Size"].as<glm::vec2>();
 				}
 
-				// --- CircleCollider2D Component --------------------------------
+				// --- CircleCollider2D Component ------------------------------
 				auto circleCollider2DComponent = entity["CircleCollider2DComponent"];
 				if (circleCollider2DComponent)
 				{
@@ -463,6 +469,14 @@ namespace Locus
 					c2D.CollisionLayer = circleCollider2DComponent["CollisionLayer"].as<int>();
 					c2D.Offset = circleCollider2DComponent["Offset"].as<glm::vec2>();
 					c2D.Radius = circleCollider2DComponent["Radius"].as<float>();
+				}
+
+				// --- Script Component ---------------------------------------
+				auto scriptComponent = entity["ScriptComponent"];
+				if (scriptComponent)
+				{
+					auto& sc = deserializedEntity.AddComponent<ScriptComponent>();
+					sc.ScriptClass = scriptComponent["ScriptClass"].as<std::string>();
 				}
 			}
 

@@ -7,7 +7,7 @@
 namespace Locus
 {
 	// TODO: move to project folder in the future when we create project folders
-	extern const std::filesystem::path g_ProjectPath = "assets";
+	extern const std::filesystem::path g_ProjectPath = "SandboxProject/Assets";
 
 	ContentBrowserPanel::ContentBrowserPanel()
 		: m_CurrentDirectory(g_ProjectPath)

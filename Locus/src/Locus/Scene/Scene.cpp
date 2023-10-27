@@ -14,6 +14,7 @@
 #include "Locus/Scene/Components.h"
 #include "Locus/Scene/ScriptableEntity.h"
 #include "Locus/Scene/Entity.h"
+#include "Locus/Scripting/ScriptEngine.h"
 
 namespace Locus
 {
@@ -91,6 +92,7 @@ namespace Locus
 		CopyComponent<BoxCollider2DComponent>(from, to);
 		CopyComponent<CircleCollider2DComponent>(from, to);
 		CopyComponent<NativeScriptComponent>(from, to);
+		CopyComponent<ScriptComponent>(from, to);
 	}
 
 	Entity Scene::CreateEntity(const std::string& name)
@@ -136,7 +138,7 @@ namespace Locus
 
 	void Scene::OnUpdateRuntime(Timestep deltaTime)
 	{
-		// --- Update Scripts -------------------------------------------------
+		// --- Update Native Scripts ------------------------------------------
 		{
 			auto view = m_Registry.view<NativeScriptComponent, TagComponent>();
 			for (auto entity : view)
@@ -146,6 +148,20 @@ namespace Locus
 				if (enabled)
 				{
 					nsc.Instance->OnUpdate(deltaTime);
+				}
+			}
+		}
+
+		// --- Update C# Scripts ----------------------------------------------
+		{
+			// Example API
+			auto view = m_Registry.view<ScriptComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				if (view.get<TagComponent>(e).Enabled)
+				{
+					ScriptEngine::OnUpdateEntityScript(entity, deltaTime);
 				}
 			}
 		}
@@ -332,6 +348,23 @@ namespace Locus
 				}
 			}
 		}
+
+		// --- C# Scripts -----------------------------------------------------
+		{
+			ScriptEngine::OnRuntimeStart(this);
+			auto view = m_Registry.view<ScriptComponent, TagComponent, IDComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				auto& sc = view.get<ScriptComponent>(e);
+				bool enabled = view.get<TagComponent>(e).Enabled;
+				UUID id = view.get<IDComponent>(e).ID;
+				if (enabled)
+				{
+					ScriptEngine::OnCreateEntityScript(entity);
+				}
+			}
+		}
 		
 		// --- Physics --------------------------------------------------------
 		{
@@ -485,6 +518,8 @@ namespace Locus
 	{
 		delete m_Box2DWorld;
 		m_Box2DWorld = nullptr;
+
+		ScriptEngine::OnRuntimeStop();
 	}
 
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)
@@ -607,6 +642,12 @@ namespace Locus
 
 	template<>
 	void Scene::OnComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent& component)
+	{
+
+	}
+
+	template<>
+	void Scene::OnComponentAdded<ScriptComponent>(Entity entity, ScriptComponent& component)
 	{
 
 	}

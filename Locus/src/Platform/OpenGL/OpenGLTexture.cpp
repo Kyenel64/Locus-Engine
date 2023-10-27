@@ -34,7 +34,7 @@ namespace Locus
 			data = stbi_load(path.c_str(), &width, &height, &channels, 0);
 			if (data == NULL)
 			{
-				data = stbi_load("assets/textures/MissingTexture.png", &width, &height, &channels, 0);
+				data = stbi_load("resources/textures/MissingTexture.png", &width, &height, &channels, 0);
 				LOCUS_CORE_ERROR("Texture missing: {0}", path);
 			}
 		}

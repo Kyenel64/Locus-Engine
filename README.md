@@ -25,6 +25,7 @@ Requirements: Visual Studio 2022, Python3
 
 #### 2. Run Scripts/Setup.bat
 - Run Scripts/Setup.bat to install dependencies and generate a Visual Studio solution. (If script doesn't run, check if Python is installed)
+- TEMP: Run Locus-Editor/SandboxProject/Setup.bat and build. (This will change once users are able to select where to create their project directory).
 - IMPORTANT: Make sure 'Shader Toolchain Debug Symbols - 64-bit' is selected when the Vulkan install pop-up opens.
 
 #### 3. Build using Visual Studio

@@ -2,6 +2,7 @@
 #include "Application.h"
 
 #include "Locus/Renderer/Renderer.h"
+#include "Locus/Scripting/ScriptEngine.h"
 
 
 namespace Locus
@@ -24,6 +25,7 @@ namespace Locus
 		m_Window->SetEventCallback(LOCUS_BIND_EVENT_FN(Application::OnEvent));
 
 		Renderer::Init();
+		ScriptEngine::Init();
 
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
@@ -103,6 +105,7 @@ namespace Locus
 	void Application::Close()
 	{
 		Renderer::Shutdown();
+		ScriptEngine::Shutdown();
 		m_Running = false;
 	}
 

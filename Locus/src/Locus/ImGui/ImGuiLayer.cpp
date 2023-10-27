@@ -75,8 +75,8 @@ namespace Locus
 			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
 
-		io.Fonts->AddFontFromFileTTF("assets/fonts/Inter/Inter-Bold.ttf", 20.0f);
-		io.FontDefault = io.Fonts->AddFontFromFileTTF("assets/fonts/Inter/Inter-Regular.ttf", 16.0f);
+		io.Fonts->AddFontFromFileTTF("resources/fonts/Inter/Inter-Bold.ttf", 20.0f);
+		io.FontDefault = io.Fonts->AddFontFromFileTTF("resources/fonts/Inter/Inter-Regular.ttf", 16.0f);
 
 		SetDarkTheme();
 

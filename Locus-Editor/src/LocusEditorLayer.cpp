@@ -196,7 +196,7 @@ namespace Locus
 
 		DrawLayoutTable();
 
-		//ImGui::ShowDemoWindow();
+		ImGui::ShowDemoWindow();
 
 		// --- Save Popup -----------------------------------------------------
 		OpenSavePopup();
@@ -405,7 +405,7 @@ namespace Locus
 				}
 				break;
 			}
-
+				
 			// Command History
 			case Key::Y:
 			{
@@ -454,6 +454,8 @@ namespace Locus
 
 	void LocusEditorLayer::NewScene()
 	{
+		if (m_SceneState != SceneState::Edit)
+			OnSceneStop();
 		m_SelectedEntity = {};
 		m_EditorScene = CreateRef<Scene>();
 		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
@@ -474,6 +476,8 @@ namespace Locus
 
 	void LocusEditorLayer::OpenScene(const std::filesystem::path& path)
 	{
+		if (m_SceneState != SceneState::Edit)
+			OnSceneStop();
 		m_SelectedEntity = {};
 		m_EditorScene = CreateRef<Scene>();
 		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
@@ -775,6 +779,11 @@ namespace Locus
 
 			if (ImGui::BeginMenu("Project"))
 			{
+				if (ImGui::MenuItem("Reload Scripts", "Ctrl+Shift+R"))
+				{
+					ScriptEngine::ReloadScripts();
+					m_PropertiesPanel.m_ScriptClasses = ScriptEngine::GetClassNames();
+				}
 				ImGui::EndMenu();
 			}
 

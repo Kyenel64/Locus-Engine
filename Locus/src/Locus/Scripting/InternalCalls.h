@@ -34,62 +34,100 @@ namespace Locus
 		static bool Entity_HasComponent(UUID entityID, MonoReflectionType* componentType)
 		{
 			Entity entity = GetEntity(entityID);
-
-			MonoType* type = mono_reflection_type_get_type(componentType);
-			return s_HasComponentFunctions[type](entity);
+			if (entity.IsValid())
+			{
+				MonoType* type = mono_reflection_type_get_type(componentType);
+				return s_HasComponentFunctions[type](entity);
+			}
+			else
+			{
+				LOCUS_SCRIPT_CRITICAL("Could not find entity!");
+				return false;
+			}
 		}
 
 		static void Entity_AddComponent(UUID entityID, MonoReflectionType* componentType)
 		{
 			Entity entity = GetEntity(entityID);
-
-			MonoType* type = mono_reflection_type_get_type(componentType);
-			s_AddComponentFunctions[type](entity);
+			if (entity.IsValid())
+			{
+				MonoType* type = mono_reflection_type_get_type(componentType);
+				s_AddComponentFunctions[type](entity);
+			}
+			else
+			{
+				LOCUS_SCRIPT_CRITICAL("Could not find entity!");
+			}
 		}
 
 		static MonoString* Entity_GetTag(UUID entityID)
 		{
 			Entity entity = GetEntity(entityID);
-
-			std::string tag = entity.GetComponent<TagComponent>().Tag;
-			return mono_string_new(ScriptEngine::GetAppDomain(), tag.c_str());
+			if (entity.IsValid())
+			{
+				std::string tag;
+				tag = entity.GetComponent<TagComponent>().Tag;
+				return mono_string_new(ScriptEngine::GetAppDomain(), tag.c_str());
+			}
+			else
+			{
+				LOCUS_SCRIPT_CRITICAL("Could not find entity!");
+				return nullptr;
+			}
 		}
 
 		static void Entity_SetTag(UUID entityID, MonoString* newTag)
 		{
 			Entity entity = GetEntity(entityID);
-
-			MonoError error;
-			std::string newTagStr = mono_string_to_utf8_checked(newTag, &error);
-			// TODO: Still need to check for the error
-			entity.GetComponent<TagComponent>().Tag = newTagStr;
+			if (entity.IsValid())
+			{
+				std::string newTagStr = mono_string_to_utf8(newTag);
+				entity.GetComponent<TagComponent>().Tag = newTagStr;
+			}
+			else
+			{
+				LOCUS_SCRIPT_CRITICAL("Could not find entity!");
+			}
 		}
 
 		static bool Entity_GetEnabled(UUID entityID)
 		{
 			Entity entity = GetEntity(entityID);
-
-			return entity.GetComponent<TagComponent>().Enabled;
+			if (entity.IsValid())
+				return entity.GetComponent<TagComponent>().Enabled;
+			
+			LOCUS_SCRIPT_CRITICAL("Could not find entity!");
+			return false;
 		}
 
 		static void Entity_SetEnabled(UUID entityID, bool newEnabled)
 		{
 			Entity entity = GetEntity(entityID);
-			entity.GetComponent<TagComponent>().Enabled = newEnabled;
+			if (entity.IsValid())
+				entity.GetComponent<TagComponent>().Enabled = newEnabled;
+			else
+				LOCUS_SCRIPT_CRITICAL("Could not find entity!");
 		}
 
-		static UUID Entity_Find(MonoString* tag)
+		static uint64_t Entity_Find(MonoString* tag)
 		{
-			MonoError error;
-			std::string newTagStr = mono_string_to_utf8_checked(tag, &error);
+			char* newTagStr = mono_string_to_utf8(tag);
 			auto view = ScriptEngine::GetScene()->GetEntitiesWith<TagComponent>();
 			for (auto e : view)
 			{
 				Entity entity = Entity(e, ScriptEngine::GetScene());
-				if (entity.GetComponent<TagComponent>().Tag == newTagStr)
-					return entity.GetUUID();
+				if (entity.HasComponent<TagComponent>())
+				{
+					if (entity.GetComponent<TagComponent>().Tag == std::string(newTagStr))
+					{
+						mono_free(newTagStr);
+						return entity.GetUUID();
+					}
+				}
 			}
 
+			LOCUS_SCRIPT_CRITICAL("Could not find entity with tag: {0}", std::string(newTagStr));
+			mono_free(newTagStr);
 			return 0;
 		}
 

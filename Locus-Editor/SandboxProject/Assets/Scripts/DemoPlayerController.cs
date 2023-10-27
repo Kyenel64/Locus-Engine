@@ -26,18 +26,23 @@ namespace Sandbox
         public char testChar;
 
         public Vec3 testVec3;
+
+        public Entity otherEntity;
         void OnCreate()
         {
             Console.WriteLine("\rtestFloat:{0} ", testFloat);
             Console.WriteLine("\rtestFloatNoDefault:{0} ", testFloatNoDefault);
             Console.WriteLine("\rtestInt:{0} ", testInt);
             Console.WriteLine("\rtestIntNoDefault:{0} ", testIntNoDefault);
+
+            otherEntity = Find("Other Entity");
+            Console.WriteLine(otherEntity.Tag);
         }
 
         void OnUpdate(float deltaTime)
         {
             //Console.WriteLine("\rtestChar:{0} ", testChar);
-            Console.WriteLine("testVec3: {0}, {1}, {2}", testVec3.x, testVec3.y, testVec3.z);
+            //Console.WriteLine("testVec3: {0}, {1}, {2}", testVec3.x, testVec3.y, testVec3.z);
         }
     }
 }

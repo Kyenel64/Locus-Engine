@@ -88,7 +88,7 @@ namespace Locus
         /// <summary>
         /// Creates an empty entity. Optionally sets the tag of the newly created entity.
         /// </summary>
-        public static Entity CreateEntity(string tag = "Emtpty Entity")
+        public static Entity CreateEntity(string tag = "Empty Entity")
         {
             Entity entity = new Entity(InternalCalls.CreateEntity());
             entity.Tag = tag;

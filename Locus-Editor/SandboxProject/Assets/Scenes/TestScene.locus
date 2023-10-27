@@ -1,45 +1,29 @@
 Scene: Untitled
 RootEntityCount: 3
 Entities:
-  - Entity: 10340983657204881902
+  - Entity: 3348179176376308620
     TagComponent:
-      Tag: Empty Entity
+      Tag: Other Entity
       Enabled: true
       HierarchyPos: 2
     TransformComponent:
-      Self: 10340983657204881902
+      Self: 3348179176376308620
       Parent: 0
       LocalPosition: [0, 0, 0]
       LocalRotation: [0, 0, 0]
       LocalRotationQuat: [0, 0, 0, 1]
       LocalScale: [1, 1, 1]
-    SpriteRendererComponent:
-      Color: [1, 1, 1, 1]
-      TexturePath: ""
-      TilingFactor: 1
-    ScriptComponent:
-      ScriptClass: Sandbox::Player
-  - Entity: 8835880168986104072
+  - Entity: 7352724189592751854
     TagComponent:
       Tag: Empty Entity
       Enabled: true
       HierarchyPos: 1
     TransformComponent:
-      Self: 8835880168986104072
+      Self: 7352724189592751854
       Parent: 0
       LocalPosition: [0, 0, 0]
       LocalRotation: [0, 0, 0]
       LocalRotationQuat: [0, 0, 0, 1]
       LocalScale: [1, 1, 1]
-    CameraComponent:
-      Camera:
-        BackgroundColor: [0.25, 0.5, 0.5, 1]
-        ProjectionType: 0
-        OrthographicSize: 5
-        OrthographicNearClip: -1
-        OrthographicFarClip: 1000
-        PerspectiveFOV: 0.785398185
-        PerspectiveNearClip: 0.00999999978
-        PerspectiveFarClip: 1000
-      Primary: true
-      FixedAspectRatio: false
+    ScriptComponent:
+      ScriptClass: Sandbox::TestClass

@@ -8,17 +8,43 @@
 #include "Locus/Core/UUID.h"
 #include "Locus/Scene/Components.h"
 #include "Locus/Scripting/ScriptLink.h"
-#include "Locus/Utils/FileSystem.h"
 
 namespace Locus
 {
 	namespace Utils
 	{
+		char* ReadBytes(const std::string& filepath, uint32_t* outSize)
+		{
+			std::ifstream stream(filepath, std::ios::binary | std::ios::ate);
+
+			if (!stream)
+			{
+				// Failed to open the file
+				return nullptr;
+			}
+
+			std::streampos end = stream.tellg();
+			stream.seekg(0, std::ios::beg);
+			uint32_t size = (uint32_t)(end - stream.tellg());
+
+			if (size == 0)
+			{
+				// File is empty
+				return nullptr;
+			}
+
+			char* buffer = new char[size];
+			stream.read((char*)buffer, size);
+			stream.close();
+
+			*outSize = size;
+			return buffer;
+		}
 		// Loads a C# assembly from a path. Returns the loaded assembly.
 		MonoAssembly* LoadCSharpAssembly(const std::string& assemblyPath)
 		{
 			uint32_t fileSize = 0;
-			char* fileData = FileSystem::ReadBytes(assemblyPath, &fileSize);
+			char* fileData = Utils::ReadBytes(assemblyPath, &fileSize);
 
 			// NOTE: We can't use this image for anything other than loading the assembly because this image doesn't have a reference to the assembly
 			MonoImageOpenStatus status;

@@ -151,6 +151,18 @@ namespace Locus
 		s_Data->EntityBaseClass = CreateRef<ScriptClass>(s_Data->CoreAssemblyImage, "Locus", "Entity");
 		// Link C++ functions to C# declarations
 		ScriptLink::RegisterFunctions();
+
+		if (s_Data->Scene)
+		{
+			s_Data->ScriptInstances.clear();
+			auto view = s_Data->Scene->GetEntitiesWith<ScriptComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, s_Data->Scene);
+				auto& sc = entity.GetComponent<ScriptComponent>();
+				s_Data->ScriptInstances[entity.GetUUID()] = CreateRef<ScriptInstance>(s_Data->ScriptClasses[sc.ScriptClass], entity);
+			}
+		}
 	}
 
 	void ScriptEngine::Shutdown()

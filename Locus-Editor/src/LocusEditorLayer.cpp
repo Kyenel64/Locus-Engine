@@ -454,6 +454,8 @@ namespace Locus
 
 	void LocusEditorLayer::NewScene()
 	{
+		if (m_SceneState != SceneState::Edit)
+			OnSceneStop();
 		m_SelectedEntity = {};
 		m_EditorScene = CreateRef<Scene>();
 		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
@@ -474,6 +476,8 @@ namespace Locus
 
 	void LocusEditorLayer::OpenScene(const std::filesystem::path& path)
 	{
+		if (m_SceneState != SceneState::Edit)
+			OnSceneStop();
 		m_SelectedEntity = {};
 		m_EditorScene = CreateRef<Scene>();
 		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);

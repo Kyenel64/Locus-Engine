@@ -907,12 +907,11 @@ namespace Locus
 			ImGui::Text("Hierarchy position: %d", m_SelectedEntity.GetComponent<TagComponent>().HierarchyPos);
 
 		// Collision
-		std::string collisionLayer = "None";
-		if (m_HoveredEntity)
-			if (m_HoveredEntity.HasComponent<BoxCollider2DComponent>())
-				collisionLayer = std::to_string(m_HoveredEntity.GetComponent<BoxCollider2DComponent>().CollisionLayer);
-		ImGui::Text("Hovered Collision Layer: %s", collisionLayer.c_str());
-
+		if (m_SelectedEntity.IsValid())
+		{
+			if (m_SelectedEntity.HasComponent<BoxCollider2DComponent>())
+				ImGui::Text("Collision category: %d", m_SelectedEntity.GetComponent<BoxCollider2DComponent>().CollisionCategory);
+		}
 		// Child debug
 		if (m_SelectedEntity.IsValid())
 		{

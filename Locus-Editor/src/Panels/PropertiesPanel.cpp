@@ -403,8 +403,12 @@ namespace Locus
 		// --- BoxCollider2D Component ----------------------------------------
 		DrawComponentUI<BoxCollider2DComponent>("Box Collider 2D", entity, [this](auto& component)
 			{
-				// Collision Layer
-				Widgets::DrawValueControl("Collision Layer", m_LabelWidth, component.CollisionLayer);
+				// Collision Category
+				Widgets::DrawCollisionGrid("Collision Category", m_LabelWidth, component.CollisionCategory, 0x0001);
+
+				// Collision Mask
+				Widgets::DrawCollisionGrid("Collision Mask", m_LabelWidth, component.CollisionMask, 0xFFFF);
+
 				// Size
 				Widgets::DrawVec2Control("Size", m_LabelWidth, component.Size);
 				// Offset
@@ -414,8 +418,11 @@ namespace Locus
 		// --- CircleCollider2D Component -------------------------------------
 		DrawComponentUI<CircleCollider2DComponent>("Circle Collider 2D", entity, [this](auto& component)
 			{
-				// Collision Layer
-				Widgets::DrawValueControl("Collision Layer", m_LabelWidth, component.CollisionLayer);
+				// Collision Category
+				Widgets::DrawCollisionGrid("Collision Category", m_LabelWidth, component.CollisionCategory, 0x0001);
+
+				// Collision Mask
+				Widgets::DrawCollisionGrid("Collision Mask", m_LabelWidth, component.CollisionMask, 0xFFFF);
 				// Radius
 				Widgets::DrawValueControl("Radius", m_LabelWidth, component.Radius, 0.5f);
 				// Offset

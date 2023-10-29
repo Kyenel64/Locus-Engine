@@ -401,7 +401,8 @@ namespace Locus
 					fixtureDef.friction = rb2D.Friction;
 					fixtureDef.restitution = rb2D.Restitution;
 					fixtureDef.restitutionThreshold = rb2D.RestitutionThreshold;
-					fixtureDef.filter.categoryBits = 0;
+					fixtureDef.filter.categoryBits = 0x0001;
+					fixtureDef.filter.maskBits = 0xFFFF;
 
 					if (entity.HasComponent<BoxCollider2DComponent>())
 					{
@@ -414,7 +415,8 @@ namespace Locus
 						b2PolygonShape box;
 						box.SetAsBox(size.x / 2, size.y / 2, offset, angle);
 						fixtureDef.shape = &box;
-						fixtureDef.filter.categoryBits = b2D.CollisionLayer;
+						fixtureDef.filter.categoryBits = b2D.CollisionCategory;
+						fixtureDef.filter.maskBits = b2D.CollisionMask;
 						b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);
 						b2D.RuntimeFixture = fixture;
 					}
@@ -430,7 +432,8 @@ namespace Locus
 						circle.m_p = offset;
 						circle.m_radius = radius;
 						fixtureDef.shape = &circle;
-						fixtureDef.filter.categoryBits = c2D.CollisionLayer;
+						fixtureDef.filter.categoryBits = c2D.CollisionCategory;
+						fixtureDef.filter.maskBits = c2D.CollisionMask;
 						b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);
 						c2D.RuntimeFixture = fixture;
 					}
@@ -476,7 +479,8 @@ namespace Locus
 					fixtureDef.friction = rb2D.Friction;
 					fixtureDef.restitution = rb2D.Restitution;
 					fixtureDef.restitutionThreshold = rb2D.RestitutionThreshold;
-					fixtureDef.filter.categoryBits = 0;
+					fixtureDef.filter.categoryBits = 0x0001;
+					fixtureDef.filter.maskBits = 0xFFFF;
 
 					if (entity.HasComponent<BoxCollider2DComponent>())
 					{
@@ -489,7 +493,9 @@ namespace Locus
 						b2PolygonShape box;
 						box.SetAsBox(size.x / 2, size.y / 2, offset, angle);
 						fixtureDef.shape = &box;
-						fixtureDef.filter.categoryBits = b2D.CollisionLayer;
+						fixtureDef.filter.categoryBits = b2D.CollisionCategory;
+						fixtureDef.filter.maskBits = b2D.CollisionMask;
+
 						b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);
 						b2D.RuntimeFixture = fixture;
 					}
@@ -505,7 +511,8 @@ namespace Locus
 						circle.m_p = offset;
 						circle.m_radius = radius;
 						fixtureDef.shape = &circle;
-						fixtureDef.filter.categoryBits = c2D.CollisionLayer;
+						fixtureDef.filter.categoryBits = c2D.CollisionCategory;
+						fixtureDef.filter.maskBits = c2D.CollisionMask;
 						b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);
 						c2D.RuntimeFixture = fixture;
 					}

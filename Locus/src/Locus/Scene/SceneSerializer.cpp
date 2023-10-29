@@ -284,7 +284,8 @@ namespace Locus
 
 			out << YAML::Key << "BoxCollider2DComponent";
 			out << YAML::BeginMap; // BoxCollider2D Component
-			out << YAML::Key << "CollisionLayer" << YAML::Value << bc2D.CollisionLayer;
+			out << YAML::Key << "CollisionCategory" << YAML::Value << bc2D.CollisionCategory;
+			out << YAML::Key << "CollisionMask" << YAML::Value << bc2D.CollisionMask;
 			out << YAML::Key << "Offset" << YAML::Value << bc2D.Offset;
 			out << YAML::Key << "Size" << YAML::Value << bc2D.Size;
 			out << YAML::EndMap; // BoxCollider2D Component
@@ -297,7 +298,8 @@ namespace Locus
 
 			out << YAML::Key << "CircleCollider2DComponent";
 			out << YAML::BeginMap; // BoxCollider2D Component
-			out << YAML::Key << "CollisionLayer" << YAML::Value << c2D.CollisionLayer;
+			out << YAML::Key << "CollisionCategory" << YAML::Value << c2D.CollisionCategory;
+			out << YAML::Key << "CollisionMask" << YAML::Value << c2D.CollisionMask;
 			out << YAML::Key << "Radius" << YAML::Value << c2D.Radius;
 			out << YAML::Key << "Offset" << YAML::Value << c2D.Offset;
 			out << YAML::EndMap; // BoxCollider2D Component
@@ -456,7 +458,8 @@ namespace Locus
 				if (boxCollider2DComponent)
 				{
 					auto& bc2D = deserializedEntity.AddComponent<BoxCollider2DComponent>();
-					bc2D.CollisionLayer = boxCollider2DComponent["CollisionLayer"].as<int>();
+					bc2D.CollisionCategory = boxCollider2DComponent["CollisionCategory"].as<int>();
+					bc2D.CollisionMask = boxCollider2DComponent["CollisionMask"].as<int>();
 					bc2D.Offset = boxCollider2DComponent["Offset"].as<glm::vec2>();
 					bc2D.Size = boxCollider2DComponent["Size"].as<glm::vec2>();
 				}
@@ -466,7 +469,8 @@ namespace Locus
 				if (circleCollider2DComponent)
 				{
 					auto& c2D = deserializedEntity.AddComponent<CircleCollider2DComponent>();
-					c2D.CollisionLayer = circleCollider2DComponent["CollisionLayer"].as<int>();
+					c2D.CollisionCategory = boxCollider2DComponent["CollisionCategory"].as<int>();
+					c2D.CollisionMask = boxCollider2DComponent["CollisionMask"].as<int>();
 					c2D.Offset = circleCollider2DComponent["Offset"].as<glm::vec2>();
 					c2D.Radius = circleCollider2DComponent["Radius"].as<float>();
 				}

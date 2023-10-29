@@ -159,7 +159,8 @@ namespace Locus
 	struct BoxCollider2DComponent
 	{
 		// Polygon shape
-		uint16_t CollisionLayer = 1;
+		uint16_t CollisionCategory = 0x0001;
+		uint16_t CollisionMask = 0xFFFF;
 		glm::vec2 Offset = { 0.0f, 0.0f };
 		glm::vec2 Size = { 1.0f, 1.0f };
 
@@ -171,7 +172,8 @@ namespace Locus
 
 	struct CircleCollider2DComponent
 	{
-		uint16_t CollisionLayer = 1;
+		uint16_t CollisionCategory = 0x0001;
+		uint16_t CollisionMask = 0xFFFF;
 		glm::vec2 Offset = { 0.0f, 0.0f };
 		float Radius = 0.5f;
 

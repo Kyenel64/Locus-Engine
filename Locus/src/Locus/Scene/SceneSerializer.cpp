@@ -8,6 +8,7 @@
 
 #include "Locus/Scene/Entity.h"
 #include "Locus/Scene/Components.h"
+#include "Locus/Scripting/ScriptEngine.h"
 
 // Needed to decode and encode custom datatypes
 namespace YAML {
@@ -313,6 +314,37 @@ namespace Locus
 			out << YAML::Key << "ScriptComponent";
 			out << YAML::BeginMap;
 			out << YAML::Key << "ScriptClass" << YAML::Value << sc.ScriptClass;
+
+			// Fields
+			auto fieldInstances = ScriptEngine::GetFieldInstances(entity.GetUUID());
+			out << YAML::Key << "Fields";
+			out << YAML::BeginMap;
+			for (auto& [name, field] : fieldInstances)
+			{
+				switch (field.Field.Type)
+				{
+				case FieldType::SystemSingle: out << YAML::Key << name << YAML::Value << field.GetValue<float>(); break;
+				case FieldType::SystemDouble: out << YAML::Key << name << YAML::Value << field.GetValue<double>(); break;
+				case FieldType::SystemShort: out << YAML::Key << name << YAML::Value << field.GetValue<int16_t>(); break;
+				case FieldType::SystemInt: out << YAML::Key << name << YAML::Value << field.GetValue<int>(); break;
+				case FieldType::SystemLong: out << YAML::Key << name << YAML::Value << field.GetValue<int64_t>(); break;
+				case FieldType::SystemUShort: out << YAML::Key << name << YAML::Value << field.GetValue<uint16_t>(); break;
+				case FieldType::SystemUInt: out << YAML::Key << name << YAML::Value << field.GetValue<uint32_t>(); break;
+				case FieldType::SystemULong: out << YAML::Key << name << YAML::Value << field.GetValue<uint64_t>(); break;
+				case FieldType::SystemBoolean: out << YAML::Key << name << YAML::Value << field.GetValue<bool>(); break;
+				case FieldType::SystemChar: out << YAML::Key << name << YAML::Value << field.GetValue<char>(); break;
+				//case FieldType::SystemString: out << YAML::Key << name << YAML::Value << field.GetValue<std::string>(); break;
+
+				case FieldType::LocusVec2: out << YAML::Key << name << YAML::Value << field.GetValue<glm::vec2>(); break;
+				case FieldType::LocusVec3: out << YAML::Key << name << YAML::Value << field.GetValue<glm::vec3>(); break;
+				//case FieldType::LocusVec4: out << YAML::Key << name << YAML::Value << field.GetValue<glm::vec4>(); break;
+				case FieldType::LocusEntity: out << YAML::Key << name << YAML::Value << field.GetValue<UUID>(); break;
+
+				}
+
+			}
+			out << YAML::EndMap; // Fields
+
 			out << YAML::EndMap; // Script Component
 		}
 
@@ -458,8 +490,8 @@ namespace Locus
 				if (boxCollider2DComponent)
 				{
 					auto& bc2D = deserializedEntity.AddComponent<BoxCollider2DComponent>();
-					bc2D.CollisionCategory = boxCollider2DComponent["CollisionCategory"].as<int>();
-					bc2D.CollisionMask = boxCollider2DComponent["CollisionMask"].as<int>();
+					bc2D.CollisionCategory = boxCollider2DComponent["CollisionCategory"].as<uint16_t>();
+					bc2D.CollisionMask = boxCollider2DComponent["CollisionMask"].as<uint16_t>();
 					bc2D.Offset = boxCollider2DComponent["Offset"].as<glm::vec2>();
 					bc2D.Size = boxCollider2DComponent["Size"].as<glm::vec2>();
 				}
@@ -477,10 +509,45 @@ namespace Locus
 
 				// --- Script Component ---------------------------------------
 				auto scriptComponent = entity["ScriptComponent"];
+				auto fields = scriptComponent["Fields"];
 				if (scriptComponent)
 				{
 					auto& sc = deserializedEntity.AddComponent<ScriptComponent>();
 					sc.ScriptClass = scriptComponent["ScriptClass"].as<std::string>();
+
+					// Fields
+					if (fields)
+					{
+						Ref<ScriptClass> scriptClass = ScriptEngine::GetScriptClass(sc.ScriptClass);
+						auto& classFields = scriptClass->GetPublicFields();
+						auto& fieldInstances = ScriptEngine::GetFieldInstances(uuid);
+
+						for (auto& [fieldName, field] : classFields)
+						{
+							ScriptClassFieldInstance& scriptField = fieldInstances[fieldName];
+							scriptField.Field = field;
+
+							switch (field.Type)
+							{
+							case FieldType::SystemSingle: scriptField.SetValue<float>(fields[fieldName].as<float>()); break;
+							case FieldType::SystemDouble: scriptField.SetValue<double>(fields[fieldName].as<double>()); break;
+							case FieldType::SystemShort: scriptField.SetValue<int16_t>(fields[fieldName].as<int16_t>()); break;
+							case FieldType::SystemInt: scriptField.SetValue<int>(fields[fieldName].as<int>()); break;
+							case FieldType::SystemLong: scriptField.SetValue<int64_t>(fields[fieldName].as<int64_t>()); break;
+							case FieldType::SystemUShort: scriptField.SetValue<uint16_t>(fields[fieldName].as<uint16_t>()); break;
+							case FieldType::SystemUInt: scriptField.SetValue<uint32_t>(fields[fieldName].as<uint32_t>()); break;
+							case FieldType::SystemULong: scriptField.SetValue<uint64_t>(fields[fieldName].as<uint64_t>()); break;
+							case FieldType::SystemBoolean: scriptField.SetValue<bool>(fields[fieldName].as<bool>()); break;
+							case FieldType::SystemChar: scriptField.SetValue<char>(fields[fieldName].as<char>()); break;
+							//case FieldType::SystemString: scriptField.SetValue<std::string>(fields[fieldName].as<std::string>()); break;
+
+							case FieldType::LocusVec2: scriptField.SetValue<glm::vec2>(fields[fieldName].as<glm::vec2>()); break;
+							case FieldType::LocusVec3: scriptField.SetValue<glm::vec3>(fields[fieldName].as<glm::vec3>()); break;
+							//case FieldType::LocusVec4: scriptField.SetValue<glm::vec4>(fields[fieldName].as<glm::vec4>()); break;
+							case FieldType::LocusEntity: scriptField.SetValue<uint64_t>(fields[fieldName].as<uint64_t>()); break;
+							}
+						}
+					}
 				}
 			}
 

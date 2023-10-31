@@ -47,6 +47,8 @@ Entities:
       FixedAspectRatio: false
     ScriptComponent:
       ScriptClass: Sandbox::CameraController2D
+      Fields:
+        testValue: 0
   - Entity: 785250229868369602
     TagComponent:
       Tag: Moon
@@ -65,6 +67,10 @@ Entities:
       TilingFactor: 1
     ScriptComponent:
       ScriptClass: Sandbox::OrbitPlanet
+      Fields:
+        centerMass: 1000018.5
+        initialForce: 5
+        thisMass: 1
   - Entity: 5979509514547691761
     TagComponent:
       Tag: Mesh

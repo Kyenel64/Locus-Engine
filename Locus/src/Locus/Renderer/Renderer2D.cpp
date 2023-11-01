@@ -444,7 +444,20 @@ namespace Locus
 		s_Data.Stats.QuadCount++;
 	}
 
-	void  Renderer2D::DrawLine(const glm::vec3& point1, const glm::vec3& point2, const glm::vec4& color, int entityID)
+	void Renderer2D::DrawDebugCircle(const glm::mat4& transform, const glm::vec4& color, uint32_t sides)
+	{
+		float angle = 360.0f / sides;
+		for (uint32_t i = 0; i < sides; i++)
+		{
+			glm::vec4 point1 = { 0.5f * cos(glm::radians(angle * i)), 0.5f * sin(glm::radians(angle * i)), 0, 1 };
+			glm::vec4 point2 = { 0.5f * cos(glm::radians(angle * (i + 1))), 0.5f * sin(glm::radians(angle * (i + 1))), 0, 1 };
+			point1 = transform * point1;
+			point2 = transform * point2;
+			DrawLine(point1, point2, color);
+		}
+	}
+
+	void Renderer2D::DrawLine(const glm::vec3& point1, const glm::vec3& point2, const glm::vec4& color, int entityID)
 	{
 		LOCUS_PROFILE_FUNCTION();
 

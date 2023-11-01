@@ -312,9 +312,7 @@ namespace Locus
 			}
 			else if (m_SelectedEntity.HasComponent<CircleRendererComponent>())
 			{
-				float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
-				float thickness = 0.1f / maxScale;
-				Renderer2D::DrawCircle(transform, m_FocusOutlineColor, thickness);
+				Renderer2D::DrawDebugCircle(transform, m_FocusOutlineColor);
 			}
 		}
 
@@ -971,9 +969,11 @@ namespace Locus
 				auto& b2D = m_SelectedEntity.GetComponent<BoxCollider2DComponent>();
 				auto& tc = m_SelectedEntity.GetComponent<TransformComponent>();
 
+				// Combine the box collider offset and size to the transform
 				glm::mat4 transform = tc.GetLocalTransform();
 				transform *= glm::translate(glm::mat4(1.0f), { b2D.Offset.x, b2D.Offset.y, 0.001f })
 					* glm::scale(glm::mat4(1.0f), { b2D.Size.x, b2D.Size.y, 1.0f });
+
 				Renderer2D::DrawRect(transform, m_CollisionMeshColor);
 			}
 			else if (m_SelectedEntity.HasComponent<CircleCollider2DComponent>())
@@ -981,14 +981,16 @@ namespace Locus
 				auto& c2D = m_SelectedEntity.GetComponent<CircleCollider2DComponent>();
 				auto& tc = m_SelectedEntity.GetComponent<TransformComponent>();
 
+				// Combine the box collider offset and size to the transform and
+				// calculate the circle radius for the larger scale axis (x or y).
 				float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
 				glm::mat4 transform = glm::translate(glm::mat4(1.0f), tc.LocalPosition)
 					* glm::rotate(glm::mat4(1.0f), tc.LocalRotation.z, glm::vec3(0, 0, 1))
 					* glm::scale(glm::mat4(1.0f), { maxScale, maxScale, 1.0f });
 				transform *= glm::translate(glm::mat4(1.0f), { c2D.Offset.x, c2D.Offset.y, 0.001f })
 					* glm::scale(glm::mat4(1.0f), { c2D.Radius * 2.0f, c2D.Radius * 2.0f, 1.0f });
-				float thickness = (0.05f / (c2D.Radius + maxScale)); // TODO: This probably is a wrong way to calculate thickness
-				Renderer2D::DrawCircle(transform, m_CollisionMeshColor, thickness);
+
+				Renderer2D::DrawDebugCircle(transform, m_CollisionMeshColor);
 			}
 		}
 		else if (m_ShowAllCollisionMesh)
@@ -1001,6 +1003,7 @@ namespace Locus
 					auto& b2D = entity.GetComponent<BoxCollider2DComponent>();
 					auto& tc = entity.GetComponent<TransformComponent>();
 
+					// Combine the box collider offset and size to the transform
 					glm::mat4 transform = tc.GetLocalTransform();
 					transform *= glm::translate(glm::mat4(1.0f), { b2D.Offset.x, b2D.Offset.y, 0.001f })
 						* glm::scale(glm::mat4(1.0f), { b2D.Size.x, b2D.Size.y, 1.0f });
@@ -1016,14 +1019,16 @@ namespace Locus
 					auto& c2D = entity.GetComponent<CircleCollider2DComponent>();
 					auto& tc = entity.GetComponent<TransformComponent>();
 
+					// Combine the box collider offset and size to the transform and
+					// calculate the circle radius for the larger scale axis (x or y).
 					float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
 					glm::mat4 transform = glm::translate(glm::mat4(1.0f), tc.LocalPosition)
 						* glm::rotate(glm::mat4(1.0f), tc.LocalRotation.z, glm::vec3(0, 0, 1))
 						* glm::scale(glm::mat4(1.0f), { maxScale, maxScale, 1.0f });
 					transform *= glm::translate(glm::mat4(1.0f), { c2D.Offset.x, c2D.Offset.y, 0.001f })
 						* glm::scale(glm::mat4(1.0f), { c2D.Radius * 2.0f, c2D.Radius * 2.0f, 1.0f });
-					float thickness = (0.05f / (c2D.Radius + maxScale)); // TODO: This probably is a wrong way to calculate thickness
-					Renderer2D::DrawCircle(transform, m_CollisionMeshColor, thickness);
+
+					Renderer2D::DrawDebugCircle(transform, m_CollisionMeshColor);
 				}
 			}
 		}

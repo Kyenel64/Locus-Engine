@@ -56,6 +56,7 @@ namespace Locus
 			#endif
 			m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 			glfwMaximizeWindow(m_Window);
+			glfwGetWindowSize(m_Window, &(int&)m_Data.Width, &(int&)m_Data.Height); // Set window size after maximizing window
 		}
 		m_Context = GraphicsContext::Create(m_Window);
 		m_Context->Init();

@@ -59,6 +59,7 @@ namespace Locus
 		void DrawCollisionMesh();
 
 	private:
+		glm::vec2 m_WindowSize;
 		// Scene
 		std::string m_SavePath;
 		Ref<Scene> m_ActiveScene;

@@ -58,9 +58,10 @@ namespace Locus
 		m_EditorCamera = EditorCamera(30.0f, 1920.0f / 1080.0f, 0.1f, 1000.0f);
 
 		// TODO: set values on load
-		m_ViewportHeight = 600.0f;
-		m_HierarchyHeight = 400.0f;
-		m_CenterSplitterPos = 1500.0f;
+		m_WindowSize = { Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight() };
+		m_ViewportHeight = 0.7f;
+		m_HierarchyHeight = 0.3f;
+		m_CenterSplitterPos = 0.8f;
 
 		m_CollisionMeshColor = ToGLMVec4(LocusColors::LightBlue);
 		m_FocusOutlineColor = ToGLMVec4(LocusColors::Green);
@@ -77,7 +78,7 @@ namespace Locus
 		LOCUS_PROFILE_FUNCTION();
 		Renderer2D::StatsStartFrame();
 
-		// Resize
+		// On viewport resize
 		if (FramebufferSpecification spec = m_Framebuffer->GetSpecification();
 			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f &&
 			(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
@@ -85,6 +86,13 @@ namespace Locus
 			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		}
+
+		// On window resize
+		if (m_WindowSize.x != Application::Get().GetWindow().GetWidth() || 
+			m_WindowSize.y != Application::Get().GetWindow().GetHeight())
+		{
+			m_WindowSize = { Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight() };
 		}
 
 		Renderer2D::ResetStats();
@@ -638,6 +646,14 @@ namespace Locus
 	{
 		ImGuiIO io = ImGui::GetIO();
 
+		// Table constraints
+		m_CenterSplitterPos = m_CenterSplitterPos > 0.9f ? 0.9f : m_CenterSplitterPos;
+		m_CenterSplitterPos = m_CenterSplitterPos < 0.1f ? 0.1f : m_CenterSplitterPos;
+		m_ViewportHeight = m_ViewportHeight > 0.9f ? 0.9f : m_ViewportHeight;
+		m_ViewportHeight = m_ViewportHeight < 0.1f ? 0.1f : m_ViewportHeight;
+		m_HierarchyHeight = m_HierarchyHeight > 0.9f ? 0.9f : m_HierarchyHeight;
+		m_HierarchyHeight = m_HierarchyHeight < 0.1f ? 0.1f : m_HierarchyHeight;
+
 		// Docked window flags
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 5.0f, 5.0f });
@@ -647,10 +663,10 @@ namespace Locus
 
 		ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
 		// --- Left Table ---
-		if (ImGui::BeginTable("LayoutLeft", 1, ImGuiTableFlags_None, { m_CenterSplitterPos, -1.0f}))
+		if (ImGui::BeginTable("LayoutLeft", 1, ImGuiTableFlags_None, { m_WindowSize.x * m_CenterSplitterPos, -1.0f}))
 		{
 			ImGui::TableNextColumn();
-			ImGui::BeginChild("Frame1", { -1.0f, m_ViewportHeight }, false, childFlags);
+			ImGui::BeginChild("Frame1", { -1.0f, m_WindowSize.y * m_ViewportHeight }, false, childFlags);
 			ImGuiID dockspace_id = ImGui::GetID("Frame1Dockspace");
 			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
 
@@ -669,7 +685,7 @@ namespace Locus
 				ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
 			if (ImGui::IsItemActive())
 			{
-				m_ViewportHeight += io.MouseDelta.y;
+				m_ViewportHeight += io.MouseDelta.y / m_WindowSize.y;
 			}
 
 			ImGui::BeginChild("Frame2", { -1.0f, -1.0f }, false, childFlags);
@@ -694,7 +710,7 @@ namespace Locus
 			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
 		if (ImGui::IsItemActive())
 		{
-			m_CenterSplitterPos += io.MouseDelta.x;
+			m_CenterSplitterPos += io.MouseDelta.x / m_WindowSize.x;
 		}
 		ImGui::SameLine();
 
@@ -702,7 +718,7 @@ namespace Locus
 		if (ImGui::BeginTable("LayoutRight", 1, ImGuiTableFlags_None, { -1.0, -1.0f }))
 		{
 			ImGui::TableNextColumn();
-			ImGui::BeginChild("Frame3", { -1.0f, m_HierarchyHeight }, false, childFlags);
+			ImGui::BeginChild("Frame3", { -1.0f, m_WindowSize.y * m_HierarchyHeight }, false, childFlags);
 
 			m_FrameSizes[2].x = ImGui::GetWindowSize().x;
 			m_FrameSizes[2].y = ImGui::GetWindowSize().y;
@@ -719,7 +735,7 @@ namespace Locus
 				ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
 			if (ImGui::IsItemActive())
 			{
-				m_HierarchyHeight += io.MouseDelta.y;
+				m_HierarchyHeight += io.MouseDelta.y / m_WindowSize.y;
 			}
 
 			ImGui::BeginChild("Frame4", { -1.0f, -1.0f }, false, childFlags);

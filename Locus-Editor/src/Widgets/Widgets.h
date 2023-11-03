@@ -15,15 +15,34 @@ namespace Locus::Widgets
 	// Widget to display name on the left hand side of each property in the properties panel.
 	void DrawControlLabel(const std::string& name, const glm::vec2& size = { 110.0f, 0.0f });
 
+	// Draws the label on the left hand side and a switch on the right.
 	void DrawBoolControl(const std::string& name, float labelWidth, bool& changeValue, bool resetValue = false, Ref<ScriptInstance> instance = nullptr);
+
+	// Draws the label on the left hand side and a text input for chars on the right.
 	void DrawCharControl(const std::string& name, float labelWidth, char& changeValue, char resetValue, Ref<ScriptInstance> instance = nullptr);
+
+	// Draws the label on the left hand side and a color box on the right.
+	// Clicking on the color box will open a pop up for color control.
 	void DrawColorControl(const std::string& name, glm::vec4& colorValue, float labelWidth);
-	void DrawVec2Control(const std::string& name, float labelWidth, glm::vec2& changeValue, const glm::vec2& resetValue = glm::vec2(1.0f), Ref<ScriptInstance> instance = nullptr, float speed = 0.1f, const char* format = "%.3f", float min = 0.0f, float max = 0.0f);
-	void DrawVec3Control(const std::string& name, float labelWidth, glm::vec3& changeValue, const glm::vec3& resetValue = glm::vec3(1.0f), Ref<ScriptInstance> instance = nullptr, float speed = 0.1f, const char* format = "%.3f", float min = 0.0f, float max = 0.0f);
+
+	// Draws the label on the left hand side and two float controls labeled x and y on the right.
+	void DrawVec2Control(const std::string& name, float labelWidth, glm::vec2& changeValue, const glm::vec2& resetValue = glm::vec2(1.0f), 
+		Ref<ScriptInstance> instance = nullptr, float speed = 0.1f, const char* format = "%.3f", float min = 0.0f, float max = 0.0f);
+
+	// Draws the label on the left hand side and three float controls labeled x, y, and z on the right.
+	void DrawVec3Control(const std::string& name, float labelWidth, glm::vec3& changeValue, const glm::vec3& resetValue = glm::vec3(1.0f), 
+		Ref<ScriptInstance> instance = nullptr, float speed = 0.1f, const char* format = "%.3f", float min = 0.0f, float max = 0.0f);
 
 	// Draws a 2x8 grid of buttons for collision filters. 
 	void DrawCollisionGrid(const std::string& name, float labelWidth, uint16_t& changeValue, uint16_t resetValue);
 
+	// Draws an image button. The image is centered within the button. 
+	bool DrawImageButton(const std::string& name, uint32_t imageID, const glm::vec2& size, bool clickable = false);
+
+
+
+	// Templates can not be used in cpp file.
+	
 	// Control widget for floats, doubles, int16_t, int, int64_t, uint16_t, uint32_t, uint64_t.
 	// If instance != nullptr, the widget is only displayed during runtime for scripts. (Weird API. Think of fix.)
 	// If dragClamp == true, slider is clamped to the following ranges.

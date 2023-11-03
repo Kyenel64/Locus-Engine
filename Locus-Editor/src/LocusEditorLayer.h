@@ -46,7 +46,6 @@ namespace Locus
 		void OnScenePlay();
 		void OnPhysicsPlay();
 		void OnSceneStop();
-		void OnScenePause();
 
 		// Layout
 		void DrawLayoutTable();
@@ -64,14 +63,14 @@ namespace Locus
 		std::string m_SavePath;
 		Ref<Scene> m_ActiveScene;
 		Ref<Scene> m_EditorScene;
-		enum class SceneState { Edit = 0, Play = 1, Pause = 2, Physics = 3};
+		enum class SceneState { Edit = 0, Play, Pause, Physics, PhysicsPause};
 		SceneState m_SceneState = SceneState::Edit;
 
 		// Textures
 		Ref<Texture2D> m_PlayButton;
 		Ref<Texture2D> m_PauseButton;
 		Ref<Texture2D> m_StopButton;
-		Ref<Texture2D> m_SimulatePhysicsButton;
+		Ref<Texture2D> m_PhysicsButton;
 
 		// Viewport
 		Ref<Framebuffer> m_Framebuffer;

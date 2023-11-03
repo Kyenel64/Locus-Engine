@@ -7,6 +7,8 @@
 #include <glm/gtx/matrix_decompose.hpp>
 #include <ImGuizmo.h>
 
+#include "Widgets/Widgets.h"
+
 namespace Locus
 {
 	extern const std::filesystem::path g_ProjectPath;
@@ -17,7 +19,7 @@ namespace Locus
 		m_PlayButton = Texture2D::Create("resources/icons/PlayButton.png");
 		m_StopButton = Texture2D::Create("resources/icons/StopButton.png");
 		m_PauseButton = Texture2D::Create("resources/icons/PauseButton.png");
-		m_SimulatePhysicsButton = Texture2D::Create("resources/icons/SimulatePhysicsButton.png");
+		m_PhysicsButton = Texture2D::Create("resources/icons/SimulatePhysicsButton.png");
 	}
 
 	LocusEditorLayer::~LocusEditorLayer()
@@ -126,6 +128,10 @@ namespace Locus
 				RenderCommand::Clear();
 				m_ActiveScene->OnUpdatePhysics(deltaTime, m_EditorCamera);
 				m_EditorCamera.OnUpdate(deltaTime); // These are camera specific update commands. Actual rendering is in scene object.
+				break;
+			}
+			case SceneState::PhysicsPause:
+			{
 				break;
 			}
 		}
@@ -637,11 +643,6 @@ namespace Locus
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
-	void LocusEditorLayer::OnScenePause()
-	{
-		m_SceneState = SceneState::Pause;
-	}
-
 	void LocusEditorLayer::DrawLayoutTable()
 	{
 		ImGuiIO io = ImGui::GetIO();
@@ -766,6 +767,7 @@ namespace Locus
 		ImGui::PushStyleColor(ImGuiCol_HeaderActive, LocusColors::Grey);
 		if (ImGui::BeginMainMenuBar())
 		{
+			// --- Menu buttons -----------------------------------------------
 			if (ImGui::BeginMenu("File"))
 			{
 				if (ImGui::MenuItem("New", "Ctrl+N"))
@@ -806,62 +808,77 @@ namespace Locus
 				ImGui::EndMenu();
 			}
 
-			float avail = ImGui::GetWindowSize().x;
+
 
 			// --- Runtime buttons --------------------------------------------
-			// Background
-			ImDrawList* draw_list = ImGui::GetWindowDrawList();
-			ImVec2 bgSize = { 100.0f, 22.0f };
-			float bgOffset = (avail - bgSize.x) * 0.5f;
-			float menuPadding = 10.0f;
-			ImVec2 bgTopLeft = { bgOffset, ImGui::GetWindowPos().y + menuPadding };
-			ImVec2 bgBottomRight = { bgOffset + bgSize.x, ImGui::GetWindowPos().y + menuPadding + bgSize.y };
-			draw_list->AddRectFilled(bgTopLeft, bgBottomRight, ImColor(LocusColors::LightGrey), 3.0f, ImDrawFlags_None);
+			// For each button we check if the button is clickable in the current scene state.
+
+			glm::vec2 buttonSize = { 60.0f, 25.0f };
+			float buttonXSpacing = 3.0f;
+			float buttonYSpacing = 6.0f;
+			bool clickable = false;
+
+			// Calculate x button position: Center of window - ( half of number of buttons * button width and x spacing )
+			float firstButtonPos = (m_WindowSize.x * 0.5f) - (2.0f * (buttonSize.x + buttonXSpacing));
+
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { buttonXSpacing, -1.0f });
+			ImGui::SetCursorPosX(firstButtonPos);
 
 			// Play button
-			float buttonSize = 20.0f;
-			float playOffset = ((avail - buttonSize) * 0.5f) - (bgSize.x * 0.33f) + 3.0f;
-			ImGui::SetCursorPosX(playOffset);
-			ImGui::SetCursorPosY(11.0f);
-			ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Transparent);
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Transparent);
-			// TODO: Fix texture resolution causing jagged edges
-			if (ImGui::ImageButton((ImTextureID)(uint64_t)m_PlayButton->GetRendererID(), ImVec2(buttonSize, buttonSize), ImVec2(0, 0), ImVec2(1, 1), 0))
+			if (m_SceneState == SceneState::Edit || m_SceneState == SceneState::Pause)
+				clickable = true;
+			else
+				clickable = false;
+			ImGui::SetCursorPosY(buttonYSpacing);
+			if (Widgets::DrawImageButton("##PlayButton", m_PlayButton->GetRendererID(), buttonSize, clickable))
 			{
 				if (m_SceneState == SceneState::Edit)
 					OnScenePlay();
-			}
-
-			// Pause button
-			float pauseOffset = ((avail - buttonSize) * 0.5f);
-			ImGui::SetCursorPosX(pauseOffset);
-			ImGui::SetCursorPosY(11.0f);
-			if (ImGui::ImageButton((ImTextureID)(uint64_t)m_PauseButton->GetRendererID(), ImVec2(buttonSize, buttonSize), ImVec2(0, 0), ImVec2(1, 1), 0))
-			{
-				if (m_SceneState == SceneState::Play)
-					OnScenePause();
 				else if (m_SceneState == SceneState::Pause)
 					m_SceneState = SceneState::Play;
 			}
 
-			// Stop button
-			float stopOffset = ((avail - buttonSize) * 0.5f + (bgSize.x * 0.33f));
-			ImGui::SetCursorPosX(stopOffset);
-			ImGui::SetCursorPosY(11.0f);
-			if (ImGui::ImageButton((ImTextureID)(uint64_t)m_StopButton->GetRendererID(), ImVec2(buttonSize, buttonSize), ImVec2(0, 0), ImVec2(1, 1), 0))
-			{
-				if (m_SceneState == SceneState::Play || m_SceneState == SceneState::Pause || m_SceneState == SceneState::Physics)
-					OnSceneStop();
-			}
-
-			if (ImGui::ImageButton((ImTextureID)(uint64_t)m_SimulatePhysicsButton->GetRendererID(), ImVec2(buttonSize, buttonSize), ImVec2(0, 1), ImVec2(1, 0), 0))
+			// Physics button
+			if (m_SceneState == SceneState::Edit || m_SceneState == SceneState::PhysicsPause)
+				clickable = true;
+			else
+				clickable = false;
+			ImGui::SetCursorPosY(buttonYSpacing);
+			if (Widgets::DrawImageButton("##PhysicsButton", m_PhysicsButton->GetRendererID(), buttonSize, clickable))
 			{
 				if (m_SceneState == SceneState::Edit)
 					OnPhysicsPlay();
+				else if (m_SceneState == SceneState::PhysicsPause)
+					m_SceneState = SceneState::Physics;
 			}
 
-			ImGui::PopStyleColor(3);
+			// Pause button
+			if (m_SceneState == SceneState::Play || m_SceneState == SceneState::Physics)
+				clickable = true;
+			else
+				clickable = false;
+			ImGui::SetCursorPosY(buttonYSpacing);
+			if (Widgets::DrawImageButton("##PauseButton", m_PauseButton->GetRendererID(), buttonSize, clickable))
+			{
+				if (m_SceneState == SceneState::Play)
+					m_SceneState = SceneState::Pause;
+				else if (m_SceneState == SceneState::Physics)
+					m_SceneState = SceneState::PhysicsPause;
+			}
+
+			// Stop button
+			if (m_SceneState != SceneState::Edit)
+				clickable = true;
+			else
+				clickable = false;
+			ImGui::SetCursorPosY(buttonYSpacing);
+			if (Widgets::DrawImageButton("##StopButton", m_StopButton->GetRendererID(), buttonSize, clickable))
+			{
+				if (m_SceneState != SceneState::Edit)
+					OnSceneStop();
+			}
+
+			ImGui::PopStyleVar();
 
 			ImGui::EndMainMenuBar();
 		}

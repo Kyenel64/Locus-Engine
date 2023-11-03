@@ -442,4 +442,25 @@ namespace Locus::Widgets
 
 		ImGui::PopItemWidth();
 	}
+
+	bool Widgets::DrawImageButton(const std::string& name, uint32_t imageID, const glm::vec2& size, bool clickable)
+	{
+		std::string label = "##" + name;
+		bool pressed = false;
+		ImDrawList* draw_list = ImGui::GetWindowDrawList();
+		// Center of window + center of button + image offset
+		ImVec2 topLeft = { ImGui::GetCursorPosX() + ImGui::GetWindowPos().x + (size.x * 0.5f) - (size.y * 0.5f), ImGui::GetCursorPosY() + ImGui::GetWindowPos().y};
+		ImVec2 botRight = { topLeft.x + size.y, topLeft.y + size.y };
+		
+		ImVec4 tint;
+		if (clickable == true)
+			tint = { 1.0f, 1.0f, 1.0f, 1.0f };
+		else
+			tint = { 0.7f, 0.7f, 0.7f, 1.0f };
+		
+		pressed = ImGui::Button(label.c_str(), {size.x, size.y});
+		draw_list->AddImage((ImTextureID)(uint64_t)imageID, topLeft, botRight, { 0, 0 }, { 1, 1 }, ImGui::GetColorU32(tint));
+
+		return pressed;
+	}
 }

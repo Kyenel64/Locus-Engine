@@ -57,7 +57,7 @@ namespace Locus
 		m_PropertiesPanel.SetContext(m_ActiveScene);
 
 		// Editor Camera
-		m_EditorCamera = EditorCamera(30.0f, 1920.0f / 1080.0f, 0.1f, 1000.0f);
+		m_EditorCamera = EditorCamera(30.0f, 1920.0f / 1080.0f, 0.1f, 10000.0f);
 
 		// TODO: set values on load
 		m_WindowSize = { Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight() };

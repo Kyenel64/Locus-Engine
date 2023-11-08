@@ -38,6 +38,11 @@ namespace Locus
 		int EntityID;
 	};
 
+	struct GridVertex
+	{
+		int Index;
+	};
+
 	struct Renderer2DData
 	{
 		static const uint32_t MaxQuads = 20000;
@@ -57,6 +62,10 @@ namespace Locus
 		Ref<VertexBuffer> LineVB;
 		Ref<Shader> LineShader;
 
+		Ref<VertexArray> GridVA;
+		Ref<VertexBuffer> GridVB;
+		Ref<Shader> GridShader;
+
 		uint32_t QuadIndexCount = 0;
 		QuadVertex* QuadVertexBufferBase = nullptr;
 		QuadVertex* QuadVertexBufferPtr = nullptr;
@@ -68,6 +77,10 @@ namespace Locus
 		uint32_t LineVertexCount = 0;
 		LineVertex* LineVertexBufferBase = nullptr;
 		LineVertex* LineVertexBufferPtr = nullptr;
+
+		uint32_t GridIndexCount = 0;
+		GridVertex* GridVertexBufferBase = nullptr;
+		GridVertex* GridVertexBufferPtr = nullptr;
 
 		float LineWidth = 2.0f;
 
@@ -155,6 +168,29 @@ namespace Locus
 		s_Data.LineVA->AddVertexBuffer(s_Data.LineVB);
 		s_Data.LineVertexBufferBase = new LineVertex[s_Data.MaxVertices];
 
+		// --- Grid -----------------------------------------------------------
+		s_Data.GridVA = VertexArray::Create();
+		// Create VB
+		s_Data.GridVB = VertexBuffer::Create(4 * sizeof(GridVertex));
+		s_Data.GridVB->SetLayout({
+			{ ShaderDataType::Int, "a_Index"}
+			});
+		s_Data.GridVA->AddVertexBuffer(s_Data.GridVB);
+		// Create IB
+		uint32_t* gridIndices = new uint32_t[6];
+		gridIndices[0] = 0;
+		gridIndices[1] = 1;
+		gridIndices[2] = 2;
+						 
+		gridIndices[3] = 2;
+		gridIndices[4] = 3;
+		gridIndices[5] = 0;
+
+		Ref<IndexBuffer> gridIB = IndexBuffer::Create(gridIndices, 6);
+		s_Data.GridVA->SetIndexBuffer(gridIB);
+		delete[] gridIndices;
+		s_Data.GridVertexBufferBase = new GridVertex[4];
+
 		// --- Initializations ------------------------------------------------
 		// Create a base texture for single color textures.
 		s_Data.WhiteTexture = Texture2D::Create(1, 1);
@@ -169,6 +205,7 @@ namespace Locus
 		s_Data.QuadShader = Shader::Create("resources/shaders/2DQuad.glsl");
 		s_Data.CircleShader = Shader::Create("resources/shaders/2DCircle.glsl");
 		s_Data.LineShader = Shader::Create("resources/shaders/2DLine.glsl");
+		s_Data.GridShader = Shader::Create("resources/shaders/GridShader.glsl"); // temp
 		s_Data.TextureSlots[0] = s_Data.WhiteTexture;
 
 		// Initialize quad data
@@ -190,6 +227,9 @@ namespace Locus
 		LOCUS_PROFILE_FUNCTION();
 
 		delete[] s_Data.QuadVertexBufferBase;
+		delete[] s_Data.CircleVertexBufferBase;
+		delete[] s_Data.LineVertexBufferBase;
+		delete[] s_Data.GridVertexBufferBase;
 	}
 
 	void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform)
@@ -240,6 +280,9 @@ namespace Locus
 		s_Data.LineVertexCount = 0;
 		s_Data.LineVertexBufferPtr = s_Data.LineVertexBufferBase;
 
+		s_Data.GridIndexCount = 0;
+		s_Data.GridVertexBufferPtr = s_Data.GridVertexBufferBase;
+
 		s_Data.TextureSlotIndex = 1;
 	}
 
@@ -282,6 +325,17 @@ namespace Locus
 
 			s_Data.Stats.DrawCalls++;
 		}
+
+		if (s_Data.GridIndexCount)
+		{
+			uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.GridVertexBufferPtr - (uint8_t*)s_Data.GridVertexBufferBase);
+			s_Data.GridVB->SetData(s_Data.GridVertexBufferBase, dataSize);
+
+			s_Data.GridShader->Bind();
+			RenderCommand::DrawIndexed(s_Data.GridVA, s_Data.GridIndexCount);
+
+			s_Data.Stats.DrawCalls++;
+		}
 	}
 
 	void Renderer2D::FlushAndReset()
@@ -296,6 +350,9 @@ namespace Locus
 
 		s_Data.LineVertexCount = 0;
 		s_Data.LineVertexBufferPtr = s_Data.LineVertexBufferBase;
+
+		s_Data.GridIndexCount = 0;
+		s_Data.GridVertexBufferPtr = s_Data.GridVertexBufferBase;
 
 		s_Data.TextureSlotIndex = 1;
 	}
@@ -487,6 +544,19 @@ namespace Locus
 		DrawLine(points[1], points[2], color);
 		DrawLine(points[2], points[3], color);
 		DrawLine(points[3], points[0], color);
+	}
+
+	void Renderer2D::DrawGrid()
+	{
+		LOCUS_PROFILE_FUNCTION();
+
+		for (uint32_t i = 0; i < 4; i++)
+		{
+			s_Data.GridVertexBufferPtr->Index = i;
+			s_Data.GridVertexBufferPtr++;
+		}
+
+		s_Data.GridIndexCount += 6;
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)

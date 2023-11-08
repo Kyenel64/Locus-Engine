@@ -276,6 +276,9 @@ namespace Locus
 			}
 		}
 
+		// 3D grid plane
+		Renderer2D::DrawGrid();
+
 		Renderer2D::EndScene();
 	}
 

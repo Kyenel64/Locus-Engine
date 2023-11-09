@@ -27,34 +27,43 @@ namespace Locus
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
 		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar;
-		//ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { });
 		ImGui::Begin(" Scene Hierarchy ", false, windowFlags);
 
-		// --- Scene Hierarchy Panel ------------------------------------------
-		// Top bar
+		// --- Top bar ---
 		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Grey);
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Grey);
 		if (ImGui::ImageButton((ImTextureID)(uintptr_t)m_PlusButton->GetRendererID(), { 15.0f, 15.0f }))
+			ImGui::OpenPopup("ButtonPopup");
+		if (ImGui::IsItemHovered())
+			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+		// Popup when clicking button. 
+		if (ImGui::BeginPopupContextWindow("ButtonPopup", ImGuiPopupFlags_MouseButtonLeft))
 		{
-			// TODO: Functionality
+			if (ImGui::MenuItem("Create Empty Entity"))
+				CommandHistory::AddCommand(new CreateEntityCommand(m_ActiveScene, "Empty Entity"));
+			ImGui::EndPopup();
 		}
-		ImGui::PopStyleColor();
+		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
 
+		// --- Search bar ---
 		char buffer[256];
 		memset(buffer, 0, sizeof(buffer));
 		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
 		ImGui::InputText("##Search", buffer, sizeof(buffer), ImGuiInputTextFlags_None); // TODO: Functionality
 		ImGui::PopItemWidth();
 
-		// Hierarchy panel
+		// --- Hierarchy window ---
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.0f);
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, LocusColors::Grey);
 		ImGui::BeginChild("Hierarchy");
 		
+		// Display each entity
 		if (m_ActiveScene)
 		{
-			// Display each entity
 			m_ActiveScene->m_Registry.sort<TagComponent>([&](entt::entity lhs, entt::entity rhs)
 				{
 					return m_ActiveScene->m_Registry.get<TagComponent>(lhs).HierarchyPos < m_ActiveScene->m_Registry.get<TagComponent>(rhs).HierarchyPos;
@@ -70,20 +79,19 @@ namespace Locus
 						DrawEntityNode(entity);
 				}
 			}
-
-			// Select nothing if clicking in blank space
-			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered() || !m_SelectedEntity.IsValid())
-				m_SelectedEntity = {};
-
-			// Open pop up menu when right clicking on blank space.
-			if (ImGui::BeginPopupContextWindow(0, 1 | ImGuiPopupFlags_NoOpenOverItems))
-			{
-				if (ImGui::MenuItem("Create Empty Entity"))
-					CommandHistory::AddCommand(new CreateEntityCommand(m_ActiveScene, "Empty Entity"));
-				ImGui::EndPopup();
-			}
 		}
 
+		// Select nothing if clicking in blank space
+		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered() || !m_SelectedEntity.IsValid())
+			m_SelectedEntity = {};
+
+		// Popup when clicking in empty space.
+		if (ImGui::BeginPopupContextWindow("HierarchyPopup", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
+		{
+			if (ImGui::MenuItem("Create Empty Entity"))
+				CommandHistory::AddCommand(new CreateEntityCommand(m_ActiveScene, "Empty Entity"));
+			ImGui::EndPopup();
+		}
 		ImGui::EndChild();
 		ImGui::PopStyleColor();
 		ImGui::PopStyleVar();

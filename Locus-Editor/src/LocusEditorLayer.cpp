@@ -265,6 +265,36 @@ namespace Locus
 			{
 				if (ImGui::MenuItem("Enable collision mesh")) // TODO: Enable/Disable
 					m_ShowAllCollisionMesh = !m_ShowAllCollisionMesh;
+
+				// Background color
+				glm::vec4 bgColor = m_EditorCamera.GetBackgroundColor();
+				if (ImGui::ColorEdit4("Background Color", glm::value_ptr(bgColor)))
+					m_EditorCamera.SetBackgroundColor(bgColor);
+
+				// Grid visibility
+				bool gridEnabled = m_EditorCamera.GetGridVisibility();
+				if (ImGui::Checkbox("Grid Visibility", &gridEnabled))
+					m_EditorCamera.SetGridVisibility(gridEnabled);
+
+				// Grid scale
+				float gridScale = m_EditorCamera.GetGridScale();
+				if (ImGui::DragFloat("Grid Scale", &gridScale))
+					m_EditorCamera.SetGridScale(gridScale);
+
+				// Grid color
+				glm::vec4 gridColor = m_EditorCamera.GetGridColor();
+				if (ImGui::ColorEdit4("Grid Color", glm::value_ptr(gridColor)))
+					m_EditorCamera.SetGridColor(gridColor);
+
+				// Near Clip
+				float nearClip = m_EditorCamera.GetNearClip();
+				if (ImGui::DragFloat("Near Clip", &nearClip))
+					m_EditorCamera.SetNearClip(nearClip);
+
+				// Far Clip
+				float farClip = m_EditorCamera.GetFarClip();
+				if (ImGui::DragFloat("Far Clip", &farClip))
+					m_EditorCamera.SetFarClip(farClip);
 				ImGui::EndMenu();
 			}
 

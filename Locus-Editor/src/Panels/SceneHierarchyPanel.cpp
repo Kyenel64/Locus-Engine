@@ -37,7 +37,7 @@ namespace Locus
 			ImGui::OpenPopup("ButtonPopup");
 
 		// Popup when clicking button. 
-		if (ImGui::BeginPopupContextWindow("ButtonPopup", ImGuiPopupFlags_MouseButtonLeft))
+		if (ImGui::BeginPopupContextWindow("ButtonPopup"))
 		{
 			if (ImGui::MenuItem("Create Empty Entity"))
 				CommandHistory::AddCommand(new CreateEntityCommand(m_ActiveScene, "Empty Entity"));

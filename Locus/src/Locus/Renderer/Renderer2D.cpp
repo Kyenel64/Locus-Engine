@@ -99,6 +99,16 @@ namespace Locus
 		};
 		CameraData CameraBuffer;
 		Ref<UniformBuffer> CameraUniformBuffer;
+
+		struct GridData
+		{
+			glm::vec4 Color;
+			float Near;
+			float Far;
+			float GridScale;
+		};
+		GridData GridBuffer;
+		Ref<UniformBuffer> GridUniformBuffer;
 	};
 
 	static Renderer2DData s_Data;
@@ -220,6 +230,7 @@ namespace Locus
 		s_Data.TexCoords[3] = { 0.0f, 1.0f };
 
 		s_Data.CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DData::CameraData), 0);
+		s_Data.GridUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DData::GridData), 1);
 	}
 
 	void Renderer2D::Shutdown()
@@ -258,6 +269,13 @@ namespace Locus
 
 		s_Data.CameraBuffer.ViewProjection = camera.GetViewProjectionMatrix();
 		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer2DData::CameraData));
+
+		// Editor grid
+		s_Data.GridBuffer.Color = camera.GetGridColor();
+		s_Data.GridBuffer.Near = camera.GetNearClip();
+		s_Data.GridBuffer.Far = camera.GetFarClip();
+		s_Data.GridBuffer.GridScale = camera.GetGridScale();
+		s_Data.GridUniformBuffer->SetData(&s_Data.GridBuffer, sizeof(Renderer2DData::GridData));
 
 		StartBatch();
 	}

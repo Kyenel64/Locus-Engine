@@ -37,7 +37,7 @@ namespace Locus::Widgets
 	void DrawCollisionGrid(const std::string& name, float labelWidth, uint16_t& changeValue, uint16_t resetValue);
 
 	// Draws an image button. The image is centered within the button. 
-	bool DrawImageButton(const std::string& name, uint32_t imageID, const glm::vec2& size, bool clickable = false);
+	bool DrawImageButton(const std::string& name, uint32_t imageID, const glm::vec2& size, bool clickable = true);
 
 
 

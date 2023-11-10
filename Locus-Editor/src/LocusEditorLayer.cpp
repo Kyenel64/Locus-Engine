@@ -59,11 +59,12 @@ namespace Locus
 		// Editor Camera
 		m_EditorCamera = EditorCamera(30.0f, 1920.0f / 1080.0f, 0.1f, 10000.0f);
 
-		// TODO: set values on load
 		m_WindowSize = { Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight() };
+
+		// TODO: serialize
 		m_ViewportHeight = 0.7f;
 		m_HierarchyHeight = 0.3f;
-		m_CenterSplitterPos = 0.8f;
+		m_CenterSplitterPos = 0.79f;
 
 		m_CollisionMeshColor = ToGLMVec4(LocusColors::LightBlue);
 		m_FocusOutlineColor = ToGLMVec4(LocusColors::Green);
@@ -443,8 +444,19 @@ namespace Locus
 				m_GizmoType = ImGuizmo::OPERATION::ROTATE;
 				break;
 			case Key::R:
-				m_GizmoType = ImGuizmo::OPERATION::SCALE;
+			{
+
+				if (control && shift)
+				{
+					ScriptEngine::ReloadScripts();
+					m_PropertiesPanel.m_ScriptClasses = ScriptEngine::GetClassNames();
+				}
+				else
+				{
+					m_GizmoType = ImGuizmo::OPERATION::SCALE;
+				}
 				break;
+			}
 		}
 
 		return true;

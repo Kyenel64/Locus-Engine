@@ -35,8 +35,6 @@ namespace Locus
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Grey);
 		if (ImGui::ImageButton((ImTextureID)(uintptr_t)m_PlusButton->GetRendererID(), { 15.0f, 15.0f }))
 			ImGui::OpenPopup("ButtonPopup");
-		if (ImGui::IsItemHovered())
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 
 		// Popup when clicking button. 
 		if (ImGui::BeginPopupContextWindow("ButtonPopup", ImGuiPopupFlags_MouseButtonLeft))

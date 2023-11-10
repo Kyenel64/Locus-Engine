@@ -31,8 +31,8 @@ namespace Locus
 
 		inline void SetViewportSize(float width, float height) { m_ViewportWidth = width; m_ViewportHeight = height; CalculateProjection(); }
 
-		const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; } // Note: Usually only use const& as return if the returning value is a member or static variable.
-		glm::mat4 GetViewProjectionMatrix() const { return m_Projection * m_ViewMatrix; } // Returning by value since returning value is not member or static.
+		const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; }
+		glm::mat4 GetViewProjectionMatrix() const { return m_Projection * m_ViewMatrix; }
 
 		glm::vec3 GetForwardDirection() const;
 		glm::vec3 GetRightDirection() const;
@@ -61,8 +61,8 @@ namespace Locus
 		glm::vec3 m_Position = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 m_FocalPoint = { 0.0f, 0.0f, 0.0f };
 
-		float m_Distance = 30.0f;
-		float m_Pitch = 0.0f, m_Yaw = 0.0f;
+		float m_Distance = 20.0f;
+		float m_Pitch = 0.5f, m_Yaw = -0.785f;
 
 		float m_ViewportWidth = 1920.0f, m_ViewportHeight = 1080.0f;
 		glm::vec2 m_InitialMousePosition = { 0.0f, 0.0f };

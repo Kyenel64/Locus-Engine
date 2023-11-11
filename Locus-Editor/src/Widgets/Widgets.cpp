@@ -12,11 +12,13 @@ namespace Locus::Widgets
 {
 	void DrawControlLabel(const std::string& name, const glm::vec2& size)
 	{
+		ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, { 0.0f, 0.5f });
 		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Transparent);
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Transparent);
 		ImGui::Button(name.c_str(), { size.x, size.y });
 		ImGui::PopStyleColor(3);
+		ImGui::PopStyleVar();
 	}
 
 	void DrawBoolControl(const std::string& name, float labelWidth, bool& changeValue, bool resetValue, Ref<ScriptInstance> instance)
@@ -459,7 +461,7 @@ namespace Locus::Widgets
 			tint = { 0.7f, 0.7f, 0.7f, 1.0f };
 		
 		pressed = ImGui::Button(label.c_str(), {size.x, size.y});
-		draw_list->AddImage((ImTextureID)(uint64_t)imageID, topLeft, botRight, { 0, 0 }, { 1, 1 }, ImGui::GetColorU32(tint));
+		draw_list->AddImage((ImTextureID)(uint64_t)imageID, topLeft, botRight, { 0, 1 }, { 1, 0 }, ImGui::GetColorU32(tint));
 
 		return pressed;
 	}

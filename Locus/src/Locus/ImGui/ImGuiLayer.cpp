@@ -13,8 +13,8 @@ namespace Locus
 {
 	ImVec4 LocusColors::Black =	{ 0.0f, 0.0f, 0.0f, 1.0f };
 	ImVec4 LocusColors::DarkGrey = { 0.132f, 0.125f, 0.117f, 1.0f };
-	ImVec4 LocusColors::MediumDarkGrey = { 0.246f, 0.234f, 0.211f, 1.0f };
-	ImVec4 LocusColors::Grey = { 0.207f, 0.195f, 0.176f, 1.0f };
+	ImVec4 LocusColors::MediumDarkGrey = { 0.207f, 0.195f, 0.176f, 1.0f };
+	ImVec4 LocusColors::Grey = { 0.246f, 0.234f, 0.211f, 1.0f };
 	ImVec4 LocusColors::LightGrey = { 0.289f, 0.281f, 0.266f, 1.0f };
 	ImVec4 LocusColors::White = { 1.0f, 1.0f, 1.0f, 1.0f };
 	ImVec4 LocusColors::Pink = { 0.9f, 0.4f, 0.4f, 1.0f };
@@ -149,26 +149,26 @@ namespace Locus
 		colors[ImGuiCol_HeaderActive] = LocusColors::Orange;
 
 		// Buttons
-		colors[ImGuiCol_Button] = LocusColors::Grey;
+		colors[ImGuiCol_Button] = LocusColors::MediumDarkGrey;
 		colors[ImGuiCol_ButtonHovered] = LocusColors::LightGrey;
 		colors[ImGuiCol_ButtonActive] = LocusColors::LightGrey;
 
 		// Frame BG
-		colors[ImGuiCol_FrameBg] = LocusColors::Grey;
+		colors[ImGuiCol_FrameBg] = LocusColors::MediumDarkGrey;
 		colors[ImGuiCol_FrameBgHovered] = LocusColors::Orange;
 		colors[ImGuiCol_FrameBgActive] = LocusColors::LightGrey;
 
 		// Tabs
-		colors[ImGuiCol_Tab] = LocusColors::MediumDarkGrey;
+		colors[ImGuiCol_Tab] = LocusColors::Grey;
 		colors[ImGuiCol_TabHovered] = LocusColors::LightGrey;
 		colors[ImGuiCol_TabActive] = LocusColors::LightGrey;
-		colors[ImGuiCol_TabUnfocused] = LocusColors::MediumDarkGrey;
+		colors[ImGuiCol_TabUnfocused] = LocusColors::Grey;
 		colors[ImGuiCol_TabUnfocusedActive] = LocusColors::LightGrey;
 
 		// Title
-		colors[ImGuiCol_TitleBgActive] = LocusColors::Grey;
-		colors[ImGuiCol_TitleBg] = LocusColors::Grey;
-		colors[ImGuiCol_TitleBgCollapsed] = LocusColors::Grey;
+		colors[ImGuiCol_TitleBgActive] = LocusColors::MediumDarkGrey;
+		colors[ImGuiCol_TitleBg] = LocusColors::MediumDarkGrey;
+		colors[ImGuiCol_TitleBgCollapsed] = LocusColors::MediumDarkGrey;
 
 		// Border
 		colors[ImGuiCol_Border] = LocusColors::Orange;

@@ -21,7 +21,7 @@ namespace Locus
 	{
 		m_ActiveScene = context;
 		m_SelectedEntity = {};
-		m_PlusButton = Texture2D::Create("resources/icons/PlusButton.png");
+		m_PlusIcon = Texture2D::Create("resources/icons/PlusIcon.png");
 	}
 
 	void SceneHierarchyPanel::OnImGuiRender()
@@ -31,13 +31,13 @@ namespace Locus
 
 		// --- Top bar ---
 		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Grey);
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Grey);
-		if (ImGui::ImageButton((ImTextureID)(uintptr_t)m_PlusButton->GetRendererID(), { 15.0f, 15.0f }))
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::MediumDarkGrey);
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::MediumDarkGrey);
+		if (ImGui::ImageButton((ImTextureID)(uintptr_t)m_PlusIcon->GetRendererID(), { 15.0f, 15.0f }))
 			ImGui::OpenPopup("ButtonPopup");
 
 		// Popup when clicking button. 
-		if (ImGui::BeginPopupContextWindow("ButtonPopup"))
+		if (ImGui::BeginPopup("ButtonPopup"))
 		{
 			if (ImGui::MenuItem("Create Empty Entity"))
 				CommandHistory::AddCommand(new CreateEntityCommand(m_ActiveScene, "Empty Entity"));
@@ -56,7 +56,7 @@ namespace Locus
 
 		// --- Hierarchy window ---
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.0f);
-		ImGui::PushStyleColor(ImGuiCol_ChildBg, LocusColors::Grey);
+		ImGui::PushStyleColor(ImGuiCol_ChildBg, LocusColors::MediumDarkGrey);
 		ImGui::BeginChild("Hierarchy");
 		
 		// Display each entity

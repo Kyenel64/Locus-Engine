@@ -27,7 +27,7 @@ namespace Locus
 		m_SelectedEntity = {};
 		
 		// Create textures
-		m_ShowMoreButton = Texture2D::Create("resources/icons/ShowMoreButton.png");
+		m_ShowMoreIcon = Texture2D::Create("resources/icons/ShowMoreIcon.png");
 		m_FolderIcon = Texture2D::Create("resources/icons/FolderIcon.png");
 
 		m_ScriptClasses = ScriptEngine::GetClassNames();
@@ -164,7 +164,7 @@ namespace Locus
 			ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Transparent);
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::LightGrey);
-			if (ImGui::ImageButton((ImTextureID)(uint64_t)m_ShowMoreButton->GetRendererID(), ImVec2(lineHeight, lineHeight), ImVec2(0, 0), ImVec2(1, 1), 0))
+			if (ImGui::ImageButton((ImTextureID)(uint64_t)m_ShowMoreIcon->GetRendererID(), ImVec2(lineHeight, lineHeight), ImVec2(0, 0), ImVec2(1, 1), 0))
 				ImGui::OpenPopup("Component Settings");
 			ImGui::PopStyleColor(3);
 
@@ -313,8 +313,8 @@ namespace Locus
 				// Sprite
 				Widgets::DrawControlLabel("Sprite", { m_LabelWidth, 50.0f });
 				ImGui::SameLine();
-				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Grey);
-				ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Grey);
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::MediumDarkGrey);
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::MediumDarkGrey);
 				if (component.Texture == nullptr)
 					ImGui::Button("##EmptyTexture", { 50.0f, 50.0f });
 				else

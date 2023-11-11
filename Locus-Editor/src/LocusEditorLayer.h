@@ -48,10 +48,11 @@ namespace Locus
 		void OnSceneStop();
 
 		// Layout
+		void DrawViewport();
 		void DrawLayoutTable();
 		void DrawToolbar();
 		void DrawDebugPanel();
-		void OpenSavePopup();
+		void ProcessSavePopup();
 
 		// Overlay
 		void OnRenderOverlay();
@@ -67,10 +68,14 @@ namespace Locus
 		SceneState m_SceneState = SceneState::Edit;
 
 		// Textures
-		Ref<Texture2D> m_PlayButton;
-		Ref<Texture2D> m_PauseButton;
-		Ref<Texture2D> m_StopButton;
-		Ref<Texture2D> m_PhysicsButton;
+		Ref<Texture2D> m_PlayIcon;
+		Ref<Texture2D> m_PauseIcon;
+		Ref<Texture2D> m_StopIcon;
+		Ref<Texture2D> m_PhysicsIcon;
+		Ref<Texture2D> m_PointerIcon;
+		Ref<Texture2D> m_TranslateIcon;
+		Ref<Texture2D> m_RotateIcon;
+		Ref<Texture2D> m_ScaleIcon;
 
 		// Viewport
 		Ref<Framebuffer> m_Framebuffer;

@@ -16,10 +16,14 @@ namespace Locus
 	LocusEditorLayer::LocusEditorLayer()
 		: Layer("LocusEditorLayer")
 	{
-		m_PlayButton = Texture2D::Create("resources/icons/PlayButton.png");
-		m_StopButton = Texture2D::Create("resources/icons/StopButton.png");
-		m_PauseButton = Texture2D::Create("resources/icons/PauseButton.png");
-		m_PhysicsButton = Texture2D::Create("resources/icons/SimulatePhysicsButton.png");
+		m_PlayIcon = Texture2D::Create("resources/icons/PlayIcon.png");
+		m_StopIcon = Texture2D::Create("resources/icons/StopIcon.png");
+		m_PauseIcon = Texture2D::Create("resources/icons/PauseIcon.png");
+		m_PhysicsIcon = Texture2D::Create("resources/icons/SimulatePhysicsIcon.png");
+		m_PointerIcon = Texture2D::Create("resources/icons/PointerIcon.png");
+		m_TranslateIcon = Texture2D::Create("resources/icons/TranslateIcon.png");
+		m_ScaleIcon = Texture2D::Create("resources/icons/ScaleIcon.png");
+		m_RotateIcon = Texture2D::Create("resources/icons/RotateIcon.png");
 	}
 
 	LocusEditorLayer::~LocusEditorLayer()
@@ -206,122 +210,16 @@ namespace Locus
 		ImGui::PopStyleVar(2);
 		ImGui::PopStyleColor();
 
-		ImGuiStyle& style = ImGui::GetStyle();
-		ImGuiIO& io = ImGui::GetIO();
-
 		DrawLayoutTable();
 
 		ImGui::ShowDemoWindow();
 
-		// --- Save Popup -----------------------------------------------------
-		OpenSavePopup();
-
-
-		// --- Menu Bar -------------------------------------------------------
+		ProcessSavePopup();
 		DrawToolbar();
-
-
-		// --- Viewport window ------------------------------------------------
-		ImGuiWindowFlags viewportFlags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar;
-		if (!Application::Get().GetIsSavedStatus())
-			viewportFlags |= ImGuiWindowFlags_UnsavedDocument;
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
-		ImGui::Begin(" Viewport ", false, viewportFlags);
-		ImGui::PopStyleVar();
-		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
-
-		uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
-		ImGui::Image((void*)(uintptr_t)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
-
-		m_ViewportBounds[0].x = ImGui::GetItemRectMin().x, m_ViewportBounds[0].y = ImGui::GetItemRectMin().y;
-		m_ViewportBounds[1].x = ImGui::GetItemRectMax().x, m_ViewportBounds[1].y = ImGui::GetItemRectMax().y;
-		m_ViewportHovered = ImGui::IsMouseHoveringRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
-		m_ViewportFocused = ImGui::IsWindowFocused();
-
-		ProcessViewportDragDrop();
-
-		// Show gizmo. Checks for first click to prevent moving the object when clicking on the entity.
-		if (m_SelectedEntity && m_GizmoType != -1)
-		{
-			if (!m_GizmoFirstClick)
-				showGizmoUI();
-			else
-				m_GizmoFirstClick = false;
-		}
-		// viewport menu
-		if (ImGui::BeginMenuBar())
-		{
-			if (ImGui::MenuItem("P", "q"))
-				m_GizmoType = -1;
-			if (ImGui::MenuItem("T", "w"))
-				m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
-			if (ImGui::MenuItem("R", "e"))
-				m_GizmoType = ImGuizmo::OPERATION::ROTATE;
-			if (ImGui::MenuItem("S", "r"))
-				m_GizmoType = ImGuizmo::OPERATION::SCALE;
-
-			if (ImGui::BeginMenu("Options"))
-			{
-				if (ImGui::MenuItem("Enable collision mesh")) // TODO: Enable/Disable
-					m_ShowAllCollisionMesh = !m_ShowAllCollisionMesh;
-
-				// Background color
-				glm::vec4 bgColor = m_EditorCamera.GetBackgroundColor();
-				if (ImGui::ColorEdit4("Background Color", glm::value_ptr(bgColor)))
-					m_EditorCamera.SetBackgroundColor(bgColor);
-
-				// Grid visibility
-				bool gridEnabled = m_EditorCamera.GetGridVisibility();
-				if (ImGui::Checkbox("Grid Visibility", &gridEnabled))
-					m_EditorCamera.SetGridVisibility(gridEnabled);
-
-				// Grid scale
-				float gridScale = m_EditorCamera.GetGridScale();
-				if (ImGui::DragFloat("Grid Scale", &gridScale))
-					m_EditorCamera.SetGridScale(gridScale);
-
-				// Grid color
-				glm::vec4 gridColor = m_EditorCamera.GetGridColor();
-				if (ImGui::ColorEdit4("Grid Color", glm::value_ptr(gridColor)))
-					m_EditorCamera.SetGridColor(gridColor);
-
-				// Near Clip
-				float nearClip = m_EditorCamera.GetNearClip();
-				if (ImGui::DragFloat("Near Clip", &nearClip))
-					m_EditorCamera.SetNearClip(nearClip);
-
-				// Far Clip
-				float farClip = m_EditorCamera.GetFarClip();
-				if (ImGui::DragFloat("Far Clip", &farClip))
-					m_EditorCamera.SetFarClip(farClip);
-				ImGui::EndMenu();
-			}
-
-			ImGui::EndMenuBar();
-		}
-		ImGui::End();
-
-
-		// --- Content Browser ------------------------------------------------
-		ImGui::SetNextWindowSize({ m_FrameSizes[1].x, m_FrameSizes[1].y });
-		ImGui::SetNextWindowPos({ m_FramePositions[1].x, m_FramePositions[1].y });
+		DrawViewport();
 		m_ContentBrowserPanel.OnImGuiRender();
-
-
-		// --- Scene Hierarchy ------------------------------------------------
-		ImGui::SetNextWindowSize({ m_FrameSizes[2].x, m_FrameSizes[2].y });
-		ImGui::SetNextWindowPos({ m_FramePositions[2].x, m_FramePositions[2].y });
 		m_SceneHierarchyPanel.OnImGuiRender();
-
-
-		// --- Properties -----------------------------------------------------
-		ImGui::SetNextWindowSize({ m_FrameSizes[3].x, m_FrameSizes[3].y });
-		ImGui::SetNextWindowPos({ m_FramePositions[3].x, m_FramePositions[3].y });
 		m_PropertiesPanel.OnImGuiRender();
-
-
-		// --- Debug panel ---------------------------------------------------
 		DrawDebugPanel();
 
 
@@ -798,6 +696,136 @@ namespace Locus
 		ImGui::PopStyleVar(5);
 	}
 
+	void LocusEditorLayer::DrawViewport()
+	{
+		ImGuiWindowFlags viewportFlags = ImGuiWindowFlags_NoScrollbar;
+		if (!Application::Get().GetIsSavedStatus())
+			viewportFlags |= ImGuiWindowFlags_UnsavedDocument;
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
+		ImGui::Begin(" Viewport ", false, viewportFlags);
+		ImGui::PopStyleVar();
+		
+
+		// --- Viewport toolbar -----------------------------------------------
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 2.0f, 3.0f });
+		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::MediumDarkGrey);
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Grey);
+
+		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3.0f);
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 3.0f);
+
+		if (Widgets::DrawImageButton("PointerButton", m_PointerIcon->GetRendererID(), { 40.0f, 22.0f }))
+			m_GizmoType = -1;
+
+		ImGui::SameLine();
+
+		if (Widgets::DrawImageButton("TranslateButton", m_TranslateIcon->GetRendererID(), { 40.0f, 22.0f }))
+			m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+
+		ImGui::SameLine();
+
+		if (Widgets::DrawImageButton("RotateButton", m_RotateIcon->GetRendererID(), { 40.0f, 22.0f }))
+			m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+
+		ImGui::SameLine();
+
+		if (Widgets::DrawImageButton("ScaleButton", m_ScaleIcon->GetRendererID(), { 40.0f, 22.0f }))
+			m_GizmoType = ImGuizmo::OPERATION::SCALE;
+
+		ImGui::SameLine();
+
+		ImVec2 buttonPos = ImGui::GetCursorPos();
+		if (ImGui::Button("View", { 50.0f, 22.0f }))
+			ImGui::OpenPopup("ViewSettings");
+
+
+		// --- View settings popup --------------------------------------------
+		ImGui::PushStyleColor(ImGuiCol_PopupBg, LocusColors::Grey);
+		ImGui::PushStyleColor(ImGuiCol_Border, LocusColors::DarkGrey);
+		ImGui::SetNextWindowPos({ ImGui::GetWindowPos().x + buttonPos.x, ImGui::GetWindowPos().y + buttonPos.y + 25.0f });
+		if (ImGui::BeginPopup("ViewSettings"))
+		{
+			// Grid visibility
+			Widgets::DrawControlLabel("Collision Mesh");
+			ImGui::SameLine();
+			bool collisionMesh = m_ShowAllCollisionMesh;
+			if (ImGui::Checkbox("##Collision Mesh", &collisionMesh))
+				m_ShowAllCollisionMesh = !m_ShowAllCollisionMesh;
+
+			// Background color
+			Widgets::DrawControlLabel("Background Color");
+			ImGui::SameLine();
+			glm::vec4 bgColor = m_EditorCamera.GetBackgroundColor();
+			if (ImGui::ColorEdit4("##Background Color", glm::value_ptr(bgColor)))
+				m_EditorCamera.SetBackgroundColor(bgColor);
+
+			// Grid visibility
+			Widgets::DrawControlLabel("Grid Visibility");
+			ImGui::SameLine();
+			bool gridEnabled = m_EditorCamera.GetGridVisibility();
+			if (ImGui::Checkbox("##Grid Visibility", &gridEnabled))
+				m_EditorCamera.SetGridVisibility(gridEnabled);
+
+			// Grid scale
+			Widgets::DrawControlLabel("Grid Scale");
+			ImGui::SameLine();
+			float gridScale = m_EditorCamera.GetGridScale();
+			if (ImGui::DragFloat("##Grid Scale", &gridScale))
+				m_EditorCamera.SetGridScale(gridScale);
+
+			// Grid color
+			Widgets::DrawControlLabel("Grid Color");
+			ImGui::SameLine();
+			glm::vec4 gridColor = m_EditorCamera.GetGridColor();
+			if (ImGui::ColorEdit4("##Grid Color", glm::value_ptr(gridColor)))
+				m_EditorCamera.SetGridColor(gridColor);
+
+			// Near Clip
+			Widgets::DrawControlLabel("Near Clip");
+			ImGui::SameLine();
+			float nearClip = m_EditorCamera.GetNearClip();
+			if (ImGui::DragFloat("##Near Clip", &nearClip))
+				m_EditorCamera.SetNearClip(nearClip);
+
+			// Far Clip
+			Widgets::DrawControlLabel("Far Clip");
+			ImGui::SameLine();
+			float farClip = m_EditorCamera.GetFarClip();
+			if (ImGui::DragFloat("##Far Clip", &farClip))
+				m_EditorCamera.SetFarClip(farClip);
+			ImGui::EndPopup();
+		}
+		ImGui::PopStyleColor(2);
+
+		ImGui::PopStyleVar();
+		ImGui::PopStyleColor(2);
+
+
+		// --- Viewport -------------------------------------------------------
+		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
+		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
+		uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
+		ImGui::Image((void*)(uintptr_t)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+
+		m_ViewportBounds[0].x = ImGui::GetItemRectMin().x, m_ViewportBounds[0].y = ImGui::GetItemRectMin().y;
+		m_ViewportBounds[1].x = ImGui::GetItemRectMax().x, m_ViewportBounds[1].y = ImGui::GetItemRectMax().y;
+		m_ViewportHovered = ImGui::IsMouseHoveringRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+		m_ViewportFocused = ImGui::IsWindowFocused();
+
+		ProcessViewportDragDrop();
+
+		// --- Gizmo ----------------------------------------------------------
+		// Checks for first click to prevent moving the object when clicking on the entity.
+		if (m_SelectedEntity && m_GizmoType != -1)
+		{
+			if (!m_GizmoFirstClick)
+				showGizmoUI();
+			else
+				m_GizmoFirstClick = false;
+		}
+		ImGui::End();
+	}
+
 	void LocusEditorLayer::DrawToolbar()
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { -1.0f, 10.0f });
@@ -805,8 +833,8 @@ namespace Locus
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 12.0f, -1.0f });
 		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, LocusColors::DarkGrey);
 		ImGui::PushStyleColor(ImGuiCol_Header, LocusColors::DarkGrey);
-		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, LocusColors::Grey);
-		ImGui::PushStyleColor(ImGuiCol_HeaderActive, LocusColors::Grey);
+		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, LocusColors::MediumDarkGrey);
+		ImGui::PushStyleColor(ImGuiCol_HeaderActive, LocusColors::MediumDarkGrey);
 		if (ImGui::BeginMainMenuBar())
 		{
 			// --- Menu buttons -----------------------------------------------
@@ -872,7 +900,7 @@ namespace Locus
 			else
 				clickable = false;
 			ImGui::SetCursorPosY(buttonYSpacing);
-			if (Widgets::DrawImageButton("##PlayButton", m_PlayButton->GetRendererID(), buttonSize, clickable))
+			if (Widgets::DrawImageButton("##PlayButton", m_PlayIcon->GetRendererID(), buttonSize, clickable))
 			{
 				if (m_SceneState == SceneState::Edit)
 					OnScenePlay();
@@ -886,7 +914,7 @@ namespace Locus
 			else
 				clickable = false;
 			ImGui::SetCursorPosY(buttonYSpacing);
-			if (Widgets::DrawImageButton("##PhysicsButton", m_PhysicsButton->GetRendererID(), buttonSize, clickable))
+			if (Widgets::DrawImageButton("##PhysicsButton", m_PhysicsIcon->GetRendererID(), buttonSize, clickable))
 			{
 				if (m_SceneState == SceneState::Edit)
 					OnPhysicsPlay();
@@ -900,7 +928,7 @@ namespace Locus
 			else
 				clickable = false;
 			ImGui::SetCursorPosY(buttonYSpacing);
-			if (Widgets::DrawImageButton("##PauseButton", m_PauseButton->GetRendererID(), buttonSize, clickable))
+			if (Widgets::DrawImageButton("##PauseButton", m_PauseIcon->GetRendererID(), buttonSize, clickable))
 			{
 				if (m_SceneState == SceneState::Play)
 					m_SceneState = SceneState::Pause;
@@ -914,7 +942,7 @@ namespace Locus
 			else
 				clickable = false;
 			ImGui::SetCursorPosY(buttonYSpacing);
-			if (Widgets::DrawImageButton("##StopButton", m_StopButton->GetRendererID(), buttonSize, clickable))
+			if (Widgets::DrawImageButton("##StopButton", m_StopIcon->GetRendererID(), buttonSize, clickable))
 			{
 				if (m_SceneState != SceneState::Edit)
 					OnSceneStop();
@@ -928,7 +956,7 @@ namespace Locus
 		ImGui::PopStyleColor(4);
 	}
 	
-	void LocusEditorLayer::OpenSavePopup()
+	void LocusEditorLayer::ProcessSavePopup()
 	{
 		// --- Save Project Popup ---------------------------------------------
 		if (Application::Get().GetSaveChangesPopupStatus())

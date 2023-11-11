@@ -23,7 +23,7 @@ namespace Locus
 
 		static ImGuiTableFlags tableFlags = ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Resizable
 			| ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg;
-		ImGui::PushStyleColor(ImGuiCol_TableRowBg, LocusColors::Grey);
+		ImGui::PushStyleColor(ImGuiCol_TableRowBg, LocusColors::MediumDarkGrey);
 		if (ImGui::BeginTable("CBTable", 2, tableFlags))
 		{
 			ImGui::TableNextRow(ImGuiTableRowFlags_None, ImGui::GetContentRegionAvail().y);
@@ -65,7 +65,7 @@ namespace Locus
 			columnCount = 1;
 
 		static ImGuiTableFlags flags = ImGuiTableFlags_RowBg;
-		ImGui::PushStyleColor(ImGuiCol_TableRowBg, LocusColors::Grey);
+		ImGui::PushStyleColor(ImGuiCol_TableRowBg, LocusColors::MediumDarkGrey);
 		if (ImGui::BeginTable("DVTable", columnCount, flags))
 		{
 			ImGui::TableNextRow(ImGuiTableRowFlags_None, ImGui::GetContentRegionAvail().y - 40.0f);

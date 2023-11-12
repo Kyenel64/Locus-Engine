@@ -53,6 +53,7 @@ namespace Locus
 		void DrawToolbar();
 		void DrawDebugPanel();
 		void ProcessSavePopup();
+		void ProcessViewSettingsPopup(const glm::vec2& position);
 
 		// Overlay
 		void OnRenderOverlay();

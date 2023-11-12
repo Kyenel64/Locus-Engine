@@ -257,7 +257,7 @@ namespace Locus
 				Widgets::DrawBoolControl("Primary", m_LabelWidth, component.Primary);
 
 				// Background color
-				Widgets::DrawColorControl("Background Color", camera.GetBackgroundColor(), m_LabelWidth);
+				Widgets::DrawColorControl("Background Color", m_LabelWidth, camera.GetBackgroundColor(), { 0.25f, 0.5f, 0.5f, 1.0f });
 
 				// Projection mode dropdown
 				Widgets::DrawControlLabel("Projection", { m_LabelWidth, 0.0f });
@@ -313,6 +313,14 @@ namespace Locus
 				// Sprite
 				Widgets::DrawControlLabel("Sprite", { m_LabelWidth, 50.0f });
 				ImGui::SameLine();
+
+				if (ImGui::IsItemHovered())
+				{
+					ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+					if (ImGui::IsMouseDoubleClicked(0))
+						component.Texture = nullptr;
+				}
+
 				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::MediumDarkGrey);
 				ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::MediumDarkGrey);
 				if (component.Texture == nullptr)
@@ -343,7 +351,7 @@ namespace Locus
 				ImGui::PopStyleColor();
 
 				// Color
-				Widgets::DrawColorControl("Color", component.Color, m_LabelWidth);
+				Widgets::DrawColorControl("Color", m_LabelWidth, component.Color, { 1.0f, 1.0f, 1.0f, 1.0f});
 				// Tiling Factor
 				Widgets::DrawValueControl("Tiling Factor", m_LabelWidth, component.TilingFactor);
 			});
@@ -351,7 +359,7 @@ namespace Locus
 		// --- Circle Renderer Component --------------------------------------
 		DrawComponentUI<CircleRendererComponent>("Circle Renderer", entity, [this](auto& component)
 			{
-				Widgets::DrawColorControl("Color", component.Color, m_LabelWidth);
+				Widgets::DrawColorControl("Color", m_LabelWidth, component.Color, { 1.0f, 1.0f, 1.0f, 1.0f });
 				Widgets::DrawValueControl("Thickness", m_LabelWidth, component.Thickness, 1.0f, nullptr, 0.01f, "%.3f", true, 0.0f, 1.0f);
 				Widgets::DrawValueControl("Fade", m_LabelWidth, component.Fade, 0.005f, nullptr, 0.01f, "%.3f", true, 0.0001f, FLT_MAX);
 			});

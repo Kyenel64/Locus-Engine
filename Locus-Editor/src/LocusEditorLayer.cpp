@@ -734,69 +734,18 @@ namespace Locus
 
 		ImGui::SameLine();
 
+		ImDrawList* draw_list = ImGui::GetWindowDrawList();
+		ImVec2 position = { ImGui::GetWindowPos().x + ImGui::GetCursorPosX() + 3.0f, ImGui::GetWindowPos().y + ImGui::GetCursorPosY() };
+		draw_list->AddLine(position, { position.x, position.y + 22.0f }, ImGui::GetColorU32(LocusColors::Tan), 2.0f);
+
+		ImGui::SameLine();
+
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 8.0f);
 		ImVec2 buttonPos = ImGui::GetCursorPos();
 		if (ImGui::Button("View", { 50.0f, 22.0f }))
 			ImGui::OpenPopup("ViewSettings");
-
-
-		// --- View settings popup --------------------------------------------
-		ImGui::PushStyleColor(ImGuiCol_PopupBg, LocusColors::Grey);
-		ImGui::PushStyleColor(ImGuiCol_Border, LocusColors::DarkGrey);
-		ImGui::SetNextWindowPos({ ImGui::GetWindowPos().x + buttonPos.x, ImGui::GetWindowPos().y + buttonPos.y + 25.0f });
-		if (ImGui::BeginPopup("ViewSettings"))
-		{
-			// Grid visibility
-			Widgets::DrawControlLabel("Collision Mesh");
-			ImGui::SameLine();
-			bool collisionMesh = m_ShowAllCollisionMesh;
-			if (ImGui::Checkbox("##Collision Mesh", &collisionMesh))
-				m_ShowAllCollisionMesh = !m_ShowAllCollisionMesh;
-
-			// Background color
-			Widgets::DrawControlLabel("Background Color");
-			ImGui::SameLine();
-			glm::vec4 bgColor = m_EditorCamera.GetBackgroundColor();
-			if (ImGui::ColorEdit4("##Background Color", glm::value_ptr(bgColor)))
-				m_EditorCamera.SetBackgroundColor(bgColor);
-
-			// Grid visibility
-			Widgets::DrawControlLabel("Grid Visibility");
-			ImGui::SameLine();
-			bool gridEnabled = m_EditorCamera.GetGridVisibility();
-			if (ImGui::Checkbox("##Grid Visibility", &gridEnabled))
-				m_EditorCamera.SetGridVisibility(gridEnabled);
-
-			// Grid scale
-			Widgets::DrawControlLabel("Grid Scale");
-			ImGui::SameLine();
-			float gridScale = m_EditorCamera.GetGridScale();
-			if (ImGui::DragFloat("##Grid Scale", &gridScale))
-				m_EditorCamera.SetGridScale(gridScale);
-
-			// Grid color
-			Widgets::DrawControlLabel("Grid Color");
-			ImGui::SameLine();
-			glm::vec4 gridColor = m_EditorCamera.GetGridColor();
-			if (ImGui::ColorEdit4("##Grid Color", glm::value_ptr(gridColor)))
-				m_EditorCamera.SetGridColor(gridColor);
-
-			// Near Clip
-			Widgets::DrawControlLabel("Near Clip");
-			ImGui::SameLine();
-			float nearClip = m_EditorCamera.GetNearClip();
-			if (ImGui::DragFloat("##Near Clip", &nearClip))
-				m_EditorCamera.SetNearClip(nearClip);
-
-			// Far Clip
-			Widgets::DrawControlLabel("Far Clip");
-			ImGui::SameLine();
-			float farClip = m_EditorCamera.GetFarClip();
-			if (ImGui::DragFloat("##Far Clip", &farClip))
-				m_EditorCamera.SetFarClip(farClip);
-			ImGui::EndPopup();
-		}
-		ImGui::PopStyleColor(2);
-
+		ProcessViewSettingsPopup({ buttonPos.x, buttonPos.y });
+		
 		ImGui::PopStyleVar();
 		ImGui::PopStyleColor(2);
 
@@ -983,6 +932,108 @@ namespace Locus
 			}
 			ImGui::EndPopup();
 		}
+	}
+
+	void LocusEditorLayer::ProcessViewSettingsPopup(const glm::vec2& position)
+	{
+		ImGui::PushStyleColor(ImGuiCol_PopupBg, LocusColors::Grey);
+		ImGui::PushStyleColor(ImGuiCol_Border, LocusColors::Tan);
+		ImGui::SetNextWindowPos({ ImGui::GetWindowPos().x + position.x, ImGui::GetWindowPos().y + position.y + 25.0f });
+		if (ImGui::BeginPopup("ViewSettings"))
+		{
+			// Grid visibility
+			Widgets::DrawControlLabel("Collision Mesh");
+			ImGui::SameLine();
+			if (ImGui::IsItemHovered())
+			{
+				ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+				if (ImGui::IsMouseDoubleClicked(0))
+					m_ShowAllCollisionMesh = false;
+			}
+			bool collisionMesh = m_ShowAllCollisionMesh;
+			if (ImGui::Checkbox("##Collision Mesh", &collisionMesh))
+				m_ShowAllCollisionMesh = !m_ShowAllCollisionMesh;
+
+			// Background color
+			Widgets::DrawControlLabel("Background Color");
+			ImGui::SameLine();
+			if (ImGui::IsItemHovered())
+			{
+				ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+				if (ImGui::IsMouseDoubleClicked(0))
+					m_EditorCamera.SetBackgroundColor({ 0.25f, 0.5f, 0.5f, 1.0f });
+			}
+			glm::vec4 bgColor = m_EditorCamera.GetBackgroundColor();
+			if (ImGui::ColorEdit4("##Background Color", glm::value_ptr(bgColor)))
+				m_EditorCamera.SetBackgroundColor(bgColor);
+
+			// Grid visibility
+			Widgets::DrawControlLabel("Grid Visibility");
+			ImGui::SameLine();
+			if (ImGui::IsItemHovered())
+			{
+				ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+				if (ImGui::IsMouseDoubleClicked(0))
+					m_EditorCamera.SetGridVisibility(true);
+			}
+			bool gridEnabled = m_EditorCamera.GetGridVisibility();
+			if (ImGui::Checkbox("##Grid Visibility", &gridEnabled))
+				m_EditorCamera.SetGridVisibility(gridEnabled);
+
+			// Grid scale
+			Widgets::DrawControlLabel("Grid Scale");
+			ImGui::SameLine();
+			if (ImGui::IsItemHovered())
+			{
+				ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+				if (ImGui::IsMouseDoubleClicked(0))
+					m_EditorCamera.SetGridScale(1.0f);
+			}
+			float gridScale = m_EditorCamera.GetGridScale();
+			if (ImGui::DragFloat("##Grid Scale", &gridScale, 0.01f, 0.01f, FLT_MAX))
+				m_EditorCamera.SetGridScale(gridScale);
+
+			// Grid color
+			Widgets::DrawControlLabel("Grid Color");
+			ImGui::SameLine();
+			if (ImGui::IsItemHovered())
+			{
+				ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+				if (ImGui::IsMouseDoubleClicked(0))
+					m_EditorCamera.SetGridColor({ 0.8f, 0.8f, 0.8f, 1.0f });
+			}
+			glm::vec4 gridColor = m_EditorCamera.GetGridColor();
+			if (ImGui::ColorEdit4("##Grid Color", glm::value_ptr(gridColor)))
+				m_EditorCamera.SetGridColor(gridColor);
+
+			// Near Clip
+			Widgets::DrawControlLabel("Near Clip");
+			ImGui::SameLine();
+			if (ImGui::IsItemHovered())
+			{
+				ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+				if (ImGui::IsMouseDoubleClicked(0))
+					m_EditorCamera.SetNearClip(0.1f);;
+			}
+			float nearClip = m_EditorCamera.GetNearClip();
+			if (ImGui::DragFloat("##Near Clip", &nearClip, 0.01f, 0.0f, FLT_MAX))
+				m_EditorCamera.SetNearClip(nearClip);
+
+			// Far Clip
+			Widgets::DrawControlLabel("Far Clip");
+			ImGui::SameLine();
+			if (ImGui::IsItemHovered())
+			{
+				ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+				if (ImGui::IsMouseDoubleClicked(0))
+					m_EditorCamera.SetFarClip(10000.0f);;
+			}
+			float farClip = m_EditorCamera.GetFarClip();
+			if (ImGui::DragFloat("##Far Clip", &farClip, 5.0f, 0.0f, FLT_MAX))
+				m_EditorCamera.SetFarClip(farClip);
+			ImGui::EndPopup();
+		}
+		ImGui::PopStyleColor(2);
 	}
 
 	void LocusEditorLayer::DrawDebugPanel()

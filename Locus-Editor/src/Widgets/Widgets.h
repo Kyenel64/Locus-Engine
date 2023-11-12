@@ -23,7 +23,7 @@ namespace Locus::Widgets
 
 	// Draws the label on the left hand side and a color box on the right.
 	// Clicking on the color box will open a pop up for color control.
-	void DrawColorControl(const std::string& name, glm::vec4& colorValue, float labelWidth);
+	void DrawColorControl(const std::string& name, float labelWidth, glm::vec4& changeValue, const glm::vec4& resetValue);
 
 	// Draws the label on the left hand side and two float controls labeled x and y on the right.
 	void DrawVec2Control(const std::string& name, float labelWidth, glm::vec2& changeValue, const glm::vec2& resetValue = glm::vec2(1.0f), 

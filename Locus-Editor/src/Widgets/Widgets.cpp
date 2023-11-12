@@ -94,12 +94,21 @@ namespace Locus::Widgets
 		ImGui::PopItemWidth();
 	}
 
-	void DrawColorControl(const std::string& name, glm::vec4& colorValue, float labelWidth)
+	void DrawColorControl(const std::string& name, float labelWidth, glm::vec4& changeValue, const glm::vec4& resetValue)
 	{
 		Widgets::DrawControlLabel("Color", { labelWidth, 0.0f });
 		ImGui::SameLine();
 
-		glm::vec4 color = colorValue;
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+			if (ImGui::IsMouseDoubleClicked(0))
+			{
+				CommandHistory::AddCommand(new ChangeValueCommand(resetValue, changeValue));
+			}
+		}
+
+		glm::vec4 color = changeValue;
 		static glm::vec4 backupColor;
 		ImGui::PushStyleColor(ImGuiCol_Button, ToImVec4(color));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ToImVec4(color));
@@ -119,7 +128,7 @@ namespace Locus::Widgets
 			ImGui::Text("Color");
 			ImGui::Separator();
 			if (ImGui::ColorPicker4("##picker", glm::value_ptr(color), ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview))
-				CommandHistory::AddCommand(new ChangeValueCommand(color, colorValue));
+				CommandHistory::AddCommand(new ChangeValueCommand(color, changeValue));
 			ImGui::SameLine();
 
 			ImGui::BeginGroup(); // Lock X position
@@ -140,6 +149,8 @@ namespace Locus::Widgets
 			func = [=](glm::vec2 val) { instance->SetFieldValue<glm::vec2>(name, val); };
 
 		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Transparent);
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Transparent);
 		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0.0f, 1.0f });
 
 		glm::vec2 dragValues = changeValue;
@@ -147,8 +158,19 @@ namespace Locus::Widgets
 			dragValues = glm::degrees(dragValues);
 
 		Widgets::DrawControlLabel(name.c_str(), { labelWidth, 0.0f });
-
 		ImGui::SameLine();
+
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+			if (ImGui::IsMouseDoubleClicked(0))
+			{
+				if (instance)
+					CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, resetValue, changeValue));
+				else
+					CommandHistory::AddCommand(new ChangeValueCommand(resetValue, changeValue));
+			}
+		}
 
 		ImGui::BeginTable("Vec3Control", 2);
 
@@ -231,7 +253,7 @@ namespace Locus::Widgets
 		ImGui::PopStyleVar();
 
 		ImGui::EndTable();
-		ImGui::PopStyleColor();
+		ImGui::PopStyleColor(3);
 		ImGui::PopStyleVar();
 	}
 
@@ -242,6 +264,8 @@ namespace Locus::Widgets
 			func = [=](glm::vec3 val) { instance->SetFieldValue<glm::vec3>(name, val); };
 
 		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Transparent);
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Transparent);
 		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0.0f, 1.0f });
 
 		glm::vec3 dragValues = changeValue;
@@ -249,8 +273,19 @@ namespace Locus::Widgets
 			dragValues = glm::degrees(dragValues);
 
 		Widgets::DrawControlLabel(name.c_str(), { labelWidth, 0.0f });
-
 		ImGui::SameLine();
+
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+			if (ImGui::IsMouseDoubleClicked(0))
+			{
+				if (instance)
+					CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, resetValue, changeValue));
+				else
+					CommandHistory::AddCommand(new ChangeValueCommand(resetValue, changeValue));
+			}
+		}
 
 		ImGui::BeginTable("Vec3Control", 3);
 
@@ -369,7 +404,7 @@ namespace Locus::Widgets
 		ImGui::PopStyleVar();
 
 		ImGui::EndTable();
-		ImGui::PopStyleColor();
+		ImGui::PopStyleColor(3);
 		ImGui::PopStyleVar();
 	}
 	

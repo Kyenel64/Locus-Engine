@@ -28,6 +28,22 @@ project "Locus-Editor"
 	{
 		"Locus"
 	}
+
+	-- postbuildcommands
+	-- {
+	-- 	"xcopy %{ProjectDir}/resources/*.* %{targetdir}/resources /Y /I /E",
+	-- 	"xcopy %{ProjectDir}/mono/*.* %{targetdir}/mono /Y /I /E",
+	-- 	"xcopy %{ProjectDir}/SandboxProject/*.* %{targetdir}/SandboxProject /Y /I /E",
+	-- 	"xcopy %{ProjectDir}/imgui.ini %{targetdir} /Y /I"
+	-- }
+
+	postbuildcommands
+	{
+		"{COPY} %{prj.location}/resources %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/resources",
+		"{COPY} %{prj.location}/mono %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/mono",
+		"{COPY} %{prj.location}/SandboxProject %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/SandboxProject",
+		"{COPY} %{prj.location}/imgui.ini %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/"
+	}
 	
 	filter "system:windows"
 		systemversion "latest"

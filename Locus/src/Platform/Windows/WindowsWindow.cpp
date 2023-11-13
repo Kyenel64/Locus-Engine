@@ -1,6 +1,8 @@
 #include "Lpch.h"
 #include "WindowsWindow.h"
 
+#include <stb_image.h>
+
 #include "Locus/Events/ApplicationEvent.h"
 #include "Locus/Events/MouseEvent.h"
 #include "Locus/Events/KeyEvent.h"
@@ -64,6 +66,12 @@ namespace Locus
 
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
+
+		// Set window icon
+		GLFWimage icons[1];
+		icons[0].pixels = stbi_load("resources/icons/LocusLogoIcon.png", &icons[0].width, &icons[0].height, 0, 4);
+		glfwSetWindowIcon(m_Window, 1, icons);
+		stbi_image_free(icons[0].pixels);
 
 		// --- Set GLFW callbacks ---------------------------------------------
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)

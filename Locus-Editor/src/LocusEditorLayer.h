@@ -106,8 +106,8 @@ namespace Locus
 		PropertiesPanel m_PropertiesPanel;
 
 		// Layout
-		float m_ViewportHeight; // Makes more sense to do m_LeftSplitterPos & m_RightSplitterPos
-		float m_HierarchyHeight;
+		float m_LeftSplitterPos;
+		float m_RightSplitterPos;
 		float m_CenterSplitterPos;
 		glm::vec2 m_FrameSizes[4];
 		glm::vec2 m_FramePositions[4];

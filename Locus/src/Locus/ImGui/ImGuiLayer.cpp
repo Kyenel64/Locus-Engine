@@ -171,6 +171,9 @@ namespace Locus
 		colors[ImGuiCol_TitleBgCollapsed] = LocusColors::MediumDarkGrey;
 
 		// Border
-		colors[ImGuiCol_Border] = LocusColors::Orange;
+		colors[ImGuiCol_Border] = LocusColors::Tan;
+
+		// Popups
+		colors[ImGuiCol_PopupBg] = LocusColors::Grey;
 	}
 }

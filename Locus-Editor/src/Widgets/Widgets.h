@@ -1,7 +1,7 @@
 // --- Widgets ----------------------------------------------------------------
 // Locus editor widgets. 
 // Each widget can take in a ScriptInstance if displaying for a script field
-// during runtime of the editor. TODO: take in a function pointer.
+// during runtime of the editor.
 #pragma once
 
 #include <string>

@@ -60,13 +60,13 @@ namespace Locus
 	void EditorCamera::MouseRotate(const glm::vec2& delta)
 	{
 		float yawSign = GetUpDirection().y < 0 ? -1.0f : 1.0f;
-		m_Yaw += yawSign * delta.x * m_MouseRotateSpeed * 0.0005f; // TODO:: better speed
+		m_Yaw += yawSign * delta.x * m_MouseRotateSpeed * 0.0005f;
 		m_Pitch += delta.y * m_MouseRotateSpeed * 0.0005f;
 	}
 
 	void EditorCamera::MousePan(const glm::vec2& delta)
 	{
-		m_FocalPoint += -GetRightDirection() * delta.x * m_MousePanSpeed * m_Distance * 0.00005f; // TODO: better speed
+		m_FocalPoint += -GetRightDirection() * delta.x * m_MousePanSpeed * m_Distance * 0.00005f;
 		m_FocalPoint += GetUpDirection() * delta.y * m_MousePanSpeed * m_Distance * 0.00005f;
 	}
 

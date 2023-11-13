@@ -205,7 +205,6 @@ namespace Locus
 	struct ScriptComponent
 	{
 		std::string ScriptClass;
-		// TODO: std::string Path;
 
 		ScriptComponent() = default;
 		ScriptComponent(const ScriptComponent&) = default;

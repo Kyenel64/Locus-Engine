@@ -66,8 +66,8 @@ namespace Locus
 		m_WindowSize = { Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight() };
 
 		// TODO: serialize
-		m_ViewportHeight = 0.7f;
-		m_HierarchyHeight = 0.3f;
+		m_LeftSplitterPos = 0.7f;
+		m_RightSplitterPos = 0.3f;
 		m_CenterSplitterPos = 0.79f;
 
 		m_CollisionMeshColor = ToGLMVec4(LocusColors::LightBlue);
@@ -412,7 +412,7 @@ namespace Locus
 		m_EditorScene = CreateRef<Scene>();
 		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_ActiveScene = m_EditorScene;
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene); // TODO: Set these to Editor scene?
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 		m_PropertiesPanel.SetContext(m_ActiveScene);
 		m_SavePath = std::string();
 		Application::Get().SetIsSavedStatus(false);
@@ -590,10 +590,10 @@ namespace Locus
 		// Table constraints
 		m_CenterSplitterPos = m_CenterSplitterPos > 0.9f ? 0.9f : m_CenterSplitterPos;
 		m_CenterSplitterPos = m_CenterSplitterPos < 0.1f ? 0.1f : m_CenterSplitterPos;
-		m_ViewportHeight = m_ViewportHeight > 0.9f ? 0.9f : m_ViewportHeight;
-		m_ViewportHeight = m_ViewportHeight < 0.1f ? 0.1f : m_ViewportHeight;
-		m_HierarchyHeight = m_HierarchyHeight > 0.9f ? 0.9f : m_HierarchyHeight;
-		m_HierarchyHeight = m_HierarchyHeight < 0.1f ? 0.1f : m_HierarchyHeight;
+		m_LeftSplitterPos = m_LeftSplitterPos > 0.9f ? 0.9f : m_LeftSplitterPos;
+		m_LeftSplitterPos = m_LeftSplitterPos < 0.1f ? 0.1f : m_LeftSplitterPos;
+		m_RightSplitterPos = m_RightSplitterPos > 0.9f ? 0.9f : m_RightSplitterPos;
+		m_RightSplitterPos = m_RightSplitterPos < 0.1f ? 0.1f : m_RightSplitterPos;
 
 		// Docked window flags
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
@@ -607,7 +607,7 @@ namespace Locus
 		if (ImGui::BeginTable("LayoutLeft", 1, ImGuiTableFlags_None, { m_WindowSize.x * m_CenterSplitterPos, -1.0f}))
 		{
 			ImGui::TableNextColumn();
-			ImGui::BeginChild("Frame1", { -1.0f, m_WindowSize.y * m_ViewportHeight }, false, childFlags);
+			ImGui::BeginChild("Frame1", { -1.0f, m_WindowSize.y * m_LeftSplitterPos }, false, childFlags);
 			ImGuiID dockspace_id = ImGui::GetID("Frame1Dockspace");
 			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
 
@@ -626,7 +626,7 @@ namespace Locus
 				ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
 			if (ImGui::IsItemActive())
 			{
-				m_ViewportHeight += io.MouseDelta.y / m_WindowSize.y;
+				m_LeftSplitterPos += io.MouseDelta.y / m_WindowSize.y;
 			}
 
 			ImGui::BeginChild("Frame2", { -1.0f, -1.0f }, false, childFlags);
@@ -659,7 +659,7 @@ namespace Locus
 		if (ImGui::BeginTable("LayoutRight", 1, ImGuiTableFlags_None, { -1.0, -1.0f }))
 		{
 			ImGui::TableNextColumn();
-			ImGui::BeginChild("Frame3", { -1.0f, m_WindowSize.y * m_HierarchyHeight }, false, childFlags);
+			ImGui::BeginChild("Frame3", { -1.0f, m_WindowSize.y * m_RightSplitterPos }, false, childFlags);
 
 			m_FrameSizes[2].x = ImGui::GetWindowSize().x;
 			m_FrameSizes[2].y = ImGui::GetWindowSize().y;
@@ -676,7 +676,7 @@ namespace Locus
 				ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
 			if (ImGui::IsItemActive())
 			{
-				m_HierarchyHeight += io.MouseDelta.y / m_WindowSize.y;
+				m_RightSplitterPos += io.MouseDelta.y / m_WindowSize.y;
 			}
 
 			ImGui::BeginChild("Frame4", { -1.0f, -1.0f }, false, childFlags);
@@ -909,23 +909,26 @@ namespace Locus
 	{
 		// --- Save Project Popup ---------------------------------------------
 		if (Application::Get().GetSaveChangesPopupStatus())
-			ImGui::OpenPopup("Save?");
-		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-		ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-		if (ImGui::BeginPopupModal("Save?", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+			ImGui::OpenPopup("You have unsaved changes...");
+		ImVec2 center = { ImGui::GetWindowPos().x + m_WindowSize.x / 2, ImGui::GetWindowPos().y + m_WindowSize.y / 2};
+		ImGui::SetNextWindowPos(center, ImGuiCond_None, { 0.5f, 0.5f });
+		ImGui::SetNextWindowSize({ 400.0f, 100.0f });
+		if (ImGui::BeginPopupModal("You have unsaved changes...", NULL, ImGuiWindowFlags_AlwaysAutoResize))
 		{
 			m_SelectedEntity = {};
 			ImGui::Text("Save Current Project?");
-			if (ImGui::Button("Save")) // TODO: Keep on popup modal when clicking cancel
+			if (ImGui::Button("Save and Close", { 120.0f, 40.0f }))
 			{
 				SaveScene();
 				Application::Get().Close();
 			}
-			if (ImGui::Button("Don't Save"))
+			ImGui::SameLine();
+			if (ImGui::Button("Don't Save", { 120.0f, 40.0f }))
 			{
 				Application::Get().Close();
 			}
-			if (ImGui::Button("Close"))
+			ImGui::SameLine();
+			if (ImGui::Button("Cancel", { 120.0f, 40.0f }))
 			{
 				Application::Get().SetSaveChangesPopupStatus(false);
 				ImGui::CloseCurrentPopup();
@@ -936,8 +939,6 @@ namespace Locus
 
 	void LocusEditorLayer::ProcessViewSettingsPopup(const glm::vec2& position)
 	{
-		ImGui::PushStyleColor(ImGuiCol_PopupBg, LocusColors::Grey);
-		ImGui::PushStyleColor(ImGuiCol_Border, LocusColors::Tan);
 		ImGui::SetNextWindowPos({ ImGui::GetWindowPos().x + position.x, ImGui::GetWindowPos().y + position.y + 25.0f });
 		if (ImGui::BeginPopup("ViewSettings"))
 		{
@@ -1033,7 +1034,6 @@ namespace Locus
 				m_EditorCamera.SetFarClip(farClip);
 			ImGui::EndPopup();
 		}
-		ImGui::PopStyleColor(2);
 	}
 
 	void LocusEditorLayer::DrawDebugPanel()

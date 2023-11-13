@@ -24,13 +24,13 @@ namespace Locus
 		{
 			m_OldValue = m_ValueToChange;
 			m_ValueToChange = m_NewValue;
-			Application::Get().SetIsSavedStatus(false);
+			CommandHistory::SetEditorSavedStatus(false);
 		}
 
 		virtual void Undo() override
 		{
 			m_ValueToChange = m_OldValue;
-			Application::Get().SetIsSavedStatus(false);
+			CommandHistory::SetEditorSavedStatus(false);
 		}
 
 		virtual bool Merge(Command* other) override
@@ -77,14 +77,14 @@ namespace Locus
 			m_OldValue = m_ValueToChange;
 			m_ValueToChange = m_NewValue;
 			m_Function(m_ValueToChange);
-			Application::Get().SetIsSavedStatus(false);
+			CommandHistory::SetEditorSavedStatus(false);
 		}
 
 		virtual void Undo() override
 		{
 			m_ValueToChange = m_OldValue;
 			m_Function(m_ValueToChange);
-			Application::Get().SetIsSavedStatus(false);
+			CommandHistory::SetEditorSavedStatus(false);
 		}
 
 		virtual bool Merge(Command* other) override
@@ -130,8 +130,7 @@ namespace Locus
 
 			m_TextureToChange = m_NewTexture;
 			m_PathToChange = m_NewPath;
-
-			Application::Get().SetIsSavedStatus(false);
+			CommandHistory::SetEditorSavedStatus(false);
 		}
 
 		virtual void Undo() override
@@ -139,8 +138,7 @@ namespace Locus
 			m_TextureToChange = m_OldTexture;
 
 			m_PathToChange = m_OldPath;
-
-			Application::Get().SetIsSavedStatus(false);
+			CommandHistory::SetEditorSavedStatus(false);
 		}
 
 		virtual bool Merge(Command* other) override

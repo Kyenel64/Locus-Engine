@@ -7,10 +7,6 @@
 
 namespace Locus
 {
-
-// Binds to an event function. Ex: OnWindowClose()
-//#define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
-
 	Application* Application::s_Instance = nullptr;
 
 	Application::Application(const std::string& name, ApplicationCommandLineArgs args)
@@ -50,11 +46,6 @@ namespace Locus
 	{
 		LOCUS_PROFILE_FUNCTION();
 
-		EventDispatcher dispatcher(e);
-		// Dispatch event if event class type matches event type
-		dispatcher.Dispatch<WindowCloseEvent>(LOCUS_BIND_EVENT_FN(Application::OnWindowClose));
-		dispatcher.Dispatch<WindowResizeEvent>(LOCUS_BIND_EVENT_FN(Application::OnWindowResize));
-
 		// Iterate each layer's events backwards
 		for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it)
 		{
@@ -63,6 +54,11 @@ namespace Locus
 			(*it)->OnEvent(e);
 
 		}
+
+		EventDispatcher dispatcher(e);
+		// Dispatch event if event class type matches event type
+		dispatcher.Dispatch<WindowResizeEvent>(LOCUS_BIND_EVENT_FN(Application::OnWindowResize));
+		dispatcher.Dispatch<WindowCloseEvent>(LOCUS_BIND_EVENT_FN(Application::OnWindowClose));
 	}
 
 	void Application::Run()
@@ -111,10 +107,8 @@ namespace Locus
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)
 	{
-		if (m_IsSaved)
+		if (!e.m_Handled)
 			Close();
-		else
-			m_OpenSaveChangesPopup = true;
 		return true;
 	}
 

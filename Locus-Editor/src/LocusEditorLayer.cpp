@@ -24,6 +24,8 @@ namespace Locus
 		m_TranslateIcon = Texture2D::Create("resources/icons/TranslateIcon.png");
 		m_ScaleIcon = Texture2D::Create("resources/icons/ScaleIcon.png");
 		m_RotateIcon = Texture2D::Create("resources/icons/RotateIcon.png");
+
+		CommandHistory::Init(this);
 	}
 
 	LocusEditorLayer::~LocusEditorLayer()
@@ -182,6 +184,7 @@ namespace Locus
 			m_EditorCamera.OnEvent(e);
 
 		EventDispatcher dispatcher(e);
+		dispatcher.Dispatch<WindowCloseEvent>(LOCUS_BIND_EVENT_FN(LocusEditorLayer::OnWindowClose));
 		dispatcher.Dispatch<KeyPressedEvent>(LOCUS_BIND_EVENT_FN(LocusEditorLayer::OnKeyPressed));
 		dispatcher.Dispatch<MouseButtonPressedEvent>(LOCUS_BIND_EVENT_FN(LocusEditorLayer::OnMouseButtonPressed));
 	}
@@ -262,6 +265,17 @@ namespace Locus
 		DrawCollisionMesh();
 
 		Renderer2D::EndScene();
+	}
+
+	bool LocusEditorLayer::OnWindowClose(WindowCloseEvent& e)
+	{
+		if (m_IsSaved)
+			Application::Get().Close();
+		else
+			m_OpenSavePopup = true;
+		e.m_Handled = true;
+
+		return true;
 	}
 
 	bool LocusEditorLayer::OnKeyPressed(KeyPressedEvent& e)
@@ -415,7 +429,7 @@ namespace Locus
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 		m_PropertiesPanel.SetContext(m_ActiveScene);
 		m_SavePath = std::string();
-		Application::Get().SetIsSavedStatus(false);
+		m_IsSaved = false;
 		CommandHistory::Reset();
 	}
 
@@ -439,11 +453,12 @@ namespace Locus
 		SceneSerializer serializer(m_EditorScene);
 		serializer.Deserialize(path.string());
 		m_SavePath = path.string();
-		Application::Get().SetIsSavedStatus(true);
+		m_IsSaved = true;
 		CommandHistory::Reset();
 	}
 
-	void LocusEditorLayer::SaveSceneAs()
+	// Returns false if canceling file dialog.
+	bool LocusEditorLayer::SaveSceneAs()
 	{
 		std::string path = FileDialogs::SaveFile("Locus Scene (*.locus)\0*.locus\0");
 		if (!path.empty())
@@ -451,21 +466,24 @@ namespace Locus
 			SceneSerializer serializer(m_EditorScene);
 			serializer.Serialize(path);
 			m_SavePath = path;
-			Application::Get().SetIsSavedStatus(true);
+			m_IsSaved = true;
+			return true;
 		}
+		return false;
 	}
 
-	void LocusEditorLayer::SaveScene()
+	bool LocusEditorLayer::SaveScene()
 	{
 		if (m_SavePath.empty())
 		{
-			SaveSceneAs();
+			return SaveSceneAs();
 		}
 		else
 		{
 			SceneSerializer serializer(m_EditorScene);
 			serializer.Serialize(m_SavePath);
-			Application::Get().SetIsSavedStatus(true);
+			m_IsSaved = true;
+			return true;
 		}
 	}
 
@@ -699,7 +717,7 @@ namespace Locus
 	void LocusEditorLayer::DrawViewport()
 	{
 		ImGuiWindowFlags viewportFlags = ImGuiWindowFlags_NoScrollbar;
-		if (!Application::Get().GetIsSavedStatus())
+		if (!m_IsSaved)
 			viewportFlags |= ImGuiWindowFlags_UnsavedDocument;
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
 		ImGui::Begin(" Viewport ", false, viewportFlags);
@@ -714,32 +732,29 @@ namespace Locus
 		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3.0f);
 		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 3.0f);
 
+		// Gizmo buttons
 		if (Widgets::DrawImageButton("PointerButton", m_PointerIcon->GetRendererID(), { 40.0f, 22.0f }))
 			m_GizmoType = -1;
-
 		ImGui::SameLine();
-
 		if (Widgets::DrawImageButton("TranslateButton", m_TranslateIcon->GetRendererID(), { 40.0f, 22.0f }))
 			m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
-
 		ImGui::SameLine();
-
 		if (Widgets::DrawImageButton("RotateButton", m_RotateIcon->GetRendererID(), { 40.0f, 22.0f }))
 			m_GizmoType = ImGuizmo::OPERATION::ROTATE;
-
 		ImGui::SameLine();
-
 		if (Widgets::DrawImageButton("ScaleButton", m_ScaleIcon->GetRendererID(), { 40.0f, 22.0f }))
 			m_GizmoType = ImGuizmo::OPERATION::SCALE;
 
 		ImGui::SameLine();
 
+		// Vertical separator
 		ImDrawList* draw_list = ImGui::GetWindowDrawList();
 		ImVec2 position = { ImGui::GetWindowPos().x + ImGui::GetCursorPosX() + 3.0f, ImGui::GetWindowPos().y + ImGui::GetCursorPosY() };
 		draw_list->AddLine(position, { position.x, position.y + 22.0f }, ImGui::GetColorU32(LocusColors::Tan), 2.0f);
 
 		ImGui::SameLine();
 
+		// View settings
 		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 8.0f);
 		ImVec2 buttonPos = ImGui::GetCursorPos();
 		if (ImGui::Button("View", { 50.0f, 22.0f }))
@@ -803,10 +818,10 @@ namespace Locus
 
 				if (ImGui::MenuItem("Exit"))
 				{
-					if (Application::Get().GetIsSavedStatus())
+					if (m_IsSaved)
 						Application::Get().Close();
 					else
-						Application::Get().SetSaveChangesPopupStatus(true);
+						m_OpenSavePopup = true;
 				}
 
 				ImGui::EndMenu();
@@ -908,7 +923,7 @@ namespace Locus
 	void LocusEditorLayer::ProcessSavePopup()
 	{
 		// --- Save Project Popup ---------------------------------------------
-		if (Application::Get().GetSaveChangesPopupStatus())
+		if (m_OpenSavePopup)
 			ImGui::OpenPopup("You have unsaved changes...");
 		ImVec2 center = { ImGui::GetWindowPos().x + m_WindowSize.x / 2, ImGui::GetWindowPos().y + m_WindowSize.y / 2};
 		ImGui::SetNextWindowPos(center, ImGuiCond_None, { 0.5f, 0.5f });
@@ -919,8 +934,8 @@ namespace Locus
 			ImGui::Text("Save Current Project?");
 			if (ImGui::Button("Save and Close", { 120.0f, 40.0f }))
 			{
-				SaveScene();
-				Application::Get().Close();
+				if (SaveScene())
+					Application::Get().Close();
 			}
 			ImGui::SameLine();
 			if (ImGui::Button("Don't Save", { 120.0f, 40.0f }))
@@ -930,7 +945,7 @@ namespace Locus
 			ImGui::SameLine();
 			if (ImGui::Button("Cancel", { 120.0f, 40.0f }))
 			{
-				Application::Get().SetSaveChangesPopupStatus(false);
+				m_OpenSavePopup = false;
 				ImGui::CloseCurrentPopup();
 			}
 			ImGui::EndPopup();

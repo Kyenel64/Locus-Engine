@@ -28,8 +28,11 @@ namespace Locus
 		virtual void OnEvent(Event& event) override;
 		virtual void OnImGuiRender() override;
 
+		void SetSavedStatus(bool status) { m_IsSaved = status; }
+
 	private:
 		// Events
+		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnKeyPressed(KeyPressedEvent& e);
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 
@@ -37,8 +40,8 @@ namespace Locus
 		void NewScene();
 		void OpenScene();
 		void OpenScene(const std::filesystem::path& path);
-		void SaveSceneAs();
-		void SaveScene();
+		bool SaveSceneAs();
+		bool SaveScene();
 
 		// Viewport
 		void showGizmoUI();
@@ -61,6 +64,9 @@ namespace Locus
 
 	private:
 		glm::vec2 m_WindowSize;
+		bool m_IsSaved = true;
+		bool m_OpenSavePopup = false;
+
 		// Scene
 		std::string m_SavePath;
 		Ref<Scene> m_ActiveScene;

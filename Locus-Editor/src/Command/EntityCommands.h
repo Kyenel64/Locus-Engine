@@ -80,13 +80,13 @@ namespace Locus
 			m_Entity = m_ActiveScene->CreateEntityWithUUID(m_Entity, m_UUID, m_EntityName);
 			m_Entity.GetComponent<TagComponent>().HierarchyPos = m_HierarchyPos;
 			m_ActiveScene->m_RootEntityCount--;
-			Application::Get().SetIsSavedStatus(false);
+			CommandHistory::SetEditorSavedStatus(false);
 		}
 
 		virtual void Undo() override
 		{
 			m_ActiveScene->DestroyEntity(m_Entity);
-			Application::Get().SetIsSavedStatus(false);
+			CommandHistory::SetEditorSavedStatus(false);
 		}
 
 		virtual bool Merge(Command* other) override
@@ -129,7 +129,7 @@ namespace Locus
 			parentCC.ChildEntities.push_back(m_Entity);
 			parentCC.ChildCount++;
 			m_Entity.GetComponent<TransformComponent>().Parent = m_ParentEntity;
-			Application::Get().SetIsSavedStatus(false);
+			CommandHistory::SetEditorSavedStatus(false);
 		}
 
 		virtual void Undo() override
@@ -142,7 +142,7 @@ namespace Locus
 				m_ParentEntity.RemoveComponent<ChildComponent>();
 
 			m_ActiveScene->DestroyEntity(m_Entity);
-			Application::Get().SetIsSavedStatus(false);
+			CommandHistory::SetEditorSavedStatus(false);
 		}
 
 		virtual bool Merge(Command* other) override
@@ -195,7 +195,7 @@ namespace Locus
 
 			DestroyChildren(m_Entity);
 			m_ActiveScene->DestroyEntity(m_Entity);
-			Application::Get().SetIsSavedStatus(false);
+			CommandHistory::SetEditorSavedStatus(false);
 		}
 
 		virtual void Undo() override
@@ -224,7 +224,7 @@ namespace Locus
 				LoadEntityData(childData, childEntity);
 				m_ChildEntityData.pop();
 			}
-			Application::Get().SetIsSavedStatus(false);
+			CommandHistory::SetEditorSavedStatus(false);
 		}
 
 		virtual bool Merge(Command* other) override
@@ -324,7 +324,7 @@ namespace Locus
 				m_ChildEntityData.pop();
 			}
 
-			Application::Get().SetIsSavedStatus(false);
+			CommandHistory::SetEditorSavedStatus(false);
 		}
 
 		virtual void Undo() override
@@ -347,7 +347,7 @@ namespace Locus
 			DestroyChildren(m_Entity);
 			m_ActiveScene->DestroyEntity(m_Entity);
 
-			Application::Get().SetIsSavedStatus(false);
+			CommandHistory::SetEditorSavedStatus(false);
 		}
 
 		virtual bool Merge(Command* other) override
@@ -512,13 +512,13 @@ namespace Locus
 		virtual void Execute() override
 		{
 			m_AddFunction();
-			Application::Get().SetIsSavedStatus(false);
+			CommandHistory::SetEditorSavedStatus(false);
 		}
 
 		virtual void Undo() override
 		{
 			m_Entity.RemoveComponent<T>();
-			Application::Get().SetIsSavedStatus(false);
+			CommandHistory::SetEditorSavedStatus(false);
 		}
 
 		virtual bool Merge(Command* other) override
@@ -549,13 +549,13 @@ namespace Locus
 		{
 			m_Component = m_Entity.GetComponent<T>();
 			m_Entity.RemoveComponent<T>();
-			Application::Get().SetIsSavedStatus(false);
+			CommandHistory::SetEditorSavedStatus(false);
 		}
 
 		virtual void Undo() override
 		{
 			m_Entity.AddComponent<T>(m_Component);
-			Application::Get().SetIsSavedStatus(false);
+			CommandHistory::SetEditorSavedStatus(false);
 		}
 
 		virtual bool Merge(Command* other) override

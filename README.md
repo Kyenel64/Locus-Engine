@@ -35,6 +35,13 @@ Requirements: Visual Studio 2022, Python3
 #### 1. Downloading source code
 - Download the zip and extract the files or use `git clone --recurse-submodules https://github.com/kyenel64/Locus-Engine` in command prompt.
 
+#### 1.1 (Temp) Build SandboxProject
+Locus currently does not have a project directory system setup. There is a placeholder project directory called SandboxProject within the Locus-Editor directory.
+You will need to manually generate and build the project solution for now.
+- Run Locus-Editor/SandboxProject/Setup.bat.
+- Open Locus-Editor/SandboxProject/Sandbox.sln.
+- Build solution.
+
 #### 2. Run Scripts/Setup.bat
 - Run Scripts/Setup.bat to install dependencies and generate a Visual Studio solution.
 - Temp: Run Locus-Editor/SandboxProject/Setup.bat. (This is temporary until a proper project directory system is implemented.)

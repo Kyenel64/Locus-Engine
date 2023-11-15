@@ -1,22 +1,22 @@
 Scene: Untitled
-RootEntityCount: 5
+RootEntityCount: 6
 Entities:
-  - Entity: 11199600474000206918
+  - Entity: 16333098060058739918
     TagComponent:
-      Tag: Square2
+      Tag: Circle1
       Enabled: true
-      HierarchyPos: 4
+      HierarchyPos: 5
     TransformComponent:
-      Self: 11199600474000206918
+      Self: 16333098060058739918
       Parent: 0
-      LocalPosition: [2.8046813, 2.91834784, 0]
+      LocalPosition: [0, 0.786840558, 0]
       LocalRotation: [0, 0, 0]
       LocalRotationQuat: [0, 0, 0, 1]
-      LocalScale: [1, 1, 1]
-    SpriteRendererComponent:
-      Color: [0.480519474, 0.763872623, 1, 1]
-      TexturePath: ""
-      TilingFactor: 1
+      LocalScale: [2.86000013, 2.86000013, 2.86000013]
+    CircleRendererComponent:
+      Color: [0.567099571, 0.0662843585, 0.0662843585, 1]
+      Thickness: 1
+      Fade: 0.00499999989
     Rigidbody2DComponent:
       BodyType: 1
       Mass: 1
@@ -27,42 +27,35 @@ Entities:
       Friction: 0.200000003
       Restitution: 0
       RestitutionThreshold: 1
-    BoxCollider2DComponent:
-      CollisionCategory: 2
+    CircleCollider2DComponent:
+      CollisionCategory: 4
       CollisionMask: 8
+      Radius: 0.5
       Offset: [0, 0]
-      Size: [1, 1]
-  - Entity: 8281904049443733686
+  - Entity: 991161728851556726
     TagComponent:
-      Tag: Platform
+      Tag: Main Camera
       Enabled: true
-      HierarchyPos: 3
+      HierarchyPos: 1
     TransformComponent:
-      Self: 8281904049443733686
+      Self: 991161728851556726
       Parent: 0
-      LocalPosition: [0, -1.64110005, 0]
+      LocalPosition: [0, 0, 5.86613369]
       LocalRotation: [0, 0, 0]
       LocalRotationQuat: [0, 0, 0, 1]
-      LocalScale: [9.24897385, 1, 1]
-    SpriteRendererComponent:
-      Color: [0.510822535, 0.510822535, 0.510822535, 1]
-      TexturePath: ""
-      TilingFactor: 1
-    Rigidbody2DComponent:
-      BodyType: 0
-      Mass: 1
-      GravityScale: 1
-      LinearDamping: 0.200000003
-      AngularDamping: 0.200000003
-      FixedRotation: false
-      Friction: 0.200000003
-      Restitution: 0
-      RestitutionThreshold: 1
-    BoxCollider2DComponent:
-      CollisionCategory: 8
-      CollisionMask: 2
-      Offset: [0, 0]
-      Size: [1, 1]
+      LocalScale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        BackgroundColor: [0.177039638, 0.320346296, 0.169187218, 1]
+        ProjectionType: 0
+        OrthographicSize: 10
+        OrthographicNearClip: -1
+        OrthographicFarClip: 1000
+        PerspectiveFOV: 0.785398185
+        PerspectiveNearClip: 0.00999999978
+        PerspectiveFarClip: 1000
+      Primary: true
+      FixedAspectRatio: false
   - Entity: 10423388664858736510
     TagComponent:
       Tag: Square1
@@ -94,27 +87,65 @@ Entities:
       CollisionMask: 8
       Offset: [0, 0]
       Size: [1, 1]
-  - Entity: 991161728851556726
+  - Entity: 8281904049443733686
     TagComponent:
-      Tag: Main Camera
+      Tag: Platform
       Enabled: true
-      HierarchyPos: 1
+      HierarchyPos: 3
     TransformComponent:
-      Self: 991161728851556726
+      Self: 8281904049443733686
       Parent: 0
-      LocalPosition: [0, 0, 5.86613369]
+      LocalPosition: [-0.130978853, -1.81426489, 0]
+      LocalRotation: [0, 0, -0.647574782]
+      LocalRotationQuat: [0, 0, -0.318159431, 0.948037207]
+      LocalScale: [9.24897385, 1, 1]
+    SpriteRendererComponent:
+      Color: [0.510822535, 0.510822535, 0.510822535, 1]
+      TexturePath: ""
+      TilingFactor: 1
+    Rigidbody2DComponent:
+      BodyType: 0
+      Mass: 1
+      GravityScale: 1
+      LinearDamping: 0.200000003
+      AngularDamping: 0.200000003
+      FixedRotation: false
+      Friction: 0.200000003
+      Restitution: 0
+      RestitutionThreshold: 1
+    BoxCollider2DComponent:
+      CollisionCategory: 8
+      CollisionMask: 65535
+      Offset: [0, 0]
+      Size: [1, 1]
+  - Entity: 11199600474000206918
+    TagComponent:
+      Tag: Square2
+      Enabled: true
+      HierarchyPos: 4
+    TransformComponent:
+      Self: 11199600474000206918
+      Parent: 0
+      LocalPosition: [2.8046813, 2.91834784, 0]
       LocalRotation: [0, 0, 0]
       LocalRotationQuat: [0, 0, 0, 1]
       LocalScale: [1, 1, 1]
-    CameraComponent:
-      Camera:
-        BackgroundColor: [0.177039638, 0.320346296, 0.169187218, 1]
-        ProjectionType: 0
-        OrthographicSize: 10
-        OrthographicNearClip: -1
-        OrthographicFarClip: 1000
-        PerspectiveFOV: 0.785398185
-        PerspectiveNearClip: 0.00999999978
-        PerspectiveFarClip: 1000
-      Primary: true
-      FixedAspectRatio: false
+    SpriteRendererComponent:
+      Color: [0.480519474, 0.763872623, 1, 1]
+      TexturePath: ""
+      TilingFactor: 1
+    Rigidbody2DComponent:
+      BodyType: 1
+      Mass: 1
+      GravityScale: 1
+      LinearDamping: 0.200000003
+      AngularDamping: 0.200000003
+      FixedRotation: false
+      Friction: 0.200000003
+      Restitution: 0
+      RestitutionThreshold: 1
+    BoxCollider2DComponent:
+      CollisionCategory: 2
+      CollisionMask: 8
+      Offset: [0, 0]
+      Size: [1, 1]

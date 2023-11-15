@@ -1,6 +1,5 @@
 // --- OpenGLContext ----------------------------------------------------------
-// OpenGL rendering context. Uses glad.
-// Contains all opengl rendering code.
+// OpenGL rendering context.
 #pragma once
 
 #include "Locus/Renderer/GraphicsContext.h"

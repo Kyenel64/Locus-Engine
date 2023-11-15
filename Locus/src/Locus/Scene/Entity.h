@@ -1,27 +1,22 @@
 // --- Entity -----------------------------------------------------------------
-// Entity class for Locus's ECS.
+// Entity class for Locus ECS.
 #pragma once
-
-#include <optional>
 
 #include <entt.hpp>
 
-#include "Locus/Core/Log.h"
 #include "Locus/Core/UUID.h"
 #include "Locus/Scene/Scene.h"
 
 namespace Locus
 {
-
 	class Entity
 	{
 	public:
 		Entity() = default;
 		Entity(entt::entity handle, Scene* scene);
+		~Entity() = default;
 		Entity(const Entity& other) = default;
 
-		// Entites doesnt really contain components. The scene contains components which holds handles to the entity.
-		// An Entity is an ID. A Component is a struct of data. A System is the logic that operates on the components.
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args)
 		{

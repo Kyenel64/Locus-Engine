@@ -47,7 +47,7 @@ namespace Locus::Widgets
 	// If instance != nullptr, the widget is only displayed during runtime for scripts. (Weird API. Think of fix.)
 	// If dragClamp == true, slider is clamped to the following ranges.
 	template<typename T>
-	inline void DrawValueControl(const std::string& name, float labelWidth, T& changeValue, T resetValue = 1.0f, Ref<ScriptInstance> instance = nullptr, 
+	void DrawValueControl(const std::string& name, float labelWidth, T& changeValue, T resetValue = 1.0f, Ref<ScriptInstance> instance = nullptr, 
 		float speed = 0.1f, const char* format = nullptr, bool dragClamp = false, T min = 0.0f, T max = 0.0f)
 	{
 		std::function<void(T)> func = nullptr;

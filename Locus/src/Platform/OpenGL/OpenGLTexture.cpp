@@ -19,7 +19,6 @@ namespace Locus
 		glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
 	}
 
 	OpenGLTexture2D::OpenGLTexture2D(const std::string& path) : m_Path(path)

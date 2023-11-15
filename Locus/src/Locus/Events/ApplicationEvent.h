@@ -1,10 +1,14 @@
+// --- ApplicationEvent -------------------------------------------------------
+// Contains application related events.
+// Includes WindowResizeEvent, WindowCloseEvent, AppTickEvent, AppUpdateEvent,
+//	and AppRenderEvent. 
 #pragma once
 
 #include "Locus/Events/Event.h"
 
 namespace Locus
 {
-	// Event class for window resizing
+	// --- WindowResizeEvent --------------------------------------------------
 	class WindowResizeEvent : public Event
 	{
 	public:
@@ -27,7 +31,9 @@ namespace Locus
 		unsigned int m_Width, m_Height;
 	};
 
-	// Event class for window close
+
+
+	// --- WindowCloseEvent ---------------------------------------------------
 	class WindowCloseEvent : public Event
 	{
 	public:
@@ -37,7 +43,9 @@ namespace Locus
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
-	// Event class for tick events
+
+
+	// --- AppTickEvent -------------------------------------------------------
 	class AppTickEvent : public Event
 	{
 	public:
@@ -47,7 +55,9 @@ namespace Locus
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
-	// Event class for update events
+
+
+	// --- AppUpdateEvent -----------------------------------------------------
 	class AppUpdateEvent : public Event
 	{
 	public:
@@ -57,7 +67,9 @@ namespace Locus
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
-	// Event class for render events
+
+
+	// --- AppRenderEvent -----------------------------------------------------
 	class AppRenderEvent : public Event
 	{
 	public:

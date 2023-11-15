@@ -1,9 +1,9 @@
 // --- Layer ------------------------------------------------------------------
-// Locus iterates through Layers to render to the application window.
-// For example, Locus-Editor derives the Layer class.
+// Locus iterates through Layers within the main application run-loop. 
+// To use Locus, users need to create a class derived from Layer.
+//	See LocusEditorLayer.h for a reference.
 #pragma once
 
-#include "Locus/Core/Core.h"
 #include "Locus/Core/Timestep.h"
 #include "Locus/Events/Event.h"
 
@@ -12,8 +12,8 @@ namespace Locus
 	class Layer
 	{
 	public:
-		Layer(const std::string& name = "Layer");
-		virtual ~Layer() {};
+		Layer(const std::string& debugName = "Layer") : m_DebugName(debugName) {}
+		virtual ~Layer() = default;
 
 		virtual void OnAttach() {}
 		virtual void OnDetach() {}

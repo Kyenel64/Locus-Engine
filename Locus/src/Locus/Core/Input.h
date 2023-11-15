@@ -1,8 +1,6 @@
 // --- Input ------------------------------------------------------------------
-// Application input class. The Locus-Editor also handles ImGui inputs. See if
-//    it is better to use Locus inputs for ImGui as well.
-// Implementation for this will be handled in:
-//    Platform/{Platform}/{Platform}Input.cpp
+// Application input class. Implementation is platform dependent. The cpp
+//	file is contained in the platform directory.
 #pragma once
 
 #include <glm/glm.hpp>

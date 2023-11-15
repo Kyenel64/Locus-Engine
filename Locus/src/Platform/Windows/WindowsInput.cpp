@@ -7,7 +7,6 @@
 
 namespace Locus
 {
-
 	bool Input::IsKeyPressed(const int keycode)
 	{
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());

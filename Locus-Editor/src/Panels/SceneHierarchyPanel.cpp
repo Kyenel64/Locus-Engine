@@ -62,12 +62,12 @@ namespace Locus
 		// Display each entity
 		if (m_ActiveScene)
 		{
-			m_ActiveScene->m_Registry.sort<TagComponent>([&](entt::entity lhs, entt::entity rhs)
+			m_ActiveScene->GetRegistry().sort<TagComponent>([&](entt::entity lhs, entt::entity rhs)
 				{
-					return m_ActiveScene->m_Registry.get<TagComponent>(lhs).HierarchyPos < m_ActiveScene->m_Registry.get<TagComponent>(rhs).HierarchyPos;
+					return m_ActiveScene->GetRegistry().get<TagComponent>(lhs).HierarchyPos < m_ActiveScene->GetRegistry().get<TagComponent>(rhs).HierarchyPos;
 				});
 
-			auto view = m_ActiveScene->m_Registry.view<TagComponent>();
+			auto view = m_ActiveScene->GetRegistry().view<TagComponent>();
 			for (auto e : view)
 			{
 				Entity entity = Entity(e, m_ActiveScene.get());

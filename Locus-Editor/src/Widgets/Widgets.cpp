@@ -4,7 +4,6 @@
 #include <ImGui/imgui_internal.h>
 #include <glm/gtc/type_ptr.hpp>
 
-
 #include "Command/CommandHistory.h"
 #include "Command/ValueCommands.h"
 

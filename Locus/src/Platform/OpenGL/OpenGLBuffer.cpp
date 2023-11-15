@@ -54,8 +54,9 @@ namespace Locus
 		glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
 	}
 
-	// --- IndexBuffer -------------------------------------------------------
 
+
+	// --- IndexBuffer -------------------------------------------------------
 	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* indices, uint32_t count) : m_Count(count)
 	{
 		LOCUS_PROFILE_FUNCTION();

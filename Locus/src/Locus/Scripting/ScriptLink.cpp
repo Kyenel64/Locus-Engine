@@ -43,7 +43,6 @@ namespace Locus
 		LINK_INTERNAL_CALL(TransformComponent_SetLocalScale);
 
 		LINK_INTERNAL_CALL(Input_IsKeyPressed);
-		
 	}
 
 	template<typename T>

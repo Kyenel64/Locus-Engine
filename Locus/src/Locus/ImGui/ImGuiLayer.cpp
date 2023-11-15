@@ -35,6 +35,8 @@ namespace Locus
 		return { value.x, value.y, value.z, value.w };
 	}
 
+
+
 	ImGuiLayer::ImGuiLayer() : Layer("ImGuiLayer")
 	{
 

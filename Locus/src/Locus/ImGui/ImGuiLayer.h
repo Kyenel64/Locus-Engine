@@ -13,31 +13,7 @@ struct ImVec4;
 
 namespace Locus
 {
-	class ImGuiLayer : public Layer
-	{
-	public:
-		ImGuiLayer();
-		virtual ~ImGuiLayer() {}
-
-		// Initiates and sets styling for ImGui
-		virtual void OnAttach() override;
-		// Shuts down opengl3 and glfw for ImGui
-		virtual void OnDetach() override;
-
-		virtual void OnEvent(Event& e) override;
-
-		// Separates rendering so OnImGuiRender can be simplified
-		void Begin();
-		void End();
-
-		void BlockEvents(bool block) { m_BlockEvents = block; }
-
-		void SetDarkTheme();
-
-	private:
-		bool m_BlockEvents = false;
-	};
-
+	// GUI colors
 	struct LocusColors
 	{
 		static ImVec4 Black;
@@ -57,5 +33,28 @@ namespace Locus
 
 	ImVec4 ToImVec4(const glm::vec4& value);
 	glm::vec4 ToGLMVec4(const ImVec4& value);
-}
 
+
+
+	class ImGuiLayer : public Layer
+	{
+	public:
+		ImGuiLayer();
+		virtual ~ImGuiLayer() {}
+
+		virtual void OnAttach() override;
+		virtual void OnDetach() override;
+
+		virtual void OnEvent(Event& e) override;
+
+		void Begin();
+		void End();
+
+		void BlockEvents(bool block) { m_BlockEvents = block; }
+
+		void SetDarkTheme();
+
+	private:
+		bool m_BlockEvents = false;
+	};
+}

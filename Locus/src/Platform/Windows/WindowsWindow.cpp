@@ -65,7 +65,7 @@ namespace Locus
 		++s_GLFWWindowCount;
 
 		glfwSetWindowUserPointer(m_Window, &m_Data);
-		SetVSync(true);
+		SetVSync(m_Data.VSync);
 
 		// Set window icon
 		GLFWimage icons[1];

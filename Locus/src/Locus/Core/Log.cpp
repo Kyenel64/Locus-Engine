@@ -5,12 +5,10 @@
 
 namespace Locus
 {
-
 	std::shared_ptr<spdlog::logger> Log::s_CoreLogger;
 	std::shared_ptr<spdlog::logger> Log::s_ClientLogger;
 	std::shared_ptr<spdlog::logger> Log::s_ScriptLogger;
 	
-
 	void Log::Init()
 	{
 		spdlog::set_pattern("%^[%T] %n: %v%$");
@@ -22,6 +20,5 @@ namespace Locus
 
 		s_ScriptLogger = spdlog::stdout_color_mt("SCRIPT");
 		s_ScriptLogger->set_level(spdlog::level::trace);
-
 	}
 }

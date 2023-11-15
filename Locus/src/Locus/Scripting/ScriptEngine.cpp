@@ -40,6 +40,7 @@ namespace Locus
 			*outSize = size;
 			return buffer;
 		}
+
 		// Loads a C# assembly from a path. Returns the loaded assembly.
 		MonoAssembly* LoadCSharpAssembly(const std::string& assemblyPath)
 		{

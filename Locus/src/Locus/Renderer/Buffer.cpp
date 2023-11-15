@@ -2,7 +2,6 @@
 #include "Buffer.h"
 
 #include "Locus/Renderer/Renderer.h"
-
 #include "Platform/OpenGL/OpenGLBuffer.h"
 
 namespace Locus

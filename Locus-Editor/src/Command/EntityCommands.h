@@ -1,3 +1,12 @@
+// --- EntityCommands ---------------------------------------------------------
+// Commands related to entities.
+// Contains:
+//	CreateEntityCommand
+//	CreateChildEntityCommand
+//	DestroyEntityCommand
+//	DuplicateEntityCommand
+//	AddComponentCommand
+//	RemoveComponentCommand
 #pragma once
 #include "Command.h"
 
@@ -7,7 +16,6 @@
 
 namespace Locus
 {
-
 	// Used to store entity data before destroying the entity from the registry.
 	// It is important we store the actual entity id so relationship components don't
 	// point to a destroyed entity.
@@ -33,6 +41,8 @@ namespace Locus
 			data->CircleCollider2D = CreateRef<CircleCollider2DComponent>(entity.GetComponent<CircleCollider2DComponent>());
 		if (entity.HasComponent<NativeScriptComponent>())
 			data->NativeScript = CreateRef<NativeScriptComponent>(entity.GetComponent<NativeScriptComponent>());
+		if (entity.HasComponent<ScriptComponent>())
+			data->Script = CreateRef<ScriptComponent>(entity.GetComponent<ScriptComponent>());
 	}
 	
 	// Assigns component data to entity. ID component is redundant since entities require ID to be created.
@@ -57,6 +67,8 @@ namespace Locus
 			entity.AddComponent<CircleCollider2DComponent>(*data->CircleCollider2D);
 		if (data->NativeScript)
 			entity.AddComponent<NativeScriptComponent>(*data->NativeScript);
+		if (data->Script)
+			entity.AddComponent<ScriptComponent>(*data->Script);
 	}
 
 

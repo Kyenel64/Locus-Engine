@@ -1,6 +1,12 @@
 // --- Application ------------------------------------------------------------
-// Main program application. 
-
+// Main program application class.
+// Contains the core run loop that iterates through each layer.
+// Handles events for all layers.
+// Optionally takes in command line args. The first argument takes in a path
+//  to a .locus scene file which will open on startup.
+// The client needs to create a class that derives from Application and 
+//  define the CreateApplication function to create a Locus app. 
+//  See LocusEditorApp.cpp for an example.
 #pragma once
 
 #include "Core.h"
@@ -13,7 +19,6 @@
 #include "Locus/Renderer/Shader.h"
 #include "Locus/Renderer/Buffer.h"
 #include "Locus/Renderer/VertexArray.h"
-#include "Locus/Renderer/OrthographicCamera.h"
 
 namespace Locus
 {
@@ -24,7 +29,7 @@ namespace Locus
 
 		const char* operator[](int index) const
 		{
-			LOCUS_CORE_ASSERT(index < Count, "CommandLineArgs failed");
+			LOCUS_CORE_ASSERT(index < Count, "No CommandLineArgs!");
 			return Args[index];
 		}
 	};
@@ -33,7 +38,7 @@ namespace Locus
 	{
 	public:
 		Application(const std::string& name = "Locus App", ApplicationCommandLineArgs args = ApplicationCommandLineArgs());
-		virtual ~Application() {}
+		virtual ~Application() = default;
 
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);

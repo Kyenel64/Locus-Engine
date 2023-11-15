@@ -50,6 +50,5 @@ namespace Locus
 		{
 			m_Projection = glm::perspective(m_PerspectiveFOV, m_AspectRatio, m_PerspectiveNear, m_PerspectiveFar);
 		}
-
 	}
 }

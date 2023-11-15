@@ -1,11 +1,10 @@
 // --- Window -----------------------------------------------------------------
-// Window interface. Platform specific window class must be implemented.
-// Sets event callbacks.
+// Window interface. Implementation is platform dependent. The Create()
+//	function will create a platform dependent Window class.
 #pragma once
 
 #include <sstream>
 
-#include "Locus/Core/Core.h"
 #include "Locus/Events/Event.h"
 
 namespace Locus
@@ -22,13 +21,10 @@ namespace Locus
 			: Title(title), Width(width), Height(height) {}
 	};
 
-	// Window class interface for desktops
 	class Window
 	{
 	public:
-		using EventCallbackFn = std::function<void(Event&)>;
-
-		virtual ~Window() {}
+		virtual ~Window() = default;
 
 		virtual void OnUpdate() = 0;
 
@@ -36,12 +32,11 @@ namespace Locus
 		virtual uint32_t GetHeight() const = 0;
 		virtual float GetTime() const = 0;
 
-		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
+		virtual void SetEventCallback(const std::function<void(Event&)>& callback) = 0;
 		virtual void SetVSync(bool enabled) = 0;
 		virtual bool IsVSync() const = 0;
 
 		virtual void* GetNativeWindow() const = 0;
-
 
 		static Scope<Window> Create(const WindowProps& props = WindowProps());
 	};

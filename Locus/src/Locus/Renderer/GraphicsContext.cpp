@@ -2,7 +2,6 @@
 #include "GraphicsContext.h"
 
 #include "Locus/Renderer/Renderer.h"
-
 #include "Platform/OpenGL/OpenGLContext.h"
 
 namespace Locus

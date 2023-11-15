@@ -5,8 +5,6 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
 
-#include "Locus/Core/Core.h"
-
 namespace Locus
 {
 	class Log
@@ -25,7 +23,6 @@ namespace Locus
 
 	};
 }
-
 
 // Core log macros
 #define LOCUS_CORE_ERROR(...) ::Locus::Log::GetCoreLogger()->error(__VA_ARGS__)

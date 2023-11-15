@@ -1,3 +1,5 @@
+// --- CommandHistory ---------------------------------------------------------
+// Manages commands in the command pattern.
 #pragma once
 #include "Command.h"
 

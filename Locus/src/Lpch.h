@@ -17,6 +17,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "Locus/Core/Core.h"
 #include "Locus/Core/Log.h"
 #include "Locus/Debug/Instrumentor.h"
 

@@ -4,7 +4,6 @@
 #include "Locus/Renderer/Renderer.h"
 #include "Locus/Scripting/ScriptEngine.h"
 
-
 namespace Locus
 {
 	Application* Application::s_Instance = nullptr;
@@ -17,12 +16,15 @@ namespace Locus
 		LOCUS_CORE_ASSERT(!s_Instance, "Application already exists");
 		s_Instance = this;
 
+		Log::Init();
+
 		m_Window = Window::Create(name);
 		m_Window->SetEventCallback(LOCUS_BIND_EVENT_FN(Application::OnEvent));
 
+		// Subsystem startups
 		Renderer::Init();
 		ScriptEngine::Init();
-
+		
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
 	}
@@ -41,22 +43,19 @@ namespace Locus
 		m_LayerStack.PushOverlay(overlay);
 	}
 
-	// Passes event function to dispatcher.
 	void Application::OnEvent(Event& e)
 	{
 		LOCUS_PROFILE_FUNCTION();
 
-		// Iterate each layer's events backwards
 		for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it)
 		{
 			if (e.m_Handled)
 				break;
 			(*it)->OnEvent(e);
-
 		}
 
+		// Bind callback functions
 		EventDispatcher dispatcher(e);
-		// Dispatch event if event class type matches event type
 		dispatcher.Dispatch<WindowResizeEvent>(LOCUS_BIND_EVENT_FN(Application::OnWindowResize));
 		dispatcher.Dispatch<WindowCloseEvent>(LOCUS_BIND_EVENT_FN(Application::OnWindowClose));
 	}
@@ -67,39 +66,37 @@ namespace Locus
 
 		while (m_Running)
 		{
-			LOCUS_PROFILE_SCOPE("Run loop");
 			// Calculate deltaTime
 			float time = m_Window->GetTime();
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
+			// Call OnUpdate() for each layer
 			if (!m_Minimized)
 			{
-				{
-					LOCUS_PROFILE_SCOPE("LayerStack OnUpdate");
-					// Iterate through layers on update BEFORE window update.
-					for (Layer* layer : m_LayerStack)
+				LOCUS_PROFILE_SCOPE("LayerStack OnUpdate()");
+				for (Layer* layer : m_LayerStack)
 					layer->OnUpdate(timestep);
-				}
-				
 			}
 
-			// Render ImGui
+			// Call OnImGuiRender() for each layer
 			m_ImGuiLayer->Begin();
 			{
-				LOCUS_PROFILE_SCOPE("LayerStack OnImGuiRender");
+				LOCUS_PROFILE_SCOPE("LayerStack OnImGuiRender()");
 				for (Layer* layer : m_LayerStack)
 					layer->OnImGuiRender();
 			}
 			m_ImGuiLayer->End();
 
-
+			// Call window OnUpdate() after all layers
 			m_Window->OnUpdate();
 		}
 	}
 
 	void Application::Close()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		Renderer::Shutdown();
 		ScriptEngine::Shutdown();
 		m_Running = false;
@@ -107,8 +104,12 @@ namespace Locus
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)
 	{
+		LOCUS_PROFILE_FUNCTION();
+
+		// Check if the WindowCloseEvent has already been handled elsewhere.
 		if (!e.m_Handled)
 			Close();
+
 		return true;
 	}
 

@@ -1,8 +1,20 @@
 // --- Components -------------------------------------------------------------
-// Holds all component classes for Locus's ECS.
+// Components for Locus ECS.
+// Components:
+//	Tag
+//	Transform
+//	Child
+//	SpriteRenderer
+//	CircleRenderer
+//	Camera
+//	Rigidbody2D
+//	BoxCollider2D
+//	CircleCollider2D
+//	NativeScript
+//	Script
 #pragma once
 
-#include <stack> // This could be causing a COMDAT linking error
+#include <stack>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -31,7 +43,7 @@ namespace Locus
 	{
 		std::string Tag;
 		bool Enabled = true;
-		uint32_t HierarchyPos;
+		uint32_t HierarchyPos; // TODO: Store elsewhere as this is an editor related property.
 
 		TagComponent() = default;
 		TagComponent(const TagComponent&) = default;
@@ -56,6 +68,7 @@ namespace Locus
 		glm::vec3 LocalScale = { 1.0f, 1.0f, 1.0f };
 
 	private:
+		// Rotations are private to force using setters to sync both euler and quat.
 		// In radians
 		glm::vec3 LocalRotation = { 0.0f, 0.0f, 0.0f };
 		glm::quat LocalRotationQuat = { 0.0f, 0.0f, 0.0f, 0.0f };
@@ -103,7 +116,7 @@ namespace Locus
 	struct SpriteRendererComponent
 	{
 		// TODO: Take in a material
-		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
+		glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		Ref<Texture2D> Texture;
 		std::string TexturePath;
 		float TilingFactor = 1.0f;
@@ -115,7 +128,7 @@ namespace Locus
 
 	struct CircleRendererComponent
 	{
-		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
+		glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		float Thickness = 1.0f;
 		float Fade = 0.005f;
 
@@ -158,9 +171,9 @@ namespace Locus
 
 	struct BoxCollider2DComponent
 	{
-		// Polygon shape
 		uint16_t CollisionCategory = 0x0001;
 		uint16_t CollisionMask = 0xFFFF;
+
 		glm::vec2 Offset = { 0.0f, 0.0f };
 		glm::vec2 Size = { 1.0f, 1.0f };
 
@@ -174,6 +187,7 @@ namespace Locus
 	{
 		uint16_t CollisionCategory = 0x0001;
 		uint16_t CollisionMask = 0xFFFF;
+
 		glm::vec2 Offset = { 0.0f, 0.0f };
 		float Radius = 0.5f;
 
@@ -189,9 +203,7 @@ namespace Locus
 	{
 		ScriptableEntity* Instance = nullptr;
 
-		// Creates a function ptr called InstantiateScript that takes no args and returns ScriptableEntity*
 		ScriptableEntity* (*InstantiateScript)();
-		// Creates a void func ptr called DestroyScript that takes in NativeScriptComponent*
 		void (*DestroyScript)(NativeScriptComponent*);
 
 		template <typename T>
@@ -211,7 +223,7 @@ namespace Locus
 		ScriptComponent(const std::string& scriptClass) : ScriptClass(scriptClass) {}
 	};
 
-	// Make sure to update Scene, PropertiesPanel, and ScriptLink class when adding new components
+
 	enum class ComponentType
 	{
 		None = 0,
@@ -244,5 +256,4 @@ namespace Locus
 		Ref<NativeScriptComponent> NativeScript;
 		Ref<ScriptComponent> Script;
 	};
-	
 }

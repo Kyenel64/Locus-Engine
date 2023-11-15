@@ -67,6 +67,8 @@ namespace Locus
 		LocusEntity
 	};
 
+
+
 	// --- ScriptEngine -------------------------------------------------------
 	class ScriptEngine
 	{
@@ -105,6 +107,7 @@ namespace Locus
 	public:
 		ScriptClass() = default;
 		ScriptClass(MonoImage* image, const std::string& namespaceName, const std::string& className);
+		~ScriptClass() = default;
 
 		// Creates a mono instance of the script class.
 		MonoObject* Instantiate();
@@ -151,10 +154,9 @@ namespace Locus
 	public:
 		ScriptInstance() = default;
 		ScriptInstance(Ref<ScriptClass> scriptClass, Entity entity);
+		~ScriptInstance() = default;
 
-		// Calls the OnCreate() method
 		void InvokeOnCreate();
-		// Calls the OnUpdate() method
 		void InvokeOnUpdate(Timestep deltaTime);
 
 		// Gets the current value of a C# field
@@ -174,10 +176,10 @@ namespace Locus
 			SetFieldValueInternal(name, &value);
 		}
 
-
 	private:
 		bool GetFieldValueInternal(const std::string& name, void* buffer);
 		bool SetFieldValueInternal(const std::string& name, const void* value);
+
 	private:
 		Entity m_Entity;
 		Ref<ScriptClass> m_ScriptClass;
@@ -198,8 +200,6 @@ namespace Locus
 		std::string FieldName;
 		FieldType Type;
 	};
-
-
 
 	// Field instance data. 
 	struct ScriptClassFieldInstance
@@ -224,6 +224,7 @@ namespace Locus
 			static_assert(sizeof(T) <= 16, "Type too large!");
 			memcpy(m_Buffer, &value, sizeof(T));
 		}
+
 	private:
 		uint8_t m_Buffer[16];
 

@@ -13,19 +13,7 @@ Entities:
       LocalRotation: [0, 0, 0]
       LocalRotationQuat: [0, 0, 0, 1]
       LocalScale: [1, 1, 1]
-    ScriptComponent:
-      ScriptClass: Sandbox::TestClass
-      Fields:
-        otherEntity: 0
-        testBool: true
-        testBoolNoDefault: false
-        testChar: "\x00"
-        testDouble: 217.80000000000001
-        testDoubleNoDefault: 0
-        testFloat: 10
-        testFloatNoDefault: 0
-        testInt: 10
-        testIntNoDefault: 0
-        testLong: 0
-        testShort: 0
-        testVec3: [0, 0, 0]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+      TexturePath: ""
+      TilingFactor: 1

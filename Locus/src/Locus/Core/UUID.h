@@ -1,5 +1,5 @@
 // --- UUID -------------------------------------------------------------------
-// Generates UUID
+// Generates a 64 bit UUID using a random number generator.
 #pragma once
 
 #include <xhash>
@@ -12,6 +12,7 @@ namespace Locus
 		UUID();
 		UUID(uint64_t uuid);
 		UUID(const UUID&) = default;
+		~UUID() = default;
 
 		operator uint64_t() const { return m_UUID; }
 

@@ -12,6 +12,7 @@ namespace Locus
 
 	static Entity GetEntity(UUID entityID)
 	{
+		// Probably faster if C# Entity held entt id instead of UUID.
 		Scene* scene = ScriptEngine::GetScene();
 		return scene->GetEntityByUUID(entityID);
 	}
@@ -30,7 +31,7 @@ namespace Locus
 			return entity.GetUUID();
 		}
 
-		// --- Entity ---------------------------------------------------------
+		// --- Entity ---
 		static bool Entity_HasComponent(UUID entityID, MonoReflectionType* componentType)
 		{
 			Entity entity = GetEntity(entityID);
@@ -131,7 +132,7 @@ namespace Locus
 			return 0;
 		}
 
-		// --- Vec3 -----------------------------------------------------------
+		// --- Vec3 ---
 		static void Vec3_Cross(glm::vec3 v1, glm::vec3 v2, glm::vec3* output)
 		{
 			*output = glm::cross(v1, v2);
@@ -147,7 +148,7 @@ namespace Locus
 			return glm::length(vec);
 		}
 
-		// --- Transform Component --------------------------------------------
+		// --- Transform Component ---
 		static void TransformComponent_GetLocalTransform(UUID entityID, glm::mat4* output)
 		{
 			Entity entity = GetEntity(entityID);
@@ -198,12 +199,11 @@ namespace Locus
 
 		static void TransformComponent_GetWorldToLocal(UUID entityID, glm::mat4* output)
 		{
-			// Not optimized
 			Entity entity = GetEntity(entityID);
 			*output = glm::inverse(ScriptEngine::GetScene()->GetWorldTransform(entity));
 		}
 
-		// --- Input ----------------------------------------------------------
+		// --- Input ---
 		static bool Input_IsKeyPressed(uint16_t key)
 		{
 			return Input::IsKeyPressed(key);

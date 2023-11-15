@@ -1,15 +1,12 @@
 // --- Event ------------------------------------------------------------------
-// Contains abstract class for events and the event dispatcher.
+// Event interface 
 #pragma once
 
 #include <functional>
 
-#include "Locus/Core/Core.h"
-#include "Locus/Debug/Instrumentor.h"
-
 namespace Locus
 {
-	enum class EventType // Enum classes dont convert to integers
+	enum class EventType
 	{
 		None = 0,
 		// Window events
@@ -38,26 +35,32 @@ namespace Locus
 
 #define EVENT_CLASS_CATEGORY(category) virtual int GetCategoryFlags() const override { return category; }
 
-	// Parent class for events
+
+
+	// --- Event --------------------------------------------------------------
 	class Event
 	{
-		friend class EventDispatcher; // Friend classes can access private and protected.
 	public:
-		virtual EventType GetEventType() const = 0; // Virtual functions are meant to be overridden.
+		virtual EventType GetEventType() const = 0;
 		virtual const char* GetName() const = 0;
 		virtual int GetCategoryFlags() const = 0;
 		virtual std::string ToString() const { return GetName(); }
 
-		// Inline fills function within code. Doesn't search for function elsewhere.
 		inline bool IsInCategory(EventCategory category)
 		{
 			return GetCategoryFlags() & category;
 		}
 
+	public:
 		bool m_Handled = false;
+
+	public:
+		friend class EventDispatcher;
 	};
 
-	// Dispatches event based on event type
+
+
+	// --- Dispatches event based on event type -------------------------------
 	class EventDispatcher
 	{
 		template<typename T>

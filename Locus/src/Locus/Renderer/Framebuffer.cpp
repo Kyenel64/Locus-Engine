@@ -2,7 +2,6 @@
 #include "Framebuffer.h"
 
 #include "Locus/Renderer/Renderer.h"
-
 #include "Platform/OpenGL/OpenGLFramebuffer.h"
 
 namespace Locus

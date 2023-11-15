@@ -31,10 +31,6 @@ namespace Locus
 		return b2_staticBody;
 	}
 
-	Scene::Scene()
-	{
-	}
-
 	Ref<Scene> Scene::Copy(Ref<Scene> other)
 	{
 		Ref<Scene> newScene = CreateRef<Scene>();
@@ -114,9 +110,7 @@ namespace Locus
 		return entity;
 	}
 
-	// Only used when we want to create an entity with the same entt id. 
-	// For example, undoing a destroy entity command will create a new Entity with a new entt id.
-	// To prevent that, we use this function so the entt id stays the same.
+	
 	Entity Scene::CreateEntityWithUUID(Entity copyEntity, UUID uuid, const std::string& name, bool enabled)
 	{
 		Entity entity = Entity(m_Registry.create(copyEntity), this);
@@ -138,7 +132,7 @@ namespace Locus
 
 	void Scene::OnUpdateRuntime(Timestep deltaTime)
 	{
-		// --- Update Native Scripts ------------------------------------------
+		// --- Update Native Scripts ---
 		{
 			auto view = m_Registry.view<NativeScriptComponent, TagComponent>();
 			for (auto entity : view)
@@ -152,7 +146,7 @@ namespace Locus
 			}
 		}
 
-		// --- Update C# Scripts ----------------------------------------------
+		// --- Update C# Scripts ---
 		{
 			// Example API
 			auto view = m_Registry.view<ScriptComponent, TagComponent>();
@@ -166,7 +160,7 @@ namespace Locus
 			}
 		}
 
-		// --- Physics --------------------------------------------------------
+		// --- Physics ---
 		{
 			m_Box2DWorld->Step(deltaTime, 6, 2); // TODO: paremeterize
 			auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
@@ -186,8 +180,8 @@ namespace Locus
 			}
 		}
 		
-		// --- Rendering 2D ---------------------------------------------------
-		// Find first main camera
+		// --- Rendering 2D ---
+		// Find first camera with "Primary" property enabled.
 		SceneCamera* mainCamera = nullptr;
 		glm::mat4 cameraTransform;
 		{
@@ -288,7 +282,7 @@ namespace Locus
 		// Main rendering
 		Renderer2D::BeginScene(camera);
 
-		// --- Physics --------------------------------------------------------
+		// --- Physics ---
 		{
 			m_Box2DWorld->Step(deltaTime, 6, 2); // TODO: paremeterize
 			auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
@@ -308,7 +302,8 @@ namespace Locus
 			}
 		}
 
-		{ // Sprite
+		// --- Sprite ---
+		{
 			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent, TagComponent>();
 			for (auto e : view)
 			{
@@ -320,7 +315,8 @@ namespace Locus
 			}
 		}
 
-		{ // Circle
+		// --- Circle ---
+		{
 			auto view = m_Registry.view<TransformComponent, CircleRendererComponent, TagComponent>();
 			for (auto e : view)
 			{
@@ -337,7 +333,7 @@ namespace Locus
 
 	void Scene::OnRuntimeStart()
 	{
-		// --- Native Script --------------------------------------------------
+		// --- Native Script ---
 		{
 			auto view = m_Registry.view<NativeScriptComponent, TagComponent>();
 			for (auto entity : view)
@@ -353,7 +349,7 @@ namespace Locus
 			}
 		}
 
-		// --- C# Scripts -----------------------------------------------------
+		// --- C# Scripts ---
 		{
 			ScriptEngine::OnRuntimeStart(this);
 			auto view = m_Registry.view<ScriptComponent, TagComponent, IDComponent>();
@@ -370,7 +366,7 @@ namespace Locus
 			}
 		}
 		
-		// --- Physics --------------------------------------------------------
+		// --- Physics ---
 		{
 			m_Box2DWorld = new b2World({ 0.0f, -9.8f });
 			auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
@@ -448,7 +444,7 @@ namespace Locus
 
 	void Scene::OnPhysicsStart()
 	{
-		// --- Physics --------------------------------------------------------
+		// --- Physics ---
 		{
 			m_Box2DWorld = new b2World({ 0.0f, -9.8f });
 			auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
@@ -557,7 +553,7 @@ namespace Locus
 			if (view.get<CameraComponent>(entity).Primary)
 				return Entity(entity, this);
 		}
-		return {};
+		return Entity::Null;
 	}
 
 	Entity Scene::GetEntityByUUID(UUID uuid)

@@ -1,5 +1,5 @@
 // --- GraphicsContext --------------------------------------------------------
-// Graphics context interface. Must implement render api specific context.
+// Graphics context interface.
 #pragma once
 
 namespace Locus
@@ -7,6 +7,7 @@ namespace Locus
 	class GraphicsContext
 	{
 	public:
+		virtual ~GraphicsContext() = default;
 		virtual void Init() = 0;
 		virtual void SwapBuffers() = 0;
 

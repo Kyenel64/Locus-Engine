@@ -10,7 +10,7 @@
 #include "Locus/Scene/Components.h"
 #include "Locus/Scripting/ScriptEngine.h"
 
-// Needed to decode and encode custom datatypes
+// Needed to decode and encode custom datatypes using YAML
 namespace YAML {
 
 	template<>
@@ -117,6 +117,8 @@ namespace YAML {
 
 }
 
+
+
 namespace Locus
 {
 	YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec2& v)
@@ -158,7 +160,7 @@ namespace Locus
 		out << YAML::BeginMap; // Begin Entity
 		out << YAML::Key << "Entity" << YAML::Value << entity.GetUUID();
 
-		// --- Tag Component --------------------------------------------------
+		// --- Tag Component ---
 		if (entity.HasComponent<TagComponent>())
 		{
 			auto& tag = entity.GetComponent<TagComponent>();
@@ -171,7 +173,7 @@ namespace Locus
 			out << YAML::EndMap; // End Tag Component
 		}
 
-		// --- Transform Component --------------------------------------------
+		// --- Transform Component ---
 		if (entity.HasComponent<TransformComponent>())
 		{
 			auto& tc = entity.GetComponent<TransformComponent>();
@@ -190,7 +192,7 @@ namespace Locus
 			out << YAML::EndMap; // End Transform Component
 		}
 
-		// --- Child Component ------------------------------------------------
+		// --- Child Component ---
 		if (entity.HasComponent<ChildComponent>())
 		{
 			auto& cc = entity.GetComponent<ChildComponent>();
@@ -209,7 +211,7 @@ namespace Locus
 			out << YAML::EndMap; // End Child Component
 		}
 
-		// --- Sprite Renderer Component --------------------------------------
+		// --- Sprite Renderer Component ---
 		if (entity.HasComponent<SpriteRendererComponent>())
 		{
 			auto& src = entity.GetComponent<SpriteRendererComponent>();
@@ -222,7 +224,7 @@ namespace Locus
 			out << YAML::EndMap; // End Sprite Renderer Component
 		}
 
-		// --- Circle Renderer Component --------------------------------------
+		// --- Circle Renderer Component ---
 		if (entity.HasComponent<CircleRendererComponent>())
 		{
 			auto& crc = entity.GetComponent<CircleRendererComponent>();
@@ -235,7 +237,7 @@ namespace Locus
 			out << YAML::EndMap;
 		}
 
-		// --- Camera Component -----------------------------------------------
+		// --- Camera Component ---
 		if (entity.HasComponent<CameraComponent>())
 		{
 			auto& cc = entity.GetComponent<CameraComponent>();
@@ -259,7 +261,7 @@ namespace Locus
 			out << YAML::EndMap; // End Camera Component
 		}
 
-		// --- Rigidbody2D Component ------------------------------------------
+		// --- Rigidbody2D Component ---
 		if (entity.HasComponent<Rigidbody2DComponent>())
 		{
 			auto& rb2D = entity.GetComponent<Rigidbody2DComponent>();
@@ -278,7 +280,7 @@ namespace Locus
 			out << YAML::EndMap; // End Rigidbody2D Component
 		}
 
-		// --- BoxCollider2D Component ----------------------------------------
+		// --- BoxCollider2D Component ---
 		if (entity.HasComponent<BoxCollider2DComponent>())
 		{
 			auto& bc2D = entity.GetComponent<BoxCollider2DComponent>();
@@ -292,7 +294,7 @@ namespace Locus
 			out << YAML::EndMap; // BoxCollider2D Component
 		}
 
-		// --- CircleCollider2D Component ----------------------------------------
+		// --- CircleCollider2D Component ---
 		if (entity.HasComponent<CircleCollider2DComponent>())
 		{
 			auto& c2D = entity.GetComponent<CircleCollider2DComponent>();
@@ -306,7 +308,7 @@ namespace Locus
 			out << YAML::EndMap; // BoxCollider2D Component
 		}
 
-		// --- Script Component -----------------------------------------------
+		// --- Script Component ---
 		if (entity.HasComponent<ScriptComponent>())
 		{
 			auto& sc = entity.GetComponent<ScriptComponent>();
@@ -359,7 +361,7 @@ namespace Locus
 		out << YAML::Key << "RootEntityCount" << YAML::Value << m_Scene->m_RootEntityCount;
 		// Array of Entities
 		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
-		m_Scene->m_Registry.each([&](auto entityID)
+		m_Scene->GetRegistry().each([&](auto entityID)
 		{
 				Entity entity = Entity(entityID, m_Scene.get());
 				if (!entity)
@@ -397,10 +399,10 @@ namespace Locus
 		{
 			for (auto entity : entities)
 			{
-				// --- Entity uuid --------------------------------------------
+				// --- Entity uuid ---
 				uint64_t uuid = entity["Entity"].as<uint64_t>();
 
-				// --- Tag Component ------------------------------------------
+				// --- Tag Component ---
 				std::string name;
 				bool enabled = true;
 				auto tagComponent = entity["TagComponent"];
@@ -415,7 +417,7 @@ namespace Locus
 				m_Scene->m_RootEntityCount--;
 				deserializedEntity.GetComponent<TagComponent>().HierarchyPos = tagComponent["HierarchyPos"].as<uint32_t>();
 
-				// --- Transform Component ------------------------------------
+				// --- Transform Component ---
 				auto transformComponent = entity["TransformComponent"];
 				if (transformComponent)
 				{
@@ -427,7 +429,7 @@ namespace Locus
 					tc.LocalScale = transformComponent["LocalScale"].as<glm::vec3>();
 				}
 
-				// --- Sprite Renderer Component ------------------------------
+				// --- Sprite Renderer Component ---
 				auto spriteRendererComponent = entity["SpriteRendererComponent"];
 				if (spriteRendererComponent)
 				{
@@ -439,7 +441,7 @@ namespace Locus
 					src.TilingFactor = spriteRendererComponent["TilingFactor"].as<float>();
 				}
 
-				// --- Circle Renderer Component ------------------------------
+				// --- Circle Renderer Component ---
 				auto circleRendererComponent = entity["CircleRendererComponent"];
 				if (circleRendererComponent)
 				{
@@ -449,7 +451,7 @@ namespace Locus
 					crc.Fade = circleRendererComponent["Fade"].as<float>();
 				}
 
-				// --- Camera Component ---------------------------------------
+				// --- Camera Component ---
 				auto cameraComponent = entity["CameraComponent"];
 				if (cameraComponent)
 				{
@@ -469,7 +471,7 @@ namespace Locus
 					cc.FixedAspectRatio = cameraComponent["FixedAspectRatio"].as<bool>();
 				}
 
-				// --- Rigidbody2D Component ----------------------------------
+				// --- Rigidbody2D Component ---
 				auto rigidBody2DComponent = entity["Rigidbody2DComponent"];
 				if (rigidBody2DComponent)
 				{
@@ -485,7 +487,7 @@ namespace Locus
 					rb2D.RestitutionThreshold = rigidBody2DComponent["RestitutionThreshold"].as<float>();
 				}
 
-				// --- BoxCollider2D Component --------------------------------
+				// --- BoxCollider2D Component ---
 				auto boxCollider2DComponent = entity["BoxCollider2DComponent"];
 				if (boxCollider2DComponent)
 				{
@@ -496,7 +498,7 @@ namespace Locus
 					bc2D.Size = boxCollider2DComponent["Size"].as<glm::vec2>();
 				}
 
-				// --- CircleCollider2D Component ------------------------------
+				// --- CircleCollider2D Component ---
 				auto circleCollider2DComponent = entity["CircleCollider2DComponent"];
 				if (circleCollider2DComponent)
 				{
@@ -507,7 +509,7 @@ namespace Locus
 					c2D.Radius = circleCollider2DComponent["Radius"].as<float>();
 				}
 
-				// --- Script Component ---------------------------------------
+				// --- Script Component ---
 				auto scriptComponent = entity["ScriptComponent"];
 				auto fields = scriptComponent["Fields"];
 				if (scriptComponent)
@@ -557,7 +559,7 @@ namespace Locus
 				uint64_t uuid = e["Entity"].as<uint64_t>();
 				Entity entity = m_Scene->GetEntityByUUID(uuid);
 
-				// --- Transform Component ------------------------------------
+				// --- Transform Component ---
 				auto transformComponent = e["TransformComponent"];
 				if (transformComponent)
 				{
@@ -569,7 +571,7 @@ namespace Locus
 					}
 				}
 
-				// --- Child Component ----------------------------------------
+				// --- Child Component ---
 				auto childComponent = e["ChildComponent"];
 				if (childComponent)
 				{
@@ -584,7 +586,6 @@ namespace Locus
 						cc.ChildEntities.push_back(child);
 					}
 				}
-				
 			}
 		}
 
@@ -597,5 +598,4 @@ namespace Locus
 		LOCUS_CORE_ASSERT(false, "Not implemented");
 		return false;
 	}
-
 }

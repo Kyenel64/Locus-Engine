@@ -56,6 +56,7 @@ namespace Locus
 			SceneSerializer serializer(m_ActiveScene);
 			serializer.Deserialize(sceneFilePath);
 			m_SavePath = sceneFilePath;
+			LOCUS_CORE_INFO("Loaded startup scene: {0}", commandLineArgs[1]);
 		}
 
 		// Panels
@@ -280,7 +281,6 @@ namespace Locus
 
 	bool LocusEditorLayer::OnKeyPressed(KeyPressedEvent& e)
 	{
-
 		bool control = Input::IsKeyPressed(Key::LeftControl) || Input::IsKeyPressed(Key::RightControl);
 		bool shift = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
 		switch (e.GetKeyCode())
@@ -1202,5 +1202,4 @@ namespace Locus
 			}
 		}
 	}
-
 }

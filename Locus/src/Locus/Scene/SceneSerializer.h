@@ -1,5 +1,5 @@
 // --- SceneSerializer --------------------------------------------------------
-// Serializes and deserializes scene to a given .locus file.
+// Serializes and deserializes scene to/from a given .locus file.
 #pragma once
 
 #include "Locus/Scene/Scene.h"
@@ -15,6 +15,7 @@ namespace Locus
 	{
 	public:
 		SceneSerializer(const Ref<Scene>& scene);
+		~SceneSerializer() = default;
 		
 		void Serialize(const std::string& path);
 		void SerializeRunTime(const std::string& path);

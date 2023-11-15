@@ -1,3 +1,9 @@
+// --- ValueCommands ----------------------------------------------------------
+// Commands for datatypes.
+// Contains:
+//	ChangeValueCommand
+//	ChangeFunctionValueCommand
+//	ChangeTextureCommand
 #pragma once
 #include "Command.h"
 
@@ -54,6 +60,9 @@ namespace Locus
 		T& m_ValueToChange;
 	};
 
+
+	
+	// Use for when value is only manipulatable by functions.
 	template<typename T>
 	class ChangeFunctionValueCommand : public Command
 	{
@@ -108,6 +117,8 @@ namespace Locus
 		T& m_ValueToChange;
 		std::function<void(const T&)> m_Function;
 	};
+
+
 
 	class ChangeTextureCommand : public Command
 	{

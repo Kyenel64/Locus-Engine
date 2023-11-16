@@ -29,14 +29,6 @@ project "Locus-Editor"
 		"Locus"
 	}
 
-	-- postbuildcommands
-	-- {
-	-- 	"xcopy %{ProjectDir}/resources/*.* %{targetdir}/resources /Y /I /E",
-	-- 	"xcopy %{ProjectDir}/mono/*.* %{targetdir}/mono /Y /I /E",
-	-- 	"xcopy %{ProjectDir}/SandboxProject/*.* %{targetdir}/SandboxProject /Y /I /E",
-	-- 	"xcopy %{ProjectDir}/imgui.ini %{targetdir} /Y /I"
-	-- }
-
 	postbuildcommands
 	{
 		"{COPY} %{prj.location}/resources %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/resources",
@@ -58,13 +50,29 @@ project "Locus-Editor"
 			"/ignore:4099"
 		}
 
+		postbuildcommands
+		{
+			"{COPY} %{VULKAN_SDK}/Bin/shaderc_sharedd.dll %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/"
+		}
+
 	filter "configurations:Release"
 		defines "LOCUS_RELEASE"
 		runtime "Release" -- /MD
 		optimize "on"
-	
+
+		postbuildcommands
+		{
+			"{COPY} %{VULKAN_SDK}/Bin/shaderc_shared.dll %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/"
+		}
+
 	filter "configurations:Dist"
 		defines "LOCUS_DIST"
 		runtime "Release" -- /MD
 		optimize "on"
-				
+
+		postbuildcommands
+		{
+			"{COPY} %{VULKAN_SDK}/Bin/shaderc_shared.dll %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/"
+		}
+
+			

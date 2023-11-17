@@ -12,15 +12,15 @@
 namespace Locus
 {
 	ImVec4 LocusColors::Black =	{ 0.0f, 0.0f, 0.0f, 1.0f };
-	ImVec4 LocusColors::DarkGrey = { 0.132f, 0.125f, 0.117f, 1.0f };
-	ImVec4 LocusColors::MediumDarkGrey = { 0.207f, 0.195f, 0.176f, 1.0f };
-	ImVec4 LocusColors::Grey = { 0.246f, 0.234f, 0.211f, 1.0f };
-	ImVec4 LocusColors::LightGrey = { 0.289f, 0.281f, 0.266f, 1.0f };
+	ImVec4 LocusColors::DarkGrey = { 0.05f, 0.05f, 0.05f, 1.0f };
+	ImVec4 LocusColors::MediumDarkGrey = { 0.11f, 0.11f, 0.11f, 1.0f };
+	ImVec4 LocusColors::Grey = { 0.14f, 0.14f, 0.14f, 1.0f };
+	ImVec4 LocusColors::LightGrey = { 0.17f, 0.17f, 0.17f, 1.0f };
 	ImVec4 LocusColors::White = { 1.0f, 1.0f, 1.0f, 1.0f };
 	ImVec4 LocusColors::Pink = { 0.9f, 0.4f, 0.4f, 1.0f };
 	ImVec4 LocusColors::Transparent = { 0.0f, 0.0f, 0.0f, 0.0f };
-	ImVec4 LocusColors::Tan = { 0.41f, 0.375f, 0.313f, 1.0f };
-	ImVec4 LocusColors::Orange = { 0.585f, 0.332f, 0.18f, 1.0f };
+	ImVec4 LocusColors::Tan = { 0.40f, 0.40f, 0.40f, 1.0f };
+	ImVec4 LocusColors::Orange = { 0.35f, 0.35f, 0.35f, 1.0f };
 	ImVec4 LocusColors::Green = { 0.0f, 1.0f, 0.0f, 1.0f };
 	ImVec4 LocusColors::Blue = { 0.0f, 0.0f, 1.0f, 1.0f };
 	ImVec4 LocusColors::LightBlue = { 0.4f, 0.8f, 1.0f, 1.0f };

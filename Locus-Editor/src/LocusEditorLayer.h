@@ -115,8 +115,6 @@ namespace Locus
 		float m_LeftSplitterPos;
 		float m_RightSplitterPos;
 		float m_CenterSplitterPos;
-		glm::vec2 m_FrameSizes[4];
-		glm::vec2 m_FramePositions[4];
 		enum class LayoutStyle { Default = 0 };
 		LayoutStyle m_LayoutStyle = LayoutStyle::Default;
 	};

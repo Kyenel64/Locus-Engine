@@ -629,11 +629,6 @@ namespace Locus
 			ImGuiID dockspace_id = ImGui::GetID("Frame1Dockspace");
 			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
 
-			m_FrameSizes[0].x = ImGui::GetWindowSize().x;
-			m_FrameSizes[0].y = ImGui::GetWindowSize().y;
-			m_FramePositions[0].x = ImGui::GetWindowPos().x;
-			m_FramePositions[0].y = ImGui::GetWindowPos().y;
-
 			ImGuiID frame1DockID = ImGui::GetID("Frame1Dock");
 			ImGui::DockSpace(frame1DockID, { -1.0f, -1.0f });
 
@@ -648,11 +643,6 @@ namespace Locus
 			}
 
 			ImGui::BeginChild("Frame2", { -1.0f, -1.0f }, false, childFlags);
-
-			m_FrameSizes[1].x = ImGui::GetWindowSize().x;
-			m_FrameSizes[1].y = ImGui::GetWindowSize().y;
-			m_FramePositions[1].x = ImGui::GetWindowPos().x;
-			m_FramePositions[1].y = ImGui::GetWindowPos().y;
 
 			ImGuiID frame2DockID = ImGui::GetID("Frame2Dock");
 			ImGui::DockSpace(frame2DockID, { -1.0f, -1.0f });
@@ -679,11 +669,6 @@ namespace Locus
 			ImGui::TableNextColumn();
 			ImGui::BeginChild("Frame3", { -1.0f, m_WindowSize.y * m_RightSplitterPos }, false, childFlags);
 
-			m_FrameSizes[2].x = ImGui::GetWindowSize().x;
-			m_FrameSizes[2].y = ImGui::GetWindowSize().y;
-			m_FramePositions[2].x = ImGui::GetWindowPos().x;
-			m_FramePositions[2].y = ImGui::GetWindowPos().y;
-
 			ImGuiID frame3DockID = ImGui::GetID("Frame3Dock");
 			ImGui::DockSpace(frame3DockID, { -1.0f, -1.0f });
 
@@ -698,11 +683,6 @@ namespace Locus
 			}
 
 			ImGui::BeginChild("Frame4", { -1.0f, -1.0f }, false, childFlags);
-
-			m_FrameSizes[3].x = ImGui::GetWindowSize().x;
-			m_FrameSizes[3].y = ImGui::GetWindowSize().y;
-			m_FramePositions[3].x = ImGui::GetWindowPos().x;
-			m_FramePositions[3].y = ImGui::GetWindowPos().y;
 
 			ImGuiID frame4DockID = ImGui::GetID("Frame4Dock");
 			ImGui::DockSpace(frame4DockID, { -1.0f, -1.0f });

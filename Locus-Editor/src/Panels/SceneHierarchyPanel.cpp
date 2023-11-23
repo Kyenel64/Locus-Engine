@@ -27,37 +27,57 @@ namespace Locus
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
 		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar;
-		ImGui::Begin(" Scene Hierarchy ", false, windowFlags);
 
 		// --- Top bar ---
-		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::MediumDarkGrey);
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::MediumDarkGrey);
-		if (ImGui::ImageButton((ImTextureID)(uintptr_t)m_PlusIcon->GetRendererID(), { 15.0f, 15.0f }))
-			ImGui::OpenPopup("ButtonPopup");
 
+		// Plus button
+		ImVec2 textSize = ImGui::CalcTextSize("Search");
+		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { ImGui::GetStyle().FramePadding.y, ImGui::GetStyle().FramePadding.y });
+		if (ImGui::ImageButton((ImTextureID)(uintptr_t)m_PlusIcon->GetRendererID(), { textSize.y, textSize.y }, { 0, 1 }, { 1, 0 }))
+			ImGui::OpenPopup("ButtonPopup");
+		ImGui::PopStyleVar(2);
+		ImGui::PopStyleColor();
 		// Popup when clicking button. 
+		ImGui::SetNextWindowPos({ ImGui::GetWindowPos().x + ImGui::GetCursorPosX(), ImGui::GetWindowPos().y + ImGui::GetCursorPosY() - ImGui::GetStyle().ItemSpacing.y });
 		if (ImGui::BeginPopup("ButtonPopup"))
 		{
 			if (ImGui::MenuItem("Create Empty Entity"))
 				CommandHistory::AddCommand(new CreateEntityCommand(m_ActiveScene, "Empty Entity"));
 			ImGui::EndPopup();
 		}
-		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
 
-		// --- Search bar ---
+		// Search bar
+		ImGuiTextFilter filter;
+		bool showSearchText = true;
+		float inputPosY = ImGui::GetCursorPosY();
+
 		char buffer[256];
 		memset(buffer, 0, sizeof(buffer));
-		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-		ImGui::InputText("##Search", buffer, sizeof(buffer), ImGuiInputTextFlags_None); // TODO: Functionality
+		float width = ImGui::GetWindowSize().x * 0.5f;
+		ImGui::SetCursorPosX(width - (width * 0.5f));
+		ImGui::PushItemWidth(width);
+		if (filter.Draw("##Search"))
+			showSearchText = false;
 		ImGui::PopItemWidth();
+		// Search text
+		if (showSearchText)
+		{
+			ImDrawList* drawList = ImGui::GetWindowDrawList();
+			drawList->AddText({ ImGui::GetWindowPos().x + (ImGui::GetWindowSize().x - textSize.x) * 0.5f, ImGui::GetWindowPos().y + inputPosY + ImGui::GetStyle().FramePadding.y }, 
+				ImGui::GetColorU32(LocusColors::Orange), "Search");
+		}
 
-		// --- Hierarchy window ---
-		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.0f);
-		ImGui::PushStyleColor(ImGuiCol_ChildBg, LocusColors::MediumDarkGrey);
-		ImGui::BeginChild("Hierarchy");
+
+		// Hierarchy
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
+		ImGui::PushStyleColor(ImGuiCol_ChildBg, LocusColors::DarkGrey);
+		ImGui::BeginChild("Hierarchy", { -1.0f, ImGui::GetContentRegionAvail().y - 10.0f }, true);
+		ImGui::PopStyleColor();
+		ImGui::PopStyleVar();
 		
 		// Display each entity
 		if (m_ActiveScene)
@@ -71,10 +91,13 @@ namespace Locus
 			for (auto e : view)
 			{
 				Entity entity = Entity(e, m_ActiveScene.get());
-				if (entity.HasComponent<TransformComponent>())
+				if (entity.HasComponent<TagComponent>()) 
 				{
-					if (entity.GetComponent<TransformComponent>().Parent == Entity::Null)
-						DrawEntityNode(entity);
+					if (filter.PassFilter(entity.GetComponent<TagComponent>().Tag.c_str()))
+					{
+						if (entity.GetComponent<TransformComponent>().Parent == Entity::Null)
+							DrawEntityNode(entity);
+					}
 				}
 			}
 		}
@@ -90,11 +113,8 @@ namespace Locus
 				CommandHistory::AddCommand(new CreateEntityCommand(m_ActiveScene, "Empty Entity"));
 			ImGui::EndPopup();
 		}
-		ImGui::EndChild();
-		ImGui::PopStyleColor();
-		ImGui::PopStyleVar();
 
-		ImGui::End();
+		ImGui::EndChild();
 	}
 
 	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
@@ -102,12 +122,19 @@ namespace Locus
 		auto& tag = entity.GetComponent<TagComponent>().Tag;
 
 		ImGuiTreeNodeFlags flags = ((m_SelectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0)
-			| ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 1.0f });
-		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, LocusColors::Tan);
+			| ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Framed;
+		ImVec4 headerColor = LocusColors::Transparent;
+		if (m_SelectedEntity == entity)
+			headerColor = LocusColors::Orange;
+
+		ImGui::PushStyleColor(ImGuiCol_Header, headerColor);
+		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, headerColor);
+		ImGui::PushStyleColor(ImGuiCol_HeaderActive, headerColor);
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0.0f });
 		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
-		ImGui::PopStyleVar();
-		ImGui::PopStyleColor();
+		ImGui::PopStyleVar(2);
+		ImGui::PopStyleColor(3);
 
 		if (ImGui::IsItemClicked())
 			m_SelectedEntity = entity;
@@ -118,7 +145,6 @@ namespace Locus
 			ImGui::SetDragDropPayload("ENTITY_POSITION", &entity, sizeof(Entity));
 			ImGui::EndDragDropSource();
 		}
-
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_POSITION"))

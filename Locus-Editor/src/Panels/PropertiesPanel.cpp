@@ -27,7 +27,7 @@ namespace Locus
 		m_SelectedEntity = {};
 		
 		// Create textures
-		m_ShowMoreIcon = Texture2D::Create("resources/icons/ShowMoreIcon.png");
+		m_MenuIcon = Texture2D::Create("resources/icons/MenuIcon.png");
 		m_FolderIcon = Texture2D::Create("resources/icons/FolderIcon.png");
 
 		m_ScriptClasses = ScriptEngine::GetClassNames();
@@ -35,22 +35,14 @@ namespace Locus
 
 	void PropertiesPanel::OnImGuiRender()
 	{
-		// Panel styling
-		float windowWidth = ImGui::GetWindowSize().x;
-		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar;
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 10.0f, 10.0f });
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 4.0f, 2.0f });
-		ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 10.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, { 0.0f, 0.5f });
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Orange);
-		ImGui::Begin(" Properties ", false, windowFlags);
-
-		m_LabelWidth = 60.0f * ( 1.0f + ((ImGui::GetWindowSize().x / windowWidth) * 5.0f));
+		ImGui::BeginChild("PropertiesPanel", { -1.0f, ImGui::GetContentRegionAvail().y - 15.0f }, false, ImGuiWindowFlags_NoScrollbar);
 
 		if (m_SelectedEntity.IsValid())
 		{
 			DrawComponents(m_SelectedEntity);
 
+			ImGui::SetCursorPosX(ImGui::GetContentRegionAvail().x * 0.5f - (ImGui::CalcTextSize("Add Component").x * 0.5f + ImGui::GetStyle().FramePadding.x));
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
 			if (ImGui::Button("Add Component"))
 				ImGui::OpenPopup("AddComponent");
 
@@ -135,9 +127,7 @@ namespace Locus
 			ImGui::EndPopup();
 		}
 
-		ImGui::End();
-		ImGui::PopStyleVar(4);
-		ImGui::PopStyleColor();
+		ImGui::EndChild();
 	}
 
 	// Draws the component to the panel. Takes in a function for component specific data to display. 
@@ -148,28 +138,40 @@ namespace Locus
 		const ImGuiTreeNodeFlags treeNodeFlags =
 			ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed |
 			ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap |
-			ImGuiTreeNodeFlags_FramePadding;
+			ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_HideArrow;
 
 		if (entity.HasComponent<T>())
 		{
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 3.0f });
 			auto& component = entity.GetComponent<T>();
-			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
-
-			ImGui::PushStyleColor(ImGuiCol_Header, LocusColors::Tan);
-			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
-			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
-			ImGui::PopStyleColor();
-
-			ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
-			ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Transparent);
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::LightGrey);
-			if (ImGui::ImageButton((ImTextureID)(uint64_t)m_ShowMoreIcon->GetRendererID(), ImVec2(lineHeight, lineHeight), ImVec2(0, 0), ImVec2(1, 1), 0))
-				ImGui::OpenPopup("Component Settings");
-			ImGui::PopStyleColor(3);
 
 			bool removeComponent = false;
-			// Component dropdown when clicking on three dots on the right.
+
+			ImGui::Separator();
+
+			// TreeNode
+			ImGui::PushStyleColor(ImGuiCol_Header, LocusColors::Transparent);
+			ImGui::PushStyleColor(ImGuiCol_HeaderHovered, LocusColors::Transparent);
+			ImGui::PushStyleColor(ImGuiCol_HeaderActive, LocusColors::Transparent);
+			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 3.0f, ImGui::GetStyle().FramePadding.y });
+			ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0]);
+			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
+			ImGui::PopFont();
+			ImGui::PopStyleVar();
+			ImGui::PopStyleColor(3);
+			float menuButtonSize = ImGui::GetItemRectSize().y;
+
+			ImGui::SameLine(ImGui::GetItemRectSize().x - menuButtonSize);
+
+			// TreeNode Menu button
+			ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
+			if (ImGui::ImageButton((ImTextureID)(uint64_t)m_MenuIcon->GetRendererID(), { menuButtonSize, menuButtonSize }, ImVec2(0, 1), ImVec2(1, 0), 0))
+				ImGui::OpenPopup("Component Settings");
+			ImGui::PopStyleColor();
+			ImGui::PopStyleVar();
+
+			// TreeNode Menu popup
 			if (ImGui::BeginPopup("Component Settings"))
 			{
 				if (name != "Transform")
@@ -190,6 +192,8 @@ namespace Locus
 
 			if (removeComponent)
 				CommandHistory::AddCommand(new RemoveComponentCommand<T>(entity));
+
+			ImGui::PopStyleVar();
 		}
 	}
 
@@ -199,53 +203,30 @@ namespace Locus
 		if (entity.HasComponent<TagComponent>())
 		{
 			// Tag
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, ImGui::GetStyle().ItemSpacing.x });
 			auto& tag = entity.GetComponent<TagComponent>().Tag;
-			char buffer[256];
-			memset(buffer, 0, sizeof(buffer));
-			strcpy_s(buffer, sizeof(buffer), tag.c_str());
-			ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
-
-			ImGui::PushItemWidth(ImGui::GetWindowSize().x - 50.0f);
-			if (ImGui::InputText("##Tag", buffer, sizeof(buffer), flags))
-				CommandHistory::AddCommand(new ChangeValueCommand(std::string(buffer), tag));
-			ImGui::PopItemWidth();
+			Widgets::DrawStringControl("Tag", tag, "Empty Entity", 0, ImGui::GetWindowWidth() * 0.5f - ImGui::CalcTextSize("Tag").x - ImGui::GetStyle().FramePadding.x * 2.0f);
 
 			ImGui::SameLine();
 
-			// Enabled
-			bool enabled = entity.GetComponent<TagComponent>().Enabled;
-			if (ImGui::Checkbox("##Enabled", &enabled))
-				entity.GetComponent<TagComponent>().Enabled = enabled;
-
-			if (!ImGui::TempInputIsActive(ImGui::GetActiveID()))
-				Application::Get().GetImGuiLayer()->BlockEvents(true);
-			else
-				Application::Get().GetImGuiLayer()->BlockEvents(false);
-
-			// Groups (Not yet implemented)
-			Widgets::DrawControlLabel("Group", { 0.0f, 0.0f });
-			ImGui::SameLine();
-			ImGui::Button("Enemy (temp)", { 150.0f, 0.0f });
+			// Groups (Not yet implemented). TODO: replace this with dropdown
+			std::string group = "Entity";
+			Widgets::DrawStringControl("Group", group, "Default", 0);
+			ImGui::PopStyleVar();
 		}
 
 		// --- Transform Component --------------------------------------------
 		DrawComponentUI<TransformComponent>("Transform", entity, [this](auto& component)
 			{
 				// Position
-				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 5.0f, 0.0f });
-				Widgets::DrawVec3Control("Position", m_LabelWidth, component.LocalPosition, { 0.0f, 0.0f, 0.0f }, nullptr, 0.01f, "%.2f");
-				
+				Widgets::DrawVec3Control("Position", component.LocalPosition, { 0.0f, 0.0f, 0.0f }, 0.01f, "%.2f");
+
 				// Rotation
-				Widgets::DrawVec3Control("Rotation", m_LabelWidth, component.LocalRotation, { 0.0f, 0.0f, 0.0f }, nullptr, 0.01f, "%.2f");
+				Widgets::DrawVec3Control("Rotation", component.LocalRotation, { 0.0f, 0.0f, 0.0f }, 0.01f, "%.2f");
 				component.SetLocalRotation(component.LocalRotation);
-				ImGui::PopStyleVar();
 
 				// Scale
-				// Bottom spacing gets removed if applying styling to all three controls. 
-				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 5.0f, 5.0f });
-				Widgets::DrawVec3Control("Scale", m_LabelWidth, component.LocalScale, { 1.0f, 1.0f, 1.0f }, nullptr, 0.01f, "%.2f");
-				ImGui::PopStyleVar();
-
+				Widgets::DrawVec3Control("Scale", component.LocalScale, { 1.0f, 1.0f, 1.0f }, 0.01f, "%.2f");
 			});
 
 		// --- Camera Component -----------------------------------------------
@@ -254,13 +235,15 @@ namespace Locus
 				SceneCamera& camera = component.Camera;
 
 				// Primary camera check
-				Widgets::DrawBoolControl("Primary", m_LabelWidth, component.Primary);
+				Widgets::DrawBoolControl("Primary", component.Primary);
 
 				// Background color
-				Widgets::DrawColorControl("Background Color", m_LabelWidth, camera.GetBackgroundColor(), { 0.25f, 0.5f, 0.5f, 1.0f });
+				Widgets::DrawColorControl("Background Color", camera.GetBackgroundColor(), { 0.25f, 0.5f, 0.5f, 1.0f });
 
 				// Projection mode dropdown
-				Widgets::DrawControlLabel("Projection", { m_LabelWidth, 0.0f });
+				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, ImGui::GetStyle().ItemSpacing.y });
+
+				Widgets::DrawControlLabel("Projection", { ImGui::GetContentRegionAvail().x * 0.5f, 0.0f });
 				ImGui::SameLine();
 				const char* projectionTypeString[] = { "Orthographic", "Perspective" };
 				const char* currentProjectionTypeString = projectionTypeString[(int)camera.GetProjectionType()];
@@ -279,18 +262,19 @@ namespace Locus
 					ImGui::EndCombo();
 				}
 				ImGui::PopItemWidth();
+				ImGui::PopStyleVar();
 
 				// Orthographic settings
 				if (camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic)
 				{
 					// Size
-					Widgets::DrawValueControl("Size", m_LabelWidth, camera.GetOrthographicSize(), 5.0f);
+					Widgets::DrawValueControl("Size", camera.GetOrthographicSize(), 5.0f);
 					// Near
-					Widgets::DrawValueControl("Near Clip", m_LabelWidth, camera.GetOrthographicNearClip(), -1.0f, nullptr, 0.1f, "%.1f");
+					Widgets::DrawValueControl("Near Clip", camera.GetOrthographicNearClip(), -1.0f, 0.1f, "%.1f");
 					// Far
-					Widgets::DrawValueControl("Far Clip", m_LabelWidth, camera.GetOrthographicFarClip(), 1000.0f, nullptr, 0.1f, "%.1f");
+					Widgets::DrawValueControl("Far Clip", camera.GetOrthographicFarClip(), 1000.0f, 0.1f, "%.1f");
 					// Fixed Aspect Ratio
-					Widgets::DrawBoolControl("Fixed Aspect Ratio", m_LabelWidth, component.FixedAspectRatio);
+					Widgets::DrawBoolControl("Fixed Aspect Ratio", component.FixedAspectRatio);
 				}
 
 				// Perspective settings
@@ -298,12 +282,12 @@ namespace Locus
 				{
 					// FOV TODO: Fix
 					float fov = glm::degrees(camera.GetPerspectiveFOV());
-					Widgets::DrawValueControl("FOV", m_LabelWidth, fov, 45.0f);
+					Widgets::DrawValueControl("FOV", fov, 45.0f);
 					camera.SetPerspectiveFOV(glm::radians(fov));
 					// Near
-					Widgets::DrawValueControl("Near Clip", m_LabelWidth, camera.GetPerspectiveNearClip(), -1.0f, nullptr, 0.1f, "%.1f");
+					Widgets::DrawValueControl("Near Clip", camera.GetPerspectiveNearClip(), -1.0f, 0.1f, "%.1f");
 					// Far
-					Widgets::DrawValueControl("Far Clip", m_LabelWidth, camera.GetPerspectiveFarClip(), 1000.0f, nullptr, 0.1f, "%.1f");
+					Widgets::DrawValueControl("Far Clip", camera.GetPerspectiveFarClip(), 1000.0f, 0.1f, "%.1f");
 				}
 			});
 
@@ -311,8 +295,9 @@ namespace Locus
 		DrawComponentUI<SpriteRendererComponent>("Sprite Renderer", entity, [this](auto& component)
 			{
 				// Sprite
-				Widgets::DrawControlLabel("Sprite", { m_LabelWidth, 50.0f });
-				ImGui::SameLine();
+				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, ImGui::GetStyle().ItemSpacing.y });
+
+				Widgets::DrawControlLabel("Sprite", { ImGui::GetContentRegionAvail().x * 0.5f, 50.0f});
 
 				if (ImGui::IsItemHovered())
 				{
@@ -321,13 +306,16 @@ namespace Locus
 						component.Texture = nullptr;
 				}
 
-				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::MediumDarkGrey);
-				ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::MediumDarkGrey);
+				ImGui::SameLine();
+
+				ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_FrameBg));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyleColorVec4(ImGuiCol_FrameBgHovered));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyleColorVec4(ImGuiCol_FrameBgActive));
 				if (component.Texture == nullptr)
 					ImGui::Button("##EmptyTexture", { 50.0f, 50.0f });
 				else
-					ImGui::ImageButton((ImTextureID)(uint64_t)component.Texture->GetRendererID(), { 50.0f, 50.0f }, { 1, 1 }, { 0, 0 });
-				ImGui::PopStyleColor(2);
+					ImGui::ImageButton((ImTextureID)(uint64_t)component.Texture->GetRendererID(), { 50.0f, 50.0f }, { 0, 1 }, { 1, 0 });
+
 				if (ImGui::BeginDragDropTarget())
 				{
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TEXTURE_ITEM_PATH"))
@@ -338,37 +326,40 @@ namespace Locus
 					}
 					ImGui::EndDragDropTarget();
 				}
+
 				ImGui::SameLine();
+
 				ImGui::SetCursorPosY(ImGui::GetCursorPos().y + 25.0f - ImGui::GetFontSize() * 0.5f);
 				if (component.Texture == nullptr)
 					ImGui::Button("##EmptyTexturePath", { -1.0f, 0.0f });
 				else
 					ImGui::Button(component.Texture->GetTextureName().c_str(), { -1.0f, 0.0f });
-				ImGui::SameLine(ImGui::GetContentRegionAvail().x - 5.0f);
-				ImGui::SetCursorPosY(ImGui::GetCursorPos().y + 25.0f - ImGui::GetFontSize() * 0.5f);
-				ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
-				ImGui::ImageButton((ImTextureID)(uint64_t)m_FolderIcon->GetRendererID(), { 16.0f, 16.0f }, { 1, 1 }, { 0, 0 });
-				ImGui::PopStyleColor();
+				ImGui::PopStyleColor(3);
+				ImGui::PopStyleVar();
 
 				// Color
-				Widgets::DrawColorControl("Color", m_LabelWidth, component.Color, { 1.0f, 1.0f, 1.0f, 1.0f});
+				Widgets::DrawColorControl("Color", component.Color, { 1.0f, 1.0f, 1.0f, 1.0f});
 				// Tiling Factor
-				Widgets::DrawValueControl("Tiling Factor", m_LabelWidth, component.TilingFactor);
+				Widgets::DrawValueControl("Tiling Factor", component.TilingFactor);
 			});
 
 		// --- Circle Renderer Component --------------------------------------
 		DrawComponentUI<CircleRendererComponent>("Circle Renderer", entity, [this](auto& component)
 			{
-				Widgets::DrawColorControl("Color", m_LabelWidth, component.Color, { 1.0f, 1.0f, 1.0f, 1.0f });
-				Widgets::DrawValueControl("Thickness", m_LabelWidth, component.Thickness, 1.0f, nullptr, 0.01f, "%.3f", true, 0.0f, 1.0f);
-				Widgets::DrawValueControl("Fade", m_LabelWidth, component.Fade, 0.005f, nullptr, 0.01f, "%.3f", true, 0.0001f, FLT_MAX);
+				Widgets::DrawColorControl("Color", component.Color, { 1.0f, 1.0f, 1.0f, 1.0f });
+
+				Widgets::DrawValueControl("Thickness", component.Thickness, 1.0f, 0.01f, "%.3f", -1.0f, -1.0f, 0.0f, 1.0f);
+
+				Widgets::DrawValueControl("Fade", component.Fade, 0.005f, 0.01f, "%.3f", -1.0f, -1.0f, 0.0001f, FLT_MAX);
 			});
 
 		// --- Rigidbody2D Component ------------------------------------------
 		DrawComponentUI<Rigidbody2DComponent>("Rigidbody 2D", entity, [this](auto& component)
 			{
 				// Body type dropdown
-				Widgets::DrawControlLabel("Body Type", { m_LabelWidth, 0.0f });
+				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, ImGui::GetStyle().ItemSpacing.y });
+
+				Widgets::DrawControlLabel("Body Type", { ImGui::GetContentRegionAvail().x * 0.5f, 0.0f });
 				ImGui::SameLine();
 				const char* RigidbodyTypeString[] = { "Static", "Dynamic", "Kinematic" };
 				const char* currentRigidbodyTypeString = RigidbodyTypeString[(int)component.BodyType];
@@ -387,62 +378,64 @@ namespace Locus
 					ImGui::EndCombo();
 				}
 				ImGui::PopItemWidth();
+				ImGui::PopStyleVar();
 
 				// Mass
-				Widgets::DrawValueControl("Mass", m_LabelWidth, component.Mass);
+				Widgets::DrawValueControl("Mass", component.Mass);
 				// Gravity Scale
-				Widgets::DrawValueControl("Gravity Scale", m_LabelWidth, component.GravityScale);
+				Widgets::DrawValueControl("Gravity Scale", component.GravityScale);
 				// Linear Drag
-				Widgets::DrawValueControl("Linear Damping", m_LabelWidth, component.LinearDamping, 0.2f);
+				Widgets::DrawValueControl("Linear Damping", component.LinearDamping, 0.2f);
 				// Angular Drag
-				Widgets::DrawValueControl("Angular Damping", m_LabelWidth, component.AngularDamping, 0.2f);
+				Widgets::DrawValueControl("Angular Damping", component.AngularDamping, 0.2f);
 
 				// Fixed Rotation
-				Widgets::DrawBoolControl("Fixed Rotation", m_LabelWidth, component.FixedRotation);
+				Widgets::DrawBoolControl("Fixed Rotation", component.FixedRotation);
 
 				// Friction
-				Widgets::DrawValueControl("Friction", m_LabelWidth, component.Friction, 0.2f);
+				Widgets::DrawValueControl("Friction", component.Friction, 0.2f);
 				// Restitution
-				Widgets::DrawValueControl("Restitution", m_LabelWidth, component.Restitution, 0.0f);
+				Widgets::DrawValueControl("Restitution", component.Restitution, 0.0f);
 				// Restitution Threshold
-				Widgets::DrawValueControl("Restitution Threshold", m_LabelWidth, component.RestitutionThreshold, 0.0f);
+				Widgets::DrawValueControl("Restitution Threshold", component.RestitutionThreshold, 0.0f);
 			});
 
 		// --- BoxCollider2D Component ----------------------------------------
 		DrawComponentUI<BoxCollider2DComponent>("Box Collider 2D", entity, [this](auto& component)
 			{
 				// Collision Category
-				Widgets::DrawCollisionGrid("Collision Category", m_LabelWidth, component.CollisionCategory, 0x0001);
-
+				Widgets::DrawCollisionGrid("Collision Category", component.CollisionCategory, 0x0001);
 				// Collision Mask
-				Widgets::DrawCollisionGrid("Collision Mask", m_LabelWidth, component.CollisionMask, 0xFFFF);
-
+				Widgets::DrawCollisionGrid("Collision Mask", component.CollisionMask, 0xFFFF);
 				// Size
-				Widgets::DrawVec2Control("Size", m_LabelWidth, component.Size);
+				Widgets::DrawVec2Control("Size", component.Size);
 				// Offset
-				Widgets::DrawVec2Control("Offset", m_LabelWidth, component.Offset, { 0.0f, 0.0f });
+				Widgets::DrawVec2Control("Offset", component.Offset, { 0.0f, 0.0f });
 			});
 
 		// --- CircleCollider2D Component -------------------------------------
 		DrawComponentUI<CircleCollider2DComponent>("Circle Collider 2D", entity, [this](auto& component)
 			{
 				// Collision Category
-				Widgets::DrawCollisionGrid("Collision Category", m_LabelWidth, component.CollisionCategory, 0x0001);
-
+				Widgets::DrawCollisionGrid("Collision Category", component.CollisionCategory, 0x0001);
 				// Collision Mask
-				Widgets::DrawCollisionGrid("Collision Mask", m_LabelWidth, component.CollisionMask, 0xFFFF);
+				Widgets::DrawCollisionGrid("Collision Mask", component.CollisionMask, 0xFFFF);
 				// Radius
-				Widgets::DrawValueControl("Radius", m_LabelWidth, component.Radius, 0.5f);
+				Widgets::DrawValueControl("Radius", component.Radius, 0.5f);
 				// Offset
-				Widgets::DrawVec2Control("Offset", m_LabelWidth, component.Offset, { 0.0f, 0.0f });
+				Widgets::DrawVec2Control("Offset", component.Offset, { 0.0f, 0.0f });
 			});
 
 		// --- Script ---------------------------------------------------------
 		DrawComponentUI<ScriptComponent>("Script", entity, [this, entity](auto& component) mutable
 			{
 				// Script Class dropdown
-				Widgets::DrawControlLabel("Script Class", { m_LabelWidth, 0.0f });
+				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, ImGui::GetStyle().ItemSpacing.y });
+
+				Widgets::DrawControlLabel("Script Class", { ImGui::GetContentRegionAvail().x * 0.5f, 0.0f });
+
 				ImGui::SameLine();
+
 				std::string curClass = component.ScriptClass;
 				ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
 				if (ImGui::BeginCombo("##Script Class", curClass.c_str()))
@@ -467,6 +460,7 @@ namespace Locus
 					ImGui::EndCombo();
 				}
 				ImGui::PopItemWidth();
+				ImGui::PopStyleVar();
 
 				// Public Fields
 				if (Application::Get().IsRunning())
@@ -493,62 +487,62 @@ namespace Locus
 					if (field.Type == FieldType::SystemSingle)
 					{
 						float changeVal = instance->GetFieldValue<float>(name);
-						Widgets::DrawValueControl<float>(name, m_LabelWidth, changeVal, scriptClass->GetFieldValue<float>(name), instance);
+						Widgets::DrawValueControl<float>(name, changeVal, scriptClass->GetFieldValue<float>(name), 0.1f, nullptr, -1.0f, -1.0f, 0.0f, 0.0f, instance);
 					}
 					else if (field.Type == FieldType::SystemDouble)
 					{
 						double changeVal = instance->GetFieldValue<double>(name);
-						Widgets::DrawValueControl<double>(name, m_LabelWidth, changeVal, scriptClass->GetFieldValue<double>(name), instance);
+						Widgets::DrawValueControl<double>(name, changeVal, scriptClass->GetFieldValue<double>(name), 0.1f, nullptr, -1.0f, -1.0f, 0.0f, 0.0f, instance);
 					}
 					else if (field.Type == FieldType::SystemShort)
 					{
 						int16_t changeVal = instance->GetFieldValue<int16_t>(name);
-						Widgets::DrawValueControl<int16_t>(name, m_LabelWidth, changeVal, scriptClass->GetFieldValue<int16_t>(name), instance);
+						Widgets::DrawValueControl<int16_t>(name, changeVal, scriptClass->GetFieldValue<int16_t>(name), 0.1f, nullptr, -1.0f, -1.0f, 0, 0, instance);
 					}
 					else if (field.Type == FieldType::SystemInt)
 					{
 						int changeVal = instance->GetFieldValue<int>(name);
-						Widgets::DrawValueControl<int>(name, m_LabelWidth, changeVal, scriptClass->GetFieldValue<int>(name), instance);
+						Widgets::DrawValueControl<int>(name, changeVal, scriptClass->GetFieldValue<int>(name), 0.1f, nullptr, -1.0f, -1.0f, 0, 0, instance);
 					}
 					else if (field.Type == FieldType::SystemLong)
 					{
 						int64_t changeVal = instance->GetFieldValue<int64_t>(name);
-						Widgets::DrawValueControl<int64_t>(name, m_LabelWidth, changeVal, scriptClass->GetFieldValue<int64_t>(name), instance);
+						Widgets::DrawValueControl<int64_t>(name, changeVal, scriptClass->GetFieldValue<int64_t>(name), 0.1f, nullptr, -1.0f, -1.0f, 0, 0, instance);
 					}
 					else if (field.Type == FieldType::SystemUShort)
 					{
 						uint16_t changeVal = instance->GetFieldValue<uint16_t>(name);
-						Widgets::DrawValueControl<uint16_t>(name, m_LabelWidth, changeVal, scriptClass->GetFieldValue<uint16_t>(name), instance);
+						Widgets::DrawValueControl<uint16_t>(name, changeVal, scriptClass->GetFieldValue<uint16_t>(name), 0.1f, nullptr, -1.0f, -1.0f, 0, 0, instance);
 					}
 					else if (field.Type == FieldType::SystemUInt)
 					{
 						uint32_t changeVal = instance->GetFieldValue<uint32_t>(name);
-						Widgets::DrawValueControl<uint32_t>(name, m_LabelWidth, changeVal, scriptClass->GetFieldValue<uint32_t>(name), instance);
+						Widgets::DrawValueControl<uint32_t>(name, changeVal, scriptClass->GetFieldValue<uint32_t>(name), 0.1f, nullptr, -1.0f, -1.0f, 0, 0, instance);
 					}
 					else if (field.Type == FieldType::SystemULong)
 					{
 						uint64_t changeVal = instance->GetFieldValue<uint64_t>(name);
-						Widgets::DrawValueControl<uint64_t>(name, m_LabelWidth, changeVal, scriptClass->GetFieldValue<uint64_t>(name), instance);
+						Widgets::DrawValueControl<uint64_t>(name, changeVal, scriptClass->GetFieldValue<uint64_t>(name), 0.1f, nullptr, -1.0f, -1.0f, 0, 0, instance);
 					}
 					else if (field.Type == FieldType::SystemBoolean)
 					{
 						bool changeVal = instance->GetFieldValue<bool>(name);
-						Widgets::DrawBoolControl(name, m_LabelWidth, changeVal, scriptClass->GetFieldValue<bool>(name), instance);
+						Widgets::DrawBoolControl(name, changeVal, scriptClass->GetFieldValue<bool>(name), -1.0f, instance);
 					}
 					else if (field.Type == FieldType::SystemChar)
 					{
 						char changeVal = instance->GetFieldValue<char>(name);
-						Widgets::DrawCharControl(name, m_LabelWidth, changeVal, scriptClass->GetFieldValue<char>(name), instance);
+						Widgets::DrawCharControl(name, changeVal, scriptClass->GetFieldValue<char>(name), -1.0f, -1.0f, instance);
 					}
 					else if (field.Type == FieldType::LocusVec2)
 					{
 						glm::vec2 changeVal = instance->GetFieldValue<glm::vec2>(name);
-						Widgets::DrawVec2Control(name, m_LabelWidth, changeVal, scriptClass->GetFieldValue<glm::vec2>(name), instance);
+						Widgets::DrawVec2Control(name, changeVal, scriptClass->GetFieldValue<glm::vec2>(name), 0.1f, nullptr, -1.0f, -1.0f, glm::vec2(0.0f), glm::vec2(0.0f), instance);
 					}
 					else if (field.Type == FieldType::LocusVec3)
 					{
 						glm::vec3 changeVal = instance->GetFieldValue<glm::vec3>(name);
-						Widgets::DrawVec3Control(name, m_LabelWidth, changeVal, scriptClass->GetFieldValue<glm::vec3>(name), instance);
+						Widgets::DrawVec3Control(name, changeVal, scriptClass->GetFieldValue<glm::vec3>(name), 0.1f, nullptr, -1.0f, -1.0f, glm::vec3(0.0f), glm::vec3(0.0f), instance);
 					}
 				}
 				else // Editor controls
@@ -591,29 +585,29 @@ namespace Locus
 						ScriptClassFieldInstance& scriptField = fieldInstances.at(name);
 
 						if (field.Type == FieldType::SystemSingle)
-							Widgets::DrawValueControl<float>(name, m_LabelWidth, *(float*)scriptField.m_Buffer, scriptClass->GetFieldValue<float>(name));
+							Widgets::DrawValueControl<float>(name, *(float*)scriptField.m_Buffer, scriptClass->GetFieldValue<float>(name));
 						else if (field.Type == FieldType::SystemDouble)
-							Widgets::DrawValueControl<double>(name, m_LabelWidth, *(double*)scriptField.m_Buffer, scriptClass->GetFieldValue<double>(name));
+							Widgets::DrawValueControl<double>(name, *(double*)scriptField.m_Buffer, scriptClass->GetFieldValue<double>(name));
 						else if (field.Type == FieldType::SystemShort)
-							Widgets::DrawValueControl<int16_t>(name, m_LabelWidth, *(int16_t*)scriptField.m_Buffer, scriptClass->GetFieldValue<int16_t>(name));
+							Widgets::DrawValueControl<int16_t>(name, *(int16_t*)scriptField.m_Buffer, scriptClass->GetFieldValue<int16_t>(name));
 						else if (field.Type == FieldType::SystemInt)
-							Widgets::DrawValueControl<int>(name, m_LabelWidth, *(int*)scriptField.m_Buffer, scriptClass->GetFieldValue<int>(name));
+							Widgets::DrawValueControl<int>(name, *(int*)scriptField.m_Buffer, scriptClass->GetFieldValue<int>(name));
 						else if (field.Type == FieldType::SystemLong)
-							Widgets::DrawValueControl<int64_t>(name, m_LabelWidth, *(int64_t*)scriptField.m_Buffer, scriptClass->GetFieldValue<int64_t>(name));
+							Widgets::DrawValueControl<int64_t>(name, *(int64_t*)scriptField.m_Buffer, scriptClass->GetFieldValue<int64_t>(name));
 						else if (field.Type == FieldType::SystemUShort)
-							Widgets::DrawValueControl<uint16_t>(name, m_LabelWidth, *(uint16_t*)scriptField.m_Buffer, scriptClass->GetFieldValue<uint16_t>(name));
+							Widgets::DrawValueControl<uint16_t>(name, *(uint16_t*)scriptField.m_Buffer, scriptClass->GetFieldValue<uint16_t>(name));
 						else if (field.Type == FieldType::SystemUInt)
-							Widgets::DrawValueControl<uint32_t>(name, m_LabelWidth, *(uint32_t*)scriptField.m_Buffer, scriptClass->GetFieldValue<uint32_t>(name));
+							Widgets::DrawValueControl<uint32_t>(name, *(uint32_t*)scriptField.m_Buffer, scriptClass->GetFieldValue<uint32_t>(name));
 						else if (field.Type == FieldType::SystemULong)
-							Widgets::DrawValueControl<uint64_t>(name, m_LabelWidth, *(uint64_t*)scriptField.m_Buffer, scriptClass->GetFieldValue<uint64_t>(name));
+							Widgets::DrawValueControl<uint64_t>(name, *(uint64_t*)scriptField.m_Buffer, scriptClass->GetFieldValue<uint64_t>(name));
 						else if (field.Type == FieldType::SystemBoolean)
-							Widgets::DrawBoolControl(name, m_LabelWidth, *(bool*)scriptField.m_Buffer, scriptClass->GetFieldValue<bool>(name));
+							Widgets::DrawBoolControl(name, *(bool*)scriptField.m_Buffer, scriptClass->GetFieldValue<bool>(name));
 						else if (field.Type == FieldType::SystemChar)
-							Widgets::DrawCharControl(name, m_LabelWidth, *(char*)scriptField.m_Buffer, scriptClass->GetFieldValue<char>(name));
+							Widgets::DrawCharControl(name, *(char*)scriptField.m_Buffer, scriptClass->GetFieldValue<char>(name));
 						else if (field.Type == FieldType::LocusVec2)
-							Widgets::DrawVec2Control(name, m_LabelWidth, *(glm::vec2*)scriptField.m_Buffer, scriptClass->GetFieldValue<glm::vec2>(name));
+							Widgets::DrawVec2Control(name, *(glm::vec2*)scriptField.m_Buffer, scriptClass->GetFieldValue<glm::vec2>(name));
 						else if (field.Type == FieldType::LocusVec3)
-							Widgets::DrawVec3Control(name, m_LabelWidth, *(glm::vec3*)scriptField.m_Buffer, scriptClass->GetFieldValue<glm::vec3>(name));
+							Widgets::DrawVec3Control(name, *(glm::vec3*)scriptField.m_Buffer, scriptClass->GetFieldValue<glm::vec3>(name));
 					}
 				}
 			}
@@ -663,6 +657,11 @@ namespace Locus
 			m_ClipboardComponent.NativeScript = CreateRef<NativeScriptComponent>(m_SelectedEntity.GetComponent<NativeScriptComponent>());
 			m_ClipboardComponentType = ComponentType::NativeScript;
 		}
+		if (typeid(T) == typeid(ScriptComponent))
+		{
+			m_ClipboardComponent.Script = CreateRef<ScriptComponent>(m_SelectedEntity.GetComponent<ScriptComponent>());
+			m_ClipboardComponentType = ComponentType::Script;
+		}
 	}
 
 	void PropertiesPanel::PasteComponent(Entity selectedEntity)
@@ -686,6 +685,8 @@ namespace Locus
 		case Locus::ComponentType::CircleCollider2D: selectedEntity.AddOrReplaceComponent<CircleCollider2DComponent>(*m_ClipboardComponent.CircleCollider2D);
 			break;
 		case Locus::ComponentType::NativeScript: selectedEntity.AddOrReplaceComponent<NativeScriptComponent>(*m_ClipboardComponent.NativeScript);
+			break;
+		case Locus::ComponentType::Script: selectedEntity.AddOrReplaceComponent<ScriptComponent>(*m_ClipboardComponent.Script);
 			break;
 		default:
 			break;

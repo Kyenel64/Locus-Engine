@@ -68,11 +68,6 @@ namespace Locus
 
 		m_WindowSize = { Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight() };
 
-		// TODO: serialize
-		m_LeftSplitterPos = 0.7f;
-		m_RightSplitterPos = 0.3f;
-		m_CenterSplitterPos = 0.79f;
-
 		m_CollisionMeshColor = ToGLMVec4(LocusColors::LightBlue);
 		m_FocusOutlineColor = ToGLMVec4(LocusColors::Green);
 	}
@@ -148,17 +143,17 @@ namespace Locus
 		auto [mx, my] = ImGui::GetMousePos();
 		mx -= m_ViewportBounds[0].x;
 		my -= m_ViewportBounds[0].y;
-		glm::vec2 viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
-		my = viewportSize.y - my;
+		my = m_ViewportSize.y - my;
 		int mouseX = (int)mx;
 		int mouseY = (int)my;
 
 		m_HoveredEntity = {};
-		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
+		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)m_ViewportSize.x && mouseY < (int)m_ViewportSize.y)
 		{
 			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY); // TODO: This is really slow??
 			m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 		}
+
 		m_SelectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
 		if (!m_SelectedEntity.IsValid())
 			m_SelectedEntity = {};
@@ -196,7 +191,7 @@ namespace Locus
 
 		// --- Dockspace ------------------------------------------------------
 		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoScrollbar |
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoScrollbar |
 			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
 			ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoScrollWithMouse;
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -207,25 +202,18 @@ namespace Locus
 		if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
 			window_flags |= ImGuiWindowFlags_NoBackground;
 
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, LocusColors::DarkGrey);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 13.0f, 13.0f });
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::Begin("Layout", false, window_flags);
-		ImGui::PopStyleVar(2);
-		ImGui::PopStyleColor();
+		ImGui::PopStyleVar(3);
 
-		DrawLayoutTable();
+		if (m_LayoutStyle == LayoutStyle::Default)
+			DrawLayoutTable();
 
 		ImGui::ShowDemoWindow();
 
 		ProcessSavePopup();
-		DrawToolbar();
-		DrawViewport();
-		m_ContentBrowserPanel.OnImGuiRender();
-		m_SceneHierarchyPanel.OnImGuiRender();
-		m_PropertiesPanel.OnImGuiRender();
-		DrawDebugPanel();
-
 
 		ImGui::End(); // End ImGui
 	}
@@ -387,7 +375,6 @@ namespace Locus
 				break;
 			case Key::R:
 			{
-
 				if (control && shift)
 				{
 					ScriptEngine::ReloadScripts();
@@ -423,6 +410,7 @@ namespace Locus
 		if (m_SceneState != SceneState::Edit)
 			OnSceneStop();
 		m_SelectedEntity = {};
+		m_HoveredEntity = {};
 		m_EditorScene = CreateRef<Scene>();
 		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_ActiveScene = m_EditorScene;
@@ -445,6 +433,7 @@ namespace Locus
 		if (m_SceneState != SceneState::Edit)
 			OnSceneStop();
 		m_SelectedEntity = {};
+		m_HoveredEntity = {};
 		m_EditorScene = CreateRef<Scene>();
 		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_ActiveScene = m_EditorScene;
@@ -603,7 +592,7 @@ namespace Locus
 
 	void LocusEditorLayer::DrawLayoutTable()
 	{
-		ImGuiIO io = ImGui::GetIO();
+		ImGuiIO& io = ImGui::GetIO();
 
 		// Table constraints
 		m_CenterSplitterPos = m_CenterSplitterPos > 0.9f ? 0.9f : m_CenterSplitterPos;
@@ -613,41 +602,53 @@ namespace Locus
 		m_RightSplitterPos = m_RightSplitterPos > 0.9f ? 0.9f : m_RightSplitterPos;
 		m_RightSplitterPos = m_RightSplitterPos < 0.1f ? 0.1f : m_RightSplitterPos;
 
-		// Docked window flags
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 5.0f, 5.0f });
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, { 0.0f, 0.0f });
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0.0f, 4.0f });
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-
 		ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+
 		// --- Left Table ---
-		if (ImGui::BeginTable("LayoutLeft", 1, ImGuiTableFlags_None, { m_WindowSize.x * m_CenterSplitterPos, -1.0f}))
+		if (ImGui::BeginTable("LayoutLeft", 1, ImGuiTableFlags_None, { m_WindowSize.x * m_CenterSplitterPos, -1.0f }))
 		{
 			ImGui::TableNextColumn();
-			ImGui::BeginChild("Frame1", { -1.0f, m_WindowSize.y * m_LeftSplitterPos }, false, childFlags);
-			ImGuiID dockspace_id = ImGui::GetID("Frame1Dockspace");
-			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
 
-			ImGuiID frame1DockID = ImGui::GetID("Frame1Dock");
-			ImGui::DockSpace(frame1DockID, { -1.0f, -1.0f });
+			float toolbarHeight = 40.0f;
+			float imagePadding = 5.0f;
 
+			// Settings Bar
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
+			ImGui::BeginChild("SettingsBar", { 300.0f, toolbarHeight }, true, childFlags);
+			DrawSettingsBar();
 			ImGui::EndChild();
 
-			ImGui::Button("##Divider", { 80.0f, 3.0f });
+			ImGui::SameLine(ImGui::GetCursorPosX() + (m_CenterSplitterPos * m_WindowSize.x) - (toolbarHeight + imagePadding) * 4.0f);
+
+			// Toolbar
+			ImGui::BeginChild("Toolbar", { -1.0f, toolbarHeight }, true, childFlags);
+			DrawToolbar();
+			ImGui::EndChild();
+			ImGui::PopStyleVar();
+
+
+			// Viewport
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
+			ImGui::BeginChild("Frame1", { -1.0f, m_WindowSize.y * m_LeftSplitterPos }, true, childFlags);
+			DrawViewport();
+			ImGui::EndChild();
+			ImGui::PopStyleVar();
+
+
+			// Splitter
+			ImGui::Button("##Divider", { 80.0f, 2.0f });
 			if (ImGui::IsItemHovered())
 				ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
 			if (ImGui::IsItemActive())
-			{
 				m_LeftSplitterPos += io.MouseDelta.y / m_WindowSize.y;
-			}
 
-			ImGui::BeginChild("Frame2", { -1.0f, -1.0f }, false, childFlags);
 
-			ImGuiID frame2DockID = ImGui::GetID("Frame2Dock");
-			ImGui::DockSpace(frame2DockID, { -1.0f, -1.0f });
-
+			// Bottom Left Frame
+			ImGui::BeginChild("Frame2", { -1.0f, -1.0f }, true, childFlags);
+			DrawActivePanel(m_Frame2ActivePanel);
+			DrawTabBar("Frame2", m_Frame2AttachedPanels, m_Frame2ActivePanel);
 			ImGui::EndChild();
+
 
 			ImGui::EndTable();
 		}
@@ -658,103 +659,57 @@ namespace Locus
 		if (ImGui::IsItemHovered())
 			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
 		if (ImGui::IsItemActive())
-		{
 			m_CenterSplitterPos += io.MouseDelta.x / m_WindowSize.x;
-		}
 		ImGui::SameLine();
 
 		// --- Right Table ---
 		if (ImGui::BeginTable("LayoutRight", 1, ImGuiTableFlags_None, { -1.0, -1.0f }))
 		{
 			ImGui::TableNextColumn();
-			ImGui::BeginChild("Frame3", { -1.0f, m_WindowSize.y * m_RightSplitterPos }, false, childFlags);
 
-			ImGuiID frame3DockID = ImGui::GetID("Frame3Dock");
-			ImGui::DockSpace(frame3DockID, { -1.0f, -1.0f });
-
+			// Top Right Frame
+			ImGui::BeginChild("Frame3", { -1.0f, m_WindowSize.y * m_RightSplitterPos }, true, childFlags);
+			DrawActivePanel(m_Frame3ActivePanel);
+			DrawTabBar("Frame3", m_Frame3AttachedPanels, m_Frame3ActivePanel);
 			ImGui::EndChild();
 
+
+			// Splitter
 			ImGui::Button("##Divider", { 80.0f, 3.0f });
 			if (ImGui::IsItemHovered())
 				ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
 			if (ImGui::IsItemActive())
-			{
 				m_RightSplitterPos += io.MouseDelta.y / m_WindowSize.y;
-			}
 
-			ImGui::BeginChild("Frame4", { -1.0f, -1.0f }, false, childFlags);
 
-			ImGuiID frame4DockID = ImGui::GetID("Frame4Dock");
-			ImGui::DockSpace(frame4DockID, { -1.0f, -1.0f });
-
+			// Bottom Right Frame
+			ImGui::BeginChild("Frame4", { -1.0f, -1.0f }, true, childFlags);
+			DrawActivePanel(m_Frame4ActivePanel);
+			DrawTabBar("Frame4", m_Frame4AttachedPanels, m_Frame4ActivePanel);
 			ImGui::EndChild();
 
 			ImGui::EndTable();
 		}
-		ImGui::PopStyleVar(5);
 	}
 
 	void LocusEditorLayer::DrawViewport()
 	{
-		ImGuiWindowFlags viewportFlags = ImGuiWindowFlags_NoScrollbar;
-		if (!m_IsSaved)
-			viewportFlags |= ImGuiWindowFlags_UnsavedDocument;
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
-		ImGui::Begin(" Viewport ", false, viewportFlags);
-		ImGui::PopStyleVar();
-		
-
-		// --- Viewport toolbar -----------------------------------------------
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 2.0f, 3.0f });
-		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::MediumDarkGrey);
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Grey);
-
-		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3.0f);
-		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 3.0f);
-
-		// Gizmo buttons
-		if (Widgets::DrawImageButton("PointerButton", m_PointerIcon->GetRendererID(), { 40.0f, 22.0f }))
-			m_GizmoType = -1;
-		ImGui::SameLine();
-		if (Widgets::DrawImageButton("TranslateButton", m_TranslateIcon->GetRendererID(), { 40.0f, 22.0f }))
-			m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
-		ImGui::SameLine();
-		if (Widgets::DrawImageButton("RotateButton", m_RotateIcon->GetRendererID(), { 40.0f, 22.0f }))
-			m_GizmoType = ImGuizmo::OPERATION::ROTATE;
-		ImGui::SameLine();
-		if (Widgets::DrawImageButton("ScaleButton", m_ScaleIcon->GetRendererID(), { 40.0f, 22.0f }))
-			m_GizmoType = ImGuizmo::OPERATION::SCALE;
-
-		ImGui::SameLine();
-
-		// Vertical separator
-		ImDrawList* draw_list = ImGui::GetWindowDrawList();
-		ImVec2 position = { ImGui::GetWindowPos().x + ImGui::GetCursorPosX() + 3.0f, ImGui::GetWindowPos().y + ImGui::GetCursorPosY() };
-		draw_list->AddLine(position, { position.x, position.y + 22.0f }, ImGui::GetColorU32(LocusColors::Tan), 2.0f);
-
-		ImGui::SameLine();
-
-		// View settings
-		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 8.0f);
-		ImVec2 buttonPos = ImGui::GetCursorPos();
-		if (ImGui::Button("View", { 50.0f, 22.0f }))
-			ImGui::OpenPopup("ViewSettings");
-		ProcessViewSettingsPopup({ buttonPos.x, buttonPos.y });
-		
-		ImGui::PopStyleVar();
-		ImGui::PopStyleColor(2);
-
-
 		// --- Viewport -------------------------------------------------------
-		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
+		m_ViewportSize = { ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y };
 		uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
-		ImGui::Image((void*)(uintptr_t)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 
-		m_ViewportBounds[0].x = ImGui::GetItemRectMin().x, m_ViewportBounds[0].y = ImGui::GetItemRectMin().y;
-		m_ViewportBounds[1].x = ImGui::GetItemRectMax().x, m_ViewportBounds[1].y = ImGui::GetItemRectMax().y;
-		m_ViewportHovered = ImGui::IsMouseHoveringRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
-		m_ViewportFocused = ImGui::IsWindowFocused();
+		ImDrawList* draw_list = ImGui::GetWindowDrawList();
+		ImVec2 topLeft = { ImGui::GetCursorPosX() + ImGui::GetWindowPos().x,ImGui::GetCursorPosY() + ImGui::GetWindowPos().y };
+		draw_list->AddImageRounded((void*)(uintptr_t)textureID, topLeft, { topLeft.x + m_ViewportSize.x, topLeft.y + m_ViewportSize.y },
+			{ 0, 1 }, { 1, 0 }, ImGui::GetColorU32(LocusColors::White), 10.0f);
+
+		// To Check if viewport is hovered since draw_list->AddImageRounded has no focus checks
+		ImGui::InvisibleButton("##FocusButton", ImVec2{ m_ViewportSize.x, m_ViewportSize.y });
+
+		m_ViewportBounds[0] = { topLeft.x, topLeft.y };
+		m_ViewportBounds[1] = { topLeft.x + m_ViewportSize.x, topLeft.y + m_ViewportSize.y };
+		m_ViewportHovered = ImGui::IsMouseHoveringRect({ topLeft.x, topLeft.y }, { topLeft.x + m_ViewportSize.x, topLeft.y + m_ViewportSize.y });
+		m_ViewportFocused = ImGui::IsItemFocused();
 
 		ProcessViewportDragDrop();
 
@@ -767,137 +722,210 @@ namespace Locus
 			else
 				m_GizmoFirstClick = false;
 		}
-		ImGui::End();
+
+		glm::vec2 toolbarPos = { 10.0f, 10.0f };
+		DrawViewportToolbar(toolbarPos);
+	}
+
+	void LocusEditorLayer::DrawViewportToolbar(const glm::vec2& position)
+	{
+		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Transparent);
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Transparent);
+		ImGui::PushStyleColor(ImGuiCol_ChildBg, { 0.0f, 0.0f, 0.0f, 0.3f });
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, ImGui::GetStyle().ItemSpacing.y });
+		ImGui::SetCursorPos({ position.x, position.y });
+		ImGui::BeginChild("Gizmo toolbar", { 35.0f * 4.0f, 35.0f }, true);
+
+		int imagePadding = 5;
+		float imageWidth = ImGui::GetContentRegionAvail().y - imagePadding * 2.0f;
+		ImVec4 tintColor;
+
+		// --- Gizmo buttons ---
+		// Pointer
+		tintColor = LocusColors::Orange;
+		if (m_GizmoType == -1)
+			tintColor = LocusColors::White;
+		if (ImGui::ImageButton((ImTextureID)(uint64_t)m_PointerIcon->GetRendererID(), { imageWidth, imageWidth }, { 0, 1 }, { 1, 0 }, imagePadding, LocusColors::Transparent, tintColor))
+			m_GizmoType = -1;
+
+		ImGui::SameLine();
+
+		// Translate
+		tintColor = LocusColors::Orange;
+		if (m_GizmoType == ImGuizmo::OPERATION::TRANSLATE)
+			tintColor = LocusColors::White;
+		if (ImGui::ImageButton((ImTextureID)(uint64_t)m_TranslateIcon->GetRendererID(), { imageWidth, imageWidth }, { 0, 1 }, { 1, 0 }, imagePadding, LocusColors::Transparent, tintColor))
+			m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+
+		ImGui::SameLine();
+
+		// Rotate
+		tintColor = LocusColors::Orange;
+		if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
+			tintColor = LocusColors::White;
+		if (ImGui::ImageButton((ImTextureID)(uint64_t)m_RotateIcon->GetRendererID(), { imageWidth, imageWidth }, { 0, 1 }, { 1, 0 }, imagePadding, LocusColors::Transparent, tintColor))
+			m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+
+		ImGui::SameLine();
+
+		// Scale
+		tintColor = LocusColors::Orange;
+		if (m_GizmoType == ImGuizmo::OPERATION::SCALE)
+			tintColor = LocusColors::White;
+		if (ImGui::ImageButton((ImTextureID)(uint64_t)m_ScaleIcon->GetRendererID(), { imageWidth, imageWidth }, { 0, 1 }, { 1, 0 }, imagePadding, LocusColors::Transparent, tintColor))
+			m_GizmoType = ImGuizmo::OPERATION::SCALE;
+
+		ImGui::EndChild();
+
+		if (ImGui::IsItemHovered())
+			m_ViewportHovered = false;
+
+		ImGui::SameLine(ImGui::GetItemRectSize().x + 20.0f);
+
+		// --- Editor settings ---
+		ImGui::BeginChild("Editor toolbar", { 55.0f, 35.0f }, true);
+
+		if (ImGui::Button("View", { -1.0f, -1.0f }))
+			ImGui::OpenPopup("ViewSettings");
+
+		ProcessViewSettingsPopup();
+
+		ImGui::EndChild();
+
+		ImGui::PopStyleVar(2);
+		ImGui::PopStyleColor(4);
 	}
 
 	void LocusEditorLayer::DrawToolbar()
 	{
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { -1.0f, 10.0f });
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 12.0f, -1.0f });
-		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, LocusColors::DarkGrey);
-		ImGui::PushStyleColor(ImGuiCol_Header, LocusColors::DarkGrey);
-		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, LocusColors::MediumDarkGrey);
-		ImGui::PushStyleColor(ImGuiCol_HeaderActive, LocusColors::MediumDarkGrey);
-		if (ImGui::BeginMainMenuBar())
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
+
+		int imagePadding = 5;
+		float imageWidth = ImGui::GetContentRegionAvail().y - imagePadding * 2.0f;
+		ImVec4 tintColor;
+
+		// Play button
+		tintColor = LocusColors::LightGrey;
+		if (m_SceneState == SceneState::Edit || m_SceneState == SceneState::Pause)
+			tintColor = LocusColors::White;
+		if (ImGui::ImageButton((ImTextureID)(uint64_t)m_PlayIcon->GetRendererID(), { imageWidth, imageWidth }, { 0, 1 }, { 1, 0 }, imagePadding, LocusColors::Transparent, tintColor))
 		{
-			// --- Menu buttons -----------------------------------------------
-			if (ImGui::BeginMenu("File"))
-			{
-				if (ImGui::MenuItem("New", "Ctrl+N"))
-					NewScene();
-
-				if (ImGui::MenuItem("Open...", "Ctrl+O"))
-					OpenScene();
-
-				if (ImGui::MenuItem("Save", "Ctrl+S"))
-					SaveScene();
-
-				if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
-					SaveSceneAs();
-
-				if (ImGui::MenuItem("Exit"))
-				{
-					if (m_IsSaved)
-						Application::Get().Close();
-					else
-						m_OpenSavePopup = true;
-				}
-
-				ImGui::EndMenu();
-			}
-
-			if (ImGui::BeginMenu("Project"))
-			{
-				if (ImGui::MenuItem("Reload Scripts", "Ctrl+Shift+R"))
-				{
-					ScriptEngine::ReloadScripts();
-					m_PropertiesPanel.m_ScriptClasses = ScriptEngine::GetClassNames();
-				}
-				ImGui::EndMenu();
-			}
-
-			if (ImGui::BeginMenu("Help"))
-			{
-				ImGui::EndMenu();
-			}
-
-
-
-			// --- Runtime buttons --------------------------------------------
-			// For each button we check if the button is clickable in the current scene state.
-
-			glm::vec2 buttonSize = { 60.0f, 25.0f };
-			float buttonXSpacing = 3.0f;
-			float buttonYSpacing = 6.0f;
-			bool clickable = false;
-
-			// Calculate x button position: Center of window - ( half of number of buttons * button width and x spacing )
-			float firstButtonPos = (m_WindowSize.x * 0.5f) - (2.0f * (buttonSize.x + buttonXSpacing));
-
-			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { buttonXSpacing, -1.0f });
-			ImGui::SetCursorPosX(firstButtonPos);
-
-			// Play button
-			if (m_SceneState == SceneState::Edit || m_SceneState == SceneState::Pause)
-				clickable = true;
-			else
-				clickable = false;
-			ImGui::SetCursorPosY(buttonYSpacing);
-			if (Widgets::DrawImageButton("##PlayButton", m_PlayIcon->GetRendererID(), buttonSize, clickable))
-			{
-				if (m_SceneState == SceneState::Edit)
-					OnScenePlay();
-				else if (m_SceneState == SceneState::Pause)
-					m_SceneState = SceneState::Play;
-			}
-
-			// Physics button
-			if (m_SceneState == SceneState::Edit || m_SceneState == SceneState::PhysicsPause)
-				clickable = true;
-			else
-				clickable = false;
-			ImGui::SetCursorPosY(buttonYSpacing);
-			if (Widgets::DrawImageButton("##PhysicsButton", m_PhysicsIcon->GetRendererID(), buttonSize, clickable))
-			{
-				if (m_SceneState == SceneState::Edit)
-					OnPhysicsPlay();
-				else if (m_SceneState == SceneState::PhysicsPause)
-					m_SceneState = SceneState::Physics;
-			}
-
-			// Pause button
-			if (m_SceneState == SceneState::Play || m_SceneState == SceneState::Physics)
-				clickable = true;
-			else
-				clickable = false;
-			ImGui::SetCursorPosY(buttonYSpacing);
-			if (Widgets::DrawImageButton("##PauseButton", m_PauseIcon->GetRendererID(), buttonSize, clickable))
-			{
-				if (m_SceneState == SceneState::Play)
-					m_SceneState = SceneState::Pause;
-				else if (m_SceneState == SceneState::Physics)
-					m_SceneState = SceneState::PhysicsPause;
-			}
-
-			// Stop button
-			if (m_SceneState != SceneState::Edit)
-				clickable = true;
-			else
-				clickable = false;
-			ImGui::SetCursorPosY(buttonYSpacing);
-			if (Widgets::DrawImageButton("##StopButton", m_StopIcon->GetRendererID(), buttonSize, clickable))
-			{
-				if (m_SceneState != SceneState::Edit)
-					OnSceneStop();
-			}
-
-			ImGui::PopStyleVar();
-
-			ImGui::EndMainMenuBar();
+			if (m_SceneState == SceneState::Edit)
+				OnScenePlay();
+			else if (m_SceneState == SceneState::Pause)
+				m_SceneState = SceneState::Play;
 		}
+
+		ImGui::SameLine();
+
+		// Physics button
+		tintColor = LocusColors::LightGrey;
+		if (m_SceneState == SceneState::Edit || m_SceneState == SceneState::PhysicsPause)
+			tintColor = LocusColors::White;
+		if (ImGui::ImageButton((ImTextureID)(uint64_t)m_PhysicsIcon->GetRendererID(), { imageWidth, imageWidth }, { 0, 1 }, { 1, 0 }, imagePadding, LocusColors::Transparent, tintColor))
+		{
+			if (m_SceneState == SceneState::Edit)
+				OnPhysicsPlay();
+			else if (m_SceneState == SceneState::PhysicsPause)
+				m_SceneState = SceneState::Physics;
+		}
+
+		ImGui::SameLine();
+
+		// Pause button
+		tintColor = LocusColors::LightGrey;
+		if (m_SceneState == SceneState::Play || m_SceneState == SceneState::Physics)
+			tintColor = LocusColors::White;
+		if (ImGui::ImageButton((ImTextureID)(uint64_t)m_PauseIcon->GetRendererID(), { imageWidth, imageWidth }, { 0, 1 }, { 1, 0 }, imagePadding, LocusColors::Transparent, tintColor))
+		{
+			if (m_SceneState == SceneState::Play)
+				m_SceneState = SceneState::Pause;
+			else if (m_SceneState == SceneState::Physics)
+				m_SceneState = SceneState::PhysicsPause;
+		}
+
+		ImGui::SameLine();
+
+		// Stop button
+		tintColor = LocusColors::LightGrey;
+		if (m_SceneState != SceneState::Edit)
+			tintColor = LocusColors::White;
+		if (ImGui::ImageButton((ImTextureID)(uint64_t)m_StopIcon->GetRendererID(), { imageWidth, imageWidth }, { 0, 1 }, { 1, 0 }, imagePadding, LocusColors::Transparent, tintColor))
+		{
+			if (m_SceneState != SceneState::Edit)
+				OnSceneStop();
+		}
+
+		ImGui::PopStyleColor();
+		ImGui::PopStyleVar();
+	}
+
+	void LocusEditorLayer::DrawSettingsBar()
+	{
+		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 10.0f, 10.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, ImGui::GetStyle().ItemSpacing.y });
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+
+		float settingsBarWidth = ImGui::GetWindowWidth();
+		if (ImGui::Button("File", { settingsBarWidth / 3.0f, -1.0f }))
+			ImGui::OpenPopup("File Settings");
+
+		ImGui::SetNextWindowPos({ ImGui::GetCursorPos().x + ImGui::GetWindowPos().x, ImGui::GetCursorPos().y + ImGui::GetWindowPos().y - ImGui::GetStyle().ItemSpacing.y });
+		if (ImGui::BeginPopup("File Settings"))
+		{
+			if (ImGui::MenuItem("New", "Ctrl+N"))
+				NewScene();
+
+			if (ImGui::MenuItem("Open...", "Ctrl+O"))
+				OpenScene();
+
+			if (ImGui::MenuItem("Save", "Ctrl+S"))
+				SaveScene();
+
+			if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
+				SaveSceneAs();
+
+			if (ImGui::MenuItem("Exit"))
+			{
+				if (m_IsSaved)
+					Application::Get().Close();
+				else
+					m_OpenSavePopup = true;
+			}
+			ImGui::EndPopup();
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Project", { settingsBarWidth / 3.0f, -1.0f }))
+		{
+			ImGui::OpenPopup("Project Settings");
+		}
+
+		ImGui::SetNextWindowPos({ ImGui::GetCursorPos().x + ImGui::GetWindowPos().x + settingsBarWidth / 3.0f, ImGui::GetCursorPos().y + ImGui::GetWindowPos().y - ImGui::GetStyle().ItemSpacing.y });
+		if (ImGui::BeginPopup("Project Settings"))
+		{
+			if (ImGui::MenuItem("Reload Scripts", "Ctrl+Shift+R"))
+			{
+				ScriptEngine::ReloadScripts();
+				m_PropertiesPanel.m_ScriptClasses = ScriptEngine::GetClassNames();
+			}
+			ImGui::EndPopup();
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Help", { settingsBarWidth / 3.0f, -1.0f }))
+		{
+
+		}
+
 		ImGui::PopStyleVar(3);
-		ImGui::PopStyleColor(4);
+		ImGui::PopStyleColor();
 	}
 	
 	void LocusEditorLayer::ProcessSavePopup()
@@ -907,23 +935,26 @@ namespace Locus
 			ImGui::OpenPopup("You have unsaved changes...");
 		ImVec2 center = { ImGui::GetWindowPos().x + m_WindowSize.x / 2, ImGui::GetWindowPos().y + m_WindowSize.y / 2};
 		ImGui::SetNextWindowPos(center, ImGuiCond_None, { 0.5f, 0.5f });
-		ImGui::SetNextWindowSize({ 400.0f, 100.0f });
-		if (ImGui::BeginPopupModal("You have unsaved changes...", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+		if (ImGui::BeginPopupModal("You have unsaved changes...", &m_OpenSavePopup, ImGuiWindowFlags_AlwaysAutoResize))
 		{
 			m_SelectedEntity = {};
 			ImGui::Text("Save Current Project?");
-			if (ImGui::Button("Save and Close", { 120.0f, 40.0f }))
+			if (ImGui::Button("Save and Close", { 140.0f, 40.0f }))
 			{
 				if (SaveScene())
 					Application::Get().Close();
 			}
+
 			ImGui::SameLine();
-			if (ImGui::Button("Don't Save", { 120.0f, 40.0f }))
+
+			if (ImGui::Button("Don't Save", { 140.0f, 40.0f }))
 			{
 				Application::Get().Close();
 			}
+
 			ImGui::SameLine();
-			if (ImGui::Button("Cancel", { 120.0f, 40.0f }))
+
+			if (ImGui::Button("Cancel", { 140.0f, 40.0f }))
 			{
 				m_OpenSavePopup = false;
 				ImGui::CloseCurrentPopup();
@@ -932,13 +963,16 @@ namespace Locus
 		}
 	}
 
-	void LocusEditorLayer::ProcessViewSettingsPopup(const glm::vec2& position)
+	void LocusEditorLayer::ProcessViewSettingsPopup()
 	{
-		ImGui::SetNextWindowPos({ ImGui::GetWindowPos().x + position.x, ImGui::GetWindowPos().y + position.y + 25.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 10.0f, 10.0f });
+
+		ImGui::SetNextWindowPos({ ImGui::GetWindowPos().x, ImGui::GetWindowPos().y + ImGui::GetWindowSize().y});
 		if (ImGui::BeginPopup("ViewSettings"))
 		{
+			float labelWidth = 150.0f;
 			// Grid visibility
-			Widgets::DrawControlLabel("Collision Mesh");
+			Widgets::DrawControlLabel("Collision Mesh", { labelWidth, 0.0f });
 			ImGui::SameLine();
 			if (ImGui::IsItemHovered())
 			{
@@ -951,7 +985,7 @@ namespace Locus
 				m_ShowAllCollisionMesh = !m_ShowAllCollisionMesh;
 
 			// Background color
-			Widgets::DrawControlLabel("Background Color");
+			Widgets::DrawControlLabel("Background Color", { labelWidth, 0.0f });
 			ImGui::SameLine();
 			if (ImGui::IsItemHovered())
 			{
@@ -964,7 +998,7 @@ namespace Locus
 				m_EditorCamera.SetBackgroundColor(bgColor);
 
 			// Grid visibility
-			Widgets::DrawControlLabel("Grid Visibility");
+			Widgets::DrawControlLabel("Grid Visibility", { labelWidth, 0.0f });
 			ImGui::SameLine();
 			if (ImGui::IsItemHovered())
 			{
@@ -977,7 +1011,7 @@ namespace Locus
 				m_EditorCamera.SetGridVisibility(gridEnabled);
 
 			// Grid scale
-			Widgets::DrawControlLabel("Grid Scale");
+			Widgets::DrawControlLabel("Grid Scale", { labelWidth, 0.0f });
 			ImGui::SameLine();
 			if (ImGui::IsItemHovered())
 			{
@@ -990,7 +1024,7 @@ namespace Locus
 				m_EditorCamera.SetGridScale(gridScale);
 
 			// Grid color
-			Widgets::DrawControlLabel("Grid Color");
+			Widgets::DrawControlLabel("Grid Color", { labelWidth, 0.0f });
 			ImGui::SameLine();
 			if (ImGui::IsItemHovered())
 			{
@@ -1003,7 +1037,7 @@ namespace Locus
 				m_EditorCamera.SetGridColor(gridColor);
 
 			// Near Clip
-			Widgets::DrawControlLabel("Near Clip");
+			Widgets::DrawControlLabel("Near Clip", { labelWidth, 0.0f });
 			ImGui::SameLine();
 			if (ImGui::IsItemHovered())
 			{
@@ -1016,7 +1050,7 @@ namespace Locus
 				m_EditorCamera.SetNearClip(nearClip);
 
 			// Far Clip
-			Widgets::DrawControlLabel("Far Clip");
+			Widgets::DrawControlLabel("Far Clip", { labelWidth, 0.0f });
 			ImGui::SameLine();
 			if (ImGui::IsItemHovered())
 			{
@@ -1027,13 +1061,15 @@ namespace Locus
 			float farClip = m_EditorCamera.GetFarClip();
 			if (ImGui::DragFloat("##Far Clip", &farClip, 5.0f, 0.0f, FLT_MAX))
 				m_EditorCamera.SetFarClip(farClip);
+
 			ImGui::EndPopup();
 		}
+
+		ImGui::PopStyleVar();
 	}
 
 	void LocusEditorLayer::DrawDebugPanel()
 	{
-		ImGui::Begin(" Debug ", false);
 		auto stats = Renderer2D::GetStats();
 		ImGui::Text("Renderer2D Stats:");
 		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
@@ -1105,7 +1141,6 @@ namespace Locus
 			ImGui::Text("LocalScale: %f, %f, %f", tc.LocalScale.x, tc.LocalScale.y, tc.LocalScale.z);
 			ImGui::Text("WorldScale: %f, %f, %f", worldScale.x, worldScale.y, worldScale.z);
 		}
-		ImGui::End();
 	}
 
 	void LocusEditorLayer::DrawCollisionMesh()
@@ -1180,6 +1215,44 @@ namespace Locus
 					Renderer2D::DrawDebugCircle(transform, m_CollisionMeshColor);
 				}
 			}
+		}
+	}
+
+	void LocusEditorLayer::DrawActivePanel(Panels activePanel)
+	{
+		switch (activePanel)
+		{
+		case Panels::None: break;
+		case Panels::SceneHierarchy: m_SceneHierarchyPanel.OnImGuiRender(); break;
+		case Panels::Properties: m_PropertiesPanel.OnImGuiRender(); break;
+		case Panels::ContentBrowser: m_ContentBrowserPanel.OnImGuiRender(); break;
+		case Panels::Debug: DrawDebugPanel(); break;
+		}
+	}
+
+	void LocusEditorLayer::DrawTabBar(const std::string& frameName, std::vector<Panels> panelList, Panels& activePanel)
+	{
+		ImVec2 tabSize = { 30.0f, 10.0f };
+		ImGui::SetCursorPosX((ImGui::GetWindowSize().x / 2) - (panelList.size() * (tabSize.x / 2 + 2.5f) - 2.5f));
+		ImGui::SetCursorPosY(ImGui::GetWindowSize().y - 5.0f - tabSize.y);
+		for (int i = 0; i < panelList.size(); i++)
+		{
+			std::string label = "##" + frameName + std::to_string(i);
+			ImVec4 color = LocusColors::Grey;
+			bool active = activePanel == panelList[i];
+
+			if (active)
+				color = LocusColors::LightGrey;
+
+			ImGui::PushStyleColor(ImGuiCol_Button, color);
+			if (ImGui::Button(label.c_str(), tabSize))
+			{
+				activePanel = panelList[i];
+			}
+
+			ImGui::PopStyleColor();
+			if (i != panelList.size() - 1)
+				ImGui::SameLine();
 		}
 	}
 }

@@ -503,8 +503,8 @@ namespace Locus
 				if (circleCollider2DComponent)
 				{
 					auto& c2D = deserializedEntity.AddComponent<CircleCollider2DComponent>();
-					c2D.CollisionCategory = boxCollider2DComponent["CollisionCategory"].as<int>();
-					c2D.CollisionMask = boxCollider2DComponent["CollisionMask"].as<int>();
+					c2D.CollisionCategory = boxCollider2DComponent["CollisionCategory"].as<uint16_t>();
+					c2D.CollisionMask = boxCollider2DComponent["CollisionMask"].as<uint16_t>();
 					c2D.Offset = circleCollider2DComponent["Offset"].as<glm::vec2>();
 					c2D.Radius = circleCollider2DComponent["Radius"].as<float>();
 				}

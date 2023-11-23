@@ -18,12 +18,9 @@ namespace Locus
 
 	void ContentBrowserPanel::OnImGuiRender()
 	{
-		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar;
-		ImGui::Begin(" Content Browser ", false, windowFlags);
-
 		static ImGuiTableFlags tableFlags = ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Resizable
 			| ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg;
-		ImGui::PushStyleColor(ImGuiCol_TableRowBg, LocusColors::MediumDarkGrey);
+		ImGui::PushStyleColor(ImGuiCol_TableRowBg, LocusColors::Transparent);
 		if (ImGui::BeginTable("CBTable", 2, tableFlags))
 		{
 			ImGui::TableNextRow(ImGuiTableRowFlags_None, ImGui::GetContentRegionAvail().y);
@@ -39,8 +36,6 @@ namespace Locus
 			ImGui::EndTable();
 		}
 		ImGui::PopStyleColor();
-
-		ImGui::End();
 	}
 
 	void ContentBrowserPanel::DrawCurrentDirectoryView()

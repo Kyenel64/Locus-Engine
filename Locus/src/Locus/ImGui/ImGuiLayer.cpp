@@ -35,8 +35,6 @@ namespace Locus
 		return { value.x, value.y, value.z, value.w };
 	}
 
-
-
 	ImGuiLayer::ImGuiLayer() : Layer("ImGuiLayer")
 	{
 
@@ -52,40 +50,36 @@ namespace Locus
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
 		ImGuiStyle& style = ImGui::GetStyle();
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
-		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
 		io.ConfigDockingNoSplit = true;
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
-		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
-		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 		io.ConfigDockingAlwaysTabBar = true;
 
-		style.ChildBorderSize = 0.0f;
-		style.TabRounding = 3.0f;
-		style.FrameRounding = 3.0f;
-		style.ChildRounding = 3.0f;
-		style.WindowMenuButtonPosition = ImGuiDir_None;
-		style.WindowBorderSize = 1.0f;
-
-		// Setup Dear ImGui style
-		ImGui::StyleColorsDark();
-
-		// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-		{
-			style.WindowRounding = 0.0f;
-			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-		}
-
+		// Load fonts
 		io.Fonts->AddFontFromFileTTF("resources/fonts/Inter/Inter-Bold.ttf", 20.0f);
-		io.FontDefault = io.Fonts->AddFontFromFileTTF("resources/fonts/Inter/Inter-Regular.ttf", 16.0f);
+		io.FontDefault = io.Fonts->AddFontFromFileTTF("resources/fonts/Inter/Inter-Regular.ttf", 18.0f);
+
+		// Styling
+		style.WindowBorderSize = 1.0f;
+		style.FrameBorderSize = 1.0f;
+		style.ChildBorderSize = 1.0f;
+		style.TabRounding = 3.0f;
+		style.WindowRounding = 5.0f;
+		style.FrameRounding = 5.0f;
+		style.ChildRounding = 5.0f;
+		style.PopupRounding = 5.0f;
+		style.IndentSpacing = 10.0f;
+		style.ScrollbarSize = 5.0f;
+		style.WindowMenuButtonPosition = ImGuiDir_None;
+		style.ItemSpacing = { 6.0f, 6.0f };
+		style.WindowPadding = { 10.0f, 10.0f };
+		style.FramePadding = { 10.0f, 4.0f };
 
 		SetDarkTheme();
 
+		// Setup Platform/Renderer bindings
 		Application& app = Application::Get();
 		GLFWwindow* window = static_cast<GLFWwindow*>(app.GetWindow().GetNativeWindow());
-
-		// Setup Platform/Renderer bindings
 		ImGui_ImplGlfw_InitForOpenGL(window, true);
 		ImGui_ImplOpenGL3_Init("#version 410");
 	}
@@ -143,21 +137,21 @@ namespace Locus
 	void ImGuiLayer::SetDarkTheme()
 	{
 		auto& colors = ImGui::GetStyle().Colors;
-		colors[ImGuiCol_WindowBg] = LocusColors::LightGrey;
+		colors[ImGuiCol_WindowBg] = LocusColors::DarkGrey;
 
 		// Headers
-		colors[ImGuiCol_Header] = LocusColors::Orange;
+		colors[ImGuiCol_Header] = LocusColors::DarkGrey;
 		colors[ImGuiCol_HeaderHovered] = LocusColors::Orange;
 		colors[ImGuiCol_HeaderActive] = LocusColors::Orange;
 
 		// Buttons
-		colors[ImGuiCol_Button] = LocusColors::MediumDarkGrey;
-		colors[ImGuiCol_ButtonHovered] = LocusColors::LightGrey;
+		colors[ImGuiCol_Button] = LocusColors::LightGrey;
+		colors[ImGuiCol_ButtonHovered] = LocusColors::Grey;
 		colors[ImGuiCol_ButtonActive] = LocusColors::LightGrey;
 
 		// Frame BG
-		colors[ImGuiCol_FrameBg] = LocusColors::MediumDarkGrey;
-		colors[ImGuiCol_FrameBgHovered] = LocusColors::Orange;
+		colors[ImGuiCol_FrameBg] = LocusColors::DarkGrey;
+		colors[ImGuiCol_FrameBgHovered] = { 0.02f, 0.02f, 0.02f, 1.0f };
 		colors[ImGuiCol_FrameBgActive] = LocusColors::LightGrey;
 
 		// Tabs
@@ -173,9 +167,12 @@ namespace Locus
 		colors[ImGuiCol_TitleBgCollapsed] = LocusColors::MediumDarkGrey;
 
 		// Border
-		colors[ImGuiCol_Border] = LocusColors::Tan;
+		colors[ImGuiCol_Border] = LocusColors::LightGrey;
 
 		// Popups
 		colors[ImGuiCol_PopupBg] = LocusColors::Grey;
+
+		// Child
+		colors[ImGuiCol_ChildBg] = LocusColors::MediumDarkGrey;
 	}
 }

@@ -16,6 +16,9 @@
 
 namespace Locus
 {
+	enum class LayoutStyle { Default = 0 };
+	enum class Panels { None = 0, Viewport = 1, SceneHierarchy = 2, Properties = 3, ContentBrowser = 4, Debug = 5 };
+
 	class LocusEditorLayer : public Layer
 	{
 	public:
@@ -52,11 +55,15 @@ namespace Locus
 
 		// Layout
 		void DrawViewport();
+		void DrawViewportToolbar(const glm::vec2& position);
 		void DrawLayoutTable();
+		void DrawActivePanel(Panels activePanel);
+		void DrawTabBar(const std::string& frameName, std::vector<Panels> panelList, Panels& activePanel);
 		void DrawToolbar();
+		void DrawSettingsBar();
 		void DrawDebugPanel();
 		void ProcessSavePopup();
-		void ProcessViewSettingsPopup(const glm::vec2& position);
+		void ProcessViewSettingsPopup();
 
 		// Overlay
 		void OnRenderOverlay();
@@ -112,10 +119,16 @@ namespace Locus
 		PropertiesPanel m_PropertiesPanel;
 
 		// Layout
-		float m_LeftSplitterPos;
-		float m_RightSplitterPos;
-		float m_CenterSplitterPos;
-		enum class LayoutStyle { Default = 0 };
+		float m_LeftSplitterPos = 0.7f;
+		float m_RightSplitterPos = 0.3f;
+		float m_CenterSplitterPos = 0.8f;
 		LayoutStyle m_LayoutStyle = LayoutStyle::Default;
+
+		Panels m_Frame2ActivePanel = Panels::Debug;
+		std::vector<Panels> m_Frame2AttachedPanels = { Panels::ContentBrowser, Panels::Debug };
+		Panels m_Frame3ActivePanel = Panels::SceneHierarchy;
+		std::vector<Panels> m_Frame3AttachedPanels = { Panels::SceneHierarchy };
+		Panels m_Frame4ActivePanel = Panels::Properties;
+		std::vector<Panels> m_Frame4AttachedPanels = { Panels::Properties };
 	};
 }

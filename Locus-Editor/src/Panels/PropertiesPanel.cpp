@@ -35,12 +35,16 @@ namespace Locus
 
 	void PropertiesPanel::OnImGuiRender()
 	{
-		ImGui::BeginChild("PropertiesPanel", { -1.0f, ImGui::GetContentRegionAvail().y - 15.0f }, false, ImGuiWindowFlags_NoScrollbar);
+		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_TabBarAlignLeft | ImGuiWindowFlags_DockedWindowBorder;
+		ImGui::Begin("Properties", false, windowFlags);
 
 		if (m_SelectedEntity.IsValid())
 		{
+			// --- Draw properties for all active components ---
 			DrawComponents(m_SelectedEntity);
 
+
+			// --- Draw Add Component button ---
 			ImGui::SetCursorPosX(ImGui::GetContentRegionAvail().x * 0.5f - (ImGui::CalcTextSize("Add Component").x * 0.5f + ImGui::GetStyle().FramePadding.x));
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
 			if (ImGui::Button("Add Component"))
@@ -119,6 +123,7 @@ namespace Locus
 			Application::Get().GetImGuiLayer()->BlockEvents(false);
 		}
 
+		// --- Popup when clicking empty area ---
 		if (ImGui::BeginPopupContextWindow(0, 1 | ImGuiPopupFlags_NoOpenOverItems))
 		{
 			if (m_ClipboardComponentType != ComponentType::None && m_SelectedEntity)
@@ -127,11 +132,11 @@ namespace Locus
 			ImGui::EndPopup();
 		}
 
-		ImGui::EndChild();
+		ImGui::End();
 	}
 
 	// Draws the component to the panel. Takes in a function for component specific data to display. 
-	// Styling is all done in this function so all components have the same general styling.
+	// Styling is all done in this function so all components have uniform styling.
 	template<typename T, typename UIFunction>
 	void PropertiesPanel::DrawComponentUI(const std::string& name, Entity entity, UIFunction uiFunction)
 	{

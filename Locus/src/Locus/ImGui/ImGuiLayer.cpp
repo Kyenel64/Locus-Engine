@@ -51,7 +51,6 @@ namespace Locus
 		ImGuiStyle& style = ImGui::GetStyle();
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-		io.ConfigDockingNoSplit = true;
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
 		io.ConfigDockingAlwaysTabBar = true;
 
@@ -68,11 +67,14 @@ namespace Locus
 		style.FrameRounding = 5.0f;
 		style.ChildRounding = 5.0f;
 		style.PopupRounding = 5.0f;
+		style.TabRounding = 0.0f;
 		style.IndentSpacing = 10.0f;
 		style.ScrollbarSize = 5.0f;
+		style.DockingSplitterSize = 12.0f;
 		style.WindowMenuButtonPosition = ImGuiDir_None;
 		style.ItemSpacing = { 6.0f, 6.0f };
-		style.WindowPadding = { 10.0f, 10.0f };
+		style.ItemInnerSpacing = { 0.0f, 6.0f };
+		style.WindowPadding = { 6.0f, 6.0f };
 		style.FramePadding = { 10.0f, 4.0f };
 
 		SetDarkTheme();
@@ -137,7 +139,12 @@ namespace Locus
 	void ImGuiLayer::SetDarkTheme()
 	{
 		auto& colors = ImGui::GetStyle().Colors;
-		colors[ImGuiCol_WindowBg] = LocusColors::DarkGrey;
+
+		// Window
+		colors[ImGuiCol_WindowBg] = LocusColors::MediumDarkGrey;
+		colors[ImGuiCol_ResizeGrip] = LocusColors::LightGrey;
+		colors[ImGuiCol_ResizeGripHovered] = LocusColors::Orange;
+		colors[ImGuiCol_ResizeGripActive] = LocusColors::Orange;
 
 		// Headers
 		colors[ImGuiCol_Header] = LocusColors::DarkGrey;
@@ -148,6 +155,7 @@ namespace Locus
 		colors[ImGuiCol_Button] = LocusColors::LightGrey;
 		colors[ImGuiCol_ButtonHovered] = LocusColors::Grey;
 		colors[ImGuiCol_ButtonActive] = LocusColors::LightGrey;
+		colors[ImGuiCol_CheckMark] = LocusColors::White;
 
 		// Frame BG
 		colors[ImGuiCol_FrameBg] = LocusColors::DarkGrey;
@@ -155,15 +163,15 @@ namespace Locus
 		colors[ImGuiCol_FrameBgActive] = LocusColors::LightGrey;
 
 		// Tabs
-		colors[ImGuiCol_Tab] = LocusColors::Grey;
-		colors[ImGuiCol_TabHovered] = LocusColors::LightGrey;
-		colors[ImGuiCol_TabActive] = LocusColors::LightGrey;
-		colors[ImGuiCol_TabUnfocused] = LocusColors::Grey;
-		colors[ImGuiCol_TabUnfocusedActive] = LocusColors::LightGrey;
+		colors[ImGuiCol_Tab] = { 0.09f, 0.09f, 0.09f, 1.0f };
+		colors[ImGuiCol_TabHovered] = LocusColors::MediumDarkGrey;
+		colors[ImGuiCol_TabActive] = LocusColors::MediumDarkGrey;
+		colors[ImGuiCol_TabUnfocused] = { 0.09f, 0.09f, 0.09f, 1.0f };
+		colors[ImGuiCol_TabUnfocusedActive] = LocusColors::MediumDarkGrey;
 
 		// Title
-		colors[ImGuiCol_TitleBgActive] = LocusColors::MediumDarkGrey;
-		colors[ImGuiCol_TitleBg] = LocusColors::MediumDarkGrey;
+		colors[ImGuiCol_TitleBgActive] = LocusColors::DarkGrey;
+		colors[ImGuiCol_TitleBg] = LocusColors::DarkGrey;
 		colors[ImGuiCol_TitleBgCollapsed] = LocusColors::MediumDarkGrey;
 
 		// Border
@@ -174,5 +182,12 @@ namespace Locus
 
 		// Child
 		colors[ImGuiCol_ChildBg] = LocusColors::MediumDarkGrey;
+
+		// Separator
+		colors[ImGuiCol_Separator] = LocusColors::Orange;
+		colors[ImGuiCol_SeparatorHovered] = LocusColors::Orange;
+
+		// Docking
+		colors[ImGuiCol_DockingPreview] = LocusColors::Orange;
 	}
 }

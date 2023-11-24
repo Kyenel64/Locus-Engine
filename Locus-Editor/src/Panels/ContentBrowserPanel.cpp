@@ -16,26 +16,33 @@ namespace Locus
 		m_FileIcon = Texture2D::Create("resources/icons/FileIcon.png");
 	}
 
+	// TODO: Not yet fully implemented
 	void ContentBrowserPanel::OnImGuiRender()
 	{
-		static ImGuiTableFlags tableFlags = ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Resizable
+		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_TabBarAlignLeft | ImGuiWindowFlags_DockedWindowBorder;
+		ImGui::Begin("Content Browser", false, windowFlags);
+
+		ImGuiTableFlags tableFlags = ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Resizable
 			| ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg;
 		ImGui::PushStyleColor(ImGuiCol_TableRowBg, LocusColors::Transparent);
 		if (ImGui::BeginTable("CBTable", 2, tableFlags))
 		{
 			ImGui::TableNextRow(ImGuiTableRowFlags_None, ImGui::GetContentRegionAvail().y);
 			ImGui::TableNextColumn();
-			// --- Project view ---------------------------------------------------
+
+			// --- Project view ---
 			DrawRootDirectoryView();
 
 			ImGui::TableNextColumn();
 
-			// --- Directory view -------------------------------------------------
+			// --- Directory view ---
 			DrawCurrentDirectoryView();
 
 			ImGui::EndTable();
 		}
 		ImGui::PopStyleColor();
+
+		ImGui::End();
 	}
 
 	void ContentBrowserPanel::DrawCurrentDirectoryView()
@@ -110,7 +117,7 @@ namespace Locus
 				ImGui::TextWrapped(filenameString.c_str());
 			}
 			ImGui::TableNextRow(ImGuiTableRowFlags_None, 40.0f);
-			ImGui::Text("Testing Rowfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+			ImGui::Text("Testing Row");
 
 			ImGui::EndTable();
 		}

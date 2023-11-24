@@ -189,33 +189,8 @@ namespace Locus
 	{
 		LOCUS_PROFILE_FUNCTION();
 
-		// --- Dockspace ------------------------------------------------------
-		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoScrollbar |
-			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
-			ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoScrollWithMouse;
-		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(viewport->Pos);
-		ImGui::SetNextWindowSize(viewport->Size);
-		ImGui::SetNextWindowViewport(viewport->ID);
-
-		if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
-			window_flags |= ImGuiWindowFlags_NoBackground;
-
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 13.0f, 13.0f });
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-		ImGui::Begin("Layout", false, window_flags);
-		ImGui::PopStyleVar(3);
-
 		if (m_LayoutStyle == LayoutStyle::Default)
-			DrawLayoutTable();
-
-		ImGui::ShowDemoWindow();
-
-		ProcessSavePopup();
-
-		ImGui::End(); // End ImGui
+			DrawDefaultLayout();
 	}
 
 	void LocusEditorLayer::OnRenderOverlay()
@@ -590,131 +565,78 @@ namespace Locus
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
-	void LocusEditorLayer::DrawLayoutTable()
+	void LocusEditorLayer::DrawDefaultLayout()
 	{
-		ImGuiIO& io = ImGui::GetIO();
+		// --- Dockspace ---
+		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar |
+			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+			ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoScrollWithMouse;
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->Pos);
+		ImGui::SetNextWindowSize(viewport->Size);
+		ImGui::SetNextWindowViewport(viewport->ID);
 
-		// Table constraints
-		m_CenterSplitterPos = m_CenterSplitterPos > 0.9f ? 0.9f : m_CenterSplitterPos;
-		m_CenterSplitterPos = m_CenterSplitterPos < 0.1f ? 0.1f : m_CenterSplitterPos;
-		m_LeftSplitterPos = m_LeftSplitterPos > 0.9f ? 0.9f : m_LeftSplitterPos;
-		m_LeftSplitterPos = m_LeftSplitterPos < 0.1f ? 0.1f : m_LeftSplitterPos;
-		m_RightSplitterPos = m_RightSplitterPos > 0.9f ? 0.9f : m_RightSplitterPos;
-		m_RightSplitterPos = m_RightSplitterPos < 0.1f ? 0.1f : m_RightSplitterPos;
+		if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+			window_flags |= ImGuiWindowFlags_NoBackground;
 
-		ImGuiWindowFlags childFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 13.0f, 13.0f });
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, LocusColors::DarkGrey);
+		ImGui::Begin("Layout", false, window_flags);
+		ImGui::PopStyleVar(2);
 
-		// --- Left Table ---
-		if (ImGui::BeginTable("LayoutLeft", 1, ImGuiTableFlags_None, { m_WindowSize.x * m_CenterSplitterPos, -1.0f }))
-		{
-			ImGui::TableNextColumn();
-
-			float toolbarHeight = 40.0f;
-			float imagePadding = 5.0f;
-
-			// Settings Bar
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
-			ImGui::BeginChild("SettingsBar", { 300.0f, toolbarHeight }, true, childFlags);
-			DrawSettingsBar();
-			ImGui::EndChild();
-
-			ImGui::SameLine(ImGui::GetCursorPosX() + (m_CenterSplitterPos * m_WindowSize.x) - (toolbarHeight + imagePadding) * 4.0f);
-
-			// Toolbar
-			ImGui::BeginChild("Toolbar", { -1.0f, toolbarHeight }, true, childFlags);
-			DrawToolbar();
-			ImGui::EndChild();
-			ImGui::PopStyleVar();
+		ImGuiDockNodeFlags docknodeFlags = ImGuiDockNodeFlags_None;
+		//docknodeFlags |= ImGuiDockNodeFlags_TabBarCollapsed; // Behaves the same as showing tab bar
+		docknodeFlags |= ImGuiDockNodeFlags_WindowRounding;
+		ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+		ImGui::PushStyleColor(ImGuiCol_Separator, LocusColors::Transparent);
+		ImGui::PushStyleColor(ImGuiCol_SeparatorHovered, LocusColors::Transparent);
+		ImGui::PushStyleColor(ImGuiCol_SeparatorActive, LocusColors::Transparent);
+		ImGui::DockSpace(dockspace_id, { 0.0f, 0.0f }, docknodeFlags);
+		ImGui::PopStyleColor(4);
 
 
-			// Viewport
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
-			ImGui::BeginChild("Frame1", { -1.0f, m_WindowSize.y * m_LeftSplitterPos }, true, childFlags);
-			DrawViewport();
-			ImGui::EndChild();
-			ImGui::PopStyleVar();
+		// --- Panels ---
+		DrawToolbar();
+		DrawViewport();
+		DrawDebugPanel();
+		m_SceneHierarchyPanel.OnImGuiRender();
+		m_PropertiesPanel.OnImGuiRender();
+		m_ContentBrowserPanel.OnImGuiRender();
+		ImGui::ShowDemoWindow();
 
 
-			// Splitter
-			ImGui::Button("##Divider", { 80.0f, 2.0f });
-			if (ImGui::IsItemHovered())
-				ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
-			if (ImGui::IsItemActive())
-				m_LeftSplitterPos += io.MouseDelta.y / m_WindowSize.y;
+		ProcessSavePopup();
 
-
-			// Bottom Left Frame
-			ImGui::BeginChild("Frame2", { -1.0f, -1.0f }, true, childFlags);
-			DrawActivePanel(m_Frame2ActivePanel);
-			DrawTabBar("Frame2", m_Frame2AttachedPanels, m_Frame2ActivePanel);
-			ImGui::EndChild();
-
-
-			ImGui::EndTable();
-		}
-
-		// --- Center Splitter ---
-		ImGui::SameLine();
-		ImGui::Button("##CenterSplitter", { 3.0f, 80.0f });
-		if (ImGui::IsItemHovered())
-			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-		if (ImGui::IsItemActive())
-			m_CenterSplitterPos += io.MouseDelta.x / m_WindowSize.x;
-		ImGui::SameLine();
-
-		// --- Right Table ---
-		if (ImGui::BeginTable("LayoutRight", 1, ImGuiTableFlags_None, { -1.0, -1.0f }))
-		{
-			ImGui::TableNextColumn();
-
-			// Top Right Frame
-			ImGui::BeginChild("Frame3", { -1.0f, m_WindowSize.y * m_RightSplitterPos }, true, childFlags);
-			DrawActivePanel(m_Frame3ActivePanel);
-			DrawTabBar("Frame3", m_Frame3AttachedPanels, m_Frame3ActivePanel);
-			ImGui::EndChild();
-
-
-			// Splitter
-			ImGui::Button("##Divider", { 80.0f, 3.0f });
-			if (ImGui::IsItemHovered())
-				ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
-			if (ImGui::IsItemActive())
-				m_RightSplitterPos += io.MouseDelta.y / m_WindowSize.y;
-
-
-			// Bottom Right Frame
-			ImGui::BeginChild("Frame4", { -1.0f, -1.0f }, true, childFlags);
-			DrawActivePanel(m_Frame4ActivePanel);
-			DrawTabBar("Frame4", m_Frame4AttachedPanels, m_Frame4ActivePanel);
-			ImGui::EndChild();
-
-			ImGui::EndTable();
-		}
+		ImGui::End();
 	}
 
 	void LocusEditorLayer::DrawViewport()
 	{
-		// --- Viewport -------------------------------------------------------
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
+		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_TabBarAlignLeft | ImGuiWindowFlags_DockedWindowBorder;
+		if (!m_IsSaved)
+			windowFlags |= ImGuiWindowFlags_UnsavedDocument;
+		ImGui::Begin("Viewport", false, windowFlags);
+
+		// --- Draw Viewport ---
 		m_ViewportSize = { ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y };
 		uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
-
 		ImDrawList* draw_list = ImGui::GetWindowDrawList();
 		ImVec2 topLeft = { ImGui::GetCursorPosX() + ImGui::GetWindowPos().x,ImGui::GetCursorPosY() + ImGui::GetWindowPos().y };
-		draw_list->AddImageRounded((void*)(uintptr_t)textureID, topLeft, { topLeft.x + m_ViewportSize.x, topLeft.y + m_ViewportSize.y },
-			{ 0, 1 }, { 1, 0 }, ImGui::GetColorU32(LocusColors::White), 10.0f);
-
-		// To Check if viewport is hovered since draw_list->AddImageRounded has no focus checks
-		ImGui::InvisibleButton("##FocusButton", ImVec2{ m_ViewportSize.x, m_ViewportSize.y });
-
+		ImVec2 botRight = { topLeft.x + m_ViewportSize.x, topLeft.y + m_ViewportSize.y };
+		draw_list->AddImageRounded((void*)(uintptr_t)textureID, topLeft, botRight, { 0, 1 }, { 1, 0 }, ImGui::GetColorU32(LocusColors::White), 10.0f, ImDrawFlags_RoundCornersBottom);
+		
 		m_ViewportBounds[0] = { topLeft.x, topLeft.y };
-		m_ViewportBounds[1] = { topLeft.x + m_ViewportSize.x, topLeft.y + m_ViewportSize.y };
+		m_ViewportBounds[1] = { botRight.x, botRight.y };
 		m_ViewportHovered = ImGui::IsMouseHoveringRect({ topLeft.x, topLeft.y }, { topLeft.x + m_ViewportSize.x, topLeft.y + m_ViewportSize.y });
-		m_ViewportFocused = ImGui::IsItemFocused();
+		m_ViewportFocused = ImGui::IsWindowFocused();
 
 		ProcessViewportDragDrop();
 
-		// --- Gizmo ----------------------------------------------------------
-		// Checks for first click to prevent moving the object when clicking on the entity.
+		// --- Gizmo ---
+		// Checks for first click to prevent moving the object when selecting an entity.
 		if (m_SelectedEntity && m_GizmoType != -1)
 		{
 			if (!m_GizmoFirstClick)
@@ -723,8 +645,12 @@ namespace Locus
 				m_GizmoFirstClick = false;
 		}
 
+		// --- Viewport Toolbar ---
 		glm::vec2 toolbarPos = { 10.0f, 10.0f };
 		DrawViewportToolbar(toolbarPos);
+
+		ImGui::End();
+		ImGui::PopStyleVar();
 	}
 
 	void LocusEditorLayer::DrawViewportToolbar(const glm::vec2& position)
@@ -735,8 +661,11 @@ namespace Locus
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, { 0.0f, 0.0f, 0.0f, 0.3f });
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, ImGui::GetStyle().ItemSpacing.y });
-		ImGui::SetCursorPos({ position.x, position.y });
-		ImGui::BeginChild("Gizmo toolbar", { 35.0f * 4.0f, 35.0f }, true);
+		
+		float toolbarHeight = 35.0f;
+
+		ImGui::SetCursorPos({ position.x, ImGui::GetCurrentWindow()->DockTabItemRect.GetHeight() + position.y });
+		ImGui::BeginChild("Gizmo toolbar", { toolbarHeight * 4.0f, toolbarHeight }, true);
 
 		int imagePadding = 5;
 		float imageWidth = ImGui::GetContentRegionAvail().y - imagePadding * 2.0f;
@@ -782,10 +711,12 @@ namespace Locus
 		if (ImGui::IsItemHovered())
 			m_ViewportHovered = false;
 
+		
 		ImGui::SameLine(ImGui::GetItemRectSize().x + 20.0f);
 
+
 		// --- Editor settings ---
-		ImGui::BeginChild("Editor toolbar", { 55.0f, 35.0f }, true);
+		ImGui::BeginChild("Editor toolbar", { 55.0f, toolbarHeight }, true);
 
 		if (ImGui::Button("View", { -1.0f, -1.0f }))
 			ImGui::OpenPopup("ViewSettings");
@@ -800,11 +731,96 @@ namespace Locus
 
 	void LocusEditorLayer::DrawToolbar()
 	{
+		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_None;
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, LocusColors::Transparent);
+		ImGui::Begin("Toolbar", false, windowFlags);
+		ImGui::GetCurrentWindow()->DockNode->LocalFlags |= ImGuiDockNodeFlags_TabBarCollapsed | ImGuiDockNodeFlags_NoResize;
+
+		// --- Settings bar ---
+		ImGui::SetCursorPos({ ImGui::GetCursorPosX() + 1.0f, ImGui::GetCursorPosY() + 1.0f });
+		ImGui::BeginChild("SettingsBar", { 250.0f, -1.0f }, true, ImGuiWindowFlags_None);
+
+		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, ImGui::GetStyle().ItemSpacing.y });
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+
+		float settingsBarWidth = ImGui::GetWindowWidth();
+		if (ImGui::Button("File", { settingsBarWidth / 3.0f, -1.0f }))
+			ImGui::OpenPopup("File Settings");
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 6.0f, 6.0f });
+		ImGui::SetNextWindowPos({ ImGui::GetCursorPos().x + ImGui::GetWindowPos().x, ImGui::GetCursorPos().y + ImGui::GetWindowPos().y - ImGui::GetStyle().ItemSpacing.y });
+		if (ImGui::BeginPopup("File Settings"))
+		{
+			if (ImGui::MenuItem("New", "Ctrl+N"))
+				NewScene();
+
+			if (ImGui::MenuItem("Open...", "Ctrl+O"))
+				OpenScene();
+
+			if (ImGui::MenuItem("Save", "Ctrl+S"))
+				SaveScene();
+
+			if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
+				SaveSceneAs();
+
+			if (ImGui::MenuItem("Exit"))
+			{
+				if (m_IsSaved)
+					Application::Get().Close();
+				else
+					m_OpenSavePopup = true;
+			}
+			ImGui::EndPopup();
+		}
+		ImGui::PopStyleVar();
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Project", { settingsBarWidth / 3.0f, -1.0f }))
+		{
+			ImGui::OpenPopup("Project Settings");
+		}
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 6.0f, 6.0f });
+		ImGui::SetNextWindowPos({ ImGui::GetCursorPos().x + ImGui::GetWindowPos().x + settingsBarWidth / 3.0f, 
+			ImGui::GetCursorPos().y + ImGui::GetWindowPos().y - ImGui::GetStyle().ItemSpacing.y });
+		if (ImGui::BeginPopup("Project Settings"))
+		{
+			if (ImGui::MenuItem("Reload Scripts", "Ctrl+Shift+R"))
+			{
+				ScriptEngine::ReloadScripts();
+				m_PropertiesPanel.m_ScriptClasses = ScriptEngine::GetClassNames();
+			}
+			ImGui::EndPopup();
+		}
+		ImGui::PopStyleVar();
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Help", { settingsBarWidth / 3.0f, -1.0f }))
+		{
+
+		}
+
+		ImGui::PopStyleVar(2);
+		ImGui::PopStyleColor();
+		ImGui::EndChild();
+
+
+		ImGui::SameLine(ImGui::GetContentRegionAvail().x - ImGui::GetWindowHeight() * 4.0f + 5.0f); // 5.0f is imagePadding
+
+
+		// --- Runtime buttons ---
+		ImGui::BeginChild("RuntimeButtons", { -1.0f, -1.0f }, true);
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, ImGui::GetStyle().ItemSpacing.y });
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
 
 		int imagePadding = 5;
-		float imageWidth = ImGui::GetContentRegionAvail().y - imagePadding * 2.0f;
+		float imageWidth = ImGui::GetWindowHeight() - imagePadding * 2.0f;
 		ImVec4 tintColor;
 
 		// Play button
@@ -860,85 +876,27 @@ namespace Locus
 		}
 
 		ImGui::PopStyleColor();
-		ImGui::PopStyleVar();
-	}
+		ImGui::PopStyleVar(2);
+		ImGui::EndChild();
 
-	void LocusEditorLayer::DrawSettingsBar()
-	{
-		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 10.0f, 10.0f });
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, ImGui::GetStyle().ItemSpacing.y });
-		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
-
-		float settingsBarWidth = ImGui::GetWindowWidth();
-		if (ImGui::Button("File", { settingsBarWidth / 3.0f, -1.0f }))
-			ImGui::OpenPopup("File Settings");
-
-		ImGui::SetNextWindowPos({ ImGui::GetCursorPos().x + ImGui::GetWindowPos().x, ImGui::GetCursorPos().y + ImGui::GetWindowPos().y - ImGui::GetStyle().ItemSpacing.y });
-		if (ImGui::BeginPopup("File Settings"))
-		{
-			if (ImGui::MenuItem("New", "Ctrl+N"))
-				NewScene();
-
-			if (ImGui::MenuItem("Open...", "Ctrl+O"))
-				OpenScene();
-
-			if (ImGui::MenuItem("Save", "Ctrl+S"))
-				SaveScene();
-
-			if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
-				SaveSceneAs();
-
-			if (ImGui::MenuItem("Exit"))
-			{
-				if (m_IsSaved)
-					Application::Get().Close();
-				else
-					m_OpenSavePopup = true;
-			}
-			ImGui::EndPopup();
-		}
-
-		ImGui::SameLine();
-
-		if (ImGui::Button("Project", { settingsBarWidth / 3.0f, -1.0f }))
-		{
-			ImGui::OpenPopup("Project Settings");
-		}
-
-		ImGui::SetNextWindowPos({ ImGui::GetCursorPos().x + ImGui::GetWindowPos().x + settingsBarWidth / 3.0f, ImGui::GetCursorPos().y + ImGui::GetWindowPos().y - ImGui::GetStyle().ItemSpacing.y });
-		if (ImGui::BeginPopup("Project Settings"))
-		{
-			if (ImGui::MenuItem("Reload Scripts", "Ctrl+Shift+R"))
-			{
-				ScriptEngine::ReloadScripts();
-				m_PropertiesPanel.m_ScriptClasses = ScriptEngine::GetClassNames();
-			}
-			ImGui::EndPopup();
-		}
-
-		ImGui::SameLine();
-
-		if (ImGui::Button("Help", { settingsBarWidth / 3.0f, -1.0f }))
-		{
-
-		}
-
-		ImGui::PopStyleVar(3);
+		ImGui::End();
 		ImGui::PopStyleColor();
+		ImGui::PopStyleVar(2);
 	}
 	
 	void LocusEditorLayer::ProcessSavePopup()
 	{
-		// --- Save Project Popup ---------------------------------------------
 		if (m_OpenSavePopup)
 			ImGui::OpenPopup("You have unsaved changes...");
+
 		ImVec2 center = { ImGui::GetWindowPos().x + m_WindowSize.x / 2, ImGui::GetWindowPos().y + m_WindowSize.y / 2};
 		ImGui::SetNextWindowPos(center, ImGuiCond_None, { 0.5f, 0.5f });
 		if (ImGui::BeginPopupModal("You have unsaved changes...", &m_OpenSavePopup, ImGuiWindowFlags_AlwaysAutoResize))
 		{
 			m_SelectedEntity = {};
+
 			ImGui::Text("Save Current Project?");
+
 			if (ImGui::Button("Save and Close", { 140.0f, 40.0f }))
 			{
 				if (SaveScene())
@@ -1070,6 +1028,9 @@ namespace Locus
 
 	void LocusEditorLayer::DrawDebugPanel()
 	{
+		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_TabBarAlignLeft | ImGuiWindowFlags_DockedWindowBorder;
+		ImGui::Begin("Debug", false, windowFlags);
+
 		auto stats = Renderer2D::GetStats();
 		ImGui::Text("Renderer2D Stats:");
 		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
@@ -1141,13 +1102,16 @@ namespace Locus
 			ImGui::Text("LocalScale: %f, %f, %f", tc.LocalScale.x, tc.LocalScale.y, tc.LocalScale.z);
 			ImGui::Text("WorldScale: %f, %f, %f", worldScale.x, worldScale.y, worldScale.z);
 		}
+
+		ImGui::End();
 	}
 
 	void LocusEditorLayer::DrawCollisionMesh()
 	{
-		// --- Collision mesh -------------------------------------------------
+		// Draw single collision mesh for selected entity
 		if (m_SelectedEntity.IsValid() && !m_ShowAllCollisionMesh)
 		{
+			// Box collider
 			if (m_SelectedEntity.HasComponent<BoxCollider2DComponent>())
 			{
 				auto& b2D = m_SelectedEntity.GetComponent<BoxCollider2DComponent>();
@@ -1160,6 +1124,7 @@ namespace Locus
 
 				Renderer2D::DrawRect(transform, m_CollisionMeshColor);
 			}
+			// Circle collider
 			else if (m_SelectedEntity.HasComponent<CircleCollider2DComponent>())
 			{
 				auto& c2D = m_SelectedEntity.GetComponent<CircleCollider2DComponent>();
@@ -1177,8 +1142,10 @@ namespace Locus
 				Renderer2D::DrawDebugCircle(transform, m_CollisionMeshColor);
 			}
 		}
+		// Draw collision mesh for all entities in the scene
 		else if (m_ShowAllCollisionMesh)
 		{
+			// Box collider
 			{
 				auto view = m_ActiveScene->GetEntitiesWith<BoxCollider2DComponent>();
 				for (auto e : view)
@@ -1187,14 +1154,15 @@ namespace Locus
 					auto& b2D = entity.GetComponent<BoxCollider2DComponent>();
 					auto& tc = entity.GetComponent<TransformComponent>();
 
-					// Combine the box collider offset and size to the transform
+					// Circle colliders never becomes ovals. 
+					// Radius of collision circle is always equal to the larger scale axis.
 					glm::mat4 transform = tc.GetLocalTransform();
 					transform *= glm::translate(glm::mat4(1.0f), { b2D.Offset.x, b2D.Offset.y, 0.001f })
 						* glm::scale(glm::mat4(1.0f), { b2D.Size.x, b2D.Size.y, 1.0f });
 					Renderer2D::DrawRect(transform, m_CollisionMeshColor);
 				}
 			}
-
+			// Circle collider
 			{
 				auto view = m_ActiveScene->GetEntitiesWith<CircleCollider2DComponent>();
 				for (auto e : view)
@@ -1203,8 +1171,8 @@ namespace Locus
 					auto& c2D = entity.GetComponent<CircleCollider2DComponent>();
 					auto& tc = entity.GetComponent<TransformComponent>();
 
-					// Combine the box collider offset and size to the transform and
-					// calculate the circle radius for the larger scale axis (x or y).
+					// Circle colliders never becomes ovals. 
+					// Radius of collision circle is always equal to the larger scale axis.
 					float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
 					glm::mat4 transform = glm::translate(glm::mat4(1.0f), tc.LocalPosition)
 						* glm::rotate(glm::mat4(1.0f), tc.LocalRotation.z, glm::vec3(0, 0, 1))
@@ -1215,44 +1183,6 @@ namespace Locus
 					Renderer2D::DrawDebugCircle(transform, m_CollisionMeshColor);
 				}
 			}
-		}
-	}
-
-	void LocusEditorLayer::DrawActivePanel(Panels activePanel)
-	{
-		switch (activePanel)
-		{
-		case Panels::None: break;
-		case Panels::SceneHierarchy: m_SceneHierarchyPanel.OnImGuiRender(); break;
-		case Panels::Properties: m_PropertiesPanel.OnImGuiRender(); break;
-		case Panels::ContentBrowser: m_ContentBrowserPanel.OnImGuiRender(); break;
-		case Panels::Debug: DrawDebugPanel(); break;
-		}
-	}
-
-	void LocusEditorLayer::DrawTabBar(const std::string& frameName, std::vector<Panels> panelList, Panels& activePanel)
-	{
-		ImVec2 tabSize = { 30.0f, 10.0f };
-		ImGui::SetCursorPosX((ImGui::GetWindowSize().x / 2) - (panelList.size() * (tabSize.x / 2 + 2.5f) - 2.5f));
-		ImGui::SetCursorPosY(ImGui::GetWindowSize().y - 5.0f - tabSize.y);
-		for (int i = 0; i < panelList.size(); i++)
-		{
-			std::string label = "##" + frameName + std::to_string(i);
-			ImVec4 color = LocusColors::Grey;
-			bool active = activePanel == panelList[i];
-
-			if (active)
-				color = LocusColors::LightGrey;
-
-			ImGui::PushStyleColor(ImGuiCol_Button, color);
-			if (ImGui::Button(label.c_str(), tabSize))
-			{
-				activePanel = panelList[i];
-			}
-
-			ImGui::PopStyleColor();
-			if (i != panelList.size() - 1)
-				ImGui::SameLine();
 		}
 	}
 }

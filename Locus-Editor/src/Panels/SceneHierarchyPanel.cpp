@@ -26,10 +26,10 @@ namespace Locus
 
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
-		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar;
+		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_TabBarAlignLeft | ImGuiWindowFlags_DockedWindowBorder;
+		ImGui::Begin("Scene Hierarchy", false, windowFlags);
 
 		// --- Top bar ---
-
 		// Plus button
 		ImVec2 textSize = ImGui::CalcTextSize("Search");
 		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
@@ -39,7 +39,8 @@ namespace Locus
 			ImGui::OpenPopup("ButtonPopup");
 		ImGui::PopStyleVar(2);
 		ImGui::PopStyleColor();
-		// Popup when clicking button. 
+
+		// Popup when clicking plus button. 
 		ImGui::SetNextWindowPos({ ImGui::GetWindowPos().x + ImGui::GetCursorPosX(), ImGui::GetWindowPos().y + ImGui::GetCursorPosY() - ImGui::GetStyle().ItemSpacing.y });
 		if (ImGui::BeginPopup("ButtonPopup"))
 		{
@@ -63,7 +64,7 @@ namespace Locus
 		if (filter.Draw("##Search"))
 			showSearchText = false;
 		ImGui::PopItemWidth();
-		// Search text
+		// Draw "Search" text
 		if (showSearchText)
 		{
 			ImDrawList* drawList = ImGui::GetWindowDrawList();
@@ -72,10 +73,10 @@ namespace Locus
 		}
 
 
-		// Hierarchy
+		// --- Hierarchy ---
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, LocusColors::DarkGrey);
-		ImGui::BeginChild("Hierarchy", { -1.0f, ImGui::GetContentRegionAvail().y - 10.0f }, true);
+		ImGui::BeginChild("Hierarchy", { -1.0f, -1.0f }, true);
 		ImGui::PopStyleColor();
 		ImGui::PopStyleVar();
 		
@@ -115,6 +116,8 @@ namespace Locus
 		}
 
 		ImGui::EndChild();
+
+		ImGui::End();
 	}
 
 	void SceneHierarchyPanel::DrawEntityNode(Entity entity)

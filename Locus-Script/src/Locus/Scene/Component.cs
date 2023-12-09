@@ -103,6 +103,48 @@ namespace Locus
     /// </summary>
     public class SpriteRendererComponent : Component
     {
+        public Color Color
+        {
+            get
+            {
+                InternalCalls.SpriteRendererComponent_GetColor(Entity.ID, out Color result);
+                return result;
+            }
+            set => InternalCalls.SpriteRendererComponent_SetColor(Entity.ID, ref value);
+        }
+        public float TilingFactor
+        {
+            get => InternalCalls.SpriteRendererComponent_GetTilingFactor(Entity.ID);
+            set => InternalCalls.SpriteRendererComponent_SetTilingFactor(Entity.ID, ref value);
+        }
+    }
 
+
+
+    // --- Circle Renderer Component ------------------------------------------
+    /// <summary>
+    /// Circle renderer component.
+    /// </summary>
+    public class CircleRendererComponent : Component
+    {
+        public Color Color
+        {
+            get
+            {
+                InternalCalls.CircleRendererComponent_GetColor(Entity.ID, out Color result);
+                return result;
+            }
+            set => InternalCalls.CircleRendererComponent_SetColor(Entity.ID, ref value);
+        }
+        public float Thickness
+        {
+            get => InternalCalls.CircleRendererComponent_GetThickness(Entity.ID);
+            set => InternalCalls.CircleRendererComponent_SetThickness(Entity.ID, ref value);
+        }
+        public float Fade
+        {
+            get => InternalCalls.CircleRendererComponent_GetFade(Entity.ID);
+            set => InternalCalls.CircleRendererComponent_SetFade(Entity.ID, ref value);
+        }
     }
 }

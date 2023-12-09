@@ -16,7 +16,7 @@ namespace Locus
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static ulong CreateEntity();
 
-        // --- Entity ---------------------------------------------------------
+        // --- Entity ---
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static bool Entity_HasComponent(ulong id, Type componentType);
 
@@ -38,7 +38,7 @@ namespace Locus
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static void Entity_SetEnabled(ulong id, bool newEnabled);
 
-        // --- Vec3 -----------------------------------------------------------
+        // --- Vec3 ---
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static void Vec3_Cross(Vec3 v1, Vec3 v2, out Vec3 output);
 
@@ -48,7 +48,14 @@ namespace Locus
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static float Vec3_Length(Vec3 vec);
 
-        // --- Transform Component --------------------------------------------
+        // --- Vec4 ---
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static float Vec4_Distance(Vec4 v1, Vec4 v2);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static float Vec4_Length(Vec4 vec);
+
+        // --- Transform Component ---
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static void TransformComponent_GetLocalTransform(ulong id, out Mat4 output);
 
@@ -76,7 +83,39 @@ namespace Locus
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static void TransformComponent_GetWorldToLocal(ulong id, out Mat4 output);
 
-        // --- Input ----------------------------------------------------------
+        // --- Sprite Renderer Component ---
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void SpriteRendererComponent_GetColor(ulong id, out Color output);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void SpriteRendererComponent_SetColor(ulong id, ref Color newColor);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static float SpriteRendererComponent_GetTilingFactor(ulong id);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void SpriteRendererComponent_SetTilingFactor(ulong id, ref float newTF);
+
+        // --- Circle Renderer Component ---
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void CircleRendererComponent_GetColor(ulong id, out Color output);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void CircleRendererComponent_SetColor(ulong id, ref Color newColor);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static float CircleRendererComponent_GetThickness(ulong id);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void CircleRendererComponent_SetThickness(ulong id, ref float newThickness);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static float CircleRendererComponent_GetFade(ulong id);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void CircleRendererComponent_SetFade(ulong id, ref float newFade);
+
+        // --- Input ---
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static bool Input_IsKeyPressed(KeyCode key);
     }

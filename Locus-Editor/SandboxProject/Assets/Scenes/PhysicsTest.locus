@@ -184,7 +184,3 @@ Entities:
       CollisionMask: 65535
       Radius: 0.5
       Offset: [0, 0]
-    ScriptComponent:
-      ScriptClass: Sandbox::PhysicsObject
-      Fields:
-        {}

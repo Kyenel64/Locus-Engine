@@ -123,7 +123,11 @@ namespace Locus
         }
         public static Vec3 operator /(float s, Vec3 vec)
         {
-            return new Vec3(vec.x / s, vec.y / s, vec.z / s);
+            return new Vec3(s / vec.x, s / vec.y, s / vec.z);
+        }
+        public override String ToString()
+        {
+            return String.Format("{0}, {1}, {2}", x, y, z);
         }
 
     }

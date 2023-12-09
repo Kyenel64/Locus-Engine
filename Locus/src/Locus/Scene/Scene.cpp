@@ -15,21 +15,27 @@
 #include "Locus/Scene/ScriptableEntity.h"
 #include "Locus/Scene/Entity.h"
 #include "Locus/Scripting/ScriptEngine.h"
+#include "Locus/Physics2D/ContactListener2D.h"
 
 namespace Locus
 {
-	static b2BodyType Rigidbody2DTypeToBox2DType(Rigidbody2DComponent::Rigidbody2DType bodyType)
+	namespace Utils
 	{
-		switch (bodyType)
+		static b2BodyType Rigidbody2DTypeToBox2DType(Rigidbody2DComponent::Rigidbody2DType bodyType)
 		{
-		case Rigidbody2DComponent::Rigidbody2DType::Static: return b2_staticBody;
-		case Rigidbody2DComponent::Rigidbody2DType::Dynamic: return b2_dynamicBody;
-		case Rigidbody2DComponent::Rigidbody2DType::Kinematic: return b2_kinematicBody;
-		}
+			switch (bodyType)
+			{
+			case Rigidbody2DComponent::Rigidbody2DType::Static: return b2_staticBody;
+			case Rigidbody2DComponent::Rigidbody2DType::Dynamic: return b2_dynamicBody;
+			case Rigidbody2DComponent::Rigidbody2DType::Kinematic: return b2_kinematicBody;
+			}
 
-		LOCUS_CORE_ASSERT(false, "Unknown Rigidbody2DType");
-		return b2_staticBody;
+			LOCUS_CORE_ASSERT(false, "Unknown Rigidbody2DType");
+			return b2_staticBody;
+		}
 	}
+
+	static ContactListener2D s_Listener;
 
 	Ref<Scene> Scene::Copy(Ref<Scene> other)
 	{
@@ -328,6 +334,10 @@ namespace Locus
 			}
 		}
 
+		// 3D grid plane
+		if (camera.GetGridVisibility())
+			Renderer2D::DrawGrid();
+
 		Renderer2D::EndScene();
 	}
 
@@ -369,6 +379,7 @@ namespace Locus
 		// --- Physics ---
 		{
 			m_Box2DWorld = new b2World({ 0.0f, -9.8f });
+			m_Box2DWorld->SetContactListener(&s_Listener);
 			auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
 			for (auto e : view)
 			{
@@ -380,14 +391,14 @@ namespace Locus
 
 					// Body
 					b2BodyDef bodyDef;
-					bodyDef.type = Rigidbody2DTypeToBox2DType(rb2D.BodyType);
-
+					bodyDef.type = Utils::Rigidbody2DTypeToBox2DType(rb2D.BodyType);
 					bodyDef.position.Set(tc.LocalPosition.x, tc.LocalPosition.y);
 					bodyDef.angle = tc.LocalRotation.z;
 					bodyDef.linearDamping = rb2D.LinearDamping;
 					bodyDef.angularDamping = rb2D.AngularDamping;
 					bodyDef.fixedRotation = rb2D.FixedRotation;
 					bodyDef.gravityScale = rb2D.GravityScale;
+					bodyDef.userData.pointer = (uintptr_t)entity.GetUUID();
 					b2Body* entityBody = m_Box2DWorld->CreateBody(&bodyDef);
 					rb2D.RuntimeBody = entityBody;
 					b2MassData massData;
@@ -458,7 +469,7 @@ namespace Locus
 
 					// Body
 					b2BodyDef bodyDef;
-					bodyDef.type = Rigidbody2DTypeToBox2DType(rb2D.BodyType);
+					bodyDef.type = Utils::Rigidbody2DTypeToBox2DType(rb2D.BodyType);
 
 					bodyDef.position.Set(tc.LocalPosition.x, tc.LocalPosition.y);
 					bodyDef.angle = tc.LocalRotation.z;

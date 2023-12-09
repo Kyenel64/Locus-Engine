@@ -102,6 +102,11 @@ namespace Locus::Widgets
 			else
 				CommandHistory::AddCommand(new ChangeValueCommand(buffer[0], changeValue));
 		}
+
+		if (!ImGui::TempInputIsActive(ImGui::GetActiveID()))
+			Application::Get().GetImGuiLayer()->BlockEvents(true);
+		else
+			Application::Get().GetImGuiLayer()->BlockEvents(false);
 		
 		ImGui::PopItemWidth();
 
@@ -137,6 +142,11 @@ namespace Locus::Widgets
 		{
 				CommandHistory::AddCommand(new ChangeValueCommand(std::string(buffer), changeValue));
 		}
+
+		if (!ImGui::TempInputIsActive(ImGui::GetActiveID()))
+			Application::Get().GetImGuiLayer()->BlockEvents(true);
+		else
+			Application::Get().GetImGuiLayer()->BlockEvents(false);
 
 		ImGui::PopItemWidth();
 

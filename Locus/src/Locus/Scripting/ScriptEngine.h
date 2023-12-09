@@ -82,12 +82,15 @@ namespace Locus
 		static void OnCreateEntityScript(Entity entity);
 		static void OnUpdateEntityScript(Entity entity, Timestep deltaTime);
 
+		static void InvokeMethod(Ref<ScriptInstance> instance, MonoMethod* method, int paramCount, void** params);
+
 		static void ReloadScripts();
 
 		// Getters
 		static MonoImage* GetImage();
 		static Scene* GetScene();
 		static std::vector<std::string> GetClassNames();
+		static Ref<ScriptClass> GetEntityBaseClass();
 		static MonoDomain* GetAppDomain();
 		static Ref<ScriptInstance> GetScriptInstance(UUID id);
 		static Ref<ScriptClass> GetScriptClass(const std::string& name);

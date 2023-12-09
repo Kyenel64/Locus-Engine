@@ -297,9 +297,16 @@ namespace Locus
 		}
 	}
 
+	void ScriptEngine::InvokeMethod(Ref<ScriptInstance> instance, MonoMethod* method, int paramCount, void** params)
+	{
+		mono_runtime_invoke(method, instance->m_ScriptInstance, params, nullptr);
+	}
+
+	// Getters
 	MonoImage* ScriptEngine::GetImage() { return s_Data->CoreAssemblyImage; }
 	Scene* ScriptEngine::GetScene() { return s_Data->Scene; }
 	std::vector<std::string> ScriptEngine::GetClassNames() { return s_Data->ScriptClassNames; }
+	Ref<ScriptClass> ScriptEngine::GetEntityBaseClass() { return s_Data->EntityBaseClass; }
 	MonoDomain* ScriptEngine::GetAppDomain() { return s_Data->AppDomain; }
 
 	Ref<ScriptClass> ScriptEngine::GetScriptClass(const std::string& name)

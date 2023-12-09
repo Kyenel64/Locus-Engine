@@ -102,5 +102,20 @@ namespace Locus
             Entity entity = new Entity(InternalCalls.Entity_Find(tag));
             return entity;
         }
+
+
+        // --- Collision Methods ---
+        internal void OnCollisionBeginInternal(ulong id)
+        {
+            OnCollisionBegin(new Entity(id));
+        }
+        public virtual void OnCollisionBegin(Entity entity) {}
+
+        internal void OnCollisionEndInternal(ulong id)
+        {
+            OnCollisionEnd(new Entity(id));
+        }
+        public virtual void OnCollisionEnd(Entity entity) {}
+
     }
 }

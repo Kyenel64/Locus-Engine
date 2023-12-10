@@ -24,10 +24,10 @@ Entities:
       LinearDamping: 0.200000003
       AngularDamping: 0.200000003
       FixedRotation: false
+    CircleCollider2DComponent:
       Friction: 0.200000003
       Restitution: 0
       RestitutionThreshold: 1
-    CircleCollider2DComponent:
       CollisionCategory: 1
       CollisionMask: 65535
       Radius: 0.5
@@ -59,10 +59,10 @@ Entities:
       LinearDamping: 0.200000003
       AngularDamping: 0.200000003
       FixedRotation: false
+    BoxCollider2DComponent:
       Friction: 0.200000003
       Restitution: 0
       RestitutionThreshold: 1
-    BoxCollider2DComponent:
       CollisionCategory: 1
       CollisionMask: 65535
       Offset: [0, 0]
@@ -90,10 +90,10 @@ Entities:
       LinearDamping: 0.200000003
       AngularDamping: 0.200000003
       FixedRotation: false
+    BoxCollider2DComponent:
       Friction: 0.200000003
       Restitution: 0
       RestitutionThreshold: 1
-    BoxCollider2DComponent:
       CollisionCategory: 1
       CollisionMask: 65535
       Offset: [0, 0]
@@ -145,10 +145,10 @@ Entities:
       LinearDamping: 0.200000003
       AngularDamping: 0.200000003
       FixedRotation: false
+    BoxCollider2DComponent:
       Friction: 0.200000003
       Restitution: 0
       RestitutionThreshold: 1
-    BoxCollider2DComponent:
       CollisionCategory: 1
       CollisionMask: 65535
       Offset: [0, 0]
@@ -176,10 +176,10 @@ Entities:
       LinearDamping: 0.200000003
       AngularDamping: 0.200000003
       FixedRotation: false
+    CircleCollider2DComponent:
       Friction: 0.200000003
       Restitution: 0
       RestitutionThreshold: 1
-    CircleCollider2DComponent:
       CollisionCategory: 1
       CollisionMask: 65535
       Radius: 0.5

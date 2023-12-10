@@ -393,21 +393,19 @@ namespace Locus
 				Widgets::DrawValueControl("Linear Damping", component.LinearDamping, 0.2f);
 				// Angular Drag
 				Widgets::DrawValueControl("Angular Damping", component.AngularDamping, 0.2f);
-
 				// Fixed Rotation
 				Widgets::DrawBoolControl("Fixed Rotation", component.FixedRotation);
+			});
 
+		// --- BoxCollider2D Component ----------------------------------------
+		DrawComponentUI<BoxCollider2DComponent>("Box Collider 2D", entity, [this](auto& component)
+			{
 				// Friction
 				Widgets::DrawValueControl("Friction", component.Friction, 0.2f);
 				// Restitution
 				Widgets::DrawValueControl("Restitution", component.Restitution, 0.0f);
 				// Restitution Threshold
 				Widgets::DrawValueControl("Restitution Threshold", component.RestitutionThreshold, 0.0f);
-			});
-
-		// --- BoxCollider2D Component ----------------------------------------
-		DrawComponentUI<BoxCollider2DComponent>("Box Collider 2D", entity, [this](auto& component)
-			{
 				// Collision Category
 				Widgets::DrawCollisionGrid("Collision Category", component.CollisionCategory, 0x0001);
 				// Collision Mask
@@ -421,6 +419,12 @@ namespace Locus
 		// --- CircleCollider2D Component -------------------------------------
 		DrawComponentUI<CircleCollider2DComponent>("Circle Collider 2D", entity, [this](auto& component)
 			{
+				// Friction
+				Widgets::DrawValueControl("Friction", component.Friction, 0.2f);
+				// Restitution
+				Widgets::DrawValueControl("Restitution", component.Restitution, 0.0f);
+				// Restitution Threshold
+				Widgets::DrawValueControl("Restitution Threshold", component.RestitutionThreshold, 0.0f);
 				// Collision Category
 				Widgets::DrawCollisionGrid("Collision Category", component.CollisionCategory, 0x0001);
 				// Collision Mask

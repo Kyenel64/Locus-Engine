@@ -14,7 +14,7 @@ namespace Sandbox
 
         void OnUpdate(float deltaTime)
         {
-            
+
         }
 
         public override void OnCollisionBegin(Entity entity)
@@ -24,6 +24,20 @@ namespace Sandbox
             crc.Color = Color.Blue;
             crc.Thickness = 0.3f;
             crc.Fade = 0.5f;
+
+            Rigidbody2DComponent rb2d = GetComponent<Rigidbody2DComponent>();
+
+            rb2d.Mass = 50.0f;
+            Console.WriteLine(rb2d.Mass);
+
+            rb2d.GravityScale = 10.0f;
+            Console.WriteLine(rb2d.GravityScale);
+
+            rb2d.LinearDamping = 100.0f;
+            Console.WriteLine(rb2d.LinearDamping);
+
+            rb2d.AngularDamping = 200.0f;
+            Console.WriteLine(rb2d.AngularDamping);
         }
 
         public override void OnCollisionEnd(Entity entity)

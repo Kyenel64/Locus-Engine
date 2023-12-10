@@ -2,6 +2,7 @@
 
 #include "Locus/Core/Input.h"
 #include "Locus/Core/KeyCodes.h"
+#include "Locus/Physics2D/PhysicsUtils.h"
 
 namespace Locus
 {
@@ -276,6 +277,106 @@ namespace Locus
 		{
 			Entity entity = GetEntity(entityID);
 			entity.GetComponent<CircleRendererComponent>().Fade = newFade;
+		}
+
+		// --- Rigidbody2D Component ---
+		// Body Type
+		static int Rigidbody2DComponent_GetBodyType(UUID entityID)
+		{
+			Entity entity = GetEntity(entityID);
+			return (int)entity.GetComponent<Rigidbody2DComponent>().BodyType;
+		}
+		static void Rigidbody2DComponent_SetBodyType(UUID entityID, int newBodyType)
+		{
+			Entity entity = GetEntity(entityID);
+			Rigidbody2DComponent& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+			rb2d.BodyType = (Rigidbody2DComponent::Rigidbody2DType)newBodyType;
+			b2Body* runtimeBody = (b2Body*)rb2d.RuntimeBody;
+			runtimeBody->SetType(Utils::Rigidbody2DTypeToBox2DType(rb2d.BodyType));
+		}
+
+		// Mass
+		static float Rigidbody2DComponent_GetMass(UUID entityID)
+		{
+			Entity entity = GetEntity(entityID);
+			return entity.GetComponent<Rigidbody2DComponent>().Mass;
+		}
+		static void Rigidbody2DComponent_SetMass(UUID entityID, float newMass)
+		{
+			Entity entity = GetEntity(entityID);
+			Rigidbody2DComponent& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+			b2Body* runtimeBody = (b2Body*)rb2d.RuntimeBody;
+
+			rb2d.Mass = newMass;
+			b2MassData massData;
+			massData.mass = newMass;
+			massData.I = runtimeBody->GetInertia();
+			massData.center = runtimeBody->GetLocalCenter();
+			runtimeBody->SetMassData(&massData);
+		}
+
+		// GravityScale
+		static float Rigidbody2DComponent_GetGravityScale(UUID entityID)
+		{
+			Entity entity = GetEntity(entityID);
+			return entity.GetComponent<Rigidbody2DComponent>().GravityScale;
+		}
+		static void Rigidbody2DComponent_SetGravityScale(UUID entityID, float newGravityScale)
+		{
+			Entity entity = GetEntity(entityID);
+			Rigidbody2DComponent& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+			b2Body* runtimeBody = (b2Body*)rb2d.RuntimeBody;
+
+			rb2d.GravityScale = newGravityScale;
+			runtimeBody->SetGravityScale(newGravityScale);
+		}
+
+		// Linear Damping
+		static float Rigidbody2DComponent_GetLinearDamping(UUID entityID)
+		{
+			Entity entity = GetEntity(entityID);
+			return entity.GetComponent<Rigidbody2DComponent>().LinearDamping;
+		}
+		static void Rigidbody2DComponent_SetLinearDamping(UUID entityID, float newLinearDamping)
+		{
+			Entity entity = GetEntity(entityID);
+			Rigidbody2DComponent& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+			b2Body* runtimeBody = (b2Body*)rb2d.RuntimeBody;
+
+			rb2d.LinearDamping = newLinearDamping;
+			runtimeBody->SetGravityScale(newLinearDamping);
+		}
+
+		// Angular Damping
+		static float Rigidbody2DComponent_GetAngularDamping(UUID entityID)
+		{
+			Entity entity = GetEntity(entityID);
+			return entity.GetComponent<Rigidbody2DComponent>().AngularDamping;
+		}
+		static void Rigidbody2DComponent_SetAngularDamping(UUID entityID, float newAngularDamping)
+		{
+			Entity entity = GetEntity(entityID);
+			Rigidbody2DComponent& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+			b2Body* runtimeBody = (b2Body*)rb2d.RuntimeBody;
+
+			rb2d.AngularDamping = newAngularDamping;
+			runtimeBody->SetGravityScale(newAngularDamping);
+		}
+
+		// Fixed Rotation
+		static bool Rigidbody2DComponent_GetFixedRotation(UUID entityID)
+		{
+			Entity entity = GetEntity(entityID);
+			return entity.GetComponent<Rigidbody2DComponent>().FixedRotation;
+		}
+		static void Rigidbody2DComponent_SetFixedRotation(UUID entityID, float newFixedRotation)
+		{
+			Entity entity = GetEntity(entityID);
+			Rigidbody2DComponent& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+			b2Body* runtimeBody = (b2Body*)rb2d.RuntimeBody;
+
+			rb2d.FixedRotation = newFixedRotation;
+			runtimeBody->SetGravityScale(newFixedRotation);
 		}
 
 		// --- Input ---

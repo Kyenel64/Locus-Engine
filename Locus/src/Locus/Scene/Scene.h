@@ -13,11 +13,12 @@ class b2World;
 namespace Locus
 {
 	class Entity;
+	class ContactListener2D;
 
 	class Scene
 	{
 	public:
-		Scene() = default;
+		Scene();
 		Scene(const std::string& sceneName) : m_SceneName(sceneName) {}
 		~Scene() = default;
 
@@ -68,6 +69,7 @@ namespace Locus
 		uint32_t m_RootEntityCount = 1; // TODO: Handle all entity counts. 
 
 		b2World* m_Box2DWorld = nullptr;
+		Ref<ContactListener2D> m_ContactListener;
 
 		friend class Entity;
 		friend class SceneSerializer;

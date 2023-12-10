@@ -94,7 +94,7 @@ namespace Locus
         internal extern static float SpriteRendererComponent_GetTilingFactor(ulong id);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        internal extern static void SpriteRendererComponent_SetTilingFactor(ulong id, ref float newTF);
+        internal extern static void SpriteRendererComponent_SetTilingFactor(ulong id, float newTF);
 
         // --- Circle Renderer Component ---
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
@@ -107,13 +107,50 @@ namespace Locus
         internal extern static float CircleRendererComponent_GetThickness(ulong id);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        internal extern static void CircleRendererComponent_SetThickness(ulong id, ref float newThickness);
+        internal extern static void CircleRendererComponent_SetThickness(ulong id, float newThickness);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static float CircleRendererComponent_GetFade(ulong id);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        internal extern static void CircleRendererComponent_SetFade(ulong id, ref float newFade);
+        internal extern static void CircleRendererComponent_SetFade(ulong id, float newFade);
+
+        // --- Rigidbody2D Component ---
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static int Rigidbody2DComponent_GetBodyType(ulong id);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Rigidbody2DComponent_SetBodyType(ulong id, int newBodyType);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static float Rigidbody2DComponent_GetMass(ulong id);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Rigidbody2DComponent_SetMass(ulong id, float newMass);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static float Rigidbody2DComponent_GetGravityScale(ulong id);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Rigidbody2DComponent_SetGravityScale(ulong id, float newGravityScale);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static float Rigidbody2DComponent_GetLinearDamping(ulong id);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Rigidbody2DComponent_SetLinearDamping(ulong id, float newLinearDamping);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static float Rigidbody2DComponent_GetAngularDamping(ulong id);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Rigidbody2DComponent_SetAngularDamping(ulong id, float newAngularDamping);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static bool Rigidbody2DComponent_GetFixedRotation(ulong id);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Rigidbody2DComponent_SetFixedRotation(ulong id, bool newFixedRotation);
 
         // --- Input ---
         [MethodImplAttribute(MethodImplOptions.InternalCall)]

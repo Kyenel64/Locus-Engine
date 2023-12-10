@@ -16,26 +16,14 @@
 #include "Locus/Scene/Entity.h"
 #include "Locus/Scripting/ScriptEngine.h"
 #include "Locus/Physics2D/ContactListener2D.h"
+#include "Locus/Physics2D/PhysicsUtils.h"
 
 namespace Locus
 {
-	namespace Utils
+	Scene::Scene()
 	{
-		static b2BodyType Rigidbody2DTypeToBox2DType(Rigidbody2DComponent::Rigidbody2DType bodyType)
-		{
-			switch (bodyType)
-			{
-			case Rigidbody2DComponent::Rigidbody2DType::Static: return b2_staticBody;
-			case Rigidbody2DComponent::Rigidbody2DType::Dynamic: return b2_dynamicBody;
-			case Rigidbody2DComponent::Rigidbody2DType::Kinematic: return b2_kinematicBody;
-			}
-
-			LOCUS_CORE_ASSERT(false, "Unknown Rigidbody2DType");
-			return b2_staticBody;
-		}
+		m_ContactListener = CreateRef<ContactListener2D>();
 	}
-
-	static ContactListener2D s_Listener;
 
 	Ref<Scene> Scene::Copy(Ref<Scene> other)
 	{
@@ -169,6 +157,7 @@ namespace Locus
 		// --- Physics ---
 		{
 			m_Box2DWorld->Step(deltaTime, 6, 2); // TODO: paremeterize
+			m_ContactListener->Execute();
 			auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
 			for (auto e : view)
 			{
@@ -177,7 +166,7 @@ namespace Locus
 				{
 					auto& transform = entity.GetComponent<TransformComponent>();
 					auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
-			
+					
 					b2Body* body = (b2Body*)rb2d.RuntimeBody;
 					const b2Vec2& position = body->GetPosition();
 					transform.LocalPosition = { position.x, position.y , 0.0f };
@@ -379,7 +368,7 @@ namespace Locus
 		// --- Physics ---
 		{
 			m_Box2DWorld = new b2World({ 0.0f, -9.8f });
-			m_Box2DWorld->SetContactListener(&s_Listener);
+			m_Box2DWorld->SetContactListener(m_ContactListener.get());
 			auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
 			for (auto e : view)
 			{
@@ -407,14 +396,6 @@ namespace Locus
 					massData.center = entityBody->GetLocalCenter();
 					entityBody->SetMassData(&massData);
 
-					b2FixtureDef fixtureDef;
-					fixtureDef.density = rb2D.Mass;
-					fixtureDef.friction = rb2D.Friction;
-					fixtureDef.restitution = rb2D.Restitution;
-					fixtureDef.restitutionThreshold = rb2D.RestitutionThreshold;
-					fixtureDef.filter.categoryBits = 0x0001;
-					fixtureDef.filter.maskBits = 0xFFFF;
-
 					if (entity.HasComponent<BoxCollider2DComponent>())
 					{
 						auto& b2D = entity.GetComponent<BoxCollider2DComponent>();
@@ -425,6 +406,11 @@ namespace Locus
 
 						b2PolygonShape box;
 						box.SetAsBox(size.x / 2, size.y / 2, offset, angle);
+						b2FixtureDef fixtureDef; // Move this to collider
+						fixtureDef.density = rb2D.Mass; // TODO: Check if this is a correct way to handle density
+						fixtureDef.friction = b2D.Friction;
+						fixtureDef.restitution = b2D.Restitution;
+						fixtureDef.restitutionThreshold = b2D.RestitutionThreshold;
 						fixtureDef.shape = &box;
 						fixtureDef.filter.categoryBits = b2D.CollisionCategory;
 						fixtureDef.filter.maskBits = b2D.CollisionMask;
@@ -440,6 +426,11 @@ namespace Locus
 						float radius = maxScale * c2D.Radius;
 
 						b2CircleShape circle;
+						b2FixtureDef fixtureDef; // Move this to collider
+						fixtureDef.density = rb2D.Mass;
+						fixtureDef.friction = c2D.Friction;
+						fixtureDef.restitution = c2D.Restitution;
+						fixtureDef.restitutionThreshold = c2D.RestitutionThreshold;
 						circle.m_p = offset;
 						circle.m_radius = radius;
 						fixtureDef.shape = &circle;
@@ -485,14 +476,6 @@ namespace Locus
 					massData.center = entityBody->GetLocalCenter();
 					entityBody->SetMassData(&massData);
 
-					b2FixtureDef fixtureDef;
-					fixtureDef.density = rb2D.Mass;
-					fixtureDef.friction = rb2D.Friction;
-					fixtureDef.restitution = rb2D.Restitution;
-					fixtureDef.restitutionThreshold = rb2D.RestitutionThreshold;
-					fixtureDef.filter.categoryBits = 0x0001;
-					fixtureDef.filter.maskBits = 0xFFFF;
-
 					if (entity.HasComponent<BoxCollider2DComponent>())
 					{
 						auto& b2D = entity.GetComponent<BoxCollider2DComponent>();
@@ -503,6 +486,11 @@ namespace Locus
 
 						b2PolygonShape box;
 						box.SetAsBox(size.x / 2, size.y / 2, offset, angle);
+						b2FixtureDef fixtureDef;
+						fixtureDef.density = rb2D.Mass;
+						fixtureDef.friction = b2D.Friction;
+						fixtureDef.restitution = b2D.Restitution;
+						fixtureDef.restitutionThreshold = b2D.RestitutionThreshold;
 						fixtureDef.shape = &box;
 						fixtureDef.filter.categoryBits = b2D.CollisionCategory;
 						fixtureDef.filter.maskBits = b2D.CollisionMask;
@@ -519,6 +507,11 @@ namespace Locus
 						float radius = maxScale * c2D.Radius;
 
 						b2CircleShape circle;
+						b2FixtureDef fixtureDef;
+						fixtureDef.density = rb2D.Mass;
+						fixtureDef.friction = c2D.Friction;
+						fixtureDef.restitution = c2D.Restitution;
+						fixtureDef.restitutionThreshold = c2D.RestitutionThreshold;
 						circle.m_p = offset;
 						circle.m_radius = radius;
 						fixtureDef.shape = &circle;

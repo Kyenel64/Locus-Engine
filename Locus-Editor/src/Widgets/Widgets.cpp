@@ -362,7 +362,7 @@ namespace Locus::Widgets
 
 		// Popup
 		ImGui::PushStyleColor(ImGuiCol_Header, LocusColors::DarkGrey);
-		ImGui::SetNextWindowPos({ ImGui::GetWindowPos().x + ImGui::GetCursorPosX() + labelWidth, ImGui::GetWindowPos().y + ImGui::GetCursorPosY() - ImGui::GetStyle().ItemSpacing.y });
+		ImGui::SetNextWindowPos({ ImGui::GetWindowPos().x + ImGui::GetCursorPosX() + labelWidth, ImGui::GetWindowPos().y + ImGui::GetCursorPosY() - ImGui::GetStyle().ItemSpacing.y - ImGui::GetScrollY()});
 		ImGui::SetNextWindowSize({ buttonSize.x, 200.0f });
 		if (ImGui::BeginPopup("CollisionPopup"))
 		{

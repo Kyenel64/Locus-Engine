@@ -157,12 +157,7 @@ namespace Locus
 		float LinearDamping = 0.2f;
 		float AngularDamping = 0.2f;
 		bool FixedRotation = false;
-
-		// Fixture. TODO: Put in physics material
-		float Friction = 0.2f; // 0 - 1
-		float Restitution = 0.0f; // 0 - 1
-		float RestitutionThreshold = 1.0f;
-
+		
 		void* RuntimeBody = nullptr;
 
 		Rigidbody2DComponent() = default;
@@ -171,6 +166,11 @@ namespace Locus
 
 	struct BoxCollider2DComponent
 	{
+		// Fixture. TODO: Put in physics material
+		float Friction = 0.2f; // 0 - 1
+		float Restitution = 0.0f; // 0 - 1
+		float RestitutionThreshold = 1.0f;
+
 		uint16_t CollisionCategory = 0x0001;
 		uint16_t CollisionMask = 0xFFFF;
 
@@ -185,6 +185,11 @@ namespace Locus
 
 	struct CircleCollider2DComponent
 	{
+		// Fixture. TODO: Put in physics material
+		float Friction = 0.2f; // 0 - 1
+		float Restitution = 0.0f; // 0 - 1
+		float RestitutionThreshold = 1.0f;
+
 		uint16_t CollisionCategory = 0x0001;
 		uint16_t CollisionMask = 0xFFFF;
 

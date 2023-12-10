@@ -63,6 +63,20 @@ namespace Locus
 		LINK_INTERNAL_CALL(CircleRendererComponent_GetFade);
 		LINK_INTERNAL_CALL(CircleRendererComponent_SetFade);
 
+		// Rigidbody2D Component
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_GetBodyType);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_SetBodyType);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_GetMass);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_SetMass);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_GetGravityScale);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_SetGravityScale);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_GetLinearDamping);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_SetLinearDamping);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_GetAngularDamping);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_SetAngularDamping);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_GetFixedRotation);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_SetFixedRotation);
+
 		// Input
 		LINK_INTERNAL_CALL(Input_IsKeyPressed);
 	}

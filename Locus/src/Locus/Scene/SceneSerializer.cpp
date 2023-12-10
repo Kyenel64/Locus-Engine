@@ -274,9 +274,6 @@ namespace Locus
 			out << YAML::Key << "LinearDamping" << YAML::Value << rb2D.LinearDamping;
 			out << YAML::Key << "AngularDamping" << YAML::Value << rb2D.AngularDamping;
 			out << YAML::Key << "FixedRotation" << YAML::Value << rb2D.FixedRotation;
-			out << YAML::Key << "Friction" << YAML::Value << rb2D.Friction;
-			out << YAML::Key << "Restitution" << YAML::Value << rb2D.Restitution;
-			out << YAML::Key << "RestitutionThreshold" << YAML::Value << rb2D.RestitutionThreshold;
 			out << YAML::EndMap; // End Rigidbody2D Component
 		}
 
@@ -287,6 +284,9 @@ namespace Locus
 
 			out << YAML::Key << "BoxCollider2DComponent";
 			out << YAML::BeginMap; // BoxCollider2D Component
+			out << YAML::Key << "Friction" << YAML::Value << bc2D.Friction;
+			out << YAML::Key << "Restitution" << YAML::Value << bc2D.Restitution;
+			out << YAML::Key << "RestitutionThreshold" << YAML::Value << bc2D.RestitutionThreshold;
 			out << YAML::Key << "CollisionCategory" << YAML::Value << bc2D.CollisionCategory;
 			out << YAML::Key << "CollisionMask" << YAML::Value << bc2D.CollisionMask;
 			out << YAML::Key << "Offset" << YAML::Value << bc2D.Offset;
@@ -301,6 +301,9 @@ namespace Locus
 
 			out << YAML::Key << "CircleCollider2DComponent";
 			out << YAML::BeginMap; // BoxCollider2D Component
+			out << YAML::Key << "Friction" << YAML::Value << c2D.Friction;
+			out << YAML::Key << "Restitution" << YAML::Value << c2D.Restitution;
+			out << YAML::Key << "RestitutionThreshold" << YAML::Value << c2D.RestitutionThreshold;
 			out << YAML::Key << "CollisionCategory" << YAML::Value << c2D.CollisionCategory;
 			out << YAML::Key << "CollisionMask" << YAML::Value << c2D.CollisionMask;
 			out << YAML::Key << "Radius" << YAML::Value << c2D.Radius;
@@ -482,9 +485,6 @@ namespace Locus
 					rb2D.LinearDamping = rigidBody2DComponent["LinearDamping"].as<float>();
 					rb2D.AngularDamping = rigidBody2DComponent["AngularDamping"].as<float>();
 					rb2D.FixedRotation = rigidBody2DComponent["FixedRotation"].as<bool>();
-					rb2D.Friction = rigidBody2DComponent["Friction"].as<float>();
-					rb2D.Restitution = rigidBody2DComponent["Restitution"].as<float>();
-					rb2D.RestitutionThreshold = rigidBody2DComponent["RestitutionThreshold"].as<float>();
 				}
 
 				// --- BoxCollider2D Component ---
@@ -492,6 +492,9 @@ namespace Locus
 				if (boxCollider2DComponent)
 				{
 					auto& bc2D = deserializedEntity.AddComponent<BoxCollider2DComponent>();
+					bc2D.Friction = boxCollider2DComponent["Friction"].as<float>();
+					bc2D.Restitution = boxCollider2DComponent["Restitution"].as<float>();
+					bc2D.RestitutionThreshold = boxCollider2DComponent["RestitutionThreshold"].as<float>();
 					bc2D.CollisionCategory = boxCollider2DComponent["CollisionCategory"].as<uint16_t>();
 					bc2D.CollisionMask = boxCollider2DComponent["CollisionMask"].as<uint16_t>();
 					bc2D.Offset = boxCollider2DComponent["Offset"].as<glm::vec2>();
@@ -503,6 +506,9 @@ namespace Locus
 				if (circleCollider2DComponent)
 				{
 					auto& c2D = deserializedEntity.AddComponent<CircleCollider2DComponent>();
+					c2D.Friction = circleCollider2DComponent["Friction"].as<float>();
+					c2D.Restitution = circleCollider2DComponent["Restitution"].as<float>();
+					c2D.RestitutionThreshold = circleCollider2DComponent["RestitutionThreshold"].as<float>();
 					c2D.CollisionCategory = circleCollider2DComponent["CollisionCategory"].as<uint16_t>();
 					c2D.CollisionMask = circleCollider2DComponent["CollisionMask"].as<uint16_t>();
 					c2D.Offset = circleCollider2DComponent["Offset"].as<glm::vec2>();

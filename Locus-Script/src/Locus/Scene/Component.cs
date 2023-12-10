@@ -115,7 +115,7 @@ namespace Locus
         public float TilingFactor
         {
             get => InternalCalls.SpriteRendererComponent_GetTilingFactor(Entity.ID);
-            set => InternalCalls.SpriteRendererComponent_SetTilingFactor(Entity.ID, ref value);
+            set => InternalCalls.SpriteRendererComponent_SetTilingFactor(Entity.ID, value);
         }
     }
 
@@ -139,12 +139,57 @@ namespace Locus
         public float Thickness
         {
             get => InternalCalls.CircleRendererComponent_GetThickness(Entity.ID);
-            set => InternalCalls.CircleRendererComponent_SetThickness(Entity.ID, ref value);
+            set => InternalCalls.CircleRendererComponent_SetThickness(Entity.ID, value);
         }
         public float Fade
         {
             get => InternalCalls.CircleRendererComponent_GetFade(Entity.ID);
-            set => InternalCalls.CircleRendererComponent_SetFade(Entity.ID, ref value);
+            set => InternalCalls.CircleRendererComponent_SetFade(Entity.ID, value);
+        }
+    }
+
+
+
+    // --- Rigidbody2D Component ----------------------------------------------
+    public class Rigidbody2DComponent : Component
+    {
+        public RigidbodyType BodyType
+        {
+            get
+            {
+                int internalType = InternalCalls.Rigidbody2DComponent_GetBodyType(Entity.ID);
+                return (RigidbodyType)internalType;
+            }
+            set
+            {
+                int bodyType = (int)value;
+                InternalCalls.Rigidbody2DComponent_SetBodyType(Entity.ID, bodyType);
+            }
+        }
+        public float Mass
+        {
+            get => InternalCalls.Rigidbody2DComponent_GetMass(Entity.ID);
+            set => InternalCalls.Rigidbody2DComponent_SetMass(Entity.ID, value);
+        }
+        public float GravityScale
+        {
+            get => InternalCalls.Rigidbody2DComponent_GetGravityScale(Entity.ID);
+            set => InternalCalls.Rigidbody2DComponent_SetGravityScale(Entity.ID, value);
+        }
+        public float LinearDamping
+        {
+            get => InternalCalls.Rigidbody2DComponent_GetLinearDamping(Entity.ID);
+            set => InternalCalls.Rigidbody2DComponent_SetLinearDamping(Entity.ID, value);
+        }
+        public float AngularDamping
+        {
+            get => InternalCalls.Rigidbody2DComponent_GetAngularDamping(Entity.ID);
+            set => InternalCalls.Rigidbody2DComponent_SetAngularDamping(Entity.ID, value);
+        }
+        public bool FixedRotation
+        {
+            get => InternalCalls.Rigidbody2DComponent_GetFixedRotation(Entity.ID);
+            set => InternalCalls.Rigidbody2DComponent_SetFixedRotation(Entity.ID, value);
         }
     }
 }

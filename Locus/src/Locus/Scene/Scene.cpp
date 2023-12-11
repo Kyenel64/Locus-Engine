@@ -336,76 +336,138 @@ namespace Locus
 		{
 			m_Box2DWorld = new b2World({ 0.0f, -9.8f });
 			m_Box2DWorld->SetContactListener(m_ContactListener.get());
-			auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
+
+			// Box colliders
+			auto view = m_Registry.view<BoxCollider2DComponent>();
 			for (auto e : view)
 			{
 				Entity entity = Entity(e, this);
 				if (entity.GetComponent<TagComponent>().Enabled)
 				{
 					auto& tc = entity.GetComponent<TransformComponent>();
-					auto& rb2D = entity.GetComponent<Rigidbody2DComponent>();
+					auto& b2D = entity.GetComponent<BoxCollider2DComponent>();
 
-					// Body
-					b2BodyDef bodyDef;
-					bodyDef.type = Utils::Rigidbody2DTypeToBox2DType(rb2D.BodyType);
-					bodyDef.position.Set(tc.LocalPosition.x, tc.LocalPosition.y);
-					bodyDef.angle = tc.LocalRotation.z;
-					bodyDef.linearDamping = rb2D.LinearDamping;
-					bodyDef.angularDamping = rb2D.AngularDamping;
-					bodyDef.fixedRotation = rb2D.FixedRotation;
-					bodyDef.gravityScale = rb2D.GravityScale;
-					bodyDef.userData.pointer = (uintptr_t)entity.GetUUID();
-					b2Body* entityBody = m_Box2DWorld->CreateBody(&bodyDef);
-					rb2D.RuntimeBody = entityBody;
-					b2MassData massData;
-					massData.mass = rb2D.Mass;
-					massData.I = entityBody->GetInertia();
-					massData.center = entityBody->GetLocalCenter();
-					entityBody->SetMassData(&massData);
-
-					if (entity.HasComponent<BoxCollider2DComponent>())
+					b2Body* entityBody;
+					float mass;
+					if (entity.HasComponent<Rigidbody2DComponent>())
 					{
-						auto& b2D = entity.GetComponent<BoxCollider2DComponent>();
+						auto& rb2D = entity.GetComponent<Rigidbody2DComponent>();
+						mass = rb2D.Mass;
 
-						b2Vec2 size = { b2D.Size.x * tc.LocalScale.x, b2D.Size.y * tc.LocalScale.y };
-						b2Vec2 offset = { tc.LocalScale.x * b2D.Offset.x, tc.LocalScale.y * b2D.Offset.y };
-						float angle = 0.0f; // TODO
-
-						b2PolygonShape box;
-						box.SetAsBox(size.x / 2, size.y / 2, offset, angle);
-						b2FixtureDef fixtureDef; // Move this to collider
-						fixtureDef.density = rb2D.Mass; // TODO: Check if this is a correct way to handle density
-						fixtureDef.friction = b2D.Friction;
-						fixtureDef.restitution = b2D.Restitution;
-						fixtureDef.restitutionThreshold = b2D.RestitutionThreshold;
-						fixtureDef.shape = &box;
-						fixtureDef.filter.categoryBits = b2D.CollisionCategory;
-						fixtureDef.filter.maskBits = b2D.CollisionMask;
-						b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);
-						b2D.RuntimeFixture = fixture;
+						// Body
+						b2BodyDef bodyDef;
+						bodyDef.type = Utils::Rigidbody2DTypeToBox2DType(rb2D.BodyType);
+						bodyDef.position.Set(tc.LocalPosition.x, tc.LocalPosition.y);
+						bodyDef.angle = tc.LocalRotation.z;
+						bodyDef.linearDamping = rb2D.LinearDamping;
+						bodyDef.angularDamping = rb2D.AngularDamping;
+						bodyDef.fixedRotation = rb2D.FixedRotation;
+						bodyDef.gravityScale = rb2D.GravityScale;
+						bodyDef.userData.pointer = (uintptr_t)entity.GetUUID();
+						entityBody = m_Box2DWorld->CreateBody(&bodyDef);
+						rb2D.RuntimeBody = entityBody;
+						b2MassData massData;
+						massData.mass = rb2D.Mass;
+						massData.I = entityBody->GetInertia();
+						massData.center = entityBody->GetLocalCenter();
+						entityBody->SetMassData(&massData);
 					}
-					else if (entity.HasComponent<CircleCollider2DComponent>())
+					else
 					{
-						auto& c2D = entity.GetComponent<CircleCollider2DComponent>();
+						mass = 0.0f;
 
-						float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
-						b2Vec2 offset = { maxScale * c2D.Offset.x, maxScale * c2D.Offset.y };
-						float radius = maxScale * c2D.Radius;
-
-						b2CircleShape circle;
-						b2FixtureDef fixtureDef; // Move this to collider
-						fixtureDef.density = rb2D.Mass;
-						fixtureDef.friction = c2D.Friction;
-						fixtureDef.restitution = c2D.Restitution;
-						fixtureDef.restitutionThreshold = c2D.RestitutionThreshold;
-						circle.m_p = offset;
-						circle.m_radius = radius;
-						fixtureDef.shape = &circle;
-						fixtureDef.filter.categoryBits = c2D.CollisionCategory;
-						fixtureDef.filter.maskBits = c2D.CollisionMask;
-						b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);
-						c2D.RuntimeFixture = fixture;
+						b2BodyDef bodyDef;
+						bodyDef.type = b2BodyType::b2_staticBody;
+						bodyDef.position.Set(tc.LocalPosition.x, tc.LocalPosition.y);
+						bodyDef.angle = tc.LocalRotation.z;
+						bodyDef.userData.pointer = (uintptr_t)entity.GetUUID();
+						entityBody = m_Box2DWorld->CreateBody(&bodyDef);
 					}
+
+					b2Vec2 size = { b2D.Size.x * tc.LocalScale.x, b2D.Size.y * tc.LocalScale.y };
+					b2Vec2 offset = { tc.LocalScale.x * b2D.Offset.x, tc.LocalScale.y * b2D.Offset.y };
+					float angle = 0.0f; // TODO
+
+					b2PolygonShape box;
+					box.SetAsBox(size.x / 2, size.y / 2, offset, angle);
+					b2FixtureDef fixtureDef; // Move this to collider
+					fixtureDef.density = mass; // TODO: Check if this is a correct way to handle density
+					fixtureDef.friction = b2D.Friction;
+					fixtureDef.restitution = b2D.Restitution;
+					fixtureDef.restitutionThreshold = b2D.RestitutionThreshold;
+					fixtureDef.shape = &box;
+					fixtureDef.filter.categoryBits = b2D.CollisionCategory;
+					fixtureDef.filter.maskBits = b2D.CollisionMask;
+					b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);
+					b2D.RuntimeFixture = fixture;
+				}
+			}
+
+			// Circle colliders
+			auto c2dView = m_Registry.view<CircleCollider2DComponent>();
+			for (auto e : c2dView)
+			{
+				Entity entity = Entity(e, this);
+				if (entity.GetComponent<TagComponent>().Enabled)
+				{
+					auto& tc = entity.GetComponent<TransformComponent>();
+					auto& c2D = entity.GetComponent<CircleCollider2DComponent>();
+
+					b2Body* entityBody;
+					float mass;
+
+					if (entity.HasComponent<Rigidbody2DComponent>())
+					{
+						auto& rb2D = entity.GetComponent<Rigidbody2DComponent>();
+						mass = rb2D.Mass;
+
+						// Body
+						b2BodyDef bodyDef;
+						bodyDef.type = Utils::Rigidbody2DTypeToBox2DType(rb2D.BodyType);
+						bodyDef.position.Set(tc.LocalPosition.x, tc.LocalPosition.y);
+						bodyDef.angle = tc.LocalRotation.z;
+						bodyDef.linearDamping = rb2D.LinearDamping;
+						bodyDef.angularDamping = rb2D.AngularDamping;
+						bodyDef.fixedRotation = rb2D.FixedRotation;
+						bodyDef.gravityScale = rb2D.GravityScale;
+						bodyDef.userData.pointer = (uintptr_t)entity.GetUUID();
+						entityBody = m_Box2DWorld->CreateBody(&bodyDef);
+						rb2D.RuntimeBody = entityBody;
+						b2MassData massData;
+						massData.mass = rb2D.Mass;
+						massData.I = entityBody->GetInertia();
+						massData.center = entityBody->GetLocalCenter();
+						entityBody->SetMassData(&massData);
+					}
+					else
+					{
+						mass = 0.0f;
+
+						b2BodyDef bodyDef;
+						bodyDef.type = b2BodyType::b2_staticBody;
+						bodyDef.position.Set(tc.LocalPosition.x, tc.LocalPosition.y);
+						bodyDef.angle = tc.LocalRotation.z;
+						bodyDef.userData.pointer = (uintptr_t)entity.GetUUID();
+						entityBody = m_Box2DWorld->CreateBody(&bodyDef);
+					}
+
+					float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
+					b2Vec2 offset = { maxScale * c2D.Offset.x, maxScale * c2D.Offset.y };
+					float radius = maxScale * c2D.Radius;
+
+					b2CircleShape circle;
+					b2FixtureDef fixtureDef; // Move this to collider
+					fixtureDef.density = mass;
+					fixtureDef.friction = c2D.Friction;
+					fixtureDef.restitution = c2D.Restitution;
+					fixtureDef.restitutionThreshold = c2D.RestitutionThreshold;
+					circle.m_p = offset;
+					circle.m_radius = radius;
+					fixtureDef.shape = &circle;
+					fixtureDef.filter.categoryBits = c2D.CollisionCategory;
+					fixtureDef.filter.maskBits = c2D.CollisionMask;
+					b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);
+					c2D.RuntimeFixture = fixture;
 				}
 			}
 		}

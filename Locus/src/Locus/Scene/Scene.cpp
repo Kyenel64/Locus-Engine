@@ -331,40 +331,7 @@ namespace Locus
 	}
 
 	void Scene::OnRuntimeStart()
-	{
-		// --- Native Script ---
-		{
-			auto view = m_Registry.view<NativeScriptComponent, TagComponent>();
-			for (auto entity : view)
-			{
-				auto& nsc = view.get<NativeScriptComponent>(entity);
-				bool enabled = view.get<TagComponent>(entity).Enabled;
-				if (enabled)
-				{
-					nsc.Instance = nsc.InstantiateScript();
-					nsc.Instance->m_Entity = Entity(entity, this);
-					nsc.Instance->OnCreate();
-				}
-			}
-		}
-
-		// --- C# Scripts ---
-		{
-			ScriptEngine::OnRuntimeStart(this);
-			auto view = m_Registry.view<ScriptComponent, TagComponent, IDComponent>();
-			for (auto e : view)
-			{
-				Entity entity = Entity(e, this);
-				auto& sc = view.get<ScriptComponent>(e);
-				bool enabled = view.get<TagComponent>(e).Enabled;
-				UUID id = view.get<IDComponent>(e).ID;
-				if (enabled)
-				{
-					ScriptEngine::OnCreateEntityScript(entity);
-				}
-			}
-		}
-		
+	{	
 		// --- Physics ---
 		{
 			m_Box2DWorld = new b2World({ 0.0f, -9.8f });
@@ -439,6 +406,39 @@ namespace Locus
 						b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);
 						c2D.RuntimeFixture = fixture;
 					}
+				}
+			}
+		}
+
+		// --- Native Script ---
+		{
+			auto view = m_Registry.view<NativeScriptComponent, TagComponent>();
+			for (auto entity : view)
+			{
+				auto& nsc = view.get<NativeScriptComponent>(entity);
+				bool enabled = view.get<TagComponent>(entity).Enabled;
+				if (enabled)
+				{
+					nsc.Instance = nsc.InstantiateScript();
+					nsc.Instance->m_Entity = Entity(entity, this);
+					nsc.Instance->OnCreate();
+				}
+			}
+		}
+
+		// --- C# Scripts ---
+		{
+			ScriptEngine::OnRuntimeStart(this);
+			auto view = m_Registry.view<ScriptComponent, TagComponent, IDComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				auto& sc = view.get<ScriptComponent>(e);
+				bool enabled = view.get<TagComponent>(e).Enabled;
+				UUID id = view.get<IDComponent>(e).ID;
+				if (enabled)
+				{
+					ScriptEngine::OnCreateEntityScript(entity);
 				}
 			}
 		}

@@ -7,14 +7,29 @@ namespace Sandbox
     // Sample player controller class demonstrating basic movement and Entity referencing.
     public class PhysicsObject : Entity
     {
+        public Rigidbody2DComponent rb2d;
+        public float moveSpeed = 50.0f;
+        private bool canJump = false;
         void OnCreate()
         {
-
+            rb2d = GetComponent<Rigidbody2DComponent>();
         }
 
         void OnUpdate(float deltaTime)
         {
+            if (Input.IsKeyPressed(KeyCode.A))
+                rb2d.AddForce(new Vec2(-moveSpeed, 0));
+            else if (Input.IsKeyPressed(KeyCode.D))
+                rb2d.AddForce(new Vec2(moveSpeed, 0));
 
+            if (Input.IsKeyPressed(KeyCode.Space))
+            {
+                if (canJump)
+                    rb2d.AddLinearImpulse(new Vec2(0, 3));
+            }
+
+            if (Input.IsKeyPressed(KeyCode.T))
+                rb2d.SetPosition(new Vec2(0, 1));
         }
 
         public override void OnCollisionBegin(Entity entity)
@@ -24,20 +39,7 @@ namespace Sandbox
             crc.Color = Color.Blue;
             crc.Thickness = 0.3f;
             crc.Fade = 0.5f;
-
-            Rigidbody2DComponent rb2d = GetComponent<Rigidbody2DComponent>();
-
-            rb2d.Mass = 50.0f;
-            Console.WriteLine(rb2d.Mass);
-
-            rb2d.GravityScale = 10.0f;
-            Console.WriteLine(rb2d.GravityScale);
-
-            rb2d.LinearDamping = 100.0f;
-            Console.WriteLine(rb2d.LinearDamping);
-
-            rb2d.AngularDamping = 200.0f;
-            Console.WriteLine(rb2d.AngularDamping);
+            canJump = true;
         }
 
         public override void OnCollisionEnd(Entity entity)
@@ -47,6 +49,7 @@ namespace Sandbox
             crc.Color = Color.Yellow;
             crc.Thickness = 1.0f;
             crc.Fade = 0.005f;
+            canJump = false;
         }
     }
 }

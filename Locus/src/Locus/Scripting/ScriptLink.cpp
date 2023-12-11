@@ -29,6 +29,10 @@ namespace Locus
 		LINK_INTERNAL_CALL(Entity_SetEnabled);
 		LINK_INTERNAL_CALL(Entity_Find);
 
+		// Vec2
+		LINK_INTERNAL_CALL(Vec2_Distance);
+		LINK_INTERNAL_CALL(Vec2_Length);
+
 		// Vec3
 		LINK_INTERNAL_CALL(Vec3_Cross);
 		LINK_INTERNAL_CALL(Vec3_Distance);
@@ -76,6 +80,9 @@ namespace Locus
 		LINK_INTERNAL_CALL(Rigidbody2DComponent_SetAngularDamping);
 		LINK_INTERNAL_CALL(Rigidbody2DComponent_GetFixedRotation);
 		LINK_INTERNAL_CALL(Rigidbody2DComponent_SetFixedRotation);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_AddForce);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_AddLinearImpulse);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_SetPosition);
 
 		// Input
 		LINK_INTERNAL_CALL(Input_IsKeyPressed);

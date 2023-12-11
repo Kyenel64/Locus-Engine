@@ -133,6 +133,17 @@ namespace Locus
 			return 0;
 		}
 
+		// --- Vec2 ---
+		static float Vec2_Distance(glm::vec2 v1, glm::vec2 v2)
+		{
+			return glm::distance(v1, v2);
+		}
+
+		static float Vec2_Length(glm::vec2 vec)
+		{
+			return glm::length(vec);
+		}
+
 		// --- Vec3 ---
 		static void Vec3_Cross(glm::vec3 v1, glm::vec3 v2, glm::vec3* output)
 		{
@@ -377,6 +388,33 @@ namespace Locus
 
 			rb2d.FixedRotation = newFixedRotation;
 			runtimeBody->SetGravityScale(newFixedRotation);
+		}
+
+		// Add Force
+		static void Rigidbody2DComponent_AddForce(UUID entityID, glm::vec2* force)
+		{
+			Entity entity = GetEntity(entityID);
+			Rigidbody2DComponent& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+			b2Body* runtimeBody = (b2Body*)rb2d.RuntimeBody;
+			runtimeBody->ApplyForce({ force->x, force->y }, runtimeBody->GetWorldCenter(), true);
+		}
+
+		// Add Linear Impulse
+		static void Rigidbody2DComponent_AddLinearImpulse(UUID entityID, glm::vec2* impulse)
+		{
+			Entity entity = GetEntity(entityID);
+			Rigidbody2DComponent& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+			b2Body* runtimeBody = (b2Body*)rb2d.RuntimeBody;
+			runtimeBody->ApplyLinearImpulse({ impulse->x, impulse->y }, runtimeBody->GetWorldCenter(), true);
+		}
+
+		// Set Position
+		static void Rigidbody2DComponent_SetPosition(UUID entityID, glm::vec2* pos)
+		{
+			Entity entity = GetEntity(entityID);
+			Rigidbody2DComponent& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+			b2Body* runtimeBody = (b2Body*)rb2d.RuntimeBody;
+			runtimeBody->SetTransform({ pos->x, pos->y }, runtimeBody->GetAngle());
 		}
 
 		// --- Input ---

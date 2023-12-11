@@ -191,5 +191,18 @@ namespace Locus
             get => InternalCalls.Rigidbody2DComponent_GetFixedRotation(Entity.ID);
             set => InternalCalls.Rigidbody2DComponent_SetFixedRotation(Entity.ID, value);
         }
+
+        public void AddForce(Vec2 force)
+        {
+            InternalCalls.Rigidbody2DComponent_AddForce(Entity.ID, ref force);
+        }
+        public void AddLinearImpulse(Vec2 impulse)
+        {
+            InternalCalls.Rigidbody2DComponent_AddLinearImpulse(Entity.ID, ref impulse);
+        }
+        public void SetPosition(Vec2 pos)
+        {
+            InternalCalls.Rigidbody2DComponent_SetPosition(Entity.ID, ref pos);
+        }
     }
 }

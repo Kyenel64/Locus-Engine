@@ -38,6 +38,13 @@ namespace Locus
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static void Entity_SetEnabled(ulong id, bool newEnabled);
 
+        // --- Vec2 ---
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static float Vec2_Distance(Vec2 v1, Vec2 v2);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static float Vec2_Length(Vec2 vec);
+
         // --- Vec3 ---
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static void Vec3_Cross(Vec3 v1, Vec3 v2, out Vec3 output);
@@ -151,6 +158,15 @@ namespace Locus
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static void Rigidbody2DComponent_SetFixedRotation(ulong id, bool newFixedRotation);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Rigidbody2DComponent_AddForce(ulong id, ref Vec2 force);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Rigidbody2DComponent_AddLinearImpulse(ulong id, ref Vec2 impulse);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Rigidbody2DComponent_SetPosition(ulong id, ref Vec2 pos);
 
         // --- Input ---
         [MethodImplAttribute(MethodImplOptions.InternalCall)]

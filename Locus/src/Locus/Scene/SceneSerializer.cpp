@@ -535,24 +535,49 @@ namespace Locus
 							ScriptClassFieldInstance& scriptField = fieldInstances[fieldName];
 							scriptField.Field = field;
 
-							switch (field.Type)
+							if (fields[fieldName])
 							{
-							case FieldType::SystemSingle: scriptField.SetValue<float>(fields[fieldName].as<float>()); break;
-							case FieldType::SystemDouble: scriptField.SetValue<double>(fields[fieldName].as<double>()); break;
-							case FieldType::SystemShort: scriptField.SetValue<int16_t>(fields[fieldName].as<int16_t>()); break;
-							case FieldType::SystemInt: scriptField.SetValue<int>(fields[fieldName].as<int>()); break;
-							case FieldType::SystemLong: scriptField.SetValue<int64_t>(fields[fieldName].as<int64_t>()); break;
-							case FieldType::SystemUShort: scriptField.SetValue<uint16_t>(fields[fieldName].as<uint16_t>()); break;
-							case FieldType::SystemUInt: scriptField.SetValue<uint32_t>(fields[fieldName].as<uint32_t>()); break;
-							case FieldType::SystemULong: scriptField.SetValue<uint64_t>(fields[fieldName].as<uint64_t>()); break;
-							case FieldType::SystemBoolean: scriptField.SetValue<bool>(fields[fieldName].as<bool>()); break;
-							case FieldType::SystemChar: scriptField.SetValue<char>(fields[fieldName].as<char>()); break;
-							//case FieldType::SystemString: scriptField.SetValue<std::string>(fields[fieldName].as<std::string>()); break;
+								switch (field.Type)
+								{
+								case FieldType::SystemSingle:  scriptField.SetValue<float>(fields[fieldName].as<float>());         break;
+								case FieldType::SystemDouble:  scriptField.SetValue<double>(fields[fieldName].as<double>());       break;
+								case FieldType::SystemShort:   scriptField.SetValue<int16_t>(fields[fieldName].as<int16_t>());     break;
+								case FieldType::SystemInt:     scriptField.SetValue<int>(fields[fieldName].as<int>());             break;
+								case FieldType::SystemLong:    scriptField.SetValue<int64_t>(fields[fieldName].as<int64_t>());     break;
+								case FieldType::SystemUShort:  scriptField.SetValue<uint16_t>(fields[fieldName].as<uint16_t>());   break;
+								case FieldType::SystemUInt:    scriptField.SetValue<uint32_t>(fields[fieldName].as<uint32_t>());   break;
+								case FieldType::SystemULong:   scriptField.SetValue<uint64_t>(fields[fieldName].as<uint64_t>());   break;
+								case FieldType::SystemBoolean: scriptField.SetValue<bool>(fields[fieldName].as<bool>());           break;
+								case FieldType::SystemChar:    scriptField.SetValue<char>(fields[fieldName].as<char>());           break;
+								//case FieldType::SystemString: scriptField.SetValue<std::string>(fields[fieldName].as<std::string>()); break;
 
-							case FieldType::LocusVec2: scriptField.SetValue<glm::vec2>(fields[fieldName].as<glm::vec2>()); break;
-							case FieldType::LocusVec3: scriptField.SetValue<glm::vec3>(fields[fieldName].as<glm::vec3>()); break;
-							//case FieldType::LocusVec4: scriptField.SetValue<glm::vec4>(fields[fieldName].as<glm::vec4>()); break;
-							case FieldType::LocusEntity: scriptField.SetValue<uint64_t>(fields[fieldName].as<uint64_t>()); break;
+								case FieldType::LocusVec2:     scriptField.SetValue<glm::vec2>(fields[fieldName].as<glm::vec2>()); break;
+								case FieldType::LocusVec3:     scriptField.SetValue<glm::vec3>(fields[fieldName].as<glm::vec3>()); break;
+								//case FieldType::LocusVec4: scriptField.SetValue<glm::vec4>(fields[fieldName].as<glm::vec4>());     break;
+								case FieldType::LocusEntity:   scriptField.SetValue<uint64_t>(fields[fieldName].as<uint64_t>());   break;
+								}
+							}
+							else
+							{
+								switch (field.Type)
+								{
+								case FieldType::SystemSingle:  scriptField.SetValue<float>(scriptClass->GetFieldValue<float>(fieldName));         break;
+								case FieldType::SystemDouble:  scriptField.SetValue<double>(scriptClass->GetFieldValue<double>(fieldName));       break;
+								case FieldType::SystemShort:   scriptField.SetValue<int16_t>(scriptClass->GetFieldValue<int16_t>(fieldName));     break;
+								case FieldType::SystemInt:     scriptField.SetValue<int>(scriptClass->GetFieldValue<int>(fieldName));             break;
+								case FieldType::SystemLong:    scriptField.SetValue<int64_t>(scriptClass->GetFieldValue<int64_t>(fieldName));     break;
+								case FieldType::SystemUShort:  scriptField.SetValue<uint16_t>(scriptClass->GetFieldValue<uint16_t>(fieldName));   break;
+								case FieldType::SystemUInt:    scriptField.SetValue<uint32_t>(scriptClass->GetFieldValue<uint32_t>(fieldName));   break;
+								case FieldType::SystemULong:   scriptField.SetValue<uint64_t>(scriptClass->GetFieldValue<uint64_t>(fieldName));   break;
+								case FieldType::SystemBoolean: scriptField.SetValue<bool>(scriptClass->GetFieldValue<bool>(fieldName));           break;
+								case FieldType::SystemChar:    scriptField.SetValue<char>(scriptClass->GetFieldValue<char>(fieldName));           break;
+									//case FieldType::SystemString: scriptField.SetValue<std::string>(fields[fieldName].as<std::string>()); break;
+
+								case FieldType::LocusVec2:     scriptField.SetValue<glm::vec2>(scriptClass->GetFieldValue<glm::vec2>(fieldName)); break;
+								case FieldType::LocusVec3:     scriptField.SetValue<glm::vec3>(scriptClass->GetFieldValue<glm::vec3>(fieldName)); break;
+									//case FieldType::LocusVec4: scriptField.SetValue<glm::vec4>(fields[fieldName].as<glm::vec4>()); break;
+								case FieldType::LocusEntity:   scriptField.SetValue<uint64_t>(scriptClass->GetFieldValue<uint64_t>(fieldName));   break;
+								}
 							}
 						}
 					}

@@ -191,6 +191,24 @@ namespace Locus
             get => InternalCalls.Rigidbody2DComponent_GetFixedRotation(Entity.ID);
             set => InternalCalls.Rigidbody2DComponent_SetFixedRotation(Entity.ID, value);
         }
+        public Vec2 Position
+        {
+            get
+            {
+                InternalCalls.Rigidbody2DComponent_GetPosition(Entity.ID, out Vec2 result);
+                return result;
+            }
+            set => InternalCalls.Rigidbody2DComponent_SetPosition(Entity.ID, ref value);
+        }
+        public Vec2 Velocity
+        {
+            get
+            {
+                InternalCalls.Rigidbody2DComponent_GetVelocity(Entity.ID, out Vec2 result);
+                return result;
+            }
+            set => InternalCalls.Rigidbody2DComponent_SetVelocity(Entity.ID, ref value);
+        }
 
         public void AddForce(Vec2 force)
         {
@@ -200,9 +218,14 @@ namespace Locus
         {
             InternalCalls.Rigidbody2DComponent_AddLinearImpulse(Entity.ID, ref impulse);
         }
-        public void SetPosition(Vec2 pos)
-        {
-            InternalCalls.Rigidbody2DComponent_SetPosition(Entity.ID, ref pos);
-        }
     }
+
+
+
+    // --- CircleCollider -----------------------------------------------------
+    public class CircleCollider2DComponent : Component
+    {
+
+    }
+
 }

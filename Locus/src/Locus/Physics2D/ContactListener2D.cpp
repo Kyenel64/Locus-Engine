@@ -19,11 +19,17 @@ namespace Locus
 
 		// Push pair of collided entities to stack if entity has a script component.
 		// TODO: Also check if OnCollisionBegin() is defined.
-		if (aEntity.HasComponent<ScriptComponent>())
-			m_BeginContacts.push(std::make_pair(aEntity, bEntity));
+		if (aEntity.IsValid()) // Checks for valid as entities can be destroyed on contact.
+		{
+			if (aEntity.HasComponent<ScriptComponent>())
+				m_BeginContacts.push(std::make_pair(aEntity, bEntity));
+		}
 
-		if (bEntity.HasComponent<ScriptComponent>())
-			m_BeginContacts.push(std::make_pair(bEntity, aEntity));
+		if (bEntity.IsValid())
+		{
+			if (bEntity.HasComponent<ScriptComponent>())
+				m_BeginContacts.push(std::make_pair(bEntity, aEntity));
+		}
 	}
 
 	void ContactListener2D::EndContact(b2Contact* contact)
@@ -36,11 +42,18 @@ namespace Locus
 
 		// Push pair of collided entities to stack if entity has a script component.
 		// TODO: Also check if OnCollisionEnd() is defined.
-		if (aEntity.HasComponent<ScriptComponent>())
-			m_EndContacts.push(std::make_pair(aEntity, bEntity));
-
-		if (bEntity.HasComponent<ScriptComponent>())
-			m_EndContacts.push(std::make_pair(bEntity, aEntity));
+		if (aEntity.IsValid())
+		{
+			if (aEntity.HasComponent<ScriptComponent>())
+				m_EndContacts.push(std::make_pair(aEntity, bEntity));
+		}
+		
+		if (bEntity.IsValid())
+		{
+			if (bEntity.HasComponent<ScriptComponent>())
+				m_EndContacts.push(std::make_pair(bEntity, aEntity));
+		}
+		
 	}
 
 	void ContactListener2D::Execute()

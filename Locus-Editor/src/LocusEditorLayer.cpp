@@ -545,6 +545,7 @@ namespace Locus
 		m_ActiveScene = Scene::Copy(m_EditorScene);
 		m_ActiveScene->OnRuntimeStart();
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		ImGui::SetWindowFocus("Viewport");
 	}
 
 	void LocusEditorLayer::OnPhysicsPlay()
@@ -553,6 +554,7 @@ namespace Locus
 		m_ActiveScene = Scene::Copy(m_EditorScene);
 		m_ActiveScene->OnPhysicsStart();
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		ImGui::SetWindowFocus("Viewport");
 	}
 
 	void LocusEditorLayer::OnSceneStop()
@@ -1041,7 +1043,7 @@ namespace Locus
 		ImGui::Text("FPS: %f", stats.FramesPerSecond);
 
 		std::string name = "None";
-		if (m_HoveredEntity)
+		if (m_HoveredEntity.IsValid())
 			if (m_HoveredEntity.HasComponent<IDComponent>())
 				name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
 		ImGui::Text("Hovered Entity: %s", name.c_str());

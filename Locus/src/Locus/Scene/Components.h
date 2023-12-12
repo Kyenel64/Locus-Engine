@@ -42,6 +42,7 @@ namespace Locus
 	struct TagComponent
 	{
 		std::string Tag;
+		std::string Group;
 		bool Enabled = true;
 		uint32_t HierarchyPos; // TODO: Store elsewhere as this is an editor related property.
 

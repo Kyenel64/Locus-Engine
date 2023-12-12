@@ -4,6 +4,7 @@ Entities:
   - Entity: 4172512803253741771
     TagComponent:
       Tag: Earth
+      Group: Default
       Enabled: true
       HierarchyPos: 3
     TransformComponent:
@@ -20,6 +21,7 @@ Entities:
   - Entity: 2433011861349912028
     TagComponent:
       Tag: Camera
+      Group: Default
       Enabled: true
       HierarchyPos: 1
     TransformComponent:
@@ -52,6 +54,7 @@ Entities:
   - Entity: 785250229868369602
     TagComponent:
       Tag: Moon
+      Group: Default
       Enabled: true
       HierarchyPos: 2
     TransformComponent:
@@ -74,6 +77,7 @@ Entities:
   - Entity: 5979509514547691761
     TagComponent:
       Tag: Mesh
+      Group: Default
       Enabled: false
       HierarchyPos: 0
     TransformComponent:

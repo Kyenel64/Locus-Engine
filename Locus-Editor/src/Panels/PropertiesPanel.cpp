@@ -214,8 +214,8 @@ namespace Locus
 
 			ImGui::SameLine();
 
-			// Groups (Not yet implemented). TODO: replace this with dropdown
-			std::string group = "Entity";
+			// Groups TODO: replace this with dropdown
+			auto& group = entity.GetComponent<TagComponent>().Group;
 			Widgets::DrawStringControl("Group", group, "Default", 0);
 			ImGui::PopStyleVar();
 		}

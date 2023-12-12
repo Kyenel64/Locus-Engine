@@ -4,6 +4,7 @@ Entities:
   - Entity: 3484551588160030753
     TagComponent:
       Tag: Red Ball
+      Group: Default
       Enabled: true
       HierarchyPos: 4
     TransformComponent:
@@ -35,6 +36,7 @@ Entities:
   - Entity: 1277490942235191662
     TagComponent:
       Tag: Floor
+      Group: Default
       Enabled: true
       HierarchyPos: 2
     TransformComponent:
@@ -66,6 +68,7 @@ Entities:
   - Entity: 4036142760052745292
     TagComponent:
       Tag: Camera
+      Group: Default
       Enabled: true
       HierarchyPos: 1
     TransformComponent:
@@ -90,6 +93,7 @@ Entities:
   - Entity: 14827178768186691554
     TagComponent:
       Tag: Floor.001
+      Group: Default
       Enabled: true
       HierarchyPos: 3
     TransformComponent:
@@ -121,6 +125,7 @@ Entities:
   - Entity: 9956147653151618360
     TagComponent:
       Tag: Floor.002
+      Group: Default
       Enabled: true
       HierarchyPos: 5
     TransformComponent:
@@ -152,6 +157,7 @@ Entities:
   - Entity: 7234072113850555950
     TagComponent:
       Tag: Yellow Ball
+      Group: Default
       Enabled: true
       HierarchyPos: 6
     TransformComponent:

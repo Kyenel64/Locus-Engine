@@ -1,9 +1,23 @@
 Scene: Untitled
-RootEntityCount: 2
+RootEntityCount: 3
 Entities:
+  - Entity: 3862463360483777282
+    TagComponent:
+      Tag: Empty Entity
+      Group: Default
+      Enabled: true
+      HierarchyPos: 2
+    TransformComponent:
+      Self: 3862463360483777282
+      Parent: 0
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
   - Entity: 11423145292378668377
     TagComponent:
       Tag: Empty Entity
+      Group: Default
       Enabled: true
       HierarchyPos: 1
     TransformComponent:

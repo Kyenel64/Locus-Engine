@@ -27,10 +27,19 @@ namespace Locus
         internal extern static ulong Entity_Find(string tag);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Entity_Destroy(ulong id);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static string Entity_GetTag(ulong id);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static void Entity_SetTag(ulong id, string newTag);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static string Entity_GetGroup(ulong id);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Entity_SetGroup(ulong id, string newTag);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static bool Entity_GetEnabled(ulong id);
@@ -166,7 +175,16 @@ namespace Locus
         internal extern static void Rigidbody2DComponent_AddLinearImpulse(ulong id, ref Vec2 impulse);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        internal extern static void Rigidbody2DComponent_SetPosition(ulong id, ref Vec2 pos);
+        internal extern static void Rigidbody2DComponent_GetPosition(ulong id, out Vec2 output);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Rigidbody2DComponent_SetPosition(ulong id, ref Vec2 newPos);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Rigidbody2DComponent_GetVelocity(ulong id, out Vec2 output);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Rigidbody2DComponent_SetVelocity(ulong id, ref Vec2 newVelocity);
 
         // --- Input ---
         [MethodImplAttribute(MethodImplOptions.InternalCall)]

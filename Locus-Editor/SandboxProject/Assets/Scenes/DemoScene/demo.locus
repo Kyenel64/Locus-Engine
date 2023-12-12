@@ -4,6 +4,7 @@ Entities:
   - Entity: 791020655856720599
     TagComponent:
       Tag: Grass.001
+      Group: Default
       Enabled: true
       HierarchyPos: 57
     TransformComponent:
@@ -20,6 +21,7 @@ Entities:
   - Entity: 2938602930654102488
     TagComponent:
       Tag: Grass
+      Group: Default
       Enabled: true
       HierarchyPos: 31
     TransformComponent:
@@ -36,6 +38,7 @@ Entities:
   - Entity: 2285627009516106995
     TagComponent:
       Tag: Lamp
+      Group: Default
       Enabled: true
       HierarchyPos: 32
     TransformComponent:
@@ -52,6 +55,7 @@ Entities:
   - Entity: 8733233626177114322
     TagComponent:
       Tag: Character
+      Group: Default
       Enabled: true
       HierarchyPos: 6
     TransformComponent:
@@ -72,6 +76,7 @@ Entities:
   - Entity: 7898210685456294305
     TagComponent:
       Tag: Dirt.002
+      Group: Default
       Enabled: true
       HierarchyPos: 33
     TransformComponent:
@@ -88,6 +93,7 @@ Entities:
   - Entity: 5260897885569436224
     TagComponent:
       Tag: Dirt.003
+      Group: Default
       Enabled: true
       HierarchyPos: 34
     TransformComponent:
@@ -104,6 +110,7 @@ Entities:
   - Entity: 6089115443741301896
     TagComponent:
       Tag: Dirt.004
+      Group: Default
       Enabled: true
       HierarchyPos: 54
     TransformComponent:
@@ -120,6 +127,7 @@ Entities:
   - Entity: 2860260160131763201
     TagComponent:
       Tag: Dirt.005
+      Group: Default
       Enabled: true
       HierarchyPos: 56
     TransformComponent:
@@ -136,6 +144,7 @@ Entities:
   - Entity: 14987889728472748775
     TagComponent:
       Tag: Dirt.006
+      Group: Default
       Enabled: true
       HierarchyPos: 37
     TransformComponent:
@@ -152,6 +161,7 @@ Entities:
   - Entity: 13109117658901831009
     TagComponent:
       Tag: Dirt.007
+      Group: Default
       Enabled: true
       HierarchyPos: 38
     TransformComponent:
@@ -168,6 +178,7 @@ Entities:
   - Entity: 3335713461062770775
     TagComponent:
       Tag: Dirt.008
+      Group: Default
       Enabled: true
       HierarchyPos: 39
     TransformComponent:
@@ -184,6 +195,7 @@ Entities:
   - Entity: 1496734534705269365
     TagComponent:
       Tag: Dirt.009
+      Group: Default
       Enabled: true
       HierarchyPos: 40
     TransformComponent:
@@ -200,6 +212,7 @@ Entities:
   - Entity: 2372640793205512140
     TagComponent:
       Tag: Dirt.010
+      Group: Default
       Enabled: true
       HierarchyPos: 41
     TransformComponent:
@@ -216,6 +229,7 @@ Entities:
   - Entity: 4275566916494118756
     TagComponent:
       Tag: Dirt.011
+      Group: Default
       Enabled: true
       HierarchyPos: 42
     TransformComponent:
@@ -232,6 +246,7 @@ Entities:
   - Entity: 16692347609296177539
     TagComponent:
       Tag: Dirt.012
+      Group: Default
       Enabled: true
       HierarchyPos: 43
     TransformComponent:
@@ -248,6 +263,7 @@ Entities:
   - Entity: 13872733276515736866
     TagComponent:
       Tag: Dirt.013
+      Group: Default
       Enabled: true
       HierarchyPos: 44
     TransformComponent:
@@ -264,6 +280,7 @@ Entities:
   - Entity: 8697849670712376467
     TagComponent:
       Tag: Dirt.014
+      Group: Default
       Enabled: true
       HierarchyPos: 45
     TransformComponent:
@@ -280,6 +297,7 @@ Entities:
   - Entity: 11812167722283255708
     TagComponent:
       Tag: Dirt.015
+      Group: Default
       Enabled: true
       HierarchyPos: 46
     TransformComponent:
@@ -296,6 +314,7 @@ Entities:
   - Entity: 13642109333861241986
     TagComponent:
       Tag: Dirt.016
+      Group: Default
       Enabled: true
       HierarchyPos: 47
     TransformComponent:
@@ -312,6 +331,7 @@ Entities:
   - Entity: 4865259481176645135
     TagComponent:
       Tag: Dirt.017
+      Group: Default
       Enabled: true
       HierarchyPos: 48
     TransformComponent:
@@ -328,6 +348,7 @@ Entities:
   - Entity: 1338254718979454732
     TagComponent:
       Tag: Dirt.019
+      Group: Default
       Enabled: true
       HierarchyPos: 50
     TransformComponent:
@@ -344,6 +365,7 @@ Entities:
   - Entity: 13510673666047715203
     TagComponent:
       Tag: Dirt.018
+      Group: Default
       Enabled: true
       HierarchyPos: 49
     TransformComponent:
@@ -360,6 +382,7 @@ Entities:
   - Entity: 12830703339808458864
     TagComponent:
       Tag: Dirt.001
+      Group: Default
       Enabled: true
       HierarchyPos: 35
     TransformComponent:
@@ -376,6 +399,7 @@ Entities:
   - Entity: 8386137137184613872
     TagComponent:
       Tag: Dirt.021
+      Group: Default
       Enabled: true
       HierarchyPos: 52
     TransformComponent:
@@ -392,6 +416,7 @@ Entities:
   - Entity: 13057731139975701677
     TagComponent:
       Tag: Dirt.022
+      Group: Default
       Enabled: true
       HierarchyPos: 53
     TransformComponent:
@@ -408,6 +433,7 @@ Entities:
   - Entity: 11403333998552454143
     TagComponent:
       Tag: Dirt.020
+      Group: Default
       Enabled: true
       HierarchyPos: 51
     TransformComponent:
@@ -424,6 +450,7 @@ Entities:
   - Entity: 15211266627994513041
     TagComponent:
       Tag: Background3
+      Group: Default
       Enabled: true
       HierarchyPos: 4
     TransformComponent:
@@ -440,6 +467,7 @@ Entities:
   - Entity: 15191807728067282489
     TagComponent:
       Tag: Background2
+      Group: Default
       Enabled: true
       HierarchyPos: 3
     TransformComponent:
@@ -456,6 +484,7 @@ Entities:
   - Entity: 10635129282112435751
     TagComponent:
       Tag: Background1
+      Group: Default
       Enabled: true
       HierarchyPos: 2
     TransformComponent:
@@ -472,6 +501,7 @@ Entities:
   - Entity: 7178824653203601064
     TagComponent:
       Tag: Main Camera
+      Group: Default
       Enabled: true
       HierarchyPos: 1
     TransformComponent:
@@ -496,6 +526,7 @@ Entities:
   - Entity: 5448437308978780032
     TagComponent:
       Tag: Dirt
+      Group: Default
       Enabled: true
       HierarchyPos: 36
     TransformComponent:

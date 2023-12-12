@@ -23,6 +23,11 @@ namespace Locus
             get => InternalCalls.Entity_GetTag(ID);
             set => InternalCalls.Entity_SetTag(ID, value);
         }
+        public string Group
+        {
+            get => InternalCalls.Entity_GetGroup(ID);
+            set => InternalCalls.Entity_SetGroup(ID, value);
+        }
         /// <summary>
         /// The enabled status of the entity.
         /// </summary>
@@ -93,6 +98,10 @@ namespace Locus
             Entity entity = new Entity(InternalCalls.CreateEntity());
             entity.Tag = tag;
             return entity;
+        }
+        public static void Destroy(Entity entity)
+        {
+            InternalCalls.Entity_Destroy(entity.ID);
         }
         /// <summary>
         /// Searches for an entity with the given tag.

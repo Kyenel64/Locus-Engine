@@ -4,6 +4,7 @@ Entities:
   - Entity: 3348179176376308620
     TagComponent:
       Tag: Other Entity
+      Group: Default
       Enabled: true
       HierarchyPos: 2
     TransformComponent:
@@ -16,6 +17,7 @@ Entities:
   - Entity: 7352724189592751854
     TagComponent:
       Tag: Empty Entity
+      Group: Default
       Enabled: true
       HierarchyPos: 1
     TransformComponent:

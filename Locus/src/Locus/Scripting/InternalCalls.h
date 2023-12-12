@@ -1,5 +1,8 @@
 #pragma once
 
+#include <box2d/box2d.h>
+
+#include "Locus/Core/Timer.h"
 #include "Locus/Core/Input.h"
 #include "Locus/Core/KeyCodes.h"
 #include "Locus/Physics2D/PhysicsUtils.h"
@@ -55,6 +58,8 @@ namespace Locus
 			{
 				MonoType* type = mono_reflection_type_get_type(componentType);
 				s_AddComponentFunctions[type](entity);
+				Scene* scene = ScriptEngine::GetScene();
+				scene->CreatePhysicsData(entity);
 			}
 			else
 			{
@@ -85,6 +90,36 @@ namespace Locus
 			{
 				std::string newTagStr = mono_string_to_utf8(newTag);
 				entity.GetComponent<TagComponent>().Tag = newTagStr;
+			}
+			else
+			{
+				LOCUS_SCRIPT_CRITICAL("Could not find entity!");
+			}
+		}
+
+		// Group
+		static MonoString* Entity_GetGroup(UUID entityID)
+		{
+			Entity entity = GetEntity(entityID);
+			if (entity.IsValid())
+			{
+				std::string group;
+				group = entity.GetComponent<TagComponent>().Group;
+				return mono_string_new(ScriptEngine::GetAppDomain(), group.c_str());
+			}
+			else
+			{
+				LOCUS_SCRIPT_CRITICAL("Could not find entity!");
+				return nullptr;
+			}
+		}
+		static void Entity_SetGroup(UUID entityID, MonoString* newGroup)
+		{
+			Entity entity = GetEntity(entityID);
+			if (entity.IsValid())
+			{
+				std::string newGroupStr = mono_string_to_utf8(newGroup);
+				entity.GetComponent<TagComponent>().Group = newGroupStr;
 			}
 			else
 			{
@@ -131,6 +166,12 @@ namespace Locus
 			LOCUS_SCRIPT_CRITICAL("Could not find entity with tag: {0}", std::string(newTagStr));
 			mono_free(newTagStr);
 			return 0;
+		}
+
+		static void Entity_Destroy(UUID entityID)
+		{
+			Scene* scene = ScriptEngine::GetScene();
+			scene->DestroyEntity(scene->GetEntityByUUID(entityID));
 		}
 
 		// --- Vec2 ---
@@ -390,6 +431,40 @@ namespace Locus
 			runtimeBody->SetGravityScale(newFixedRotation);
 		}
 
+		// Position
+		static void Rigidbody2DComponent_GetPosition(UUID entityID, glm::vec2* output)
+		{
+			Entity entity = GetEntity(entityID);
+			Rigidbody2DComponent& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+			b2Body* runtimeBody = (b2Body*)rb2d.RuntimeBody;
+			glm::vec2 position = { runtimeBody->GetPosition().x, runtimeBody->GetPosition().y };
+			*output = position;
+		}
+		static void Rigidbody2DComponent_SetPosition(UUID entityID, glm::vec2* newPos)
+		{
+			Entity entity = GetEntity(entityID);
+			Rigidbody2DComponent& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+			b2Body* runtimeBody = (b2Body*)rb2d.RuntimeBody;
+			runtimeBody->SetTransform({ newPos->x, newPos->y }, runtimeBody->GetAngle());
+		}
+
+		// Velocity
+		static void Rigidbody2DComponent_GetVelocity(UUID entityID, glm::vec2* output)
+		{
+			Entity entity = GetEntity(entityID);
+			Rigidbody2DComponent& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+			b2Body* runtimeBody = (b2Body*)rb2d.RuntimeBody;
+			glm::vec2 velocity = { runtimeBody->GetLinearVelocity().x, runtimeBody->GetLinearVelocity().y };
+			*output = velocity;
+		}
+		static void Rigidbody2DComponent_SetVelocity(UUID entityID, glm::vec2* newVelocity)
+		{
+			Entity entity = GetEntity(entityID);
+			Rigidbody2DComponent& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+			b2Body* runtimeBody = (b2Body*)rb2d.RuntimeBody;
+			runtimeBody->SetLinearVelocity({ newVelocity->x, newVelocity->y });
+		}
+
 		// Add Force
 		static void Rigidbody2DComponent_AddForce(UUID entityID, glm::vec2* force)
 		{
@@ -406,15 +481,6 @@ namespace Locus
 			Rigidbody2DComponent& rb2d = entity.GetComponent<Rigidbody2DComponent>();
 			b2Body* runtimeBody = (b2Body*)rb2d.RuntimeBody;
 			runtimeBody->ApplyLinearImpulse({ impulse->x, impulse->y }, runtimeBody->GetWorldCenter(), true);
-		}
-
-		// Set Position
-		static void Rigidbody2DComponent_SetPosition(UUID entityID, glm::vec2* pos)
-		{
-			Entity entity = GetEntity(entityID);
-			Rigidbody2DComponent& rb2d = entity.GetComponent<Rigidbody2DComponent>();
-			b2Body* runtimeBody = (b2Body*)rb2d.RuntimeBody;
-			runtimeBody->SetTransform({ pos->x, pos->y }, runtimeBody->GetAngle());
 		}
 
 		// --- Input ---

@@ -168,6 +168,7 @@ namespace Locus
 			out << YAML::Key << "TagComponent";
 			out << YAML::BeginMap; // Tag Component
 			out << YAML::Key << "Tag" << YAML::Value << tag.Tag;
+			out << YAML::Key << "Group" << YAML::Value << tag.Group;
 			out << YAML::Key << "Enabled" << YAML::Value << tag.Enabled;
 			out << YAML::Key << "HierarchyPos" << YAML::Value << tag.HierarchyPos;
 			out << YAML::EndMap; // End Tag Component
@@ -419,6 +420,7 @@ namespace Locus
 				Entity deserializedEntity = m_Scene->CreateEntityWithUUID(uuid, name, enabled);
 				m_Scene->m_RootEntityCount--;
 				deserializedEntity.GetComponent<TagComponent>().HierarchyPos = tagComponent["HierarchyPos"].as<uint32_t>();
+				deserializedEntity.GetComponent<TagComponent>().Group = tagComponent["Group"].as<std::string>();
 
 				// --- Transform Component ---
 				auto transformComponent = entity["TransformComponent"];

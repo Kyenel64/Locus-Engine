@@ -29,7 +29,7 @@ namespace Sandbox
             }
 
             if (Input.IsKeyPressed(KeyCode.T))
-                rb2d.SetPosition(new Vec2(0, 1));
+                rb2d.Position = new Vec2(0, 3);
         }
 
         public override void OnCollisionBegin(Entity entity)

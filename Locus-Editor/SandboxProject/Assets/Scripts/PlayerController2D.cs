@@ -18,9 +18,9 @@ namespace Sandbox
         void OnUpdate(float deltaTime)
         {
             // Horizontal movement
-            if (Input.IsKeyPressed(KeyCode.A))
+            if (Input.IsKeyHeld(KeyCode.A))
                 rb2d.Velocity = new Vec2(-moveSpeed, rb2d.Velocity.y);
-            else if (Input.IsKeyPressed(KeyCode.D))
+            else if (Input.IsKeyHeld(KeyCode.D))
                 rb2d.Velocity = new Vec2(moveSpeed, rb2d.Velocity.y);
 
             // Jump
@@ -39,14 +39,6 @@ namespace Sandbox
             // Teleport back to start
             if (Input.IsKeyPressed(KeyCode.T))
                 rb2d.Position = new Vec2(0, 3);
-
-            Entity projectile = Find("Projectile");
-            if (projectile.ID != 0)
-            {
-                if (projectile.Transform.Position.x >= 100.0f || projectile.Transform.Position.x <= -100.0f
-                    || projectile.Transform.Position.y >= 100.0f || projectile.Transform.Position.y <= -100.0f)
-                    Destroy(projectile);
-            }
             
         }
 

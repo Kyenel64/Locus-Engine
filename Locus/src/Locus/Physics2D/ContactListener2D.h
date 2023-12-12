@@ -4,8 +4,6 @@
 //	BeginContact() and EndContact() depending on the state of collision.
 #pragma once
 
-#include <stack>
-
 #include <box2d/box2d.h>
 
 #include "Locus/Scene/Entity.h"
@@ -27,7 +25,7 @@ namespace Locus
 		// Execute collision functions.
 		void Execute();
 	private:
-		std::stack<std::pair<Entity, Entity>> m_BeginContacts;
-		std::stack<std::pair<Entity, Entity>> m_EndContacts;
+		std::queue<std::pair<Entity, Entity>> m_BeginContacts;
+		std::queue<std::pair<Entity, Entity>> m_EndContacts;
 	};
 }

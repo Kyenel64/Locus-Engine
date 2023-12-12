@@ -189,5 +189,11 @@ namespace Locus
         // --- Input ---
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static bool Input_IsKeyPressed(KeyCode key);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static bool Input_IsKeyHeld(KeyCode key);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static bool Input_IsKeyReleased(KeyCode key);
     }
 }

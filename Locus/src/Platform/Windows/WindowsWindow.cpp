@@ -3,6 +3,7 @@
 
 #include <stb_image.h>
 
+#include "Locus/Core/Input.h"
 #include "Locus/Events/ApplicationEvent.h"
 #include "Locus/Events/MouseEvent.h"
 #include "Locus/Events/KeyEvent.h"
@@ -104,18 +105,14 @@ namespace Locus
 				{
 					KeyPressedEvent event(key, 0);
 					data.EventCallback(event);
+					Input::SetKeyState(key, KeyState::Pressed);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
 					KeyReleasedEvent event(key);
 					data.EventCallback(event);
-					break;
-				}
-				case GLFW_REPEAT:
-				{
-					KeyPressedEvent event(key, 1);
-					data.EventCallback(event);
+					Input::SetKeyState(key, KeyState::Released);
 					break;
 				}
 			}

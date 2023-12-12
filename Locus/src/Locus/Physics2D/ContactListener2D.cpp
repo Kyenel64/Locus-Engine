@@ -60,8 +60,8 @@ namespace Locus
 	{
 		while (!m_BeginContacts.empty())
 		{
-			Entity aEntity = m_BeginContacts.top().first;
-			Entity bEntity = m_BeginContacts.top().second;
+			Entity aEntity = m_BeginContacts.front().first;
+			Entity bEntity = m_BeginContacts.front().second;
 			UUID aUUID = aEntity.GetUUID();
 			UUID bUUID = bEntity.GetUUID();
 			Ref<ScriptInstance> aInstance = ScriptEngine::GetScriptInstance(aUUID);
@@ -73,8 +73,8 @@ namespace Locus
 
 		while (!m_EndContacts.empty())
 		{
-			Entity aEntity = m_EndContacts.top().first;
-			Entity bEntity = m_EndContacts.top().second;
+			Entity aEntity = m_EndContacts.front().first;
+			Entity bEntity = m_EndContacts.front().second;
 			UUID aUUID = aEntity.GetUUID();
 			UUID bUUID = bEntity.GetUUID();
 			Ref<ScriptInstance> aInstance = ScriptEngine::GetScriptInstance(aUUID);

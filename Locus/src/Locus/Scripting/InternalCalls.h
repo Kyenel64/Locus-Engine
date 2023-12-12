@@ -488,5 +488,15 @@ namespace Locus
 		{
 			return Input::IsKeyPressed(key);
 		}
+
+		static bool Input_IsKeyHeld(uint16_t key)
+		{
+			return Input::IsKeyHeld(key);
+		}
+
+		static bool Input_IsKeyReleased(uint16_t key)
+		{
+			return Input::IsKeyReleased(key);
+		}
 	}
 }

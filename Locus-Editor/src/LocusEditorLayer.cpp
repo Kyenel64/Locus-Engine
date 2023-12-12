@@ -171,6 +171,8 @@ namespace Locus
 
 		m_Framebuffer->Unbind();
 
+		Input::ProcessKeys();
+
 		Renderer2D::StatsEndFrame();
 	}
 

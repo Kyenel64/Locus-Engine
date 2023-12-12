@@ -44,7 +44,7 @@ namespace Locus
 
 		// Create new box2d physics data for newly added physics components.
 		void CreatePhysicsData(Entity entity);
-		// Update physics data when modified.
+		// Update physics data during runtime.
 		void UpdatePhysicsData(Entity entity);
 
 		void OnViewportResize(uint32_t width, uint32_t height);

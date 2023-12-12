@@ -13,5 +13,13 @@ namespace Locus
         {
             return InternalCalls.Input_IsKeyPressed(key);
         }
+        public static bool IsKeyHeld(KeyCode key)
+        {
+            return InternalCalls.Input_IsKeyHeld(key);
+        }
+        public static bool IsKeyReleased(KeyCode key)
+        {
+            return InternalCalls.Input_IsKeyReleased(key);
+        }
     }
 }

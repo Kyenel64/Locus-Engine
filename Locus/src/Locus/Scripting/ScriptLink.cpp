@@ -92,6 +92,8 @@ namespace Locus
 
 		// Input
 		LINK_INTERNAL_CALL(Input_IsKeyPressed);
+		LINK_INTERNAL_CALL(Input_IsKeyHeld);
+		LINK_INTERNAL_CALL(Input_IsKeyReleased);
 	}
 
 	template<typename T>

@@ -16,6 +16,8 @@
 #include <array>
 #include <unordered_map>
 #include <unordered_set>
+#include <stack>
+#include <queue>
 
 #include "Locus/Core/Core.h"
 #include "Locus/Core/Log.h"

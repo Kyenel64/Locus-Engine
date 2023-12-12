@@ -5,6 +5,14 @@
 namespace Locus
 {
 	using KeyCode = uint16_t;
+
+	enum class KeyState
+	{
+		None = -1,
+		Pressed,
+		Repeat,
+		Released
+	};
 	
 	namespace Key
 	{

@@ -64,11 +64,14 @@ namespace Locus
 		// Overlay
 		void OnRenderOverlay();
 		void DrawCollisionMesh();
+		// Draws to a framebuffer. Rendering is separate.
+		void DrawActiveCameraView();
 
 	private:
 		glm::vec2 m_WindowSize;
 		bool m_IsSaved = true;
 		bool m_OpenSavePopup = false;
+		bool m_BlockEditorKeyInput = false;
 
 		// Scene
 		std::string m_SavePath;
@@ -98,6 +101,8 @@ namespace Locus
 		glm::vec4 m_CollisionMeshColor;
 		glm::vec4 m_FocusOutlineColor;
 		bool m_ShowAllCollisionMesh = false;
+		Ref<Framebuffer> m_ActiveCameraFramebuffer;
+		glm::vec2 m_ActiveCameraViewportSize;
 
 		// Entity
 		Entity m_HoveredEntity;

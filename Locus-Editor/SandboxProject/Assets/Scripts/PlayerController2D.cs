@@ -10,6 +10,8 @@ namespace Sandbox
         public float moveSpeed = 5.0f;
         public float jumpSpeed = 4.0f;
         private bool canJump = false;
+        public float timer = 0.0f;
+
         void OnCreate()
         {
             rb2d = GetComponent<Rigidbody2DComponent>();
@@ -17,6 +19,7 @@ namespace Sandbox
 
         void OnUpdate(float deltaTime)
         {
+            timer += deltaTime;
             // Horizontal movement
             if (Input.IsKeyHeld(KeyCode.A))
                 rb2d.Velocity = new Vec2(-moveSpeed, rb2d.Velocity.y);

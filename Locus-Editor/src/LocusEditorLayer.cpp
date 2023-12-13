@@ -44,6 +44,12 @@ namespace Locus
 		framebufferSpecs.Height = 1080;
 		m_Framebuffer = Framebuffer::Create(framebufferSpecs);
 
+		FramebufferSpecification activeCameraFramebufferSpecs;
+		activeCameraFramebufferSpecs.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth };
+		activeCameraFramebufferSpecs.Width = 640;
+		activeCameraFramebufferSpecs.Height = 360;
+		m_ActiveCameraFramebuffer = Framebuffer::Create(activeCameraFramebufferSpecs);
+
 		// Scene
 		m_EditorScene = CreateRef<Scene>();
 		m_ActiveScene = m_EditorScene;
@@ -91,6 +97,7 @@ namespace Locus
 			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_ActiveCameraViewportSize = m_ViewportSize * 0.2f;
 		}
 
 		// On window resize
@@ -102,8 +109,6 @@ namespace Locus
 
 		Renderer2D::ResetStats();
 		m_Framebuffer->Bind();
-
-		// Clears
 		m_Framebuffer->ClearAttachmentInt(1, -1);
 
 		switch (m_SceneState)
@@ -147,29 +152,38 @@ namespace Locus
 		int mouseX = (int)mx;
 		int mouseY = (int)my;
 
+		// Set hovered and selected entity
 		m_HoveredEntity = {};
 		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)m_ViewportSize.x && mouseY < (int)m_ViewportSize.y)
 		{
 			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY); // TODO: This is really slow??
 			m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 		}
-
 		m_SelectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
 		if (!m_SelectedEntity.IsValid())
 			m_SelectedEntity = {};
 		m_PropertiesPanel.SetSelectedEntity(m_SelectedEntity);
 
+		// Gizmo visibility
 		if (m_SelectedEntity.IsValid())
 			m_GizmoVisible = true;
 		else
 			m_GizmoVisible = false;
-
 		if (m_GizmoType == -1)
 			m_GizmoVisible = false;
+
+		// Disable keyboard capture when running scene
+		if (m_SceneState == SceneState::Play && m_ViewportFocused)
+			m_BlockEditorKeyInput = true;
+		else
+			m_BlockEditorKeyInput = false;
 
 		OnRenderOverlay();
 
 		m_Framebuffer->Unbind();
+
+		// Make sure this is after unbinding main framebuffer as it uses a separate framebuffer.
+		DrawActiveCameraView();
 
 		Input::ProcessKeys();
 
@@ -246,8 +260,10 @@ namespace Locus
 
 	bool LocusEditorLayer::OnKeyPressed(KeyPressedEvent& e)
 	{
-		bool control = Input::IsKeyPressed(Key::LeftControl) || Input::IsKeyPressed(Key::RightControl);
-		bool shift = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
+		if (m_BlockEditorKeyInput)
+			return false;
+		bool control = Input::IsKeyHeld(Key::LeftControl) || Input::IsKeyHeld(Key::RightControl);
+		bool shift = Input::IsKeyHeld(Key::LeftShift) || Input::IsKeyHeld(Key::RightShift);
 		switch (e.GetKeyCode())
 		{
 			// Scene
@@ -652,6 +668,27 @@ namespace Locus
 		// --- Viewport Toolbar ---
 		glm::vec2 toolbarPos = { 10.0f, 10.0f };
 		DrawViewportToolbar(toolbarPos);
+
+		// --- Active camera view ---
+		if (m_SelectedEntity.IsValid() && m_SceneState == SceneState::Edit)
+		{
+			if (m_SelectedEntity.HasComponent<CameraComponent>())
+			{
+				// Draw view of camera if a camera component is selected
+				float margin = 10.0f;
+				ImVec2 viewTopLeft = { ImGui::GetWindowPos().x + m_ViewportSize.x - m_ActiveCameraViewportSize.x - margin,
+					ImGui::GetWindowPos().y + m_ViewportSize.y - m_ActiveCameraViewportSize.y - margin + ImGui::CalcTextSize("A").y + ImGui::GetStyle().FramePadding.y * 2.0f };
+				ImVec2 viewBotRight = { viewTopLeft.x + m_ActiveCameraViewportSize.x, viewTopLeft.y + m_ActiveCameraViewportSize.y };
+				ImGui::SetCursorScreenPos(viewTopLeft);
+				ImGui::BeginChild("ActiveCameraView", { m_ActiveCameraViewportSize.x, m_ActiveCameraViewportSize.y }, true);
+
+				uint32_t texID = m_ActiveCameraFramebuffer->GetColorAttachmentRendererID();
+				draw_list->AddImageRounded((void*)(uintptr_t)texID, viewTopLeft, viewBotRight, { 0, 1 }, { 1, 0 }, 
+					ImGui::GetColorU32(LocusColors::White), ImGui::GetStyle().WindowRounding);
+
+				ImGui::EndChild();
+			}
+		}
 
 		ImGui::End();
 		ImGui::PopStyleVar();
@@ -1186,6 +1223,53 @@ namespace Locus
 
 					Renderer2D::DrawDebugCircle(transform, m_CollisionMeshColor);
 				}
+			}
+		}
+	}
+
+	void LocusEditorLayer::DrawActiveCameraView()
+	{
+		if (m_SelectedEntity.IsValid())
+		{
+			if (m_SelectedEntity.HasComponent<CameraComponent>())
+			{
+				SceneCamera& camera = m_SelectedEntity.GetComponent<CameraComponent>().Camera;
+				camera.SetViewportSize(m_ViewportSize.x * 0.2f, m_ViewportSize.y * 0.2f);
+				m_ActiveCameraFramebuffer->Bind();
+				m_Framebuffer->ClearAttachmentInt(1, -1);
+
+				RenderCommand::SetClearColor(camera.GetBackgroundColor());
+				RenderCommand::Clear();
+
+				Renderer2D::BeginScene(camera, m_ActiveScene->GetWorldTransform(m_SelectedEntity));
+
+				{ // Sprite
+					auto view = m_ActiveScene->GetEntitiesWith<SpriteRendererComponent>();
+					for (auto e : view)
+					{
+						Entity entity = Entity(e, m_ActiveScene.get());
+						bool enabled = entity.GetComponent<TagComponent>().Enabled;
+						auto& sprite = entity.GetComponent<SpriteRendererComponent>();
+						if (enabled)
+							Renderer2D::DrawSprite(m_ActiveScene->GetWorldTransform(entity), sprite, -1);
+					}
+				}
+
+				{ // Circle
+					auto view = m_ActiveScene->GetEntitiesWith<CircleRendererComponent>();
+					for (auto e : view)
+					{
+						Entity entity = Entity(e, m_ActiveScene.get());
+						bool enabled = entity.GetComponent<TagComponent>().Enabled;
+						auto& circle = entity.GetComponent<CircleRendererComponent>();
+						if (enabled)
+							Renderer2D::DrawCircle(m_ActiveScene->GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, -1);
+					}
+				}
+
+				Renderer2D::EndScene();
+
+				m_ActiveCameraFramebuffer->Unbind();
 			}
 		}
 	}

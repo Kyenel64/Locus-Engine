@@ -97,8 +97,8 @@ namespace Locus
 		static std::map<std::string, ScriptClassFieldInstance>& GetFieldInstances(UUID id);
 
 	private:
-		static void LoadAssembly(const std::string& assemblyPath);
-		static void LoadAppAssembly(const std::string& assemblyPath);
+		static void LoadAssembly(const std::string& assemblyPath, bool loadPDB = false);
+		static void LoadAppAssembly(const std::string& assemblyPath, bool loadPDB = false);
 		static void LoadAppAssemblyClasses();
 	};
 

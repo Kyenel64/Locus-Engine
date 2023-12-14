@@ -42,7 +42,8 @@ namespace Sandbox
             // Teleport back to start
             if (Input.IsKeyPressed(KeyCode.T))
                 rb2d.Position = new Vec2(0, 3);
-            
+
+            Entity projectile = Find("Projectile");
         }
 
         public override void OnCollisionBegin(Entity entity)

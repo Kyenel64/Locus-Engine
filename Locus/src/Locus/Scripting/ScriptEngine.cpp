@@ -4,6 +4,8 @@
 #include <mono/jit/jit.h>
 #include <mono/metadata/assembly.h>
 #include <mono/metadata/attrdefs.h>
+#include "mono/metadata/mono-debug.h"
+#include "mono/metadata/threads.h"
 
 #include "Locus/Core/UUID.h"
 #include "Locus/Scene/Components.h"
@@ -42,7 +44,7 @@ namespace Locus
 		}
 
 		// Loads a C# assembly from a path. Returns the loaded assembly.
-		MonoAssembly* LoadCSharpAssembly(const std::string& assemblyPath)
+		MonoAssembly* LoadCSharpAssembly(const std::string& assemblyPath, bool loadPDB = false)
 		{
 			uint32_t fileSize = 0;
 			char* fileData = Utils::ReadBytes(assemblyPath, &fileSize);
@@ -56,6 +58,21 @@ namespace Locus
 				const char* errorMessage = mono_image_strerror(status);
 				// Log some error message using the errorMessage data
 				return nullptr;
+			}
+
+			if (loadPDB)
+			{
+				std::filesystem::path pdbPath = assemblyPath;
+				pdbPath.replace_extension(".pdb");
+
+				if (std::filesystem::exists(pdbPath))
+				{
+					uint32_t pdbFileSize = 0;
+					char* pdbFileData = Utils::ReadBytes(pdbPath.string(), &pdbFileSize);
+					mono_debug_open_image_from_memory(image, (const mono_byte*)pdbFileData, pdbFileSize);
+					LOCUS_CORE_INFO("Loaded PDB {}", pdbPath);
+					delete[] pdbFileData;
+				}
 			}
 
 			MonoAssembly* assembly = mono_assembly_load_from_full(image, assemblyPath.c_str(), &status, 0);
@@ -103,6 +120,8 @@ namespace Locus
 		MonoImage* AppAssemblyImage = nullptr;
 
 		Scene* Scene = nullptr;
+		
+		bool Debugging = true;
 
 		std::unordered_map<std::string, Ref<ScriptClass>> ScriptClasses;
 		std::unordered_map<UUID, Ref<ScriptInstance>> ScriptInstances;
@@ -124,13 +143,29 @@ namespace Locus
 		// Sets the path of .NET system libraries
 		mono_set_assemblies_path("mono/lib");
 
+		if (s_Data->Debugging)
+		{
+			const char* argv[1] = {
+				//"--debugger-agent=transport=dt_socket,address=127.0.0.1:2550,server=y,suspend=n,loglevel=3,logfile=MonoDebugger.log",
+				"--soft-breakpoints"
+			};
+
+			mono_jit_parse_options(1, (char**)argv);
+			mono_debug_init(MONO_DEBUG_FORMAT_MONO);
+		}
+
 		// Initialize mono runtime
 		MonoDomain* rootDomain = mono_jit_init("LocusJITRuntime");
 		LOCUS_CORE_ASSERT(rootDomain, "Unable to initialize jit runtime!");
 		s_Data->RootDomain = rootDomain;
 
-		LoadAssembly("resources/scripts/Locus-Script.dll");
-		LoadAppAssembly("SandboxProject/bin/Sandbox.dll"); // TODO: set to project path
+		if (s_Data->Debugging)
+			mono_debug_domain_create(s_Data->RootDomain);
+
+		mono_thread_set_main(mono_thread_current());
+
+		LoadAssembly("resources/scripts/Locus-Script.dll", s_Data->Debugging);
+		LoadAppAssembly("SandboxProject/bin/Sandbox.dll", s_Data->Debugging); // TODO: set to project path
 		LoadAppAssemblyClasses();
 
 		s_Data->EntityBaseClass = CreateRef<ScriptClass>(s_Data->CoreAssemblyImage, "Locus", "Entity");
@@ -145,8 +180,8 @@ namespace Locus
 		mono_domain_set(mono_get_root_domain(), false);
 		mono_domain_unload(s_Data->AppDomain);
 
-		LoadAssembly("resources/scripts/Locus-Script.dll");
-		LoadAppAssembly("SandboxProject/bin/Sandbox.dll"); // TODO: set to project path
+		LoadAssembly("resources/scripts/Locus-Script.dll", s_Data->Debugging);
+		LoadAppAssembly("SandboxProject/bin/Sandbox.dll", s_Data->Debugging); // TODO: set to project path
 		LoadAppAssemblyClasses();
 
 		s_Data->EntityBaseClass = CreateRef<ScriptClass>(s_Data->CoreAssemblyImage, "Locus", "Entity");
@@ -174,21 +209,21 @@ namespace Locus
 	}
 
 	// Loads the C# assembly that contains Locus's core API
-	void ScriptEngine::LoadAssembly(const std::string& assemblyPath)
+	void ScriptEngine::LoadAssembly(const std::string& assemblyPath, bool loadPDB)
 	{
 		// Create app domain. App domains are like separate processes within mono
 		s_Data->AppDomain = mono_domain_create_appdomain("LocusAppDomain", nullptr);
 		LOCUS_CORE_ASSERT(s_Data->AppDomain, "Failed to create mono app domain!");
 		mono_domain_set(s_Data->AppDomain, true);
 
-		s_Data->CoreAssembly = Utils::LoadCSharpAssembly(assemblyPath);
+		s_Data->CoreAssembly = Utils::LoadCSharpAssembly(assemblyPath, loadPDB);
 		s_Data->CoreAssemblyImage = mono_assembly_get_image(s_Data->CoreAssembly);
 	}
 
 	// Loads the C# assembly that contains the user-written project code
-	void ScriptEngine::LoadAppAssembly(const std::string& assemblyPath)
+	void ScriptEngine::LoadAppAssembly(const std::string& assemblyPath, bool loadPDB)
 	{
-		s_Data->AppAssembly = Utils::LoadCSharpAssembly(assemblyPath);
+		s_Data->AppAssembly = Utils::LoadCSharpAssembly(assemblyPath, loadPDB);
 		s_Data->AppAssemblyImage = mono_assembly_get_image(s_Data->AppAssembly);
 	}
 

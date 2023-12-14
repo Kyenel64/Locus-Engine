@@ -163,7 +163,7 @@ namespace Locus
 				}
 			}
 
-			LOCUS_SCRIPT_CRITICAL("Could not find entity with tag: {0}", std::string(newTagStr));
+			//LOCUS_SCRIPT_CRITICAL("Could not find entity with tag: {0}", std::string(newTagStr));
 			mono_free(newTagStr);
 			return 0;
 		}

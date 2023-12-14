@@ -1,6 +1,8 @@
 ﻿// --- Entity -----------------------------------------------------------------
 using System;
+using System.Linq;
 using System.Runtime.Versioning;
+using System.Threading;
 
 namespace Locus
 {
@@ -109,6 +111,21 @@ namespace Locus
         public static Entity Find(string tag)
         {
             Entity entity = new Entity(InternalCalls.Entity_Find(tag));
+            
+
+            if (entity.ID == 0)
+            {
+                string trace = Environment.StackTrace;
+                int idx = trace.LastIndexOf('\n');
+                var rsult = trace;
+                if (idx != -1)
+                {
+                    rsult = trace.Substring(idx + 1);
+                }
+                Console.WriteLine("Could not find entity! \n" + rsult);
+            }
+            
+
             return entity;
         }
 

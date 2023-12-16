@@ -1,25 +1,6 @@
 // --- ScriptEngine -----------------------------------------------------------
 // Contains: ScriptEngine, ScriptClass, ScriptInstance, ScriptClassField, 
 //	ScriptClassFieldInstance
-// 
-// ScriptEngine does all the processing and calls for our C# scripting.
-//	This is where the assembly, classes, and fields are loaded.
-// 
-// ScriptClass is created for each class within the assembly.
-//	This is not an instance of the class, so only one ScriptClass is created
-//	for each C# class.
-// 
-// ScriptInstance is an instance of a ScriptClass.
-//	An instance is created from a ScriptClass and is tied to an Entity.
-//	ScriptInstance calls methods and accesses/modifies fields.
-//
-// ScriptClassField is a struct for a class field. Similar to the ScriptClass, 
-//	it is not an instance and holds general information about the field.
-//
-// ScriptClassFieldInstance is a struct for an instance of the field.
-//	Note that this struct has no relationships to a ScriptInstance. It is only
-//	used during editor-time when ScriptInstances have not been created yet. 
-//	Data is copied to the ScriptInstance fields once runtime starts.
 #pragma once
 
 #include "Locus/Core/Timestep.h"
@@ -43,8 +24,6 @@ namespace Locus
 	// Forward declarations
 	class ScriptClass;
 	class ScriptInstance;
-	struct ScriptClassField;
-	struct ScriptClassFieldInstance;
 
 	enum class FieldType
 	{
@@ -67,9 +46,64 @@ namespace Locus
 		LocusEntity
 	};
 
+	struct ExceptionData
+	{
+		std::string Type;
+		std::string Message;
+		std::string Trace;
+	};
+
+	// Field data. 
+	// ScriptClassField is a struct for a class field. Similar to the ScriptClass, 
+	//	it is not an instance and holds general information about the field.
+	struct ScriptClassField
+	{
+		MonoClassField* MonoField;
+		std::string FieldName;
+		FieldType Type;
+	};
+
+	// Field instance data. 
+	// ScriptClassFieldInstance is a struct for an instance of the field.
+	//	Note that this struct has no relationships to a ScriptInstance. It is only
+	//	used during editor-time when ScriptInstances have not been created yet. 
+	//	Data is copied to the ScriptInstance fields once runtime starts.
+	struct ScriptClassFieldInstance
+	{
+		ScriptClassField Field;
+
+		ScriptClassFieldInstance()
+		{
+			memset(m_Buffer, 0, sizeof(m_Buffer));
+		}
+
+		template<typename T>
+		T GetValue()
+		{
+			static_assert(sizeof(T) <= 16, "Type too large!");
+			return *(T*)m_Buffer;
+		}
+
+		template<typename T>
+		void SetValue(T value)
+		{
+			static_assert(sizeof(T) <= 16, "Type too large!");
+			memcpy(m_Buffer, &value, sizeof(T));
+		}
+
+	private:
+		uint8_t m_Buffer[16];
+
+		friend class ScriptEngine;
+		friend class ScriptInstance;
+		friend class PropertiesPanel;
+	};
+
 
 
 	// --- ScriptEngine -------------------------------------------------------
+	// ScriptEngine does all the processing and calls for our C# scripting.
+	//	This is where the assembly, classes, and fields are loaded.
 	class ScriptEngine
 	{
 	public:
@@ -82,7 +116,7 @@ namespace Locus
 		static void OnCreateEntityScript(Entity entity);
 		static void OnUpdateEntityScript(Entity entity, Timestep deltaTime);
 
-		static void InvokeMethod(Ref<ScriptInstance> instance, MonoMethod* method, int paramCount, void** params);
+		static void InvokeMethod(Ref<ScriptInstance> instance, MonoMethod* method, void** params);
 
 		static void ReloadScripts();
 
@@ -95,6 +129,7 @@ namespace Locus
 		static Ref<ScriptInstance> GetScriptInstance(UUID id);
 		static Ref<ScriptClass> GetScriptClass(const std::string& name);
 		static std::map<std::string, ScriptClassFieldInstance>& GetFieldInstances(UUID id);
+		static std::queue<ExceptionData>& GetExceptions();
 
 	private:
 		static void LoadAssembly(const std::string& assemblyPath, bool loadPDB = false);
@@ -105,6 +140,9 @@ namespace Locus
 
 
 	// --- ScriptClass --------------------------------------------------------
+	// ScriptClass is created for each class within the assembly.
+	//	ScriptClass can create instances of the class and get
+	//	information about the class.
 	class ScriptClass
 	{
 	public:
@@ -114,8 +152,6 @@ namespace Locus
 
 		// Creates a mono instance of the script class.
 		MonoObject* Instantiate();
-		// Calls a method contained in the class.
-		MonoObject* InvokeMethod(MonoObject* instance, MonoMethod* method, void** params = nullptr);
 
 		// Getters
 		MonoClass* GetMonoClass() const { return m_MonoClass; }
@@ -152,12 +188,16 @@ namespace Locus
 
 	
 	// --- ScriptInstance -----------------------------------------------------
+	// ScriptInstance is an instance of a ScriptClass.
+	//	An instance is created from a ScriptClass and is tied to an Entity.
+	//	It holds a GCHandle which is the instance tied to the mono garbage
+	//	collector. This is used to reference the instance. Not with MonoObject*.
 	class ScriptInstance
 	{
 	public:
 		ScriptInstance() = default;
 		ScriptInstance(Ref<ScriptClass> scriptClass, Entity entity);
-		~ScriptInstance() = default;
+		~ScriptInstance();
 
 		void InvokeOnCreate();
 		void InvokeOnUpdate(Timestep deltaTime);
@@ -186,53 +226,11 @@ namespace Locus
 	private:
 		Entity m_Entity;
 		Ref<ScriptClass> m_ScriptClass;
-		MonoObject* m_ScriptInstance;
 		MonoMethod* m_OnCreateFunc;
 		MonoMethod* m_OnUpdateFunc;
+		unsigned int m_GCHandle;
 
 	public:
 		friend class ScriptEngine;
-	};
-
-
-
-	// Field data. 
-	struct ScriptClassField
-	{
-		MonoClassField* MonoField;
-		std::string FieldName;
-		FieldType Type;
-	};
-
-	// Field instance data. 
-	struct ScriptClassFieldInstance
-	{
-		ScriptClassField Field;
-
-		ScriptClassFieldInstance()
-		{
-			memset(m_Buffer, 0, sizeof(m_Buffer));
-		}
-
-		template<typename T>
-		T GetValue()
-		{
-			static_assert(sizeof(T) <= 16, "Type too large!");
-			return *(T*)m_Buffer;
-		}
-		
-		template<typename T>
-		void SetValue(T value)
-		{
-			static_assert(sizeof(T) <= 16, "Type too large!");
-			memcpy(m_Buffer, &value, sizeof(T));
-		}
-
-	private:
-		uint8_t m_Buffer[16];
-
-		friend class ScriptEngine;
-		friend class ScriptInstance;
-		friend class PropertiesPanel;
 	};
 }

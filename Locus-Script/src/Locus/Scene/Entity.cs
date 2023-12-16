@@ -46,11 +46,12 @@ namespace Locus
             get => GetComponent<TransformComponent>();
         }
 
+        public static Entity Null = new Entity(0);
 
         // --- Constructors ---
         public Entity()
         {
-
+            ID = 0;
         }
 
         internal Entity(ulong id)
@@ -63,7 +64,7 @@ namespace Locus
         /// <summary>
         /// Checks if entity has component of type T. 
         /// </summary>
-        public bool HasComponent<T>() where T : Component, new()
+        public bool HasComponent<T>() where T : Component
         {
             Type componentType = typeof(T);
             return InternalCalls.Entity_HasComponent(ID, componentType);
@@ -97,7 +98,7 @@ namespace Locus
         /// </summary>
         public static Entity CreateEntity(string tag = "Empty Entity")
         {
-            Entity entity = new Entity(InternalCalls.CreateEntity());
+            Entity entity = new Entity(InternalCalls.Entity_CreateEntity());
             entity.Tag = tag;
             return entity;
         }
@@ -111,21 +112,6 @@ namespace Locus
         public static Entity Find(string tag)
         {
             Entity entity = new Entity(InternalCalls.Entity_Find(tag));
-            
-
-            if (entity.ID == 0)
-            {
-                string trace = Environment.StackTrace;
-                int idx = trace.LastIndexOf('\n');
-                var rsult = trace;
-                if (idx != -1)
-                {
-                    rsult = trace.Substring(idx + 1);
-                }
-                Console.WriteLine("Could not find entity! \n" + rsult);
-            }
-            
-
             return entity;
         }
 

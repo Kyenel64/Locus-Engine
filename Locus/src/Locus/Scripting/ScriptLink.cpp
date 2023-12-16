@@ -18,9 +18,9 @@ namespace Locus
 		RegisterComponents();
 
 		LINK_INTERNAL_CALL(DebugLog);
-		LINK_INTERNAL_CALL(CreateEntity);
 
 		// Entity
+		LINK_INTERNAL_CALL(Entity_CreateEntity);
 		LINK_INTERNAL_CALL(Entity_HasComponent);
 		LINK_INTERNAL_CALL(Entity_AddComponent);
 		LINK_INTERNAL_CALL(Entity_GetTag);

@@ -624,6 +624,7 @@ namespace Locus
 		m_SceneHierarchyPanel.OnImGuiRender();
 		m_PropertiesPanel.OnImGuiRender();
 		m_ContentBrowserPanel.OnImGuiRender();
+		m_ConsolePanel.OnImGuiRender();
 		ImGui::ShowDemoWindow();
 
 
@@ -1234,7 +1235,7 @@ namespace Locus
 			if (m_SelectedEntity.HasComponent<CameraComponent>())
 			{
 				SceneCamera& camera = m_SelectedEntity.GetComponent<CameraComponent>().Camera;
-				camera.SetViewportSize(m_ViewportSize.x * 0.2f, m_ViewportSize.y * 0.2f);
+				camera.SetViewportSize((uint32_t)(m_ViewportSize.x * 0.2f), (uint32_t)(m_ViewportSize.y * 0.2f));
 				m_ActiveCameraFramebuffer->Bind();
 				m_Framebuffer->ClearAttachmentInt(1, -1);
 

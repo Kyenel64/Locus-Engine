@@ -19,6 +19,7 @@ namespace Sandbox
 
         void OnUpdate(float deltaTime)
         {
+            Tag = "YOYUOY";
             timer += deltaTime;
             // Horizontal movement
             if (Input.IsKeyHeld(KeyCode.A))
@@ -26,23 +27,25 @@ namespace Sandbox
             else if (Input.IsKeyHeld(KeyCode.D))
                 rb2d.Velocity = new Vec2(moveSpeed, rb2d.Velocity.y);
 
+            //Color col = GetComponent<CircleRendererComponent>().Color;
+
             // Jump
             if (Input.IsKeyPressed(KeyCode.Space))
             {
                 if (canJump)
                     rb2d.AddLinearImpulse(new Vec2(rb2d.Velocity.x, jumpSpeed));
             }
-
+            
             // Fire projectile
             if (Input.IsKeyPressed(KeyCode.Left))
                 FireProjectile(new Vec2(-2, 0));
             else if (Input.IsKeyPressed(KeyCode.Right))
                 FireProjectile(new Vec2(2, 0));
-
+            
             // Teleport back to start
             if (Input.IsKeyPressed(KeyCode.T))
                 rb2d.Position = new Vec2(0, 3);
-
+            
             Entity projectile = Find("Projectile");
         }
 

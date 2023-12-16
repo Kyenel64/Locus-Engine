@@ -1,110 +1,16 @@
 Scene: Untitled
-RootEntityCount: 7
+RootEntityCount: 8
 Entities:
-  - Entity: 12124773718810636832
+  - Entity: 9989827080729353583
     TagComponent:
-      Tag: Circle
-      Group: Enemy
-      Enabled: true
-      HierarchyPos: 6
-    TransformComponent:
-      Self: 12124773718810636832
-      Parent: 0
-      LocalPosition: [8.86751747, 1.81847179, 0]
-      LocalRotation: [0, 0, 0]
-      LocalRotationQuat: [0, 0, 0, 1]
-      LocalScale: [1, 1, 1]
-    CircleRendererComponent:
-      Color: [0.973180056, 0, 0, 1]
-      Thickness: 1
-      Fade: 0.00499999989
-    Rigidbody2DComponent:
-      BodyType: 1
-      Mass: 1
-      GravityScale: 1
-      LinearDamping: 0.200000003
-      AngularDamping: 0.200000003
-      FixedRotation: false
-    CircleCollider2DComponent:
-      Friction: 0.200000003
-      Restitution: 0
-      RestitutionThreshold: 1
-      CollisionCategory: 1
-      CollisionMask: 65535
-      Radius: 0.5
-      Offset: [0, 0]
-  - Entity: 8439106995608761075
-    TagComponent:
-      Tag: Camera
+      Tag: Floor
       Group: Default
       Enabled: true
-      HierarchyPos: 5
+      HierarchyPos: 1
     TransformComponent:
-      Self: 8439106995608761075
+      Self: 9989827080729353583
       Parent: 0
-      LocalPosition: [0, -0.0778346062, 21.2798786]
-      LocalRotation: [0, 0, 0]
-      LocalRotationQuat: [0, 0, 0, 1]
-      LocalScale: [1, 1, 1]
-    CameraComponent:
-      Camera:
-        BackgroundColor: [0.25, 0.5, 0.5, 1]
-        ProjectionType: 0
-        OrthographicSize: 15.1000004
-        OrthographicNearClip: -1
-        OrthographicFarClip: 1000
-        PerspectiveFOV: 0.785398185
-        PerspectiveNearClip: 0.00999999978
-        PerspectiveFarClip: 1000
-      Primary: true
-      FixedAspectRatio: false
-  - Entity: 10700117466007315482
-    TagComponent:
-      Tag: Player
-      Group: Default
-      Enabled: true
-      HierarchyPos: 4
-    TransformComponent:
-      Self: 10700117466007315482
-      Parent: 0
-      LocalPosition: [0, 2.06083751, 0]
-      LocalRotation: [0, 0, 0]
-      LocalRotationQuat: [0, 0, 0, 1]
-      LocalScale: [1, 1, 1]
-    SpriteRendererComponent:
-      Color: [0.0288016573, 0.232730985, 0.835249066, 1]
-      TexturePath: ""
-      TilingFactor: 1
-    Rigidbody2DComponent:
-      BodyType: 1
-      Mass: 1
-      GravityScale: 1
-      LinearDamping: 0.5
-      AngularDamping: 0.200000003
-      FixedRotation: true
-    BoxCollider2DComponent:
-      Friction: 1
-      Restitution: 0
-      RestitutionThreshold: 1
-      CollisionCategory: 1
-      CollisionMask: 65535
-      Offset: [0, 0]
-      Size: [1, 1]
-    ScriptComponent:
-      ScriptClass: Sandbox::PlayerController2D
-      Fields:
-        jumpSpeed: 6
-        moveSpeed: 5
-  - Entity: 17473103748242752727
-    TagComponent:
-      Tag: Floor.002
-      Group: Default
-      Enabled: true
-      HierarchyPos: 3
-    TransformComponent:
-      Self: 17473103748242752727
-      Parent: 0
-      LocalPosition: [-10.6219292, 0.299102068, 0]
+      LocalPosition: [10.8352022, 0.299102068, 0]
       LocalRotation: [0, 0, 0]
       LocalRotationQuat: [0, 0, 0, 1]
       LocalScale: [10.9705801, 1, 1]
@@ -145,16 +51,16 @@ Entities:
       CollisionMask: 65535
       Offset: [0, 0]
       Size: [1, 1]
-  - Entity: 9989827080729353583
+  - Entity: 17473103748242752727
     TagComponent:
-      Tag: Floor
+      Tag: Floor.002
       Group: Default
       Enabled: true
-      HierarchyPos: 1
+      HierarchyPos: 3
     TransformComponent:
-      Self: 9989827080729353583
+      Self: 17473103748242752727
       Parent: 0
-      LocalPosition: [10.8352022, 0.299102068, 0]
+      LocalPosition: [-10.6219292, 0.299102068, 0]
       LocalRotation: [0, 0, 0]
       LocalRotationQuat: [0, 0, 0, 1]
       LocalScale: [10.9705801, 1, 1]
@@ -170,3 +76,102 @@ Entities:
       CollisionMask: 65535
       Offset: [0, 0]
       Size: [1, 1]
+  - Entity: 8439106995608761075
+    TagComponent:
+      Tag: Camera
+      Group: Default
+      Enabled: true
+      HierarchyPos: 5
+    TransformComponent:
+      Self: 8439106995608761075
+      Parent: 0
+      LocalPosition: [0, -0.0778346062, 21.2798786]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        BackgroundColor: [0.25, 0.5, 0.5, 1]
+        ProjectionType: 0
+        OrthographicSize: 15.1000004
+        OrthographicNearClip: -1
+        OrthographicFarClip: 1000
+        PerspectiveFOV: 0.785398185
+        PerspectiveNearClip: 0.00999999978
+        PerspectiveFarClip: 1000
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 12124773718810636832
+    TagComponent:
+      Tag: Circle
+      Group: Enemy
+      Enabled: true
+      HierarchyPos: 6
+    TransformComponent:
+      Self: 12124773718810636832
+      Parent: 0
+      LocalPosition: [8.86751747, 1.81847179, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    CircleRendererComponent:
+      Color: [0.973180056, 0, 0, 1]
+      Thickness: 1
+      Fade: 0.00499999989
+    Rigidbody2DComponent:
+      BodyType: 1
+      Mass: 1
+      GravityScale: 1
+      LinearDamping: 0.200000003
+      AngularDamping: 0.200000003
+      FixedRotation: false
+    CircleCollider2DComponent:
+      Friction: 0.200000003
+      Restitution: 0
+      RestitutionThreshold: 1
+      CollisionCategory: 1
+      CollisionMask: 65535
+      Radius: 0.5
+      Offset: [0, 0]
+    ScriptComponent:
+      ScriptClass: Sandbox::ChangingColor
+      Fields:
+        MoveSpeed: 5
+  - Entity: 4903379790330257263
+    TagComponent:
+      Tag: Player.001
+      Group: Default
+      Enabled: true
+      HierarchyPos: 7
+    TransformComponent:
+      Self: 4903379790330257263
+      Parent: 0
+      LocalPosition: [0, 2.06083751, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [0.0288016573, 0.232730985, 0.835249066, 1]
+      TexturePath: ""
+      TilingFactor: 1
+    Rigidbody2DComponent:
+      BodyType: 1
+      Mass: 1
+      GravityScale: 1
+      LinearDamping: 0.5
+      AngularDamping: 0.200000003
+      FixedRotation: true
+    BoxCollider2DComponent:
+      Friction: 1
+      Restitution: 0
+      RestitutionThreshold: 1
+      CollisionCategory: 1
+      CollisionMask: 65535
+      Offset: [0, 0]
+      Size: [1, 1]
+    ScriptComponent:
+      ScriptClass: Sandbox::PlayerController2D
+      Fields:
+        jumpSpeed: 4
+        moveSpeed: 5
+        timer: 0

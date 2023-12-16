@@ -67,7 +67,7 @@ namespace Locus
 			Ref<ScriptInstance> aInstance = ScriptEngine::GetScriptInstance(aUUID);
 			MonoMethod* method = ScriptEngine::GetEntityBaseClass()->GetMethod("OnCollisionBeginInternal", 1);
 			void* data = &bUUID;
-			ScriptEngine::InvokeMethod(aInstance, method, 1, &data);
+			ScriptEngine::InvokeMethod(aInstance, method, &data);
 			m_BeginContacts.pop();
 		}
 
@@ -80,7 +80,7 @@ namespace Locus
 			Ref<ScriptInstance> aInstance = ScriptEngine::GetScriptInstance(aUUID);
 			MonoMethod* method = ScriptEngine::GetEntityBaseClass()->GetMethod("OnCollisionEndInternal", 1);
 			void* data = &bUUID;
-			ScriptEngine::InvokeMethod(aInstance, method, 1, &data);
+			ScriptEngine::InvokeMethod(aInstance, method, &data);
 			m_EndContacts.pop();
 		}
 	}

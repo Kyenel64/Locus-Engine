@@ -10,13 +10,14 @@ namespace Locus
 {
     internal class InternalCalls
     {
+        // --- Debug ---
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static void DebugLog(float val);
 
-        [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        internal extern static ulong CreateEntity();
-
         // --- Entity ---
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static ulong Entity_CreateEntity();
+
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static bool Entity_HasComponent(ulong id, Type componentType);
 

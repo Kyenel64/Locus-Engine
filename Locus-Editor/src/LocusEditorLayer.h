@@ -13,6 +13,7 @@
 #include "Panels/SceneHierarchyPanel.h"
 #include "Panels/ContentBrowserPanel.h"
 #include "Panels/PropertiesPanel.h"
+#include "Panels/ConsolePanel.h"
 
 namespace Locus
 {
@@ -118,6 +119,7 @@ namespace Locus
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 		ContentBrowserPanel m_ContentBrowserPanel;
 		PropertiesPanel m_PropertiesPanel;
+		ConsolePanel m_ConsolePanel;
 
 		// Layout
 		LayoutStyle m_LayoutStyle = LayoutStyle::Default;

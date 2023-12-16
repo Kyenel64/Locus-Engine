@@ -6,105 +6,54 @@
 #include <mono/metadata/attrdefs.h>
 #include "mono/metadata/mono-debug.h"
 #include "mono/metadata/threads.h"
+#include "mono/metadata/exception.h"
 
 #include "Locus/Core/UUID.h"
 #include "Locus/Scene/Components.h"
 #include "Locus/Scripting/ScriptLink.h"
+#include "Locus/Scripting/ScriptUtils.h"
 
 namespace Locus
 {
-	namespace Utils
+	// Loads a C# assembly from a path. Returns the loaded assembly.
+	static MonoAssembly* LoadCSharpAssembly(const std::string& assemblyPath, bool loadPDB = false)
 	{
-		char* ReadBytes(const std::string& filepath, uint32_t* outSize)
+		uint32_t fileSize = 0;
+		char* fileData = ScriptUtils::ReadBytes(assemblyPath, &fileSize);
+
+		// NOTE: We can't use this image for anything other than loading the assembly because this image doesn't have a reference to the assembly
+		MonoImageOpenStatus status;
+		MonoImage* image = mono_image_open_from_data_full(fileData, fileSize, 1, &status, 0);
+
+		if (status != MONO_IMAGE_OK)
 		{
-			std::ifstream stream(filepath, std::ios::binary | std::ios::ate);
-
-			if (!stream)
-			{
-				// Failed to open the file
-				return nullptr;
-			}
-
-			std::streampos end = stream.tellg();
-			stream.seekg(0, std::ios::beg);
-			uint32_t size = (uint32_t)(end - stream.tellg());
-
-			if (size == 0)
-			{
-				// File is empty
-				return nullptr;
-			}
-
-			char* buffer = new char[size];
-			stream.read((char*)buffer, size);
-			stream.close();
-
-			*outSize = size;
-			return buffer;
+			const char* errorMessage = mono_image_strerror(status);
+			// Log some error message using the errorMessage data
+			return nullptr;
 		}
 
-		// Loads a C# assembly from a path. Returns the loaded assembly.
-		MonoAssembly* LoadCSharpAssembly(const std::string& assemblyPath, bool loadPDB = false)
+		if (loadPDB)
 		{
-			uint32_t fileSize = 0;
-			char* fileData = Utils::ReadBytes(assemblyPath, &fileSize);
+			std::filesystem::path pdbPath = assemblyPath;
+			pdbPath.replace_extension(".pdb");
 
-			// NOTE: We can't use this image for anything other than loading the assembly because this image doesn't have a reference to the assembly
-			MonoImageOpenStatus status;
-			MonoImage* image = mono_image_open_from_data_full(fileData, fileSize, 1, &status, 0);
-
-			if (status != MONO_IMAGE_OK)
+			if (std::filesystem::exists(pdbPath))
 			{
-				const char* errorMessage = mono_image_strerror(status);
-				// Log some error message using the errorMessage data
-				return nullptr;
+				uint32_t pdbFileSize = 0;
+				char* pdbFileData = ScriptUtils::ReadBytes(pdbPath.string(), &pdbFileSize);
+				mono_debug_open_image_from_memory(image, (const mono_byte*)pdbFileData, pdbFileSize);
+				LOCUS_CORE_INFO("Loaded PDB {}", pdbPath);
+				delete[] pdbFileData;
 			}
-
-			if (loadPDB)
-			{
-				std::filesystem::path pdbPath = assemblyPath;
-				pdbPath.replace_extension(".pdb");
-
-				if (std::filesystem::exists(pdbPath))
-				{
-					uint32_t pdbFileSize = 0;
-					char* pdbFileData = Utils::ReadBytes(pdbPath.string(), &pdbFileSize);
-					mono_debug_open_image_from_memory(image, (const mono_byte*)pdbFileData, pdbFileSize);
-					LOCUS_CORE_INFO("Loaded PDB {}", pdbPath);
-					delete[] pdbFileData;
-				}
-			}
-
-			MonoAssembly* assembly = mono_assembly_load_from_full(image, assemblyPath.c_str(), &status, 0);
-			mono_image_close(image);
-
-			// Don't forget to free the file data
-			delete[] fileData;
-
-			return assembly;
 		}
 
-		// Converts MonoType to Locus's FieldType.
-		FieldType MonoTypeToFieldType(MonoType* monoType)
-		{
-			std::string typeName = std::string(mono_type_get_name(monoType));
-			if (typeName == "System.Single")  return FieldType::SystemSingle;
-			if (typeName == "System.Double")  return FieldType::SystemDouble;
-			if (typeName == "System.Int16")   return FieldType::SystemShort;
-			if (typeName == "System.Int32")   return FieldType::SystemInt;
-			if (typeName == "System.Int64")   return FieldType::SystemLong;
-			if (typeName == "System.UInt16")  return FieldType::SystemUShort;
-			if (typeName == "System.UInt32")  return FieldType::SystemUInt;
-			if (typeName == "System.UInt64")  return FieldType::SystemULong;
-			if (typeName == "System.Boolean") return FieldType::SystemBoolean;
-			if (typeName == "System.Char")    return FieldType::SystemChar;
+		MonoAssembly* assembly = mono_assembly_load_from_full(image, assemblyPath.c_str(), &status, 0);
+		mono_image_close(image);
 
-			if (typeName == "Locus.Vec2")     return FieldType::LocusVec2;
-			if (typeName == "Locus.Vec3")     return FieldType::LocusVec3;
-			if (typeName == "Locus.Vec4")     return FieldType::LocusVec4;
-			if (typeName == "Locus.Entity")   return FieldType::LocusEntity;
-			return FieldType::None;
-		}
+		// Don't forget to free the file data
+		delete[] fileData;
+
+		return assembly;
 	}
 
 	struct ScriptEngineData
@@ -128,11 +77,15 @@ namespace Locus
 		std::vector<std::string> ScriptClassNames;
 		std::map<UUID, std::map<std::string, ScriptClassFieldInstance>> FieldInstances;
 
+		std::queue<ExceptionData> Exceptions;
+
 		Ref<ScriptClass> EntityBaseClass;
 	};
 
 	static ScriptEngineData* s_Data = nullptr;
 
+	typedef void (*OnUpdateThunk)(MonoObject*, float, MonoException**);
+	typedef void (*OnCreateThunk)(MonoObject*, MonoException**);
 
 
 	// --- ScriptEngine -------------------------------------------------------
@@ -216,14 +169,14 @@ namespace Locus
 		LOCUS_CORE_ASSERT(s_Data->AppDomain, "Failed to create mono app domain!");
 		mono_domain_set(s_Data->AppDomain, true);
 
-		s_Data->CoreAssembly = Utils::LoadCSharpAssembly(assemblyPath, loadPDB);
+		s_Data->CoreAssembly = LoadCSharpAssembly(assemblyPath, loadPDB);
 		s_Data->CoreAssemblyImage = mono_assembly_get_image(s_Data->CoreAssembly);
 	}
 
 	// Loads the C# assembly that contains the user-written project code
 	void ScriptEngine::LoadAppAssembly(const std::string& assemblyPath, bool loadPDB)
 	{
-		s_Data->AppAssembly = Utils::LoadCSharpAssembly(assemblyPath, loadPDB);
+		s_Data->AppAssembly = LoadCSharpAssembly(assemblyPath, loadPDB);
 		s_Data->AppAssemblyImage = mono_assembly_get_image(s_Data->AppAssembly);
 	}
 
@@ -278,7 +231,7 @@ namespace Locus
 					ScriptClassField classField;
 					classField.FieldName = std::string(fieldName);
 					classField.MonoField = field;
-					classField.Type = Utils::MonoTypeToFieldType(fieldType);
+					classField.Type = ScriptUtils::MonoTypeToFieldType(fieldType);
 
 					scriptClass->m_PublicFields[fieldName] = classField;
 					LOCUS_CORE_INFO(" " + std::string(fieldName));
@@ -332,9 +285,11 @@ namespace Locus
 		}
 	}
 
-	void ScriptEngine::InvokeMethod(Ref<ScriptInstance> instance, MonoMethod* method, int paramCount, void** params)
+	void ScriptEngine::InvokeMethod(Ref<ScriptInstance> instance, MonoMethod* method, void** params)
 	{
-		mono_runtime_invoke(method, instance->m_ScriptInstance, params, nullptr);
+		MonoObject* exception = nullptr;
+		MonoObject* obj = mono_runtime_invoke(method, mono_gchandle_get_target(instance->m_GCHandle), const_cast<void**>(params), &exception);
+		ScriptUtils::ProcessException((MonoException*)exception);
 	}
 
 	// Getters
@@ -343,9 +298,11 @@ namespace Locus
 	std::vector<std::string> ScriptEngine::GetClassNames() { return s_Data->ScriptClassNames; }
 	Ref<ScriptClass> ScriptEngine::GetEntityBaseClass() { return s_Data->EntityBaseClass; }
 	MonoDomain* ScriptEngine::GetAppDomain() { return s_Data->AppDomain; }
+	std::queue<ExceptionData>& ScriptEngine::GetExceptions() { return s_Data->Exceptions; }
+	std::map<std::string, ScriptClassFieldInstance>& ScriptEngine::GetFieldInstances(UUID id) { return s_Data->FieldInstances[id]; }
 
 	Ref<ScriptClass> ScriptEngine::GetScriptClass(const std::string& name)
-	{ 
+	{
 		if (s_Data->ScriptClasses.find(name) != s_Data->ScriptClasses.end())
 			return s_Data->ScriptClasses[name];
 		else
@@ -358,11 +315,6 @@ namespace Locus
 			return s_Data->ScriptInstances[id];
 		else
 			return nullptr;
-	}
-
-	std::map<std::string, ScriptClassFieldInstance>& ScriptEngine::GetFieldInstances(UUID id)
-	{
-		return s_Data->FieldInstances[id];
 	}
 
 
@@ -389,11 +341,6 @@ namespace Locus
 		return mono_class_get_method_from_name(m_MonoClass, name.c_str(), paramCount);
 	}
 
-	MonoObject* ScriptClass::InvokeMethod(MonoObject* instance, MonoMethod* method, void** params)
-	{
-		return mono_runtime_invoke(method, instance, params, nullptr);
-	}
-
 	ScriptClassField& ScriptClass::GetPublicField(const std::string& name)
 	{
 		LOCUS_CORE_ASSERT(m_PublicFields.find(name) != m_PublicFields.end(), "Field name does not exist!");
@@ -404,7 +351,9 @@ namespace Locus
 	{
 		ScriptClassField& field = GetPublicField(name);
 		MonoObject* tempInstance = Instantiate();
-		mono_field_get_value(tempInstance, field.MonoField, buffer);
+		unsigned int gchandle = mono_gchandle_new(tempInstance, false);
+		mono_field_get_value(mono_gchandle_get_target(gchandle), field.MonoField, buffer);
+		mono_gchandle_free(gchandle);
 		return true;
 	}
 
@@ -414,42 +363,55 @@ namespace Locus
 	ScriptInstance::ScriptInstance(Ref<ScriptClass> scriptClass, Entity entity)
 		: m_ScriptClass(scriptClass), m_Entity(entity)
 	{
-		UUID id = m_Entity.GetComponent<IDComponent>().ID;
-		// Create instance of class linked to entity.
-		m_ScriptInstance = m_ScriptClass->Instantiate();
+		// Use gchandle when creating or referencing instances. 
+		// MonoObject* instances are not handled and will result in errors.
+		m_GCHandle = mono_gchandle_new(m_ScriptClass->Instantiate(), false);
 
 		m_OnCreateFunc = m_ScriptClass->GetMethod("OnCreate", 0);
 		m_OnUpdateFunc = m_ScriptClass->GetMethod("OnUpdate", 1);
 
 		// Call Entity base class constructor
 		MonoMethod* entityBaseConstructor = s_Data->EntityBaseClass->GetMethod(".ctor", 1);
+		UUID id = m_Entity.GetComponent<IDComponent>().ID;
 		void* idPtr = &id;
-		m_ScriptClass->InvokeMethod(m_ScriptInstance, entityBaseConstructor, &idPtr);
+		MonoObject* exception = nullptr;
+		mono_runtime_invoke(entityBaseConstructor, mono_gchandle_get_target(m_GCHandle), &idPtr, &exception);
+		ScriptUtils::ProcessException((MonoException*)exception);
+	}
 
+	ScriptInstance::~ScriptInstance()
+	{
+		mono_gchandle_free(m_GCHandle);
 	}
 
 	void ScriptInstance::InvokeOnCreate()
 	{
-		m_ScriptClass->InvokeMethod(m_ScriptInstance, m_OnCreateFunc);
+		OnCreateThunk testInteropThunk = (OnCreateThunk)mono_method_get_unmanaged_thunk(m_OnCreateFunc);
+		MonoException* exception = nullptr;
+		testInteropThunk(mono_gchandle_get_target(m_GCHandle), &exception);
+		ScriptUtils::ProcessException(exception);
 	}
 
 	void ScriptInstance::InvokeOnUpdate(Timestep deltaTime)
 	{
-		void* dTParam = &deltaTime;
-		m_ScriptClass->InvokeMethod(m_ScriptInstance, m_OnUpdateFunc, &dTParam);
+		// This is a more optimized way of calling functions. Need to profile to see if it actually works.
+		OnUpdateThunk testInteropThunk = (OnUpdateThunk)mono_method_get_unmanaged_thunk(m_OnUpdateFunc);
+		MonoException* exception = nullptr;
+		testInteropThunk(mono_gchandle_get_target(m_GCHandle), deltaTime, &exception);
+		ScriptUtils::ProcessException(exception);
 	}
 
 	bool ScriptInstance::GetFieldValueInternal(const std::string& name, void* buffer)
 	{
 		ScriptClassField& field = m_ScriptClass->GetPublicField(name);
-		mono_field_get_value(m_ScriptInstance, field.MonoField, buffer);
+		mono_field_get_value(mono_gchandle_get_target(m_GCHandle), field.MonoField, buffer);
 		return true;
 	}
 
 	bool ScriptInstance::SetFieldValueInternal(const std::string& name, const void* value)
 	{
 		ScriptClassField& field = m_ScriptClass->GetPublicField(name);
-		mono_field_set_value(m_ScriptInstance, field.MonoField, (void*)value);
+		mono_field_set_value(mono_gchandle_get_target(m_GCHandle), field.MonoField, (void*)value);
 		return true;
 	}
 }

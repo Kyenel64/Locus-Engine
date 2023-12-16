@@ -140,18 +140,6 @@ namespace Locus
 		s_Data->EntityBaseClass = CreateRef<ScriptClass>(s_Data->CoreAssemblyImage, "Locus", "Entity");
 		// Link C++ functions to C# declarations
 		ScriptLink::RegisterFunctions();
-
-		if (s_Data->Scene)
-		{
-			s_Data->ScriptInstances.clear();
-			auto view = s_Data->Scene->GetEntitiesWith<ScriptComponent>();
-			for (auto e : view)
-			{
-				Entity entity = Entity(e, s_Data->Scene);
-				auto& sc = entity.GetComponent<ScriptComponent>();
-				s_Data->ScriptInstances[entity.GetUUID()] = CreateRef<ScriptInstance>(s_Data->ScriptClasses[sc.ScriptClass], entity);
-			}
-		}
 	}
 
 	void ScriptEngine::Shutdown()
@@ -258,7 +246,7 @@ namespace Locus
 		if (s_Data->ScriptClasses.find(sc.ScriptClass) != s_Data->ScriptClasses.end())
 		{
 			// Creates a class instance and copies data field data from the editor to the script instance.
-			s_Data->ScriptInstances[entity.GetUUID()] = CreateRef<ScriptInstance>(s_Data->ScriptClasses[sc.ScriptClass], entity);
+			s_Data->ScriptInstances[entity.GetUUID()] = CreateRef<ScriptInstance>(s_Data->ScriptClasses[sc.ScriptClass], entity.GetUUID());
 			auto& fields = ScriptEngine::GetFieldInstances(entity.GetUUID());
 			Ref<ScriptInstance> instance = ScriptEngine::GetScriptInstance(entity.GetUUID());
 			for (const auto& [name, field] : fields)
@@ -283,6 +271,14 @@ namespace Locus
 		{
 			LOCUS_CORE_ERROR("Unable to find class!");
 		}
+	}
+
+	bool ScriptEngine::HasMethod(Ref<ScriptInstance> instance, const std::string& methodName, int paramCount)
+	{
+		MonoMethod* method = mono_class_get_method_from_name(instance->m_ScriptClass->m_MonoClass, methodName.c_str(), paramCount);
+		if (method)
+			return true;
+		return false;
 	}
 
 	void ScriptEngine::InvokeMethod(Ref<ScriptInstance> instance, MonoMethod* method, void** params)
@@ -360,8 +356,8 @@ namespace Locus
 
 
 	// --- ScriptInstance -----------------------------------------------------
-	ScriptInstance::ScriptInstance(Ref<ScriptClass> scriptClass, Entity entity)
-		: m_ScriptClass(scriptClass), m_Entity(entity)
+	ScriptInstance::ScriptInstance(Ref<ScriptClass> scriptClass, UUID uuid)
+		: m_ScriptClass(scriptClass), m_UUID(uuid)
 	{
 		// Use gchandle when creating or referencing instances. 
 		// MonoObject* instances are not handled and will result in errors.
@@ -372,7 +368,7 @@ namespace Locus
 
 		// Call Entity base class constructor
 		MonoMethod* entityBaseConstructor = s_Data->EntityBaseClass->GetMethod(".ctor", 1);
-		UUID id = m_Entity.GetComponent<IDComponent>().ID;
+		UUID id = m_UUID;
 		void* idPtr = &id;
 		MonoObject* exception = nullptr;
 		mono_runtime_invoke(entityBaseConstructor, mono_gchandle_get_target(m_GCHandle), &idPtr, &exception);

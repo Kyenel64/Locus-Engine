@@ -116,6 +116,7 @@ namespace Locus
 		static void OnCreateEntityScript(Entity entity);
 		static void OnUpdateEntityScript(Entity entity, Timestep deltaTime);
 
+		static bool HasMethod(Ref<ScriptInstance> instance, const std::string& methodName, int paramCount);
 		static void InvokeMethod(Ref<ScriptInstance> instance, MonoMethod* method, void** params);
 
 		static void ReloadScripts();
@@ -196,7 +197,7 @@ namespace Locus
 	{
 	public:
 		ScriptInstance() = default;
-		ScriptInstance(Ref<ScriptClass> scriptClass, Entity entity);
+		ScriptInstance(Ref<ScriptClass> scriptClass, UUID uuid);
 		~ScriptInstance();
 
 		void InvokeOnCreate();
@@ -224,7 +225,7 @@ namespace Locus
 		bool SetFieldValueInternal(const std::string& name, const void* value);
 
 	private:
-		Entity m_Entity;
+		UUID m_UUID;
 		Ref<ScriptClass> m_ScriptClass;
 		MonoMethod* m_OnCreateFunc;
 		MonoMethod* m_OnUpdateFunc;

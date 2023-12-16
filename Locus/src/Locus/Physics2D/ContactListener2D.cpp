@@ -18,17 +18,16 @@ namespace Locus
 		Entity bEntity = scene->GetEntityByUUID(bUUID);
 
 		// Push pair of collided entities to stack if entity has a script component.
-		// TODO: Also check if OnCollisionBegin() is defined.
 		if (aEntity.IsValid()) // Checks for valid as entities can be destroyed on contact.
 		{
 			if (aEntity.HasComponent<ScriptComponent>())
-				m_BeginContacts.push(std::make_pair(aEntity, bEntity));
+				m_BeginContacts.push(std::make_pair(aUUID, bUUID));
 		}
 
 		if (bEntity.IsValid())
 		{
 			if (bEntity.HasComponent<ScriptComponent>())
-				m_BeginContacts.push(std::make_pair(bEntity, aEntity));
+				m_BeginContacts.push(std::make_pair(bUUID, aUUID));
 		}
 	}
 
@@ -45,42 +44,45 @@ namespace Locus
 		if (aEntity.IsValid())
 		{
 			if (aEntity.HasComponent<ScriptComponent>())
-				m_EndContacts.push(std::make_pair(aEntity, bEntity));
+				m_EndContacts.push(std::make_pair(aUUID, bUUID));
 		}
 		
 		if (bEntity.IsValid())
 		{
 			if (bEntity.HasComponent<ScriptComponent>())
-				m_EndContacts.push(std::make_pair(bEntity, aEntity));
+				m_EndContacts.push(std::make_pair(bUUID, aUUID));
 		}
-		
 	}
 
 	void ContactListener2D::Execute()
 	{
 		while (!m_BeginContacts.empty())
 		{
-			Entity aEntity = m_BeginContacts.front().first;
-			Entity bEntity = m_BeginContacts.front().second;
-			UUID aUUID = aEntity.GetUUID();
-			UUID bUUID = bEntity.GetUUID();
-			Ref<ScriptInstance> aInstance = ScriptEngine::GetScriptInstance(aUUID);
-			MonoMethod* method = ScriptEngine::GetEntityBaseClass()->GetMethod("OnCollisionBeginInternal", 1);
-			void* data = &bUUID;
-			ScriptEngine::InvokeMethod(aInstance, method, &data);
+			UUID aUUID = m_BeginContacts.front().first;
+			UUID bUUID = m_BeginContacts.front().second;
+			Entity aEntity = ScriptEngine::GetScene()->GetEntityByUUID(aUUID);
+			Ref<ScriptInstance> instance = ScriptEngine::GetScriptInstance(aUUID);
+			if (instance)
+			{
+				MonoMethod* method = ScriptEngine::GetEntityBaseClass()->GetMethod("OnCollisionBeginInternal", 1);
+				void* data = &bUUID;
+				ScriptEngine::InvokeMethod(instance, method, &data);
+			}
 			m_BeginContacts.pop();
 		}
 
 		while (!m_EndContacts.empty())
 		{
-			Entity aEntity = m_EndContacts.front().first;
-			Entity bEntity = m_EndContacts.front().second;
-			UUID aUUID = aEntity.GetUUID();
-			UUID bUUID = bEntity.GetUUID();
-			Ref<ScriptInstance> aInstance = ScriptEngine::GetScriptInstance(aUUID);
-			MonoMethod* method = ScriptEngine::GetEntityBaseClass()->GetMethod("OnCollisionEndInternal", 1);
-			void* data = &bUUID;
-			ScriptEngine::InvokeMethod(aInstance, method, &data);
+			UUID aUUID = m_EndContacts.front().first;
+			UUID bUUID = m_EndContacts.front().second;
+			Entity aEntity = ScriptEngine::GetScene()->GetEntityByUUID(aUUID);
+			Ref<ScriptInstance> instance = ScriptEngine::GetScriptInstance(aUUID);
+			if (instance)
+			{
+				MonoMethod* method = ScriptEngine::GetEntityBaseClass()->GetMethod("OnCollisionEndInternal", 1);
+				void* data = &bUUID;
+				ScriptEngine::InvokeMethod(instance, method, &data);
+			}
 			m_EndContacts.pop();
 		}
 	}

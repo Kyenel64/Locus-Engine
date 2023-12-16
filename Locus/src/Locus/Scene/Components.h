@@ -44,7 +44,6 @@ namespace Locus
 		std::string Tag;
 		std::string Group;
 		bool Enabled = true;
-		uint32_t HierarchyPos; // TODO: Store elsewhere as this is an editor related property.
 
 		TagComponent() = default;
 		TagComponent(const TagComponent&) = default;
@@ -54,7 +53,7 @@ namespace Locus
 	struct ChildComponent
 	{
 		uint32_t ChildCount = 0;
-		std::vector<Entity> ChildEntities;
+		std::vector<UUID> ChildEntities;
 
 		ChildComponent() = default;
 		ChildComponent(const ChildComponent&) = default;
@@ -62,8 +61,8 @@ namespace Locus
 
 	struct TransformComponent
 	{
-		Entity Self = Entity::Null;
-		Entity Parent = Entity::Null;
+		UUID Self = 0;
+		UUID Parent = 0;
 
 		glm::vec3 LocalPosition = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 LocalScale = { 1.0f, 1.0f, 1.0f };

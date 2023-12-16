@@ -302,10 +302,8 @@ namespace Locus
 			{
 				if (control)
 				{
-					if (m_ClipboardEntity)
-					{
+					if (m_ClipboardEntity.IsValid())
 						CommandHistory::AddCommand(new DuplicateEntityCommand(m_ActiveScene, m_ClipboardEntity));
-					}
 				}
 				break;
 			}
@@ -315,9 +313,7 @@ namespace Locus
 				if (control)
 				{
 					if (m_SelectedEntity)
-					{
 						CommandHistory::AddCommand(new DuplicateEntityCommand(m_ActiveScene, m_SelectedEntity));
-					}
 				}
 				break;
 			}
@@ -496,8 +492,8 @@ namespace Locus
 			nullptr, snap ? snapValues : nullptr);
 
 		// Convert back to local space
-		if (tc.Parent != Entity::Null)
-			transform = glm::inverse(m_ActiveScene->GetWorldTransform(tc.Parent)) * transform;
+		if (tc.Parent)
+			transform = glm::inverse(m_ActiveScene->GetWorldTransform(m_ActiveScene->GetEntityByUUID(tc.Parent))) * transform;
 
 		glm::vec3 translation, scale;
 		glm::quat rotation;
@@ -1089,8 +1085,6 @@ namespace Locus
 		ImGui::Text("Hovered Entity: %s", name.c_str());
 
 		ImGui::Text("Entity Value: %d", (entt::entity)m_SelectedEntity);
-		if (m_SelectedEntity.IsValid())
-			ImGui::Text("Hierarchy position: %d", m_SelectedEntity.GetComponent<TagComponent>().HierarchyPos);
 
 		// Collision
 		if (m_SelectedEntity.IsValid())
@@ -1107,8 +1101,9 @@ namespace Locus
 				ImGui::Separator();
 				ImGui::Text("Children:");
 				ImGui::Indent();
-				for (auto entity : cc.ChildEntities)
+				for (auto id : cc.ChildEntities)
 				{
+					Entity entity = m_ActiveScene->GetEntityByUUID(id);
 					auto tag = entity.GetComponent<TagComponent>().Tag;
 					ImGui::Text(tag.c_str());
 				}
@@ -1122,12 +1117,12 @@ namespace Locus
 			ImGui::Text("Transforms");
 
 			auto tc = m_SelectedEntity.GetComponent<TransformComponent>();
-			if (tc.Parent != Entity::Null)
-				ImGui::Text("Parent: %s", tc.Parent.GetComponent<TagComponent>().Tag.c_str());
+			if (tc.Parent)
+				ImGui::Text("Parent: %s", m_ActiveScene->GetEntityByUUID(tc.Parent).GetComponent<TagComponent>().Tag.c_str());
 			else
 				ImGui::Text("Parent: Entity::Null");
 
-			ImGui::Text("Self: %s", tc.Self.GetComponent<TagComponent>().Tag.c_str());
+			ImGui::Text("Self: %s", m_ActiveScene->GetEntityByUUID(tc.Self).GetComponent<TagComponent>().Tag.c_str());
 
 			glm::mat4 worldTransform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
 			glm::vec3 worldPosition, worldScale;

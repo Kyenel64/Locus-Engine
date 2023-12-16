@@ -170,7 +170,6 @@ namespace Locus
 			out << YAML::Key << "Tag" << YAML::Value << tag.Tag;
 			out << YAML::Key << "Group" << YAML::Value << tag.Group;
 			out << YAML::Key << "Enabled" << YAML::Value << tag.Enabled;
-			out << YAML::Key << "HierarchyPos" << YAML::Value << tag.HierarchyPos;
 			out << YAML::EndMap; // End Tag Component
 		}
 
@@ -181,9 +180,9 @@ namespace Locus
 
 			out << YAML::Key << "TransformComponent";
 			out << YAML::BeginMap; // Transform Component
-			out << YAML::Key << "Self" << YAML::Value << tc.Self.GetComponent<IDComponent>().ID;
-			if (tc.Parent.IsValid())
-				out << YAML::Key << "Parent" << YAML::Value << tc.Parent.GetComponent<IDComponent>().ID;
+			out << YAML::Key << "Self" << YAML::Value << tc.Self;
+			if (tc.Parent)
+				out << YAML::Key << "Parent" << YAML::Value << tc.Parent;
 			else
 				out << YAML::Key << "Parent" << YAML::Value << 0;
 			out << YAML::Key << "LocalPosition" << YAML::Value << tc.LocalPosition;
@@ -206,7 +205,7 @@ namespace Locus
 			for (uint32_t i = 0; i < cc.ChildCount; i++)
 			{
 				std::string childWithVal = "Child" + std::to_string(i);
-				out << YAML::Key << childWithVal << YAML::Value << cc.ChildEntities[i].GetComponent<IDComponent>().ID;
+				out << YAML::Key << childWithVal << YAML::Value << cc.ChildEntities[i];
 			}
 			out << YAML::EndMap; // End Child Entities
 			out << YAML::EndMap; // End Child Component
@@ -362,15 +361,14 @@ namespace Locus
 		YAML::Emitter out;
 		out << YAML::BeginMap; // Scene
 		out << YAML::Key << "Scene" << YAML::Value << m_Scene->GetSceneName();
-		out << YAML::Key << "RootEntityCount" << YAML::Value << m_Scene->m_RootEntityCount;
 		// Array of Entities
 		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
-		m_Scene->GetRegistry().each([&](auto entityID)
+		m_Scene->m_Registry.each([&](auto entityID)
 		{
-				Entity entity = Entity(entityID, m_Scene.get());
+			Entity entity = Entity(entityID, m_Scene.get());
 				if (!entity)
-					return;
-				SerializeEntity(out, entity);
+				return;
+			SerializeEntity(out, entity);
 		});
 		out << YAML::EndSeq;
 
@@ -394,7 +392,6 @@ namespace Locus
 		// Deserialize scene data
 		std::string sceneName = data["Scene"].as<std::string>();
 		m_Scene->SetSceneName(sceneName);
-		m_Scene->m_RootEntityCount = data["RootEntityCount"].as<uint32_t>();
 		LOCUS_CORE_TRACE("Deserializing scene '{0}'", sceneName);
 
 		// Deserialize every entity data
@@ -417,21 +414,36 @@ namespace Locus
 				}
 
 				LOCUS_CORE_TRACE("Deserializing Entity: {0}, ID: {1}", name, uuid);
-				Entity deserializedEntity = m_Scene->CreateEntityWithUUID(uuid, name, enabled);
-				m_Scene->m_RootEntityCount--;
-				deserializedEntity.GetComponent<TagComponent>().HierarchyPos = tagComponent["HierarchyPos"].as<uint32_t>();
+				Entity deserializedEntity = m_Scene->CreateEntityWithUUID(uuid, name);
+				deserializedEntity.GetComponent<TagComponent>().Enabled = tagComponent["Enabled"].as<bool>();
 				deserializedEntity.GetComponent<TagComponent>().Group = tagComponent["Group"].as<std::string>();
 
 				// --- Transform Component ---
 				auto transformComponent = entity["TransformComponent"];
-				if (transformComponent)
+				if (transformComponent) 
 				{
 					auto& tc = deserializedEntity.GetComponent<TransformComponent>();
-					tc.Self = deserializedEntity;
+					tc.Self = transformComponent["Self"].as<uint64_t>();
+					tc.Parent = transformComponent["Parent"].as<uint64_t>();
 					tc.LocalPosition = transformComponent["LocalPosition"].as<glm::vec3>();
 					tc.LocalRotation = transformComponent["LocalRotation"].as<glm::vec3>();
 					tc.LocalRotationQuat = transformComponent["LocalRotationQuat"].as<glm::quat>();
 					tc.LocalScale = transformComponent["LocalScale"].as<glm::vec3>();
+				}
+
+				// --- Child Component ---
+				auto childComponent = entity["ChildComponent"];
+				if (childComponent)
+				{
+					auto& cc = deserializedEntity.AddComponent<ChildComponent>();
+					cc.ChildCount = childComponent["ChildCount"].as<uint32_t>();
+					auto childEntities = childComponent["ChildEntities"];
+					for (uint32_t i = 0; i < cc.ChildCount; i++)
+					{
+						std::string childWithVal = "Child" + std::to_string(i);
+						UUID uuid = childEntities[childWithVal].as<uint64_t>();
+						cc.ChildEntities.push_back(uuid);
+					}
 				}
 
 				// --- Sprite Renderer Component ---
@@ -582,41 +594,6 @@ namespace Locus
 								}
 							}
 						}
-					}
-				}
-			}
-
-			// Process relationships after all entities are created
-			for (auto e : entities)
-			{
-				uint64_t uuid = e["Entity"].as<uint64_t>();
-				Entity entity = m_Scene->GetEntityByUUID(uuid);
-
-				// --- Transform Component ---
-				auto transformComponent = e["TransformComponent"];
-				if (transformComponent)
-				{
-					auto& tc = entity.GetComponent<TransformComponent>();
-					if (transformComponent["Parent"].as<uint64_t>() != 0)
-					{
-						Entity parent = m_Scene->GetEntityByUUID(transformComponent["Parent"].as<uint64_t>());
-						tc.Parent = parent;
-					}
-				}
-
-				// --- Child Component ---
-				auto childComponent = e["ChildComponent"];
-				if (childComponent)
-				{
-					auto& cc = entity.AddComponent<ChildComponent>();
-					cc.ChildCount = childComponent["ChildCount"].as<uint32_t>();
-					auto childEntities = childComponent["ChildEntities"];
-					for (uint32_t i = 0; i < cc.ChildCount; i++)
-					{
-						std::string childWithVal = "Child" + std::to_string(i);
-						UUID uuid = childEntities[childWithVal].as<uint64_t>();
-						Entity child = m_Scene->GetEntityByUUID(uuid);
-						cc.ChildEntities.push_back(child);
 					}
 				}
 			}

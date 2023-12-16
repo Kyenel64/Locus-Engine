@@ -1,12 +1,38 @@
 Scene: Untitled
-RootEntityCount: 8
 Entities:
+  - Entity: 10299943180066056532
+    TagComponent:
+      Tag: Empty Entity
+      Group: Default
+      Enabled: true
+    TransformComponent:
+      Self: 10299943180066056532
+      Parent: 3242682353522138077
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 0]
+      LocalScale: [1, 1, 1]
+  - Entity: 3242682353522138077
+    TagComponent:
+      Tag: Empty Entity
+      Group: Default
+      Enabled: true
+    TransformComponent:
+      Self: 3242682353522138077
+      Parent: 0
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    ChildComponent:
+      ChildCount: 1
+      ChildEntities:
+        Child0: 10299943180066056532
   - Entity: 9989827080729353583
     TagComponent:
       Tag: Floor
       Group: Default
       Enabled: true
-      HierarchyPos: 1
     TransformComponent:
       Self: 9989827080729353583
       Parent: 0
@@ -31,7 +57,6 @@ Entities:
       Tag: Floor.001
       Group: Default
       Enabled: true
-      HierarchyPos: 2
     TransformComponent:
       Self: 1709649513028570413
       Parent: 0
@@ -56,7 +81,6 @@ Entities:
       Tag: Floor.002
       Group: Default
       Enabled: true
-      HierarchyPos: 3
     TransformComponent:
       Self: 17473103748242752727
       Parent: 0
@@ -81,7 +105,6 @@ Entities:
       Tag: Camera
       Group: Default
       Enabled: true
-      HierarchyPos: 5
     TransformComponent:
       Self: 8439106995608761075
       Parent: 0
@@ -106,7 +129,6 @@ Entities:
       Tag: Circle
       Group: Enemy
       Enabled: true
-      HierarchyPos: 6
     TransformComponent:
       Self: 12124773718810636832
       Parent: 0
@@ -142,7 +164,6 @@ Entities:
       Tag: Player.001
       Group: Default
       Enabled: true
-      HierarchyPos: 7
     TransformComponent:
       Self: 4903379790330257263
       Parent: 0
@@ -151,7 +172,7 @@ Entities:
       LocalRotationQuat: [0, 0, 0, 1]
       LocalScale: [1, 1, 1]
     SpriteRendererComponent:
-      Color: [0.0288016573, 0.232730985, 0.835249066, 1]
+      Color: [0, 0.252874374, 1, 1]
       TexturePath: ""
       TilingFactor: 1
     Rigidbody2DComponent:

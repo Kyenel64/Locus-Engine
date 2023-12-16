@@ -25,7 +25,7 @@ namespace Locus
 		// Execute collision functions.
 		void Execute();
 	private:
-		std::queue<std::pair<Entity, Entity>> m_BeginContacts;
-		std::queue<std::pair<Entity, Entity>> m_EndContacts;
+		std::queue<std::pair<UUID, UUID>> m_BeginContacts;
+		std::queue<std::pair<UUID, UUID>> m_EndContacts;
 	};
 }

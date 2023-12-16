@@ -83,12 +83,7 @@ namespace Locus
 		// Display each entity
 		if (m_ActiveScene)
 		{
-			m_ActiveScene->GetRegistry().sort<TagComponent>([&](entt::entity lhs, entt::entity rhs)
-				{
-					return m_ActiveScene->GetRegistry().get<TagComponent>(lhs).HierarchyPos < m_ActiveScene->GetRegistry().get<TagComponent>(rhs).HierarchyPos;
-				});
-
-			auto view = m_ActiveScene->GetRegistry().view<TagComponent>();
+			auto view = m_ActiveScene->GetEntitiesWith<TagComponent>();
 			for (auto e : view)
 			{
 				Entity entity = Entity(e, m_ActiveScene.get());
@@ -96,7 +91,7 @@ namespace Locus
 				{
 					if (filter.PassFilter(entity.GetComponent<TagComponent>().Tag.c_str()))
 					{
-						if (entity.GetComponent<TransformComponent>().Parent == Entity::Null)
+						if (!entity.GetComponent<TransformComponent>().Parent)
 							DrawEntityNode(entity);
 					}
 				}
@@ -142,24 +137,6 @@ namespace Locus
 		if (ImGui::IsItemClicked())
 			m_SelectedEntity = entity;
 
-		// Process drag drop
-		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
-		{
-			ImGui::SetDragDropPayload("ENTITY_POSITION", &entity, sizeof(Entity));
-			ImGui::EndDragDropSource();
-		}
-		if (ImGui::BeginDragDropTarget())
-		{
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_POSITION"))
-			{
-				uint32_t curPos = entity.GetComponent<TagComponent>().HierarchyPos;
-				Entity* payloadEntity = (Entity*)payload->Data;
-				entity.GetComponent<TagComponent>().HierarchyPos = payloadEntity->GetComponent<TagComponent>().HierarchyPos;
-				payloadEntity->GetComponent<TagComponent>().HierarchyPos = curPos;
-			}
-			ImGui::EndDragDropTarget();
-		}
-
 		bool entityDeleted = false;
 		bool openOnCreate = false;
 		if (m_SelectedEntity && ImGui::BeginPopupContextItem()) // TODO: Create child when hovering too
@@ -186,7 +163,7 @@ namespace Locus
 				auto& cc = entity.GetComponent<ChildComponent>();
 				for (auto childEntity : cc.ChildEntities)
 				{
-					DrawEntityNode(childEntity);
+					DrawEntityNode(m_ActiveScene->GetEntityByUUID(childEntity));
 				}
 			}
 			ImGui::TreePop();

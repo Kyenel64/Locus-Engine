@@ -25,6 +25,31 @@ namespace Locus
 		m_ContactListener = CreateRef<ContactListener2D>();
 	}
 
+	Entity Scene::CreateEntity(const std::string& name)
+	{
+		return CreateEntityWithUUID(UUID(), name);
+	}
+
+	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name)
+	{
+		Entity entity = Entity(m_Registry.create(), this);
+		entity.AddComponent<IDComponent>(uuid);
+		entity.AddComponent<TransformComponent>();
+		entity.GetComponent<TransformComponent>().Self = uuid;
+		auto& tag = entity.AddComponent<TagComponent>();
+		tag.Tag = name.empty() ? "Entity" : name;
+		tag.Group = "Default";
+		tag.Enabled = true;
+		m_Entities[uuid] = entity;
+		return entity;
+	}
+
+	void Scene::DestroyEntity(Entity entity)
+	{
+		m_Entities.erase(m_Entities.find(entity.GetUUID()));
+		m_Registry.destroy(entity);
+	}
+
 	Ref<Scene> Scene::Copy(Ref<Scene> other)
 	{
 		Ref<Scene> newScene = CreateRef<Scene>();
@@ -32,32 +57,11 @@ namespace Locus
 		newScene->m_ViewportWidth = other->m_ViewportWidth;
 		newScene->m_ViewportHeight = other->m_ViewportHeight;
 
-		auto& otherRegistry = other->m_Registry;
-
-		// Display each entity
-		otherRegistry.each([&](auto entityID)
+		other->m_Registry.each([&](auto entityID)
 			{
 				Entity entity = Entity(entityID, other.get());
 				Entity newEntity = newScene->CreateEntityWithUUID(entity.GetUUID());
 				CopyAllComponents(entity, newEntity);
-			});
-
-		// Convert all Entity references to newScene since copying 
-		newScene->m_Registry.each([&](auto entityID)
-			{
-				Entity entity = Entity(entityID, newScene.get());
-				auto& tc = entity.GetComponent<TransformComponent>();
-				if (tc.Parent != Entity::Null)
-					tc.Parent = newScene->GetEntityByUUID(tc.Parent.GetUUID());
-
-				if (entity.HasComponent<ChildComponent>())
-				{
-					auto& cc = entity.GetComponent<ChildComponent>();
-					for (uint32_t i = 0; i < cc.ChildCount; i++)
-					{
-						cc.ChildEntities[i] = newScene->GetEntityByUUID(cc.ChildEntities[i].GetUUID());
-					}
-				}
 			});
 
 		return newScene;
@@ -83,47 +87,6 @@ namespace Locus
 		CopyComponent<CircleCollider2DComponent>(from, to);
 		CopyComponent<NativeScriptComponent>(from, to);
 		CopyComponent<ScriptComponent>(from, to);
-	}
-
-	Entity Scene::CreateEntity(const std::string& name)
-	{
-		return CreateEntityWithUUID(UUID(), name);
-	}
-
-	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name, bool enabled)
-	{
-		Entity entity = Entity(m_Registry.create(), this);
-		entity.AddComponent<IDComponent>(uuid);
-		entity.AddComponent<TransformComponent>();
-		entity.GetComponent<TransformComponent>().Self = entity;
-		auto& tag = entity.AddComponent<TagComponent>();
-		tag.Tag = name.empty() ? "Entity" : name;
-		tag.Group = "Default";
-		tag.Enabled = enabled;
-		tag.HierarchyPos = m_RootEntityCount;
-		m_RootEntityCount++;
-		return entity;
-	}
-
-	
-	Entity Scene::CreateEntityWithUUID(Entity copyEntity, UUID uuid, const std::string& name, bool enabled)
-	{
-		Entity entity = Entity(m_Registry.create(copyEntity), this);
-		entity.AddComponent<IDComponent>(uuid);
-		entity.AddComponent<TransformComponent>();
-		entity.GetComponent<TransformComponent>().Self = entity;
-		auto& tag = entity.AddComponent<TagComponent>();
-		tag.Tag = name.empty() ? "Entity" : name;
-		tag.Group = "Default";
-		tag.Enabled = enabled;
-		tag.HierarchyPos = m_RootEntityCount;
-		m_RootEntityCount++;
-		return entity;
-	}
-
-	void Scene::DestroyEntity(Entity entity)
-	{
-		m_Registry.destroy(entity);
 	}
 
 	void Scene::OnUpdateRuntime(Timestep deltaTime)
@@ -161,11 +124,11 @@ namespace Locus
 		// --- Update Native Scripts ---
 		{
 			auto view = m_Registry.view<NativeScriptComponent, TagComponent>();
-			for (auto entity : view)
+			for (auto e : view)
 			{
+				Entity entity = Entity(e, this);
 				auto& nsc = view.get<NativeScriptComponent>(entity);
-				bool enabled = view.get<TagComponent>(entity).Enabled;
-				if (enabled)
+				if (entity.GetComponent<TagComponent>().Enabled)
 				{
 					nsc.Instance->OnUpdate(deltaTime);
 				}
@@ -179,7 +142,7 @@ namespace Locus
 			for (auto e : view)
 			{
 				Entity entity = Entity(e, this);
-				if (view.get<TagComponent>(e).Enabled)
+				if (entity.GetComponent<TagComponent>().Enabled)
 				{
 					ScriptEngine::OnUpdateEntityScript(entity, deltaTime);
 				}
@@ -219,9 +182,8 @@ namespace Locus
 				for (auto e : view)
 				{
 					Entity entity = Entity(e, this);
-					bool enabled = entity.GetComponent<TagComponent>().Enabled;
 					auto& sprite = entity.GetComponent<SpriteRendererComponent>();
-					if (enabled)
+					if (entity.GetComponent<TagComponent>().Enabled)
 						Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
 				}
 			}
@@ -231,9 +193,8 @@ namespace Locus
 				for (auto e : view)
 				{
 					Entity entity = Entity(e, this);
-					bool enabled = entity.GetComponent<TagComponent>().Enabled;
 					auto& circle = entity.GetComponent<CircleRendererComponent>();
-					if (enabled)
+					if (entity.GetComponent<TagComponent>().Enabled)
 						Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
 				}
 			}
@@ -257,9 +218,8 @@ namespace Locus
 			for (auto e : view)
 			{
 				Entity entity = Entity(e, this);
-				bool enabled = entity.GetComponent<TagComponent>().Enabled;
 				auto& sprite = entity.GetComponent<SpriteRendererComponent>();
-				if (enabled)
+				if (entity.GetComponent<TagComponent>().Enabled)
 					Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
 			}
 		}
@@ -269,9 +229,8 @@ namespace Locus
 			for (auto e : view)
 			{
 				Entity entity = Entity(e, this);
-				bool enabled = entity.GetComponent<TagComponent>().Enabled;
 				auto& circle = entity.GetComponent<CircleRendererComponent>();
-				if (enabled)
+				if (entity.GetComponent<TagComponent>().Enabled)
 					Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
 			}
 		}
@@ -324,9 +283,8 @@ namespace Locus
 			for (auto e : view)
 			{
 				Entity entity = Entity(e, this);
-				bool enabled = entity.GetComponent<TagComponent>().Enabled;
 				auto& sprite = entity.GetComponent<SpriteRendererComponent>();
-				if (enabled)
+				if (entity.GetComponent<TagComponent>().Enabled)
 					Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
 			}
 		}
@@ -337,9 +295,8 @@ namespace Locus
 			for (auto e : view)
 			{
 				Entity entity = Entity(e, this);
-				bool enabled = entity.GetComponent<TagComponent>().Enabled;
 				auto& circle = entity.GetComponent<CircleRendererComponent>();
-				if (enabled)
+				if (entity.GetComponent<TagComponent>().Enabled)
 					Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
 			}
 		}
@@ -370,14 +327,14 @@ namespace Locus
 		// --- Native Script ---
 		{
 			auto view = m_Registry.view<NativeScriptComponent, TagComponent>();
-			for (auto entity : view)
+			for (auto e : view)
 			{
-				auto& nsc = view.get<NativeScriptComponent>(entity);
-				bool enabled = view.get<TagComponent>(entity).Enabled;
-				if (enabled)
+				Entity entity = Entity(e, this);
+				auto& nsc = entity.GetComponent<NativeScriptComponent>();
+				if (entity.GetComponent<TagComponent>().Enabled)
 				{
 					nsc.Instance = nsc.InstantiateScript();
-					nsc.Instance->m_Entity = Entity(entity, this);
+					nsc.Instance->m_Entity = entity;
 					nsc.Instance->OnCreate();
 				}
 			}
@@ -390,10 +347,8 @@ namespace Locus
 			for (auto e : view)
 			{
 				Entity entity = Entity(e, this);
-				auto& sc = view.get<ScriptComponent>(e);
-				bool enabled = view.get<TagComponent>(e).Enabled;
-				UUID id = view.get<IDComponent>(e).ID;
-				if (enabled)
+				auto& sc = entity.GetComponent<ScriptComponent>();
+				if (entity.GetComponent<TagComponent>().Enabled)
 				{
 					ScriptEngine::OnCreateEntityScript(entity);
 				}
@@ -659,24 +614,19 @@ namespace Locus
 	Entity Scene::GetPrimaryCameraEntity()
 	{
 		auto view = m_Registry.view<CameraComponent>();
-		for (auto entity : view)
+		for (auto e : view)
 		{
-			if (view.get<CameraComponent>(entity).Primary)
-				return Entity(entity, this);
+			Entity entity = Entity(e, this);
+			if (entity.GetComponent<CameraComponent>().Primary)
+				return entity;
 		}
 		return Entity::Null;
 	}
 
 	Entity Scene::GetEntityByUUID(UUID uuid)
 	{
-		auto view = m_Registry.view<IDComponent>();
-		for (auto e : view)
-		{
-			Entity entity = Entity(e, this);
-			if (entity.GetComponent<IDComponent>().ID == uuid)
-				return entity;
-		}
-
+		if (m_Entities.find(uuid) != m_Entities.end())
+			return m_Entities[uuid];
 		return Entity::Null;
 	}
 
@@ -685,8 +635,8 @@ namespace Locus
 		glm::mat4 transform(1.0f);
 		auto& tc = entity.GetComponent<TransformComponent>();
 
-		if (tc.Parent != Entity::Null)
-			transform = GetWorldTransform(tc.Parent);
+		if (tc.Parent)
+			transform = GetWorldTransform(GetEntityByUUID(tc.Parent));
 
 		return transform * tc.GetLocalTransform();
 	}

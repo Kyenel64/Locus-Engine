@@ -22,17 +22,17 @@ namespace Locus
 		Scene(const std::string& sceneName) : m_SceneName(sceneName) {}
 		~Scene() = default;
 
+		// Creates an entity with a new UUID.
+		Entity CreateEntity(const std::string& name = std::string());
+		// Creates an entity with an existing UUID.
+		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = std::string());
+
+		void DestroyEntity(Entity entity);
+
 		static Ref<Scene> Copy(Ref<Scene> other);
 		template<typename T>
 		static void CopyComponent(Entity from, Entity to);
 		static void CopyAllComponents(Entity from, Entity to);
-
-		Entity CreateEntity(const std::string& name = std::string());
-		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = std::string(), bool enabled = true);
-
-		// Only used when we want to re-create an entity with the same entt id.
-		Entity CreateEntityWithUUID(Entity copyEntity, UUID uuid, const std::string& name = std::string(), bool enabled = true);
-		void DestroyEntity(Entity entity);
 
 		void OnUpdateRuntime(Timestep deltaTime);
 		void OnUpdateEditor(Timestep deltaTime, EditorCamera& camera);
@@ -50,9 +50,8 @@ namespace Locus
 		void OnViewportResize(uint32_t width, uint32_t height);
 
 		Entity GetPrimaryCameraEntity();
-		const std::string& GetSceneName() const { return m_SceneName; }
 		Entity GetEntityByUUID(UUID uuid);
-		entt::registry& GetRegistry() { return m_Registry; }
+		const std::string& GetSceneName() const { return m_SceneName; }
 
 		template<typename... T>
 		auto GetEntitiesWith()
@@ -70,17 +69,13 @@ namespace Locus
 	private:
 		std::string m_SceneName = "Untitled";
 		entt::registry m_Registry;
+		std::unordered_map<UUID, Entity> m_Entities;
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
-		uint32_t m_RootEntityCount = 1; // TODO: Handle all entity counts. 
 
 		b2World* m_Box2DWorld = nullptr;
 		Ref<ContactListener2D> m_ContactListener;
 
 		friend class Entity;
 		friend class SceneSerializer;
-		friend class CreateEntityCommand;
-		friend class CreateChildEntityCommand;
-		friend class DestroyEntityCommand;
-		friend class DuplicateEntityCommand;
 	};
 }

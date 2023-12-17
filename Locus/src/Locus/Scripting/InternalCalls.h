@@ -286,9 +286,7 @@ namespace Locus
 		{
 			Entity entity = GetEntity(entityID);
 			Rigidbody2DComponent& rb2d = entity.GetComponent<Rigidbody2DComponent>();
-			rb2d.BodyType = (Rigidbody2DComponent::Rigidbody2DType)newBodyType;
-			b2Body* runtimeBody = (b2Body*)rb2d.RuntimeBody;
-			runtimeBody->SetType(Utils::Rigidbody2DTypeToBox2DType(rb2d.BodyType));
+			rb2d.BodyType = (Rigidbody2DType)newBodyType;
 		}
 
 		// Mass
@@ -301,14 +299,7 @@ namespace Locus
 		{
 			Entity entity = GetEntity(entityID);
 			Rigidbody2DComponent& rb2d = entity.GetComponent<Rigidbody2DComponent>();
-			b2Body* runtimeBody = (b2Body*)rb2d.RuntimeBody;
-
 			rb2d.Mass = newMass;
-			b2MassData massData;
-			massData.mass = newMass;
-			massData.I = runtimeBody->GetInertia();
-			massData.center = runtimeBody->GetLocalCenter();
-			runtimeBody->SetMassData(&massData);
 		}
 
 		// GravityScale
@@ -321,10 +312,7 @@ namespace Locus
 		{
 			Entity entity = GetEntity(entityID);
 			Rigidbody2DComponent& rb2d = entity.GetComponent<Rigidbody2DComponent>();
-			b2Body* runtimeBody = (b2Body*)rb2d.RuntimeBody;
-
 			rb2d.GravityScale = newGravityScale;
-			runtimeBody->SetGravityScale(newGravityScale);
 		}
 
 		// Linear Damping
@@ -337,10 +325,7 @@ namespace Locus
 		{
 			Entity entity = GetEntity(entityID);
 			Rigidbody2DComponent& rb2d = entity.GetComponent<Rigidbody2DComponent>();
-			b2Body* runtimeBody = (b2Body*)rb2d.RuntimeBody;
-
 			rb2d.LinearDamping = newLinearDamping;
-			runtimeBody->SetGravityScale(newLinearDamping);
 		}
 
 		// Angular Damping
@@ -353,10 +338,7 @@ namespace Locus
 		{
 			Entity entity = GetEntity(entityID);
 			Rigidbody2DComponent& rb2d = entity.GetComponent<Rigidbody2DComponent>();
-			b2Body* runtimeBody = (b2Body*)rb2d.RuntimeBody;
-
 			rb2d.AngularDamping = newAngularDamping;
-			runtimeBody->SetGravityScale(newAngularDamping);
 		}
 
 		// Fixed Rotation
@@ -365,14 +347,24 @@ namespace Locus
 			Entity entity = GetEntity(entityID);
 			return entity.GetComponent<Rigidbody2DComponent>().FixedRotation;
 		}
-		static void Rigidbody2DComponent_SetFixedRotation(UUID entityID, float newFixedRotation)
+		static void Rigidbody2DComponent_SetFixedRotation(UUID entityID, bool newFixedRotation)
 		{
 			Entity entity = GetEntity(entityID);
 			Rigidbody2DComponent& rb2d = entity.GetComponent<Rigidbody2DComponent>();
-			b2Body* runtimeBody = (b2Body*)rb2d.RuntimeBody;
-
 			rb2d.FixedRotation = newFixedRotation;
-			runtimeBody->SetGravityScale(newFixedRotation);
+		}
+
+		// IsBullet
+		static bool Rigidbody2DComponent_GetIsBullet(UUID entityID)
+		{
+			Entity entity = GetEntity(entityID);
+			return entity.GetComponent<Rigidbody2DComponent>().IsBullet;
+		}
+		static void Rigidbody2DComponent_SetIsBullet(UUID entityID, bool newIsBullet)
+		{
+			Entity entity = GetEntity(entityID);
+			Rigidbody2DComponent& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+			rb2d.IsBullet = newIsBullet;
 		}
 
 		// Position

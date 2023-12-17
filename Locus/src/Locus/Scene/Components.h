@@ -31,6 +31,8 @@
 
 namespace Locus
 {
+	enum class Rigidbody2DType { Static = 0, Dynamic = 1, Kinematic = 2 };
+
 	struct IDComponent
 	{
 		UUID ID;
@@ -148,7 +150,6 @@ namespace Locus
 
 	struct Rigidbody2DComponent
 	{
-		enum class Rigidbody2DType { Static = 0, Dynamic = 1, Kinematic = 2};
 		Rigidbody2DType BodyType = Rigidbody2DType::Dynamic;
 
 		// Body
@@ -157,6 +158,7 @@ namespace Locus
 		float LinearDamping = 0.2f;
 		float AngularDamping = 0.2f;
 		bool FixedRotation = false;
+		bool IsBullet = false;
 		
 		void* RuntimeBody = nullptr;
 

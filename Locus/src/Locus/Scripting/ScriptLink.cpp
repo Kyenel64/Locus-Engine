@@ -83,6 +83,8 @@ namespace Locus
 		LINK_INTERNAL_CALL(Rigidbody2DComponent_SetAngularDamping);
 		LINK_INTERNAL_CALL(Rigidbody2DComponent_GetFixedRotation);
 		LINK_INTERNAL_CALL(Rigidbody2DComponent_SetFixedRotation);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_GetIsBullet);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_SetIsBullet);
 		LINK_INTERNAL_CALL(Rigidbody2DComponent_AddForce);
 		LINK_INTERNAL_CALL(Rigidbody2DComponent_AddLinearImpulse);
 		LINK_INTERNAL_CALL(Rigidbody2DComponent_GetPosition);

@@ -170,6 +170,12 @@ namespace Locus
         internal extern static void Rigidbody2DComponent_SetFixedRotation(ulong id, bool newFixedRotation);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static bool Rigidbody2DComponent_GetIsBullet(ulong id);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Rigidbody2DComponent_SetIsBullet(ulong id, bool newIsBullet);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static void Rigidbody2DComponent_AddForce(ulong id, ref Vec2 force);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]

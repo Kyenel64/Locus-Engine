@@ -19,7 +19,6 @@ namespace Sandbox
 
         void OnUpdate(float deltaTime)
         {
-            Tag = "YOYUOY";
             timer += deltaTime;
             // Horizontal movement
             if (Input.IsKeyHeld(KeyCode.A))
@@ -68,6 +67,7 @@ namespace Sandbox
             projectile.Transform.Position = new Vec3(Transform.Position.x + direction.x, Transform.Position.y + direction.y, 0.0f);
             projectile.AddComponent<CircleRendererComponent>();
             Rigidbody2DComponent projectileRb2D = projectile.AddComponent<Rigidbody2DComponent>();
+            projectileRb2D.IsBullet = true;
             projectile.AddComponent<CircleCollider2DComponent>();
 
             projectile.Transform.Scale = new Vec3(0.2f);

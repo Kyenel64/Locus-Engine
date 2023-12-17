@@ -375,7 +375,7 @@ namespace Locus
 					{
 						bool isSelected = currentRigidbodyTypeString == RigidbodyTypeString[i];
 						if (ImGui::Selectable(RigidbodyTypeString[i], isSelected))
-							CommandHistory::AddCommand(new ChangeValueCommand((Rigidbody2DComponent::Rigidbody2DType)i, component.BodyType));
+							CommandHistory::AddCommand(new ChangeValueCommand((Rigidbody2DType)i, component.BodyType));
 
 						if (isSelected)
 							ImGui::SetItemDefaultFocus();
@@ -395,6 +395,9 @@ namespace Locus
 				Widgets::DrawValueControl("Angular Damping", component.AngularDamping, 0.2f);
 				// Fixed Rotation
 				Widgets::DrawBoolControl("Fixed Rotation", component.FixedRotation);
+
+				if (component.BodyType == Rigidbody2DType::Dynamic)
+					Widgets::DrawBoolControl("IsBullet", component.IsBullet);
 			});
 
 		// --- BoxCollider2D Component ----------------------------------------

@@ -402,6 +402,7 @@ namespace Locus
 			bodyDef.angularDamping = rb2D.AngularDamping;
 			bodyDef.fixedRotation = rb2D.FixedRotation;
 			bodyDef.gravityScale = rb2D.GravityScale;
+			bodyDef.bullet = rb2D.IsBullet;
 			bodyDef.userData.pointer = (uintptr_t)entity.GetUUID();
 			entityBody = m_Box2DWorld->CreateBody(&bodyDef);
 			rb2D.RuntimeBody = entityBody;
@@ -519,6 +520,8 @@ namespace Locus
 				runtimeBody->SetAngularDamping(rb2D.AngularDamping);
 			if (runtimeBody->IsFixedRotation() != rb2D.FixedRotation)
 				runtimeBody->SetFixedRotation(rb2D.FixedRotation);
+			if (runtimeBody->IsBullet() != rb2D.IsBullet)
+				runtimeBody->SetBullet(rb2D.IsBullet);
 		}
 
 		if (entity.HasComponent<BoxCollider2DComponent>())

@@ -274,6 +274,7 @@ namespace Locus
 			out << YAML::Key << "LinearDamping" << YAML::Value << rb2D.LinearDamping;
 			out << YAML::Key << "AngularDamping" << YAML::Value << rb2D.AngularDamping;
 			out << YAML::Key << "FixedRotation" << YAML::Value << rb2D.FixedRotation;
+			out << YAML::Key << "IsBullet" << YAML::Value << rb2D.IsBullet;
 			out << YAML::EndMap; // End Rigidbody2D Component
 		}
 
@@ -493,12 +494,13 @@ namespace Locus
 				if (rigidBody2DComponent)
 				{
 					auto& rb2D = deserializedEntity.AddComponent<Rigidbody2DComponent>();
-					rb2D.BodyType = (Rigidbody2DComponent::Rigidbody2DType)rigidBody2DComponent["BodyType"].as<int>();
+					rb2D.BodyType = (Rigidbody2DType)rigidBody2DComponent["BodyType"].as<int>();
 					rb2D.Mass = rigidBody2DComponent["Mass"].as<float>();
 					rb2D.GravityScale = rigidBody2DComponent["GravityScale"].as<float>();
 					rb2D.LinearDamping = rigidBody2DComponent["LinearDamping"].as<float>();
 					rb2D.AngularDamping = rigidBody2DComponent["AngularDamping"].as<float>();
 					rb2D.FixedRotation = rigidBody2DComponent["FixedRotation"].as<bool>();
+					rb2D.IsBullet = rigidBody2DComponent["IsBullet"].as<bool>();
 				}
 
 				// --- BoxCollider2D Component ---

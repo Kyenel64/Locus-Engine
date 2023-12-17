@@ -191,6 +191,11 @@ namespace Locus
             get => InternalCalls.Rigidbody2DComponent_GetFixedRotation(Entity.ID);
             set => InternalCalls.Rigidbody2DComponent_SetFixedRotation(Entity.ID, value);
         }
+        public bool IsBullet
+        {
+            get => InternalCalls.Rigidbody2DComponent_GetIsBullet(Entity.ID);
+            set => InternalCalls.Rigidbody2DComponent_SetIsBullet(Entity.ID, value);
+        }
         public Vec2 Position
         {
             get

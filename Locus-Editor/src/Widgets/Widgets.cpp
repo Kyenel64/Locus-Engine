@@ -222,8 +222,6 @@ namespace Locus::Widgets
 			labelWidth = ImGui::GetContentRegionAvail().x * 0.5f - (20.0f + ImGui::GetStyle().FramePadding.x);
 
 		glm::vec2 dragValues = changeValue;
-		if (name == "Rotation")
-			dragValues = glm::degrees(dragValues);
 
 		ImGui::PushID(name.c_str());
 		DrawControlLabel(name.c_str(), { labelWidth, 0 });
@@ -266,8 +264,6 @@ namespace Locus::Widgets
 			labelWidth = ImGui::GetContentRegionAvail().x * 0.5f - (20.0f + ImGui::GetStyle().FramePadding.x);
 
 		glm::vec3 dragValues = changeValue;
-		if (name == "Rotation")
-			dragValues = glm::degrees(dragValues);
 
 		ImGui::PushID(name.c_str());
 		DrawControlLabel(name.c_str(), {labelWidth, 0});

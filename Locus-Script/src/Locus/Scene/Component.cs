@@ -59,7 +59,7 @@ namespace Locus
             set => InternalCalls.TransformComponent_SetLocalPosition(Entity.ID, ref value);
         }
         /// <summary>
-        /// Rotation of the entity local to its parent. Represented in euler angles.
+        /// Euler rotation of the entity in degrees.
         /// </summary>
         public Vec3 EulerRotation
         {

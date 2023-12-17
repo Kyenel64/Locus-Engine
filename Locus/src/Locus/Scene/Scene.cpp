@@ -117,7 +117,7 @@ namespace Locus
 					b2Body* body = (b2Body*)rb2d.RuntimeBody;
 					const b2Vec2& position = body->GetPosition();
 					transform.LocalPosition = { position.x, position.y , 0.0f };
-					transform.SetLocalRotation({ 0, 0, body->GetAngle() });
+					transform.SetLocalRotation({ 0, 0, glm::degrees(body->GetAngle()) });
 				}
 			}
 		}
@@ -269,7 +269,7 @@ namespace Locus
 					b2Body* body = (b2Body*)rb2d.RuntimeBody;
 					const b2Vec2& position = body->GetPosition();
 					transform.LocalPosition = { position.x, position.y , 0.0f };
-					transform.SetLocalRotation({ 0, 0, body->GetAngle() });
+					transform.SetLocalRotation({ 0, 0, glm::degrees(body->GetAngle()) });
 				}
 			}
 		}
@@ -397,7 +397,7 @@ namespace Locus
 			b2BodyDef bodyDef;
 			bodyDef.type = Utils::Rigidbody2DTypeToBox2DType(rb2D.BodyType);
 			bodyDef.position.Set(tc.LocalPosition.x, tc.LocalPosition.y);
-			bodyDef.angle = tc.LocalRotation.z;
+			bodyDef.angle = glm::radians(tc.LocalRotation.z);
 			bodyDef.linearDamping = rb2D.LinearDamping;
 			bodyDef.angularDamping = rb2D.AngularDamping;
 			bodyDef.fixedRotation = rb2D.FixedRotation;
@@ -422,7 +422,7 @@ namespace Locus
 				b2BodyDef bodyDef;
 				bodyDef.type = b2BodyType::b2_staticBody;
 				bodyDef.position.Set(tc.LocalPosition.x, tc.LocalPosition.y);
-				bodyDef.angle = tc.LocalRotation.z;
+				bodyDef.angle = glm::radians(tc.LocalRotation.z);
 				bodyDef.userData.pointer = (uintptr_t)entity.GetUUID();
 				entityBody = m_Box2DWorld->CreateBody(&bodyDef);
 			}

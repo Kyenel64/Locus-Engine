@@ -71,7 +71,7 @@ namespace Locus
 
 	private:
 		// Rotations are private to force using setters to sync both euler and quat.
-		// In radians
+		// In degrees
 		glm::vec3 LocalRotation = { 0.0f, 0.0f, 0.0f };
 		glm::quat LocalRotationQuat = { 0.0f, 0.0f, 0.0f, 0.0f };
 
@@ -88,25 +88,20 @@ namespace Locus
 				 * glm::scale(glm::mat4(1.0f), LocalScale);
 		}
 
-		glm::vec3 GetLocalRotation() const { return LocalRotation; }
-		glm::quat GetLocalRotationQuat() const { return LocalRotationQuat; }
+		// In degrees
+		const glm::vec3& GetLocalRotation() const { return LocalRotation; }
+		const glm::quat& GetLocalRotationQuat() const { return LocalRotationQuat; }
 
 		void SetLocalRotation(const glm::vec3& rotation)
 		{
 			LocalRotation = rotation;
-			LocalRotationQuat = glm::quat(LocalRotation);
-		}
-
-		void SetLocalRotationDegrees(const glm::vec3& rotation)
-		{
-			LocalRotation = glm::radians(rotation);
-			LocalRotationQuat = glm::quat(LocalRotation);
+			LocalRotationQuat = glm::quat(glm::radians(LocalRotation));
 		}
 
 		void SetLocalRotationQuat(const glm::quat& quat)
 		{
 			LocalRotationQuat = quat;
-			LocalRotation = glm::eulerAngles(LocalRotationQuat);
+			LocalRotation = glm::degrees(glm::eulerAngles(LocalRotationQuat));
 		}
 
 		friend class Scene;

@@ -511,7 +511,7 @@ namespace Locus
 				case ImGuizmo::ROTATE:
 				{
 					// Do this in Euler in an attempt to preserve any full revolutions (> 360)
-					glm::vec3 originalRotationEuler = tc.GetLocalRotation();
+					glm::vec3 originalRotationEuler = glm::radians(tc.GetLocalRotation());
 
 					// Map original rotation to range [-180, 180] which is what ImGuizmo gives us
 					originalRotationEuler.x = fmodf(originalRotationEuler.x + glm::pi<float>(), glm::two_pi<float>()) - glm::pi<float>();
@@ -526,7 +526,7 @@ namespace Locus
 					if (fabs(deltaRotationEuler.z) < 0.001) deltaRotationEuler.z = 0.0f;
 
 					glm::vec3 rotationEuler = tc.GetLocalRotation();
-					CommandHistory::AddCommand(new ChangeValueCommand(rotationEuler + deltaRotationEuler, tc.LocalRotation));
+					CommandHistory::AddCommand(new ChangeValueCommand(rotationEuler + glm::degrees(deltaRotationEuler), tc.LocalRotation));
 					break;
 				}
 				case ImGuizmo::SCALE:
@@ -1104,7 +1104,7 @@ namespace Locus
 				for (auto id : cc.ChildEntities)
 				{
 					Entity entity = m_ActiveScene->GetEntityByUUID(id);
-					auto tag = entity.GetComponent<TagComponent>().Tag;
+					auto& tag = entity.GetComponent<TagComponent>().Tag;
 					ImGui::Text(tag.c_str());
 				}
 			}
@@ -1116,7 +1116,7 @@ namespace Locus
 			ImGui::Separator();
 			ImGui::Text("Transforms");
 
-			auto tc = m_SelectedEntity.GetComponent<TransformComponent>();
+			auto& tc = m_SelectedEntity.GetComponent<TransformComponent>();
 			if (tc.Parent)
 				ImGui::Text("Parent: %s", m_ActiveScene->GetEntityByUUID(tc.Parent).GetComponent<TagComponent>().Tag.c_str());
 			else
@@ -1133,7 +1133,7 @@ namespace Locus
 			ImGui::Text("LocalPosition: %f, %f, %f", tc.LocalPosition.x, tc.LocalPosition.y, tc.LocalPosition.z);
 			ImGui::Text("WorldPosition: %f, %f, %f", worldPosition.x, worldPosition.y, worldPosition.z);
 
-			ImGui::Text("LocalRotation: %f, %f, %f", glm::degrees(tc.LocalRotation.x), glm::degrees(tc.LocalRotation.y), glm::degrees(tc.LocalRotation.z));
+			ImGui::Text("LocalRotation: %f, %f, %f", tc.LocalRotation.x, tc.LocalRotation.y, tc.LocalRotation.z);
 			ImGui::Text("WorldRotation: %f, %f, %f", glm::degrees(worldRotation.x), glm::degrees(worldRotation.y), glm::degrees(worldRotation.z));
 
 			ImGui::Text("LocalScale: %f, %f, %f", tc.LocalScale.x, tc.LocalScale.y, tc.LocalScale.z);

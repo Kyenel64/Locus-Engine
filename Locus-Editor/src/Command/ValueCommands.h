@@ -69,13 +69,13 @@ namespace Locus
 	public:
 		ChangeFunctionValueCommand() = default;
 
-		ChangeFunctionValueCommand(std::function<void(const T&)> function, const T newValue, T& valueToChange)
-			: m_NewValue(newValue), m_ValueToChange(valueToChange), m_Function(function)
+		ChangeFunctionValueCommand(std::function<void(const T&)> function, const T& newValue, const T& oldValue)
+			: m_NewValue(newValue), m_OldValue(oldValue), m_Function(function)
 		{
 		}
 
-		ChangeFunctionValueCommand(std::function<void(T)> function, const T newValue, T& valueToChange)
-			: m_NewValue(newValue), m_ValueToChange(valueToChange), m_Function(function)
+		ChangeFunctionValueCommand(std::function<void(T)> function, T newValue, T oldValue)
+			: m_NewValue(newValue), m_OldValue(oldValue), m_Function(function)
 		{
 		}
 
@@ -83,16 +83,13 @@ namespace Locus
 
 		virtual void Execute() override
 		{
-			m_OldValue = m_ValueToChange;
-			m_ValueToChange = m_NewValue;
-			m_Function(m_ValueToChange);
+			m_Function(m_NewValue);
 			CommandHistory::SetEditorSavedStatus(false);
 		}
 
 		virtual void Undo() override
 		{
-			m_ValueToChange = m_OldValue;
-			m_Function(m_ValueToChange);
+			m_Function(m_OldValue);
 			CommandHistory::SetEditorSavedStatus(false);
 		}
 
@@ -101,7 +98,7 @@ namespace Locus
 			ChangeFunctionValueCommand* otherCommand = dynamic_cast<ChangeFunctionValueCommand*>(other);
 			if (otherCommand != nullptr)
 			{
-				if (&otherCommand->m_ValueToChange == &this->m_ValueToChange)
+				if (&otherCommand->m_OldValue == &this->m_OldValue)
 				{
 					otherCommand->m_NewValue = this->m_NewValue;
 					return true;
@@ -114,7 +111,6 @@ namespace Locus
 	private:
 		T m_NewValue;
 		T m_OldValue;
-		T& m_ValueToChange;
 		std::function<void(const T&)> m_Function;
 	};
 

@@ -186,12 +186,12 @@ namespace Locus
 		static void TransformComponent_GetLocalRotationEuler(UUID entityID, glm::vec3* output)
 		{
 			Entity entity = GetEntity(entityID);
-			*output = glm::degrees(entity.GetComponent<TransformComponent>().GetLocalRotation());
+			*output = entity.GetComponent<TransformComponent>().GetLocalRotation();
 		}
 		static void TransformComponent_SetLocalRotationEuler(UUID entityID, glm::vec3* newRot)
 		{
 			Entity entity = GetEntity(entityID);
-			entity.GetComponent<TransformComponent>().SetLocalRotationDegrees(*newRot);
+			entity.GetComponent<TransformComponent>().SetLocalRotation(*newRot);
 		}
 
 		// Local Scale

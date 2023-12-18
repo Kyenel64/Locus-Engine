@@ -89,7 +89,44 @@ namespace Locus
 		CopyComponent<ScriptComponent>(from, to);
 	}
 
-	void Scene::OnUpdateRuntime(Timestep deltaTime)
+	void Scene::OnEditorUpdate(Timestep deltaTime, EditorCamera& camera)
+	{
+		RenderCommand::SetClearColor(camera.GetBackgroundColor());
+		RenderCommand::Clear();
+
+		// Main rendering
+		Renderer2D::BeginScene(camera);
+
+		{ // Sprite
+			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				auto& sprite = entity.GetComponent<SpriteRendererComponent>();
+				if (entity.GetComponent<TagComponent>().Enabled)
+					Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
+			}
+		}
+
+		{ // Circle
+			auto view = m_Registry.view<TransformComponent, CircleRendererComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				auto& circle = entity.GetComponent<CircleRendererComponent>();
+				if (entity.GetComponent<TagComponent>().Enabled)
+					Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
+			}
+		}
+
+		// 3D grid plane
+		if (camera.GetGridVisibility())
+			Renderer2D::DrawGrid();
+
+		Renderer2D::EndScene();
+	}
+
+	void Scene::OnRuntimeUpdate(Timestep deltaTime)
 	{
 		// --- Physics ---
 		// Check physics data for changes
@@ -154,18 +191,13 @@ namespace Locus
 		SceneCamera* mainCamera = nullptr;
 		glm::mat4 cameraTransform;
 		{
-			auto view = m_Registry.view<TransformComponent, CameraComponent>();
-			for (auto e : view)
+			Entity primaryCameraEntity = GetPrimaryCameraEntity();
+			if (primaryCameraEntity.IsValid())
 			{
-				Entity entity = Entity(e, this);
-				auto& camera = entity.GetComponent<CameraComponent>();
-				if (camera.Primary)
-				{
-					mainCamera = &camera.Camera;
-					mainCamera->SetViewportSize(m_ViewportWidth, m_ViewportHeight);
-					cameraTransform = GetWorldTransform(entity);
-					break;
-				}
+				auto& camera = primaryCameraEntity.GetComponent<CameraComponent>();
+				mainCamera = &camera.Camera;
+				mainCamera->SetViewportSize(m_ViewportWidth, m_ViewportHeight);
+				cameraTransform = GetWorldTransform(primaryCameraEntity);
 			}
 		}
 		// Render if main camera exists
@@ -208,41 +240,7 @@ namespace Locus
 		}
 	}
 
-	void Scene::OnUpdateEditor(Timestep deltaTime, EditorCamera& camera)
-	{
-		// Main rendering
-		Renderer2D::BeginScene(camera);
-
-		{ // Sprite
-			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent, TagComponent>();
-			for (auto e : view)
-			{
-				Entity entity = Entity(e, this);
-				auto& sprite = entity.GetComponent<SpriteRendererComponent>();
-				if (entity.GetComponent<TagComponent>().Enabled)
-					Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
-			}
-		}
-
-		{ // Circle
-			auto view = m_Registry.view<TransformComponent, CircleRendererComponent, TagComponent>();
-			for (auto e : view)
-			{
-				Entity entity = Entity(e, this);
-				auto& circle = entity.GetComponent<CircleRendererComponent>();
-				if (entity.GetComponent<TagComponent>().Enabled)
-					Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
-			}
-		}
-
-		// 3D grid plane
-		if (camera.GetGridVisibility())
-			Renderer2D::DrawGrid();
-
-		Renderer2D::EndScene();
-	}
-
-	void Scene::OnUpdatePhysics(Timestep deltaTime, EditorCamera& camera)
+	void Scene::OnPhysicsUpdate(Timestep deltaTime, EditorCamera& camera)
 	{
 		// --- Physics ---
 		// Check physics data for changes
@@ -273,6 +271,9 @@ namespace Locus
 				}
 			}
 		}
+
+		RenderCommand::SetClearColor(camera.GetBackgroundColor());
+		RenderCommand::Clear();
 
 		// Main rendering
 		Renderer2D::BeginScene(camera);
@@ -375,6 +376,110 @@ namespace Locus
 	{
 		delete m_Box2DWorld;
 		m_Box2DWorld = nullptr;
+	}
+
+	void Scene::OnPhysicsStop()
+	{
+		delete m_Box2DWorld;
+		m_Box2DWorld = nullptr;
+	}
+
+	void Scene::OnRuntimePause(Timestep deltaTime)
+	{
+		// --- Rendering 2D ---
+		// Find first camera with "Primary" property enabled.
+		SceneCamera* mainCamera = nullptr;
+		glm::mat4 cameraTransform;
+		{
+			auto view = m_Registry.view<TransformComponent, CameraComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				auto& camera = entity.GetComponent<CameraComponent>();
+				if (camera.Primary)
+				{
+					mainCamera = &camera.Camera;
+					mainCamera->SetViewportSize(m_ViewportWidth, m_ViewportHeight);
+					cameraTransform = GetWorldTransform(entity);
+					break;
+				}
+			}
+		}
+		// Render if main camera exists
+		if (mainCamera)
+		{
+			// Main rendering
+			RenderCommand::SetClearColor(mainCamera->GetBackgroundColor());
+			RenderCommand::Clear();
+
+			Renderer2D::BeginScene(*mainCamera, cameraTransform);
+
+			{ // Sprite
+				auto view = m_Registry.view<TransformComponent, SpriteRendererComponent, TagComponent>();
+				for (auto e : view)
+				{
+					Entity entity = Entity(e, this);
+					auto& sprite = entity.GetComponent<SpriteRendererComponent>();
+					if (entity.GetComponent<TagComponent>().Enabled)
+						Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
+				}
+			}
+
+			{ // Circle
+				auto view = m_Registry.view<TransformComponent, CircleRendererComponent, TagComponent>();
+				for (auto e : view)
+				{
+					Entity entity = Entity(e, this);
+					auto& circle = entity.GetComponent<CircleRendererComponent>();
+					if (entity.GetComponent<TagComponent>().Enabled)
+						Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
+				}
+			}
+
+			Renderer2D::EndScene();
+		}
+		else
+		{
+			RenderCommand::SetClearColor({ 0.2f, 0.2f, 0.25f, 1 });
+			RenderCommand::Clear();
+		}
+	}
+
+	void Scene::OnPhysicsPause(Timestep deltaTime, EditorCamera& camera)
+	{
+		RenderCommand::SetClearColor(camera.GetBackgroundColor());
+		RenderCommand::Clear();
+
+		// Main rendering
+		Renderer2D::BeginScene(camera);
+
+		{ // Sprite
+			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				auto& sprite = entity.GetComponent<SpriteRendererComponent>();
+				if (entity.GetComponent<TagComponent>().Enabled)
+					Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
+			}
+		}
+
+		{ // Circle
+			auto view = m_Registry.view<TransformComponent, CircleRendererComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				auto& circle = entity.GetComponent<CircleRendererComponent>();
+				if (entity.GetComponent<TagComponent>().Enabled)
+					Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
+			}
+		}
+
+		// 3D grid plane
+		if (camera.GetGridVisibility())
+			Renderer2D::DrawGrid();
+
+		Renderer2D::EndScene();
 	}
 
 	void Scene::CreatePhysicsData(Entity entity)

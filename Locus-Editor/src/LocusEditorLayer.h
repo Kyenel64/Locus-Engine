@@ -47,7 +47,7 @@ namespace Locus
 		bool SaveScene();
 
 		// Viewport
-		void showGizmoUI();
+		void DrawGizmo();
 		void ProcessViewportDragDrop();
 		void OnScenePlay();
 		void OnPhysicsPlay();

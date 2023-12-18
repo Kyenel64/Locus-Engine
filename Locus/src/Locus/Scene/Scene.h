@@ -34,13 +34,23 @@ namespace Locus
 		static void CopyComponent(Entity from, Entity to);
 		static void CopyAllComponents(Entity from, Entity to);
 
-		void OnUpdateRuntime(Timestep deltaTime);
-		void OnUpdateEditor(Timestep deltaTime, EditorCamera& camera);
-		void OnUpdatePhysics(Timestep deltaTime, EditorCamera& camera);
+		void OnEditorUpdate(Timestep deltaTime, EditorCamera& camera);
 
+		// On Update
+		void OnRuntimeUpdate(Timestep deltaTime);
+		void OnPhysicsUpdate(Timestep deltaTime, EditorCamera& camera);
+
+		// On Start
 		void OnRuntimeStart();
 		void OnPhysicsStart();
+
+		// On Stop
 		void OnRuntimeStop();
+		void OnPhysicsStop();
+
+		// On Pause
+		void OnRuntimePause(Timestep deltaTime);
+		void OnPhysicsPause(Timestep deltaTime, EditorCamera& camera);
 
 		// Create new box2d physics data for newly added physics components.
 		void CreatePhysicsData(Entity entity);

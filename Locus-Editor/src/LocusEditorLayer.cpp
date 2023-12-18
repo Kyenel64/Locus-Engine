@@ -115,31 +115,30 @@ namespace Locus
 		{
 			case SceneState::Edit:
 			{
-				RenderCommand::SetClearColor(m_EditorCamera.GetBackgroundColor());
-				RenderCommand::Clear();
-				m_ActiveScene->OnUpdateEditor(deltaTime, m_EditorCamera);
-				m_EditorCamera.OnUpdate(deltaTime); // These are camera specific update commands. Actual rendering is in scene object.
-				break;
-			}
-			case SceneState::Pause:
-			{
+				m_ActiveScene->OnEditorUpdate(deltaTime, m_EditorCamera);
+				m_EditorCamera.OnUpdate(deltaTime);
 				break;
 			}
 			case SceneState::Play:
 			{
-				m_ActiveScene->OnUpdateRuntime(deltaTime);
+				m_ActiveScene->OnRuntimeUpdate(deltaTime);
 				break;
 			}
 			case SceneState::Physics:
 			{
-				RenderCommand::SetClearColor(m_EditorCamera.GetBackgroundColor());
-				RenderCommand::Clear();
-				m_ActiveScene->OnUpdatePhysics(deltaTime, m_EditorCamera);
-				m_EditorCamera.OnUpdate(deltaTime); // These are camera specific update commands. Actual rendering is in scene object.
+				m_ActiveScene->OnPhysicsUpdate(deltaTime, m_EditorCamera);
+				m_EditorCamera.OnUpdate(deltaTime);
+				break;
+			}
+			case SceneState::Pause:
+			{
+				m_ActiveScene->OnRuntimePause(deltaTime);
 				break;
 			}
 			case SceneState::PhysicsPause:
 			{
+				m_ActiveScene->OnPhysicsPause(deltaTime, m_EditorCamera);
+				m_EditorCamera.OnUpdate(deltaTime);
 				break;
 			}
 		}
@@ -465,7 +464,7 @@ namespace Locus
 		}
 	}
 
-	void LocusEditorLayer::showGizmoUI()
+	void LocusEditorLayer::DrawGizmo()
 	{
 		ImGuizmo::SetOrthographic(false);
 		ImGuizmo::SetDrawlist();
@@ -473,8 +472,25 @@ namespace Locus
 		ImGuizmo::AllowAxisFlip(false);
 
 		// Camera
-		const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
-		glm::mat4 cameraView = m_EditorCamera.GetViewMatrix();
+		const glm::mat4* proj = nullptr;
+		const glm::mat4* view = nullptr;
+
+		if (m_SceneState == SceneState::Edit || m_SceneState == SceneState::Physics || m_SceneState == SceneState::PhysicsPause)
+		{
+			proj = &m_EditorCamera.GetProjection();
+			view = &m_EditorCamera.GetViewMatrix();
+		}
+		else 
+		{
+			Entity primaryCameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
+			if (primaryCameraEntity.IsValid())
+			{
+				auto& camera = primaryCameraEntity.GetComponent<CameraComponent>();
+				proj = &camera.Camera.GetProjection();
+				view = &glm::inverse(m_ActiveScene->GetWorldTransform(primaryCameraEntity));
+				//view = &primaryCameraEntity.GetComponent<TransformComponent>().GetLocalTransform();
+			}
+		}
 
 		// Entity transform
 		auto& tc = m_SelectedEntity.GetComponent<TransformComponent>();
@@ -487,7 +503,7 @@ namespace Locus
 			snapValue = 45.0f; // Snap to 45 degrees for rotation
 		float snapValues[3] = { snapValue, snapValue, snapValue };
 
-		ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
+		ImGuizmo::Manipulate(glm::value_ptr(*view), glm::value_ptr(*proj),
 			(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform),
 			nullptr, snap ? snapValues : nullptr);
 
@@ -659,7 +675,7 @@ namespace Locus
 		if (m_SelectedEntity && m_GizmoType != -1)
 		{
 			if (!m_GizmoFirstClick)
-				showGizmoUI();
+				DrawGizmo();
 			else
 				m_GizmoFirstClick = false;
 		}

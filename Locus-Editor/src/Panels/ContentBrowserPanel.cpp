@@ -16,7 +16,6 @@ namespace Locus
 		m_FileIcon = Texture2D::Create("resources/icons/FileIcon.png");
 	}
 
-	// TODO: Not yet fully implemented
 	void ContentBrowserPanel::OnImGuiRender()
 	{
 		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_TabBarAlignLeft | ImGuiWindowFlags_DockedWindowBorder;

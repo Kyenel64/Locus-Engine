@@ -40,7 +40,7 @@ namespace Locus
 
 		if (Input::IsMouseButtonPressed(Mouse::ButtonMiddle))
 		{
-			if (Input::IsKeyPressed(Key::LeftShift))
+			if (Input::IsKeyHeld(Key::LeftShift))
 				MousePan(delta);
 			else
 				MouseRotate(delta);

@@ -322,7 +322,7 @@ namespace Locus
 			out << YAML::Key << "ScriptClass" << YAML::Value << sc.ScriptClass;
 
 			// Fields
-			auto fieldInstances = ScriptEngine::GetFieldInstances(entity.GetUUID());
+			auto& fieldInstances = ScriptEngine::GetFieldInstances(entity.GetUUID());
 			out << YAML::Key << "Fields";
 			out << YAML::BeginMap;
 			for (auto& [name, field] : fieldInstances)

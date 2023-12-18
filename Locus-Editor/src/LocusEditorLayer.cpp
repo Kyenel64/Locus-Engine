@@ -481,7 +481,7 @@ namespace Locus
 		glm::mat4& transform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
 
 		// Snapping
-		bool snap = Input::IsKeyPressed(Key::LeftControl);
+		bool snap = Input::IsKeyHeld(Key::LeftControl);
 		float snapValue = 0.5f; // Snap 0.5m for translation & scale
 		if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
 			snapValue = 45.0f; // Snap to 45 degrees for rotation
@@ -1101,7 +1101,7 @@ namespace Locus
 				ImGui::Separator();
 				ImGui::Text("Children:");
 				ImGui::Indent();
-				for (auto id : cc.ChildEntities)
+				for (auto& id : cc.ChildEntities)
 				{
 					Entity entity = m_ActiveScene->GetEntityByUUID(id);
 					auto& tag = entity.GetComponent<TagComponent>().Tag;

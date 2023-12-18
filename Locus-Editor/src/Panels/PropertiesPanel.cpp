@@ -285,10 +285,8 @@ namespace Locus
 				// Perspective settings
 				if (camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
 				{
-					// FOV TODO: Fix
-					float fov = glm::degrees(camera.GetPerspectiveFOV());
-					Widgets::DrawValueControl("FOV", fov, 45.0f);
-					camera.SetPerspectiveFOV(glm::radians(fov));
+					// FOV
+					Widgets::DrawValueControl("FOV", camera.GetPerspectiveFOV(), 45.0f);
 					// Near
 					Widgets::DrawValueControl("Near Clip", camera.GetPerspectiveNearClip(), -1.0f, 0.1f, "%.1f");
 					// Far

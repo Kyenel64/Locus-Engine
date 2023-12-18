@@ -406,7 +406,7 @@ namespace Locus
 			bodyDef.userData.pointer = (uintptr_t)entity.GetUUID();
 			entityBody = m_Box2DWorld->CreateBody(&bodyDef);
 			rb2D.RuntimeBody = entityBody;
-			b2MassData massData;
+			b2MassData massData = {};
 			massData.mass = rb2D.Mass;
 			massData.I = entityBody->GetInertia();
 			massData.center = entityBody->GetLocalCenter();
@@ -439,7 +439,7 @@ namespace Locus
 			b2PolygonShape box;
 			box.SetAsBox(size.x / 2, size.y / 2, offset, angle);
 			b2FixtureDef fixtureDef; // Move this to collider
-			fixtureDef.density = mass; // TODO: Check if this is a correct way to handle density
+			fixtureDef.density = mass; // TODO: Calculate mass from body and implement multiple fixtures per body.
 			fixtureDef.friction = b2D.Friction;
 			fixtureDef.restitution = b2D.Restitution;
 			fixtureDef.restitutionThreshold = b2D.RestitutionThreshold;
@@ -505,7 +505,7 @@ namespace Locus
 
 			if (runtimeBody->GetMass() != rb2D.Mass)
 			{
-				b2MassData massData;
+				b2MassData massData = {};
 				massData.mass = rb2D.Mass;
 				massData.I = runtimeBody->GetInertia();
 				massData.center = runtimeBody->GetLocalCenter();

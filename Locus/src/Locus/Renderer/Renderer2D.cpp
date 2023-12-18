@@ -210,7 +210,7 @@ namespace Locus
 		s_Data.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
 
 		// Create and initialize textures
-		int32_t samplers[s_Data.MaxTextureSlots];
+		int32_t samplers[s_Data.MaxTextureSlots] = {};
 		for (uint32_t i = 0; i < s_Data.MaxTextureSlots; i++)
 			samplers[i] = i;
 
@@ -546,7 +546,7 @@ namespace Locus
 	{
 		LOCUS_PROFILE_FUNCTION();
 
-		glm::vec3 points[4];
+		glm::vec3 points[4] = {};
 		for (size_t i = 0; i < 4; i++)
 			points[i] = transform * s_Data.QuadVertexPositions[i];
 

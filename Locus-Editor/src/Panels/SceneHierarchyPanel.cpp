@@ -161,7 +161,7 @@ namespace Locus
 			if (entity.HasComponent<ChildComponent>())
 			{
 				auto& cc = entity.GetComponent<ChildComponent>();
-				for (auto childEntity : cc.ChildEntities)
+				for (auto& childEntity : cc.ChildEntities)
 				{
 					DrawEntityNode(m_ActiveScene->GetEntityByUUID(childEntity));
 				}

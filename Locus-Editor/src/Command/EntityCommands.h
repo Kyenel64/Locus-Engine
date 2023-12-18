@@ -418,7 +418,7 @@ namespace Locus
 			if (from.HasComponent<ChildComponent>())
 			{
 				to.AddComponent<ChildComponent>();
-				for (auto copyUUID : from.GetComponent<ChildComponent>().ChildEntities)
+				for (auto& copyUUID : from.GetComponent<ChildComponent>().ChildEntities)
 				{
 					Entity copyEntity = m_ActiveScene->GetEntityByUUID(copyUUID);
 					auto& copyTag = copyEntity.GetComponent<TagComponent>();

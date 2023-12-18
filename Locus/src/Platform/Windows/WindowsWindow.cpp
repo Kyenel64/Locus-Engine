@@ -69,7 +69,7 @@ namespace Locus
 		SetVSync(m_Data.VSync);
 
 		// Set window icon
-		GLFWimage icons[1];
+		GLFWimage icons[1] = {};
 		icons[0].pixels = stbi_load("resources/icons/LocusLogoIcon.png", &icons[0].width, &icons[0].height, 0, 4);
 		glfwSetWindowIcon(m_Window, 1, icons);
 		stbi_image_free(icons[0].pixels);

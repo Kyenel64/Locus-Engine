@@ -33,7 +33,6 @@
 // --- Memory Management ---
 namespace Locus
 {
-	// TODO: Currently just a wrapper for std smart pointers.
 	template<typename T>
 	using Scope = std::unique_ptr<T>;
 	template<typename T, typename ... Args>

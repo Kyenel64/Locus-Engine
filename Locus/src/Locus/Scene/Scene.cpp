@@ -342,7 +342,6 @@ namespace Locus
 
 		// --- C# Scripts ---
 		{
-			ScriptEngine::OnRuntimeStart(this);
 			auto view = m_Registry.view<ScriptComponent, TagComponent, IDComponent>();
 			for (auto e : view)
 			{
@@ -376,8 +375,6 @@ namespace Locus
 	{
 		delete m_Box2DWorld;
 		m_Box2DWorld = nullptr;
-
-		ScriptEngine::OnRuntimeStop();
 	}
 
 	void Scene::CreatePhysicsData(Entity entity)

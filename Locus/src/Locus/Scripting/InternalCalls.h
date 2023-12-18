@@ -18,7 +18,7 @@ namespace Locus
 	static Entity GetEntity(UUID entityID)
 	{
 		// Probably faster if C# Entity held entt id instead of UUID.
-		Scene* scene = ScriptEngine::GetScene();
+		Ref<Scene> scene = ScriptEngine::GetScene();
 		if (!scene)
 			return Entity::Null;
 
@@ -37,7 +37,7 @@ namespace Locus
 		// --- Entity ---
 		static uint64_t Entity_CreateEntity()
 		{
-			Scene* scene = ScriptEngine::GetScene();
+			Ref<Scene> scene = ScriptEngine::GetScene();
 			Entity entity = scene->CreateEntity();
 			return entity.GetUUID();
 		}
@@ -54,7 +54,7 @@ namespace Locus
 			s_AddComponentFunctions[mono_reflection_type_get_type(componentType)](entity);
 
 			// TODO: Think of alternative
-			Scene* scene = ScriptEngine::GetScene();
+			Ref<Scene> scene = ScriptEngine::GetScene();
 			scene->CreatePhysicsData(entity);
 		}
 
@@ -104,7 +104,7 @@ namespace Locus
 			auto view = ScriptEngine::GetScene()->GetEntitiesWith<TagComponent>();
 			for (auto e : view)
 			{
-				Entity entity = Entity(e, ScriptEngine::GetScene());
+				Entity entity = Entity(e, ScriptEngine::GetScene().get());
 				if (entity.GetComponent<TagComponent>().Tag == newTagStr)
 					return entity.GetUUID();
 			}
@@ -114,7 +114,7 @@ namespace Locus
 
 		static void Entity_Destroy(UUID entityID)
 		{
-			Scene* scene = ScriptEngine::GetScene();
+			Ref<Scene> scene = ScriptEngine::GetScene();
 			scene->DestroyEntity(scene->GetEntityByUUID(entityID));
 		}
 

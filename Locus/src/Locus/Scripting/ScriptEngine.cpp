@@ -68,7 +68,7 @@ namespace Locus
 		MonoAssembly* AppAssembly = nullptr;
 		MonoImage* AppAssemblyImage = nullptr;
 
-		Scene* Scene = nullptr;
+		Ref<Scene> Scene = nullptr;
 		
 		bool Debugging = true;
 
@@ -228,7 +228,7 @@ namespace Locus
 		}
 	}
 
-	void ScriptEngine::OnRuntimeStart(Scene* scene)
+	void ScriptEngine::OnRuntimeStart(Ref<Scene> scene)
 	{
 		s_Data->Scene = scene; 
 	}
@@ -290,7 +290,7 @@ namespace Locus
 
 	// Getters
 	MonoImage* ScriptEngine::GetImage() { return s_Data->CoreAssemblyImage; }
-	Scene* ScriptEngine::GetScene() { return s_Data->Scene; }
+	Ref<Scene> ScriptEngine::GetScene() { return s_Data->Scene; }
 	std::vector<std::string> ScriptEngine::GetClassNames() { return s_Data->ScriptClassNames; }
 	Ref<ScriptClass> ScriptEngine::GetEntityBaseClass() { return s_Data->EntityBaseClass; }
 	MonoDomain* ScriptEngine::GetAppDomain() { return s_Data->AppDomain; }

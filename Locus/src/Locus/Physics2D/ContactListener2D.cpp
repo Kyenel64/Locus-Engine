@@ -11,7 +11,7 @@ namespace Locus
 {
 	void ContactListener2D::BeginContact(b2Contact* contact)
 	{
-		Scene* scene = ScriptEngine::GetScene(); // TODO: Make Ref<Scene>
+		Ref<Scene> scene = ScriptEngine::GetScene();
 		UUID aUUID = (UUID)contact->GetFixtureA()->GetBody()->GetUserData().pointer;
 		UUID bUUID = (UUID)contact->GetFixtureB()->GetBody()->GetUserData().pointer;
 		Entity aEntity = scene->GetEntityByUUID(aUUID);
@@ -33,7 +33,7 @@ namespace Locus
 
 	void ContactListener2D::EndContact(b2Contact* contact)
 	{
-		Scene* scene = ScriptEngine::GetScene();
+		Ref<Scene> scene = ScriptEngine::GetScene();
 		UUID aUUID = (UUID)contact->GetFixtureA()->GetBody()->GetUserData().pointer;
 		UUID bUUID = (UUID)contact->GetFixtureB()->GetBody()->GetUserData().pointer;
 		Entity aEntity = scene->GetEntityByUUID(aUUID);

@@ -557,6 +557,7 @@ namespace Locus
 	{
 		m_SceneState = SceneState::Play;
 		m_ActiveScene = Scene::Copy(m_EditorScene);
+		ScriptEngine::OnRuntimeStart(m_ActiveScene);
 		m_ActiveScene->OnRuntimeStart();
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 		ImGui::SetWindowFocus("Viewport");
@@ -575,6 +576,7 @@ namespace Locus
 	{
 		m_SelectedEntity = {};
 		m_SceneState = SceneState::Edit;
+		ScriptEngine::OnRuntimeStop();
 		m_ActiveScene->OnRuntimeStop();
 
 		m_ActiveScene = m_EditorScene;

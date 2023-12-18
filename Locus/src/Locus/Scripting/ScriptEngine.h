@@ -110,7 +110,9 @@ namespace Locus
 		static void Init();
 		static void Shutdown();
 
-		static void OnRuntimeStart(Scene* scene);
+		// Sets the current scene
+		static void OnRuntimeStart(Ref<Scene> scene);
+		// Clears script instances
 		static void OnRuntimeStop();
 
 		static void OnCreateEntityScript(Entity entity);
@@ -123,7 +125,7 @@ namespace Locus
 
 		// Getters
 		static MonoImage* GetImage();
-		static Scene* GetScene();
+		static Ref<Scene> GetScene();
 		static std::vector<std::string> GetClassNames();
 		static Ref<ScriptClass> GetEntityBaseClass();
 		static MonoDomain* GetAppDomain();

@@ -696,7 +696,7 @@ namespace Locus
 			}
 		}
 
-		if (entity.HasComponent<CircleRendererComponent>())
+		if (entity.HasComponent<CircleCollider2DComponent>())
 		{
 			auto& c2D = entity.GetComponent<CircleCollider2DComponent>();
 

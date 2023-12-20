@@ -185,24 +185,11 @@ namespace Locus
 		virtual void Execute() override
 		{
 			Entity entity = m_ActiveScene->GetEntityByUUID(m_UUID);
-			// Remove entity from parent's child component
-			if (entity.GetComponent<TransformComponent>().Parent)
-			{
-				UUID parentUUID = entity.GetComponent<TransformComponent>().Parent;
-				Entity parentEntity = m_ActiveScene->GetEntityByUUID(parentUUID);
-				auto& parentCC = parentEntity.GetComponent<ChildComponent>();
-				parentCC.ChildEntities.erase(std::find(parentCC.ChildEntities.begin(), parentCC.ChildEntities.end(), m_UUID));
-				parentCC.ChildCount--;
-
-				if (parentCC.ChildCount == 0)
-					parentEntity.RemoveComponent<ChildComponent>();
-			}
 
 			// Save data of entity and all its children
 			SaveEntityData(m_EntityData, entity);
 			SaveChildEntityData(entity);
 
-			DestroyChildren(entity);
 			m_ActiveScene->DestroyEntity(entity);
 			CommandHistory::SetEditorSavedStatus(false);
 		}

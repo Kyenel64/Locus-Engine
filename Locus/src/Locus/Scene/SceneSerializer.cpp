@@ -540,7 +540,7 @@ namespace Locus
 					sc.ScriptClass = scriptComponent["ScriptClass"].as<std::string>();
 
 					// Fields
-					if (fields)
+					if (fields && ScriptEngine::HasClass(sc.ScriptClass))
 					{
 						Ref<ScriptClass> scriptClass = ScriptEngine::GetScriptClass(sc.ScriptClass);
 						auto& classFields = scriptClass->GetPublicFields();
@@ -596,6 +596,10 @@ namespace Locus
 								}
 							}
 						}
+					}
+					else
+					{
+						sc.ScriptClass = std::string();
 					}
 				}
 			}

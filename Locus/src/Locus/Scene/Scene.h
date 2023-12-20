@@ -28,6 +28,7 @@ namespace Locus
 		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = std::string());
 
 		void DestroyEntity(Entity entity);
+		void DestroyChildren(Entity entity);
 
 		static Ref<Scene> Copy(Ref<Scene> other);
 		template<typename T>

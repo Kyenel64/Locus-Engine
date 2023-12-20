@@ -118,7 +118,7 @@ namespace Locus
 		static void OnCreateEntityScript(Entity entity);
 		static void OnUpdateEntityScript(Entity entity, Timestep deltaTime);
 
-		static bool HasMethod(Ref<ScriptInstance> instance, const std::string& methodName, int paramCount);
+		static bool HasClass(const std::string& className, const std::string& namespaceName = std::string());
 		static void InvokeMethod(Ref<ScriptInstance> instance, MonoMethod* method, void** params);
 
 		static void ReloadScripts();

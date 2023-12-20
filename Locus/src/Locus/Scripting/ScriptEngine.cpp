@@ -273,12 +273,15 @@ namespace Locus
 		}
 	}
 
-	bool ScriptEngine::HasMethod(Ref<ScriptInstance> instance, const std::string& methodName, int paramCount)
+	bool ScriptEngine::HasClass(const std::string& className, const std::string& namespaceName)
 	{
-		MonoMethod* method = mono_class_get_method_from_name(instance->m_ScriptClass->m_MonoClass, methodName.c_str(), paramCount);
-		if (method)
-			return true;
-		return false;
+		// Name formatting
+		std::string classNameStr;
+		if (namespaceName != std::string())
+			classNameStr = std::string(namespaceName) + "::" + std::string(className);
+		else
+			classNameStr = std::string(className);
+		return s_Data->ScriptClasses.find(classNameStr) != s_Data->ScriptClasses.end();
 	}
 
 	void ScriptEngine::InvokeMethod(Ref<ScriptInstance> instance, MonoMethod* method, void** params)

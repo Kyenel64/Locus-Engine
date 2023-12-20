@@ -46,8 +46,38 @@ namespace Locus
 
 	void Scene::DestroyEntity(Entity entity)
 	{
+		LOCUS_CORE_ASSERT(entity.IsValid(), "DestroyEntity(): Entity is not valid!");
+
+		if (entity.GetComponent<TransformComponent>().Parent)
+		{
+			UUID parentUUID = entity.GetComponent<TransformComponent>().Parent;
+			Entity parentEntity = GetEntityByUUID(parentUUID);
+			auto& parentCC = parentEntity.GetComponent<ChildComponent>();
+			parentCC.ChildEntities.erase(std::find(parentCC.ChildEntities.begin(), parentCC.ChildEntities.end(), entity.GetUUID()));
+			parentCC.ChildCount--;
+
+			if (parentCC.ChildCount == 0)
+				parentEntity.RemoveComponent<ChildComponent>();
+		}
+
+		DestroyChildren(entity);
+
 		m_Entities.erase(m_Entities.find(entity.GetUUID()));
 		m_Registry.destroy(entity);
+	}
+
+	void Scene::DestroyChildren(Entity entity)
+	{
+		if (entity.HasComponent<ChildComponent>())
+		{
+			for (UUID childUUID : entity.GetComponent<ChildComponent>().ChildEntities)
+			{
+				Entity childEntity = GetEntityByUUID(childUUID);
+				DestroyChildren(childEntity);
+				m_Entities.erase(childUUID);
+				m_Registry.destroy(childEntity);
+			}
+		}
 	}
 
 	Ref<Scene> Scene::Copy(Ref<Scene> other)

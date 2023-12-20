@@ -3,125 +3,124 @@ using System;
 
 namespace Locus
 {
-    /// <summary>
-    /// Color class. Represents a color in RGBA format.
-    /// </summary>
-    public struct Color
-    {
-        // --- Properties ---
-        /// <summary>
-        /// red channel.
-        /// </summary>
-        public float r;
-        /// <summary>
-        /// green channel.
-        /// </summary>
-        public float g;
-        /// <summary>
-        /// blue channel.
-        /// </summary>
-        public float b;
-        /// <summary>
-        /// alpha channel.
-        /// </summary>
-        public float a;
+	/// <summary>
+	/// Represents a color in RGBA format with range 0 - 1.
+	/// </summary>
+	public struct Color
+	{
+		// --- Properties ---
+		/// <summary> Red channel. </summary>
+		public float r;
+		/// <summary> Green channel. </summary>
+		public float g;
+		/// <summary> Blue channel. </summary>
+		public float b;
+		/// <summary> Alpha channel. </summary>
+		public float a;
 
-        // --- Static Properties ---
-        /// <summary>
-        /// Returns a black color.
-        /// </summary>
-        public static Color Black => new Color(0.0f);
-        public static Color White => new Color(1.0f);
-        public static Color Red => new Color(1.0f, 0.0f, 0.0f, 1.0f);
-        public static Color Green => new Color(0.0f, 1.0f, 0.0f, 1.0f);
-        public static Color Blue => new Color(0.0f, 0.0f, 1.0f, 1.0f);
-        public static Color Yellow => new Color(1.0f, 1.0f, 0.0f, 1.0f);
+		// --- Static Properties ---
+		/// <summary> Returns a black color. </summary>
+		public static Color Black => new Color(0.0f);
+		/// <summary> Returns a white color. </summary>
+		public static Color White => new Color(1.0f);
+		/// <summary> Returns a red color. </summary>
+		public static Color Red => new Color(1.0f, 0.0f, 0.0f, 1.0f);
+		/// <summary> Returns a green color. </summary>
+		public static Color Green => new Color(0.0f, 1.0f, 0.0f, 1.0f);
+		/// <summary> Returns a blue color. </summary>
+		public static Color Blue => new Color(0.0f, 0.0f, 1.0f, 1.0f);
+		/// <summary> Returns a yellow color. </summary>
+		public static Color Yellow => new Color(1.0f, 1.0f, 0.0f, 1.0f);
 
-        // --- Constructors ---
-        /// <summary>
-        /// Sets the RGB channels to the given value.
-        /// </summary>
-        public Color(float value)
-        {
-            r = g = b = value;
-            a = 1.0f;
-        }
-        /// <summary>
-         /// Sets the RGB channels with alpha = 1.0f.
-         /// </summary>
-        public Color(float R, float G, float B)
-        {
-            r = R; g = G; b = B; a = 1.0f;
-        }
-        /// <summary>
-        /// Sets each channel values.
-        /// </summary>
-        public Color(float R, float G, float B, float A)
-        {
-            r = R; g = G; b = B; a = A;
-        }
+		// --- Constructors ---
+		/// <summary>
+		/// Sets the RGB channels to the value with alpha = 1.0f.
+		/// </summary>
+		public Color(float value)
+		{
+			r = g = b = value;
+			a = 1.0f;
+		}
+		/// <summary>
+		/// Sets each RGB channels with alpha = 1.0f.
+		/// </summary>
+		public Color(float R, float G, float B)
+		{
+			r = R; g = G; b = B; a = 1.0f;
+		}
+		/// <summary>
+		/// Sets each RGBA channels.
+		/// </summary>
+		public Color(float R, float G, float B, float A)
+		{
+			r = R; g = G; b = B; a = A;
+		}
 
-        // --- Overrides ---
-        public static Color operator +(Color v1, Color v2)
-        {
-            return new Color(v1.r + v2.r, v1.g + v2.g, v1.b + v2.b, v1.a + v2.a);
-        }
-        public static Color operator +(Color vec, float s)
-        {
-            return new Color(vec.r + s, vec.g + s, vec.b + s, vec.a + s);
-        }
-        public static Color operator +(float s, Color vec)
-        {
-            return new Color(s + vec.r, s + vec.g, s + vec.b, s + vec.a);
-        }
-        public static Color operator -(Color v1, Color v2)
-        {
-            return new Color(v1.r - v2.r, v1.g - v2.g, v1.b - v2.b, v1.a - v2.a);
-        }
-        public static Color operator -(Color vec, float s)
-        {
-            return new Color(vec.r - s, vec.g - s, vec.b - s, vec.a - s);
-        }
-        public static Color operator -(float s, Color vec)
-        {
-            return new Color(s - vec.r, s - vec.g, s - vec.b, s - vec.a);
-        }
-        public static Color operator *(Color v1, Color v2)
-        {
-            return new Color(v1.r * v2.r, v1.g * v2.g, v1.b * v2.b, v1.a * v2.a);
-        }
-        public static Color operator *(Color vec, float s)
-        {
-            return new Color(vec.r * s, vec.g * s, vec.b * s, vec.a * s);
-        }
-        public static Color operator *(float s, Color vec)
-        {
-            return new Color(s * vec.r, s * vec.g, s * vec.b, s * vec.a);
-        }
-        public static Color operator *(Color vec, Mat4 mat)
-        {
-            Color result = new Color();
-            result.r = vec.r * mat.m00 + vec.g * mat.m10 + vec.b * mat.m20 + vec.a * mat.m30;
-            result.g = vec.r * mat.m01 + vec.g * mat.m11 + vec.b * mat.m21 + vec.a * mat.m31;
-            result.b = vec.r * mat.m02 + vec.g * mat.m12 + vec.b * mat.m22 + vec.a * mat.m32;
-            result.a = vec.r * mat.m03 + vec.g * mat.m13 + vec.b * mat.m23 + vec.a * mat.m33;
-            return result;
-        }
-        public static Color operator /(Color v1, Color v2)
-        {
-            return new Color(v1.r / v2.r, v1.g / v2.g, v1.b / v2.b, v1.a / v2.a);
-        }
-        public static Color operator /(Color vec, float s)
-        {
-            return new Color(vec.r / s, vec.g / s, vec.b / s, vec.a / s);
-        }
-        public static Color operator /(float s, Color vec)
-        {
-            return new Color(s / vec.r, s / vec.g, s / vec.b, s / vec.a);
-        }
-        public override String ToString()
-        {
-            return String.Format("{0}, {1}, {2}, {3}", r, g, b, a);
-        }
-    }
+		// --- Overrides ---
+		/// <summary> Adds two colors. </summary>
+		public static Color operator +(Color c1, Color c2)
+		{
+			return new Color(c1.r + c2.r, c1.g + c2.g, c1.b + c2.b, c1.a + c2.a);
+		}
+		/// <summary> Adds a color with a scalar. </summary>
+		public static Color operator +(Color col, float s)
+		{
+			return new Color(col.r + s, col.g + s, col.b + s, col.a + s);
+		}
+		/// <summary> Adds a scalar value to each channel in a color. </summary>
+		public static Color operator +(float s, Color col)
+		{
+			return new Color(s + col.r, s + col.g, s + col.b, s + col.a);
+		}
+		/// <summary> Subtracts c2 from c1. </summary>
+		public static Color operator -(Color c1, Color c2)
+		{
+			return new Color(c1.r - c2.r, c1.g - c2.g, c1.b - c2.b, c1.a - c2.a);
+		}
+		/// <summary> Subtracts a scalar value from a color. </summary>
+		public static Color operator -(Color col, float s)
+		{
+			return new Color(col.r - s, col.g - s, col.b - s, col.a - s);
+		}
+		/// <summary> Subtracts each channel in a color by a scalar value. </summary>
+		public static Color operator -(float s, Color col)
+		{
+			return new Color(s - col.r, s - col.g, s - col.b, s - col.a);
+		}
+		/// <summary> Multiplies two colors. </summary>
+		public static Color operator *(Color c1, Color c2)
+		{
+			return new Color(c1.r * c2.r, c1.g * c2.g, c1.b * c2.b, c1.a * c2.a);
+		}
+		/// <summary> Multiplies a color with a scalar value. </summary>
+		public static Color operator *(Color col, float s)
+		{
+			return new Color(col.r * s, col.g * s, col.b * s, col.a * s);
+		}
+		/// <summary> Multiplies each channel in a color with a scalar value. </summary>
+		public static Color operator *(float s, Color col)
+		{
+			return new Color(s * col.r, s * col.g, s * col.b, s * col.a);
+		}
+		/// <summary> Divides c1 by c2. </summary>
+		public static Color operator /(Color c1, Color c2)
+		{
+			return new Color(c1.r / c2.r, c1.g / c2.g, c1.b / c2.b, c1.a / c2.a);
+		}
+		/// <summary> Divides a color by a scalar value. </summary>
+		public static Color operator /(Color col, float s)
+		{
+			return new Color(col.r / s, col.g / s, col.b / s, col.a / s);
+		}
+		/// <summary> Divides a scalar value by each channel in a color. </summary>
+		public static Color operator /(float s, Color col)
+		{
+			return new Color(s / col.r, s / col.g, s / col.b, s / col.a);
+		}
+		/// <summary> Prints each channel in a color. </summary>
+		public override String ToString()
+		{
+			return String.Format("{0}, {1}, {2}, {3}", r, g, b, a);
+		}
+	}
 }

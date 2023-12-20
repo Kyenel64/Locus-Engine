@@ -1,15 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// --- Physics ----------------------------------------------------------------
 
 namespace Locus
 {
-    public enum RigidbodyType
-    {
-        Static = 0,
-        Dynamic = 1,
-        Kinematic = 2
-    }
+	/// <summary>
+	/// The type of rigidbody.
+	/// </summary>
+	public enum RigidbodyType
+	{
+		/// <summary> Static rigidbody. </summary>
+		Static = 0,
+		/// <summary> Dynamic rigidbody. </summary>
+		Dynamic,
+		/// <summary> Kinematic rigidbody. </summary>
+		Kinematic
+	}
 }

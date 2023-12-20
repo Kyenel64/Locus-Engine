@@ -150,8 +150,8 @@ namespace Locus
 		// Body
 		float Mass = 1.0f;
 		float GravityScale = 1.0f;
-		float LinearDamping = 0.2f;
-		float AngularDamping = 0.2f;
+		float LinearDamping = 0.0f;
+		float AngularDamping = 0.01f;
 		bool FixedRotation = false;
 		bool IsBullet = false;
 		
@@ -164,7 +164,7 @@ namespace Locus
 	struct BoxCollider2DComponent
 	{
 		// Fixture. TODO: Put in physics material
-		float Friction = 0.2f; // 0 - 1
+		float Friction = 0.3f; // 0 - 1
 		float Restitution = 0.0f; // 0 - 1
 		float RestitutionThreshold = 1.0f;
 

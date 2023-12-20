@@ -1,19 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// --- Debug ------------------------------------------------------------------
 
 namespace Locus
 {
-    /// <summary>
-    /// Debugging functions for Locus.
-    /// </summary>
-    public static class Debug
-    {
-        public static void Log() // TODO: Implement
-        {
+	/// <summary>
+	/// Debugging functions for Locus.
+	/// </summary>
+	public static class Debug
+	{
+		/// <summary>
+		/// Logs a message to the console.
+		/// </summary>
+		public static void Log() // TODO: Implement
+		{
 
-        }
-    }
+		}
+	}
 }

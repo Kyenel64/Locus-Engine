@@ -1,17 +1,13 @@
 # Locus Game Engine
 <p align="center">
-  <img src="./Resources/Branding/Logo/LocusLogoWithName.png" alt="Locus Logo" width="800"/>
+  <img src="./Resources/Branding/Logo/LocusLogoWithName.png" alt="Locus Logo" width="500"/> <br>
+  <a style="font-size: 1.5em" href="https://locusengine.com">Website & Documentation</a>
 </p>
 
 Locus is an open-source, lightweight, general-purpose game engine for Windows.
-## Links
-[Website & Documentation](https://www.locusengine.com)
 
 ## Progress
-Locus is still in early stages of development and the focus right now is on the 2D features and implementing basic engine features.
-Once Locus has a solid 2D workflow, implementation for 3D features will begin.
-
-Progress for Locus can be followed here: https://trello.com/b/NNDPkCjF/locus-kanban
+Locus is still in early stages of development. Progress for Locus can be followed [here](https://trello.com/b/NNDPkCjF/locus-kanban).
 
 ## Features for Locus 2D
 - Integrated editor
@@ -31,21 +27,26 @@ Progress for Locus can be followed here: https://trello.com/b/NNDPkCjF/locus-kan
 </p>
 
 ## How to Build
-Requirements: Visual Studio 2022, Python3
+
+#### Requirements
+- Windows OS
+- OpenGL 4.5 supported hardware
+- Visual Studio 2022
+- Python 3
+- .NET SDK
 
 #### 1. Downloading source code
-- Run `git clone --recurse-submodules https://github.com/kyenel64/Locus-Engine` in your command prompt.
+- Run `git clone --recursive https://github.com/kyenel64/Locus-Engine` in the command prompt. Remember to include `--recursive` as Locus uses submodules.
 
 #### 2. Run Scripts/Setup.bat
-- Run Scripts/Setup.bat to install dependencies and generate a Visual Studio solution.
-- IMPORTANT: Make sure 'Shader Toolchain Debug Symbols - 64-bit' is selected when the Vulkan pop-up opens.
+- Run Scripts/Setup.bat to install premake and generate a Visual Studio solution.
+- IMPORTANT: Make sure 'Shader Toolchain Debug Symbols - 64-bit' is selected if the Vulkan pop-up opens.
 
 #### 2.1 (Temp) Build SandboxProject
-Locus currently does not have a proper project directory system setup. There is a placeholder project directory called SandboxProject within the Locus-Editor folder (Not to mix it up with the Sandbox VS project folder in the root directory).\
-You will need to manually generate and build the project solution for now.
+- NOTE: Locus currently does not have a proper project directory system setup. There is a placeholder project directory called "SandboxProject" in the "Locus-Editor" folder. <br>
+You will need to manually generate and build the sandbox project solution for now.
 - Run Locus-Editor/SandboxProject/Setup.bat.
-- Open Locus-Editor/SandboxProject/Sandbox.sln.
-- Build solution.
+- Open and build Locus-Editor/SandboxProject/Sandbox.sln.
 
 #### 3. Build using Visual Studio
 - Open Locus.sln

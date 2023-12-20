@@ -142,13 +142,7 @@ namespace Locus
 		virtual void Undo() override
 		{
 			Entity entity = m_ActiveScene->GetEntityByUUID(m_UUID);
-			Entity parentEntity = m_ActiveScene->GetEntityByUUID(m_ParentUUID);
-
-			auto& parentCC = parentEntity.GetComponent<ChildComponent>();
-			parentCC.ChildCount--;
-			parentCC.ChildEntities.erase(std::find(parentCC.ChildEntities.begin(), parentCC.ChildEntities.end(), m_UUID));
-			if (parentCC.ChildCount == 0)
-				parentEntity.RemoveComponent<ChildComponent>();
+			m_ActiveScene->DestroyEntity(entity);
 
 			CommandHistory::SetEditorSavedStatus(false);
 		}
@@ -282,12 +276,22 @@ namespace Locus
 
 			// Initially create an entity and store its data. 
 			Entity entity = m_ActiveScene->CreateEntityWithUUID(m_UUID, m_EntityName);
-			
 			m_ActiveScene->CopyAllComponents(copyEntity, entity);
+			// Overriding copied data
+			auto& tc = entity.GetComponent<TransformComponent>();
+			tc.Self = m_UUID;
+			entity.GetComponent<TagComponent>().Tag = m_EntityName;
+
+			if (tc.Parent)
+			{
+				Entity parentEntity = m_ActiveScene->GetEntityByUUID(tc.Parent);
+				auto& parentCC = parentEntity.GetComponent<ChildComponent>();
+				parentCC.ChildEntities.push_back(m_UUID);
+				parentCC.ChildCount++;
+			}
 			// Dont want to store the copy entity's children.
 			if (entity.HasComponent<ChildComponent>())
 				entity.RemoveComponent<ChildComponent>();
-
 			CreateChildren(copyEntity, entity);
 
 			SaveEntityData(m_EntityData, entity);
@@ -297,13 +301,11 @@ namespace Locus
 
 		virtual void Execute() override
 		{
-			Entity entity = m_ActiveScene->CreateEntityWithUUID(m_EntityData->ID->ID);
+			Entity entity = m_ActiveScene->CreateEntityWithUUID(m_UUID);
 			LoadEntityData(m_EntityData, entity);
-			// Overriding copied data
-			auto& tc = entity.GetComponent<TransformComponent>();
-			tc.Self = m_UUID;
-			entity.GetComponent<TagComponent>().Tag = m_EntityName;
+
 			// Add entity to parent's child component
+			auto& tc = entity.GetComponent<TransformComponent>();
 			if (tc.Parent)
 			{
 				Entity parentEntity = m_ActiveScene->GetEntityByUUID(tc.Parent);
@@ -325,23 +327,10 @@ namespace Locus
 		virtual void Undo() override
 		{
 			Entity entity = m_ActiveScene->GetEntityByUUID(m_UUID);
-			// Remove entity from parent's child component
-			if (entity.GetComponent<TransformComponent>().Parent)
-			{
-				UUID parentUUID = entity.GetComponent<TransformComponent>().Parent;
-				Entity parentEntity = m_ActiveScene->GetEntityByUUID(parentUUID);
-				auto& parentCC = parentEntity.GetComponent<ChildComponent>();
-				parentCC.ChildEntities.erase(std::find(parentCC.ChildEntities.begin(), parentCC.ChildEntities.end(), m_UUID));
-				parentCC.ChildCount--;
-
-				if (parentCC.ChildCount == 0)
-					parentEntity.RemoveComponent<ChildComponent>();
-			}
 
 			SaveEntityData(m_EntityData, entity);
 			SaveChildEntityData(entity);
 
-			DestroyChildren(entity);
 			m_ActiveScene->DestroyEntity(entity);
 
 			CommandHistory::SetEditorSavedStatus(false);

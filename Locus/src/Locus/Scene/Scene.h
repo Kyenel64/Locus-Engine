@@ -8,41 +8,61 @@
 #include "Locus/Core/UUID.h"
 #include "Locus/Renderer/EditorCamera.h"
 
-class b2World; // Forward declare here because we dont want files including Scene.h to also include b2World
+class b2World;
 
 namespace Locus
 {
 	class Entity;
+	class ContactListener2D;
 
 	class Scene
 	{
 	public:
 		Scene();
+		Scene(const std::string& sceneName) : m_SceneName(sceneName) {}
 		~Scene() = default;
+
+		// Creates an entity with a new UUID.
+		Entity CreateEntity(const std::string& name = std::string());
+		// Creates an entity with an existing UUID.
+		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = std::string());
+
+		void DestroyEntity(Entity entity);
+		void DestroyChildren(Entity entity);
 
 		static Ref<Scene> Copy(Ref<Scene> other);
 		template<typename T>
 		static void CopyComponent(Entity from, Entity to);
 		static void CopyAllComponents(Entity from, Entity to);
 
-		Entity CreateEntity(const std::string& name = std::string());
-		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = std::string(), bool enabled = true);
-		Entity CreateEntityWithUUID(Entity copyEntity, UUID uuid, const std::string& name = std::string(), bool enabled = true);
-		void DestroyEntity(Entity entity);
+		void OnEditorUpdate(Timestep deltaTime, EditorCamera& camera);
 
-		void OnUpdateRuntime(Timestep deltaTime);
-		void OnUpdateEditor(Timestep deltaTime, EditorCamera& camera);
-		void OnUpdatePhysics(Timestep deltaTime, EditorCamera& camera);
+		// On Update
+		void OnRuntimeUpdate(Timestep deltaTime);
+		void OnPhysicsUpdate(Timestep deltaTime, EditorCamera& camera);
 
+		// On Start
 		void OnRuntimeStart();
 		void OnPhysicsStart();
+
+		// On Stop
 		void OnRuntimeStop();
+		void OnPhysicsStop();
+
+		// On Pause
+		void OnRuntimePause(Timestep deltaTime);
+		void OnPhysicsPause(Timestep deltaTime, EditorCamera& camera);
+
+		// Create new box2d physics data for newly added physics components.
+		void CreatePhysicsData(Entity entity);
+		// Update physics data during runtime.
+		void UpdatePhysicsData(Entity entity);
 
 		void OnViewportResize(uint32_t width, uint32_t height);
 
 		Entity GetPrimaryCameraEntity();
-		const std::string& GetSceneName() const { return m_SceneName; }
 		Entity GetEntityByUUID(UUID uuid);
+		const std::string& GetSceneName() const { return m_SceneName; }
 
 		template<typename... T>
 		auto GetEntitiesWith()
@@ -60,17 +80,13 @@ namespace Locus
 	private:
 		std::string m_SceneName = "Untitled";
 		entt::registry m_Registry;
+		std::unordered_map<UUID, Entity> m_Entities;
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
-		uint32_t m_RootEntityCount = 1;
 
 		b2World* m_Box2DWorld = nullptr;
+		Ref<ContactListener2D> m_ContactListener;
 
 		friend class Entity;
 		friend class SceneSerializer;
-		friend class SceneHierarchyPanel;
-		friend class CreateEntityCommand;
-		friend class CreateChildEntityCommand;
-		friend class DestroyEntityCommand;
-		friend class DuplicateEntityCommand;
 	};
 }

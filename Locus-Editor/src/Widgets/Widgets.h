@@ -1,7 +1,7 @@
 // --- Widgets ----------------------------------------------------------------
 // Locus editor widgets. 
-// Each widget can take in a ScriptInstance if displaying for a script field
-// during runtime of the editor. TODO: take in a function pointer.
+// For public script fields during scene runtime, widget needs to take in a 
+//	ScriptInstance pointer.
 #pragma once
 
 #include <string>
@@ -12,47 +12,38 @@
 
 namespace Locus::Widgets
 {
-	// Widget to display name on the left hand side of each property in the properties panel.
-	void DrawControlLabel(const std::string& name, const glm::vec2& size = { 110.0f, 0.0f });
+	// Displays a label with given size.
+	void DrawControlLabel(const std::string& name, const glm::vec2& size = { 0.0f, 0.0f });
 
-	// Draws the label on the left hand side and a switch on the right.
-	void DrawBoolControl(const std::string& name, float labelWidth, bool& changeValue, bool resetValue = false, Ref<ScriptInstance> instance = nullptr);
+	void DrawBoolControl(const std::string& name, bool& changeValue, bool resetValue = false, float labelWidth = -1.0f, Ref<ScriptInstance> instance = nullptr);
 
-	// Draws the label on the left hand side and a text input for chars on the right.
-	void DrawCharControl(const std::string& name, float labelWidth, char& changeValue, char resetValue, Ref<ScriptInstance> instance = nullptr);
+	void DrawCharControl(const std::string& name, char& changeValue, char resetValue = ' ', float labelWidth = -1.0f, float inputWidth = -1.0f, Ref<ScriptInstance> instance = nullptr);
 
-	// Draws the label on the left hand side and a color box on the right.
-	// Clicking on the color box will open a pop up for color control.
-	void DrawColorControl(const std::string& name, glm::vec4& colorValue, float labelWidth);
+	void DrawStringControl(const std::string& name, std::string& changeValue, const std::string& resetValue = std::string(), float labelWidth = -1.0f, float inputWidth = -1.0f);
 
-	// Draws the label on the left hand side and two float controls labeled x and y on the right.
-	void DrawVec2Control(const std::string& name, float labelWidth, glm::vec2& changeValue, const glm::vec2& resetValue = glm::vec2(1.0f), 
-		Ref<ScriptInstance> instance = nullptr, float speed = 0.1f, const char* format = "%.3f", float min = 0.0f, float max = 0.0f);
+	void DrawColorControl(const std::string& name, glm::vec4& changeValue, const glm::vec4& resetValue = glm::vec4(1.0f), float labelWidth = -1.0f, float inputWidth = -1.0f);
 
-	// Draws the label on the left hand side and three float controls labeled x, y, and z on the right.
-	void DrawVec3Control(const std::string& name, float labelWidth, glm::vec3& changeValue, const glm::vec3& resetValue = glm::vec3(1.0f), 
-		Ref<ScriptInstance> instance = nullptr, float speed = 0.1f, const char* format = "%.3f", float min = 0.0f, float max = 0.0f);
+	void DrawVec2Control(const std::string& name, glm::vec2& changeValue, const glm::vec2& resetValue = glm::vec2(1.0f), float speed = 0.1f, const char* format = nullptr,
+		float labelWidth = -1.0f, float inputWidth = -1.0f, const glm::vec2& min = glm::vec2(0.0f), const glm::vec2& max = glm::vec2(0.0f), Ref<ScriptInstance> instance = nullptr);
+	void DrawVec3Control(const std::string& name, glm::vec3& changeValue, const glm::vec3& resetValue = glm::vec3(1.0f), float speed = 0.1f, const char* format = nullptr,
+		float labelWidth = -1.0f, float inputWidth = -1.0f, const glm::vec3& min = glm::vec3(0.0f), const glm::vec3& max = glm::vec3(0.0f), Ref<ScriptInstance> instance = nullptr);
 
-	// Draws a 2x8 grid of buttons for collision filters. 
-	void DrawCollisionGrid(const std::string& name, float labelWidth, uint16_t& changeValue, uint16_t resetValue);
+	// Displays a 8x2 grid for each collision layer.
+	void DrawCollisionGrid(const std::string& name, uint16_t& changeValue, uint16_t resetValue = 0, float labelWidth = -1.0f, float inputWidth = -1.0f);
 
-	// Draws an image button. The image is centered within the button. 
-	bool DrawImageButton(const std::string& name, uint32_t imageID, const glm::vec2& size, bool clickable = false);
-
-
-
-	// Templates can not be used in cpp file.
-	
-	// Control widget for floats, doubles, int16_t, int, int64_t, uint16_t, uint32_t, uint64_t.
-	// If instance != nullptr, the widget is only displayed during runtime for scripts. (Weird API. Think of fix.)
-	// If dragClamp == true, slider is clamped to the following ranges.
+	// Control widget for float, double, int16_t, int, int64_t, uint16_t, uint32_t, uint64_t.
 	template<typename T>
-	void DrawValueControl(const std::string& name, float labelWidth, T& changeValue, T resetValue = 1.0f, Ref<ScriptInstance> instance = nullptr, 
-		float speed = 0.1f, const char* format = nullptr, bool dragClamp = false, T min = 0.0f, T max = 0.0f)
+	void DrawValueControl(const std::string& name, T& changeValue, T resetValue = 0, float speed = 0.1f, const char* format = nullptr,
+		float labelWidth = -1.0f, float inputWidth = -1.0f, T min = 0, T max = 0, Ref<ScriptInstance> instance = nullptr)
 	{
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, ImGui::GetStyle().ItemSpacing.y });
+
 		std::function<void(T)> func = nullptr;
 		if (instance)
 			func = [=](T val) { instance->SetFieldValue<T>(name, val); };
+
+		if (labelWidth == -1)
+			labelWidth = ImGui::GetContentRegionAvail().x * 0.5f;
 
 		Widgets::DrawControlLabel(name, { labelWidth, 0.0f });
 		ImGui::SameLine();
@@ -71,7 +62,7 @@ namespace Locus::Widgets
 		}
 
 		// Set ImGuiDataType from template datatype
-		ImGuiDataType dataType;
+		ImGuiDataType dataType = ImGuiDataType_Float;
 		if (typeid(T) == typeid(float))
 			dataType = ImGuiDataType_Float;
 		else if (typeid(T) == typeid(double))
@@ -105,8 +96,8 @@ namespace Locus::Widgets
 		// Draw slider
 		T dragVal = changeValue;
 		std::string label = "##" + name;
-		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-		if (ImGui::DragScalar(label.c_str(), dataType, &dragVal, speed, dragClamp ? &min : NULL, dragClamp ? &max : NULL, format))
+		ImGui::PushItemWidth(inputWidth);
+		if (ImGui::DragScalar(label.c_str(), dataType, &dragVal, speed, &min, &max, format))
 		{
 			if (instance)
 				CommandHistory::AddCommand(new ChangeFunctionValueCommand(func, dragVal, changeValue));
@@ -116,5 +107,7 @@ namespace Locus::Widgets
 		ImGui::PopItemWidth();
 		if (ImGui::IsItemHovered())
 			ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+
+		ImGui::PopStyleVar();
 	}
 }

@@ -5,7 +5,6 @@
 
 namespace Locus
 {
-
 	static GLenum ShaderDataTypeToOpenGLBaseType(ShaderDataType type)
 	{
 		switch (type)
@@ -96,7 +95,6 @@ namespace Locus
 				}
 				default: LOCUS_CORE_ASSERT(false, "Unknown ShaderDataType!");
 			}
-			
 		}
 		m_VertexBuffers.push_back(vertexBuffer);
 	}

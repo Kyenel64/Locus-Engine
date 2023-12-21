@@ -28,6 +28,14 @@ project "Locus-Editor"
 	{
 		"Locus"
 	}
+
+	postbuildcommands
+	{
+		"{COPY} %{prj.location}/resources %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/resources",
+		"{COPY} %{prj.location}/mono %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/mono",
+		"{COPY} %{prj.location}/SandboxProject %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/SandboxProject",
+		"{COPY} %{prj.location}/imgui.ini %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/"
+	}
 	
 	filter "system:windows"
 		systemversion "latest"
@@ -42,13 +50,29 @@ project "Locus-Editor"
 			"/ignore:4099"
 		}
 
+		postbuildcommands
+		{
+			"{COPY} %{VULKAN_SDK}/Bin/shaderc_sharedd.dll %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/"
+		}
+
 	filter "configurations:Release"
 		defines "LOCUS_RELEASE"
 		runtime "Release" -- /MD
 		optimize "on"
-	
+
+		postbuildcommands
+		{
+			"{COPY} %{VULKAN_SDK}/Bin/shaderc_shared.dll %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/"
+		}
+
 	filter "configurations:Dist"
 		defines "LOCUS_DIST"
 		runtime "Release" -- /MD
 		optimize "on"
-				
+
+		postbuildcommands
+		{
+			"{COPY} %{VULKAN_SDK}/Bin/shaderc_shared.dll %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/"
+		}
+
+			

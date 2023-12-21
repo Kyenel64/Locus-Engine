@@ -1,5 +1,6 @@
 // --- Shader -----------------------------------------------------------------
-// Interface for shaders. Creates platform specific shader class.
+// Shader interface and ShaderLibrary class.
+// Shader can be creates with either a filepath or a string of shader code.
 #pragma once
 
 #include <string>
@@ -12,6 +13,7 @@ namespace Locus
 	class Shader
 	{
 	public:
+		virtual ~Shader() = default;
 
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
@@ -27,6 +29,9 @@ namespace Locus
 	class ShaderLibrary
 	{
 	public:
+		ShaderLibrary() = default;
+		~ShaderLibrary() = default;
+
 		void Add(const std::string& name, const Ref<Shader>& shader);
 		void Add(const Ref<Shader>& shader);
 		Ref<Shader> Load(const std::string& filepath);

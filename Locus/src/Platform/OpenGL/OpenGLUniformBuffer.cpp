@@ -21,5 +21,4 @@ namespace Locus
 	{
 		glNamedBufferSubData(m_RendererID, offset, size, data);
 	}
-
 }

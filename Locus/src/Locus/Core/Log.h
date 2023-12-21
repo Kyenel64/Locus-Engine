@@ -5,8 +5,6 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
 
-#include "Locus/Core/Core.h"
-
 namespace Locus
 {
 	class Log
@@ -26,7 +24,6 @@ namespace Locus
 	};
 }
 
-
 // Core log macros
 #define LOCUS_CORE_ERROR(...) ::Locus::Log::GetCoreLogger()->error(__VA_ARGS__)
 #define LOCUS_CORE_WARN(...)  ::Locus::Log::GetCoreLogger()->warn(__VA_ARGS__)
@@ -35,10 +32,10 @@ namespace Locus
 #define LOCUS_CORE_CRITICAL(...) ::Locus::Log::GetCoreLogger()->critical(__VA_ARGS__)
 
 // Core log macros
-#define LOCUS_SCRIPT_ERROR(...) ::Locus::Log::GetSCRIPTLogger()->error(__VA_ARGS__)
-#define LOCUS_SCRIPT_WARN(...)  ::Locus::Log::GetSCRIPTLogger()->warn(__VA_ARGS__)
-#define LOCUS_SCRIPT_INFO(...)  ::Locus::Log::GetSCRIPTLogger()->info(__VA_ARGS__)
-#define LOCUS_SCRIPT_TRACE(...) ::Locus::Log::GetSCRIPTLogger()->trace(__VA_ARGS__)
+#define LOCUS_SCRIPT_ERROR(...) ::Locus::Log::GetScriptLogger()->error(__VA_ARGS__)
+#define LOCUS_SCRIPT_WARN(...)  ::Locus::Log::GetScriptLogger()->warn(__VA_ARGS__)
+#define LOCUS_SCRIPT_INFO(...)  ::Locus::Log::GetScriptLogger()->info(__VA_ARGS__)
+#define LOCUS_SCRIPT_TRACE(...) ::Locus::Log::GetScriptLogger()->trace(__VA_ARGS__)
 #define LOCUS_SCRIPT_CRITICAL(...) ::Locus::Log::GetScriptLogger()->critical(__VA_ARGS__)
 
 // Client log macros

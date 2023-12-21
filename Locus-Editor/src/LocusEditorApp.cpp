@@ -1,8 +1,6 @@
-// --- Entry Point ------------------------------------------------------------
-#include <Locus.h>
-#include <Locus/Core/EntryPoint.h>
-
 #include "LocusEditorLayer.h"
+
+#include <Locus.h>
 
 namespace Locus
 {
@@ -15,7 +13,7 @@ namespace Locus
 			PushLayer(new LocusEditorLayer());
 		}
 
-		~LocusEditorApp() {}
+		~LocusEditorApp() = default;
 	};
 
 	Application* CreateApplication(ApplicationCommandLineArgs args)

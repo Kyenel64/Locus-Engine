@@ -30,6 +30,6 @@ namespace Locus
 		Entity m_SelectedEntity;
 
 		// Textures
-		Ref<Texture2D> m_PlusButton;
+		Ref<Texture2D> m_PlusIcon;
 	};
 }

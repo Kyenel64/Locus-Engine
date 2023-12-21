@@ -1,6 +1,6 @@
 // --- ContentBrowserPanel ----------------------------------------------------
 // Content browser panel. Includes root directory view and current directory 
-//    view.
+//	view.
 #pragma once
 
 #include <filesystem>

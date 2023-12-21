@@ -1,8 +1,20 @@
 // --- Components -------------------------------------------------------------
-// Holds all component classes for Locus's ECS.
+// Components for Locus ECS.
+// Components:
+//	Tag
+//	Transform
+//	Child
+//	SpriteRenderer
+//	CircleRenderer
+//	Camera
+//	Rigidbody2D
+//	BoxCollider2D
+//	CircleCollider2D
+//	NativeScript
+//	Script
 #pragma once
 
-#include <stack> // This could be causing a COMDAT linking error
+#include <stack>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -19,6 +31,8 @@
 
 namespace Locus
 {
+	enum class Rigidbody2DType { Static = 0, Dynamic = 1, Kinematic = 2 };
+
 	struct IDComponent
 	{
 		UUID ID;
@@ -30,8 +44,8 @@ namespace Locus
 	struct TagComponent
 	{
 		std::string Tag;
+		std::string Group;
 		bool Enabled = true;
-		uint32_t HierarchyPos;
 
 		TagComponent() = default;
 		TagComponent(const TagComponent&) = default;
@@ -41,7 +55,7 @@ namespace Locus
 	struct ChildComponent
 	{
 		uint32_t ChildCount = 0;
-		std::vector<Entity> ChildEntities;
+		std::vector<UUID> ChildEntities;
 
 		ChildComponent() = default;
 		ChildComponent(const ChildComponent&) = default;
@@ -49,14 +63,15 @@ namespace Locus
 
 	struct TransformComponent
 	{
-		Entity Self = Entity::Null;
-		Entity Parent = Entity::Null;
+		UUID Self = 0;
+		UUID Parent = 0;
 
 		glm::vec3 LocalPosition = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 LocalScale = { 1.0f, 1.0f, 1.0f };
 
 	private:
-		// In radians
+		// Rotations are private to force using setters to sync both euler and quat.
+		// In degrees
 		glm::vec3 LocalRotation = { 0.0f, 0.0f, 0.0f };
 		glm::quat LocalRotationQuat = { 0.0f, 0.0f, 0.0f, 0.0f };
 
@@ -73,25 +88,20 @@ namespace Locus
 				 * glm::scale(glm::mat4(1.0f), LocalScale);
 		}
 
-		glm::vec3 GetLocalRotation() const { return LocalRotation; }
-		glm::quat GetLocalRotationQuat() const { return LocalRotationQuat; }
+		// In degrees
+		const glm::vec3& GetLocalRotation() const { return LocalRotation; }
+		const glm::quat& GetLocalRotationQuat() const { return LocalRotationQuat; }
 
 		void SetLocalRotation(const glm::vec3& rotation)
 		{
 			LocalRotation = rotation;
-			LocalRotationQuat = glm::quat(LocalRotation);
-		}
-
-		void SetLocalRotationDegrees(const glm::vec3& rotation)
-		{
-			LocalRotation = glm::radians(rotation);
-			LocalRotationQuat = glm::quat(LocalRotation);
+			LocalRotationQuat = glm::quat(glm::radians(LocalRotation));
 		}
 
 		void SetLocalRotationQuat(const glm::quat& quat)
 		{
 			LocalRotationQuat = quat;
-			LocalRotation = glm::eulerAngles(LocalRotationQuat);
+			LocalRotation = glm::degrees(glm::eulerAngles(LocalRotationQuat));
 		}
 
 		friend class Scene;
@@ -103,7 +113,7 @@ namespace Locus
 	struct SpriteRendererComponent
 	{
 		// TODO: Take in a material
-		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
+		glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		Ref<Texture2D> Texture;
 		std::string TexturePath;
 		float TilingFactor = 1.0f;
@@ -115,7 +125,7 @@ namespace Locus
 
 	struct CircleRendererComponent
 	{
-		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
+		glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		float Thickness = 1.0f;
 		float Fade = 0.005f;
 
@@ -135,21 +145,16 @@ namespace Locus
 
 	struct Rigidbody2DComponent
 	{
-		enum class Rigidbody2DType { Static = 0, Dynamic = 1, Kinematic = 2};
 		Rigidbody2DType BodyType = Rigidbody2DType::Dynamic;
 
 		// Body
 		float Mass = 1.0f;
 		float GravityScale = 1.0f;
-		float LinearDamping = 0.2f;
-		float AngularDamping = 0.2f;
+		float LinearDamping = 0.0f;
+		float AngularDamping = 0.01f;
 		bool FixedRotation = false;
-
-		// Fixture. TODO: Put in physics material
-		float Friction = 0.2f; // 0 - 1
-		float Restitution = 0.0f; // 0 - 1
-		float RestitutionThreshold = 1.0f;
-
+		bool IsBullet = false;
+		
 		void* RuntimeBody = nullptr;
 
 		Rigidbody2DComponent() = default;
@@ -158,9 +163,14 @@ namespace Locus
 
 	struct BoxCollider2DComponent
 	{
-		// Polygon shape
+		// Fixture. TODO: Put in physics material
+		float Friction = 0.3f; // 0 - 1
+		float Restitution = 0.0f; // 0 - 1
+		float RestitutionThreshold = 1.0f;
+
 		uint16_t CollisionCategory = 0x0001;
 		uint16_t CollisionMask = 0xFFFF;
+
 		glm::vec2 Offset = { 0.0f, 0.0f };
 		glm::vec2 Size = { 1.0f, 1.0f };
 
@@ -172,8 +182,14 @@ namespace Locus
 
 	struct CircleCollider2DComponent
 	{
+		// Fixture. TODO: Put in physics material
+		float Friction = 0.2f; // 0 - 1
+		float Restitution = 0.0f; // 0 - 1
+		float RestitutionThreshold = 1.0f;
+
 		uint16_t CollisionCategory = 0x0001;
 		uint16_t CollisionMask = 0xFFFF;
+
 		glm::vec2 Offset = { 0.0f, 0.0f };
 		float Radius = 0.5f;
 
@@ -189,9 +205,7 @@ namespace Locus
 	{
 		ScriptableEntity* Instance = nullptr;
 
-		// Creates a function ptr called InstantiateScript that takes no args and returns ScriptableEntity*
 		ScriptableEntity* (*InstantiateScript)();
-		// Creates a void func ptr called DestroyScript that takes in NativeScriptComponent*
 		void (*DestroyScript)(NativeScriptComponent*);
 
 		template <typename T>
@@ -205,14 +219,13 @@ namespace Locus
 	struct ScriptComponent
 	{
 		std::string ScriptClass;
-		// TODO: std::string Path;
 
 		ScriptComponent() = default;
 		ScriptComponent(const ScriptComponent&) = default;
 		ScriptComponent(const std::string& scriptClass) : ScriptClass(scriptClass) {}
 	};
 
-	// Make sure to update Scene, PropertiesPanel, and ScriptLink class when adding new components
+
 	enum class ComponentType
 	{
 		None = 0,
@@ -245,5 +258,4 @@ namespace Locus
 		Ref<NativeScriptComponent> NativeScript;
 		Ref<ScriptComponent> Script;
 	};
-	
 }

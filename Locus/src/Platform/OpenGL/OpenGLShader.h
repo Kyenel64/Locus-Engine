@@ -1,7 +1,6 @@
 // --- OpenGlShader -----------------------------------------------------------
 // OpenGL Shader class. Creates OpenGL shaders with GLSL source data.
 // Can either read from file or from string.
-// Helper function used to process program.
 #pragma once
 
 #include "Locus/Renderer/Shader.h"
@@ -20,7 +19,7 @@ namespace Locus
 		virtual void Bind() const override;
 		virtual void Unbind() const override;
 
-		virtual const std::string& GetName() const override { return m_Name; }
+		virtual inline const std::string& GetName() const override { return m_Name; }
 
 	private:
 		std::string ReadFile(const std::string& path);
@@ -40,5 +39,4 @@ namespace Locus
 
 		std::unordered_map<GLenum, std::string> m_OpenGLSourceCode; // Debug purpose
 	};
-	
 }

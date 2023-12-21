@@ -10,7 +10,7 @@ namespace Locus
 	OpenGLFramebuffer::OpenGLFramebuffer(const FramebufferSpecification& specs)
 		: m_Specification(specs)
 	{
-		for (auto spec : m_Specification.Attachments.Attachments)
+		for (auto& spec : m_Specification.Attachments.Attachments)
 		{
 			if (spec.TextureFormat != FramebufferTextureFormat::DEPTH24STENCIL8)
 				m_ColorAttachmentSpecifications.emplace_back(spec);

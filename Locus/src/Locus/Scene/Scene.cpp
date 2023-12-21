@@ -15,24 +15,69 @@
 #include "Locus/Scene/ScriptableEntity.h"
 #include "Locus/Scene/Entity.h"
 #include "Locus/Scripting/ScriptEngine.h"
+#include "Locus/Physics2D/ContactListener2D.h"
+#include "Locus/Physics2D/PhysicsUtils.h"
 
 namespace Locus
 {
-	static b2BodyType Rigidbody2DTypeToBox2DType(Rigidbody2DComponent::Rigidbody2DType bodyType)
-	{
-		switch (bodyType)
-		{
-		case Rigidbody2DComponent::Rigidbody2DType::Static: return b2_staticBody;
-		case Rigidbody2DComponent::Rigidbody2DType::Dynamic: return b2_dynamicBody;
-		case Rigidbody2DComponent::Rigidbody2DType::Kinematic: return b2_kinematicBody;
-		}
-
-		LOCUS_CORE_ASSERT(false, "Unknown Rigidbody2DType");
-		return b2_staticBody;
-	}
-
 	Scene::Scene()
 	{
+		m_ContactListener = CreateRef<ContactListener2D>();
+	}
+
+	Entity Scene::CreateEntity(const std::string& name)
+	{
+		return CreateEntityWithUUID(UUID(), name);
+	}
+
+	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name)
+	{
+		Entity entity = Entity(m_Registry.create(), this);
+		entity.AddComponent<IDComponent>(uuid);
+		entity.AddComponent<TransformComponent>();
+		entity.GetComponent<TransformComponent>().Self = uuid;
+		auto& tag = entity.AddComponent<TagComponent>();
+		tag.Tag = name.empty() ? "Entity" : name;
+		tag.Group = "Default";
+		tag.Enabled = true;
+		m_Entities[uuid] = entity;
+		return entity;
+	}
+
+	void Scene::DestroyEntity(Entity entity)
+	{
+		LOCUS_CORE_ASSERT(entity.IsValid(), "DestroyEntity(): Entity is not valid!");
+
+		if (entity.GetComponent<TransformComponent>().Parent)
+		{
+			UUID parentUUID = entity.GetComponent<TransformComponent>().Parent;
+			Entity parentEntity = GetEntityByUUID(parentUUID);
+			auto& parentCC = parentEntity.GetComponent<ChildComponent>();
+			parentCC.ChildEntities.erase(std::find(parentCC.ChildEntities.begin(), parentCC.ChildEntities.end(), entity.GetUUID()));
+			parentCC.ChildCount--;
+
+			if (parentCC.ChildCount == 0)
+				parentEntity.RemoveComponent<ChildComponent>();
+		}
+
+		DestroyChildren(entity);
+
+		m_Entities.erase(m_Entities.find(entity.GetUUID()));
+		m_Registry.destroy(entity);
+	}
+
+	void Scene::DestroyChildren(Entity entity)
+	{
+		if (entity.HasComponent<ChildComponent>())
+		{
+			for (UUID childUUID : entity.GetComponent<ChildComponent>().ChildEntities)
+			{
+				Entity childEntity = GetEntityByUUID(childUUID);
+				DestroyChildren(childEntity);
+				m_Entities.erase(childUUID);
+				m_Registry.destroy(childEntity);
+			}
+		}
 	}
 
 	Ref<Scene> Scene::Copy(Ref<Scene> other)
@@ -42,32 +87,11 @@ namespace Locus
 		newScene->m_ViewportWidth = other->m_ViewportWidth;
 		newScene->m_ViewportHeight = other->m_ViewportHeight;
 
-		auto& otherRegistry = other->m_Registry;
-
-		// Display each entity
-		otherRegistry.each([&](auto entityID)
+		other->m_Registry.each([&](auto entityID)
 			{
 				Entity entity = Entity(entityID, other.get());
 				Entity newEntity = newScene->CreateEntityWithUUID(entity.GetUUID());
 				CopyAllComponents(entity, newEntity);
-			});
-
-		// Convert all Entity references to newScene since copying 
-		newScene->m_Registry.each([&](auto entityID)
-			{
-				Entity entity = Entity(entityID, newScene.get());
-				auto& tc = entity.GetComponent<TransformComponent>();
-				if (tc.Parent != Entity::Null)
-					tc.Parent = newScene->GetEntityByUUID(tc.Parent.GetUUID());
-
-				if (entity.HasComponent<ChildComponent>())
-				{
-					auto& cc = entity.GetComponent<ChildComponent>();
-					for (uint32_t i = 0; i < cc.ChildCount; i++)
-					{
-						cc.ChildEntities[i] = newScene->GetEntityByUUID(cc.ChildEntities[i].GetUUID());
-					}
-				}
 			});
 
 		return newScene;
@@ -95,78 +119,170 @@ namespace Locus
 		CopyComponent<ScriptComponent>(from, to);
 	}
 
-	Entity Scene::CreateEntity(const std::string& name)
+	void Scene::OnEditorUpdate(Timestep deltaTime, EditorCamera& camera)
 	{
-		return CreateEntityWithUUID(UUID(), name);
+		RenderCommand::SetClearColor(camera.GetBackgroundColor());
+		RenderCommand::Clear();
+
+		// Main rendering
+		Renderer2D::BeginScene(camera);
+
+		{ // Sprite
+			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				auto& sprite = entity.GetComponent<SpriteRendererComponent>();
+				if (entity.GetComponent<TagComponent>().Enabled)
+					Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
+			}
+		}
+
+		{ // Circle
+			auto view = m_Registry.view<TransformComponent, CircleRendererComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				auto& circle = entity.GetComponent<CircleRendererComponent>();
+				if (entity.GetComponent<TagComponent>().Enabled)
+					Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
+			}
+		}
+
+		// 3D grid plane
+		if (camera.GetGridVisibility())
+			Renderer2D::DrawGrid();
+
+		Renderer2D::EndScene();
 	}
 
-	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name, bool enabled)
+	void Scene::OnRuntimeUpdate(Timestep deltaTime)
 	{
-		Entity entity = Entity(m_Registry.create(), this);
-		entity.AddComponent<IDComponent>(uuid);
-		entity.AddComponent<TransformComponent>();
-		entity.GetComponent<TransformComponent>().Self = entity;
-		auto& tag = entity.AddComponent<TagComponent>();
-		tag.Tag = name.empty() ? "Entity" : name;
-		tag.Enabled = enabled;
-		tag.HierarchyPos = m_RootEntityCount;
-		m_RootEntityCount++;
-		return entity;
-	}
+		// --- Physics ---
+		// Check physics data for changes
+		{
+			auto view = m_Registry.view<IDComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				UpdatePhysicsData(entity);
+			}
+		}
+		// Simulate physics
+		{
+			m_Box2DWorld->Step(deltaTime, 6, 2); // TODO: paremeterize
+			m_ContactListener->Execute();
+			auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				if (entity.GetComponent<TagComponent>().Enabled)
+				{
+					auto& transform = entity.GetComponent<TransformComponent>();
+					auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
 
-	// Only used when we want to create an entity with the same entt id. 
-	// For example, undoing a destroy entity command will create a new Entity with a new entt id.
-	// To prevent that, we use this function so the entt id stays the same.
-	Entity Scene::CreateEntityWithUUID(Entity copyEntity, UUID uuid, const std::string& name, bool enabled)
-	{
-		Entity entity = Entity(m_Registry.create(copyEntity), this);
-		entity.AddComponent<IDComponent>(uuid);
-		entity.AddComponent<TransformComponent>();
-		entity.GetComponent<TransformComponent>().Self = entity;
-		auto& tag = entity.AddComponent<TagComponent>();
-		tag.Tag = name.empty() ? "Entity" : name;
-		tag.Enabled = enabled;
-		tag.HierarchyPos = m_RootEntityCount;
-		m_RootEntityCount++;
-		return entity;
-	}
-
-	void Scene::DestroyEntity(Entity entity)
-	{
-		m_Registry.destroy(entity);
-	}
-
-	void Scene::OnUpdateRuntime(Timestep deltaTime)
-	{
-		// --- Update Native Scripts ------------------------------------------
+					b2Body* body = (b2Body*)rb2d.RuntimeBody;
+					const b2Vec2& position = body->GetPosition();
+					transform.LocalPosition = { position.x, position.y , 0.0f };
+					transform.SetLocalRotation({ 0, 0, glm::degrees(body->GetAngle()) });
+				}
+			}
+		}
+		// --- Update Native Scripts ---
 		{
 			auto view = m_Registry.view<NativeScriptComponent, TagComponent>();
-			for (auto entity : view)
+			for (auto e : view)
 			{
+				Entity entity = Entity(e, this);
 				auto& nsc = view.get<NativeScriptComponent>(entity);
-				bool enabled = view.get<TagComponent>(entity).Enabled;
-				if (enabled)
+				if (entity.GetComponent<TagComponent>().Enabled)
 				{
 					nsc.Instance->OnUpdate(deltaTime);
 				}
 			}
 		}
 
-		// --- Update C# Scripts ----------------------------------------------
+		// --- Update C# Scripts ---
 		{
 			// Example API
 			auto view = m_Registry.view<ScriptComponent, TagComponent>();
 			for (auto e : view)
 			{
 				Entity entity = Entity(e, this);
-				if (view.get<TagComponent>(e).Enabled)
+				if (entity.GetComponent<TagComponent>().Enabled)
 				{
 					ScriptEngine::OnUpdateEntityScript(entity, deltaTime);
 				}
 			}
 		}
 
-		// --- Physics --------------------------------------------------------
+		// --- Rendering 2D ---
+		// Find first camera with "Primary" property enabled.
+		SceneCamera* mainCamera = nullptr;
+		glm::mat4 cameraTransform;
+		{
+			Entity primaryCameraEntity = GetPrimaryCameraEntity();
+			if (primaryCameraEntity.IsValid())
+			{
+				auto& camera = primaryCameraEntity.GetComponent<CameraComponent>();
+				mainCamera = &camera.Camera;
+				mainCamera->SetViewportSize(m_ViewportWidth, m_ViewportHeight);
+				cameraTransform = GetWorldTransform(primaryCameraEntity);
+			}
+		}
+		// Render if main camera exists
+		if (mainCamera)
+		{
+			// Main rendering
+			RenderCommand::SetClearColor(mainCamera->GetBackgroundColor());
+			RenderCommand::Clear();
+
+			Renderer2D::BeginScene(*mainCamera, cameraTransform);
+
+			{ // Sprite
+				auto view = m_Registry.view<TransformComponent, SpriteRendererComponent, TagComponent>();
+				for (auto e : view)
+				{
+					Entity entity = Entity(e, this);
+					auto& sprite = entity.GetComponent<SpriteRendererComponent>();
+					if (entity.GetComponent<TagComponent>().Enabled)
+						Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
+				}
+			}
+			
+			{ // Circle
+				auto view = m_Registry.view<TransformComponent, CircleRendererComponent, TagComponent>();
+				for (auto e : view)
+				{
+					Entity entity = Entity(e, this);
+					auto& circle = entity.GetComponent<CircleRendererComponent>();
+					if (entity.GetComponent<TagComponent>().Enabled)
+						Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
+				}
+			}
+			
+			Renderer2D::EndScene();
+		}
+		else
+		{
+			RenderCommand::SetClearColor({ 0.2f, 0.2f, 0.25f, 1 });
+			RenderCommand::Clear();
+		}
+	}
+
+	void Scene::OnPhysicsUpdate(Timestep deltaTime, EditorCamera& camera)
+	{
+		// --- Physics ---
+		// Check physics data for changes
+		{
+			auto view = m_Registry.view<IDComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				UpdatePhysicsData(entity);
+			}
+		}
+		// Simulate physics
 		{
 			m_Box2DWorld->Step(deltaTime, 6, 2); // TODO: paremeterize
 			auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
@@ -177,17 +293,131 @@ namespace Locus
 				{
 					auto& transform = entity.GetComponent<TransformComponent>();
 					auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
-			
+
 					b2Body* body = (b2Body*)rb2d.RuntimeBody;
 					const b2Vec2& position = body->GetPosition();
 					transform.LocalPosition = { position.x, position.y , 0.0f };
-					transform.SetLocalRotation( {0, 0, body->GetAngle()} );
+					transform.SetLocalRotation({ 0, 0, glm::degrees(body->GetAngle()) });
 				}
 			}
 		}
-		
-		// --- Rendering 2D ---------------------------------------------------
-		// Find first main camera
+
+		RenderCommand::SetClearColor(camera.GetBackgroundColor());
+		RenderCommand::Clear();
+
+		// Main rendering
+		Renderer2D::BeginScene(camera);
+
+		// --- Sprite ---
+		{
+			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				auto& sprite = entity.GetComponent<SpriteRendererComponent>();
+				if (entity.GetComponent<TagComponent>().Enabled)
+					Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
+			}
+		}
+
+		// --- Circle ---
+		{
+			auto view = m_Registry.view<TransformComponent, CircleRendererComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				auto& circle = entity.GetComponent<CircleRendererComponent>();
+				if (entity.GetComponent<TagComponent>().Enabled)
+					Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
+			}
+		}
+
+		// 3D grid plane
+		if (camera.GetGridVisibility())
+			Renderer2D::DrawGrid();
+
+		Renderer2D::EndScene();
+	}
+
+	void Scene::OnRuntimeStart()
+	{	
+		// --- Physics ---
+		{
+			m_Box2DWorld = new b2World({ 0.0f, -9.8f });
+			m_Box2DWorld->SetContactListener(m_ContactListener.get());
+
+			auto view = m_Registry.view<TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				if (entity.GetComponent<TagComponent>().Enabled)
+					CreatePhysicsData(entity);
+			}
+		}
+
+		// --- Native Script ---
+		{
+			auto view = m_Registry.view<NativeScriptComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				auto& nsc = entity.GetComponent<NativeScriptComponent>();
+				if (entity.GetComponent<TagComponent>().Enabled)
+				{
+					nsc.Instance = nsc.InstantiateScript();
+					nsc.Instance->m_Entity = entity;
+					nsc.Instance->OnCreate();
+				}
+			}
+		}
+
+		// --- C# Scripts ---
+		{
+			auto view = m_Registry.view<ScriptComponent, TagComponent, IDComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				auto& sc = entity.GetComponent<ScriptComponent>();
+				if (entity.GetComponent<TagComponent>().Enabled)
+				{
+					ScriptEngine::OnCreateEntityScript(entity);
+				}
+			}
+		}
+	}
+
+	void Scene::OnPhysicsStart()
+	{
+		// --- Physics ---
+		{
+			m_Box2DWorld = new b2World({ 0.0f, -9.8f });
+
+			auto view = m_Registry.view<IDComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				if (entity.GetComponent<TagComponent>().Enabled)
+					CreatePhysicsData(entity);
+			}
+		}
+	}
+
+	void Scene::OnRuntimeStop()
+	{
+		delete m_Box2DWorld;
+		m_Box2DWorld = nullptr;
+	}
+
+	void Scene::OnPhysicsStop()
+	{
+		delete m_Box2DWorld;
+		m_Box2DWorld = nullptr;
+	}
+
+	void Scene::OnRuntimePause(Timestep deltaTime)
+	{
+		// --- Rendering 2D ---
+		// Find first camera with "Primary" property enabled.
 		SceneCamera* mainCamera = nullptr;
 		glm::mat4 cameraTransform;
 		{
@@ -219,25 +449,23 @@ namespace Locus
 				for (auto e : view)
 				{
 					Entity entity = Entity(e, this);
-					bool enabled = entity.GetComponent<TagComponent>().Enabled;
 					auto& sprite = entity.GetComponent<SpriteRendererComponent>();
-					if (enabled)
+					if (entity.GetComponent<TagComponent>().Enabled)
 						Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
 				}
 			}
-			
+
 			{ // Circle
 				auto view = m_Registry.view<TransformComponent, CircleRendererComponent, TagComponent>();
 				for (auto e : view)
 				{
 					Entity entity = Entity(e, this);
-					bool enabled = entity.GetComponent<TagComponent>().Enabled;
 					auto& circle = entity.GetComponent<CircleRendererComponent>();
-					if (enabled)
+					if (entity.GetComponent<TagComponent>().Enabled)
 						Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
 				}
 			}
-			
+
 			Renderer2D::EndScene();
 		}
 		else
@@ -247,8 +475,11 @@ namespace Locus
 		}
 	}
 
-	void Scene::OnUpdateEditor(Timestep deltaTime, EditorCamera& camera)
+	void Scene::OnPhysicsPause(Timestep deltaTime, EditorCamera& camera)
 	{
+		RenderCommand::SetClearColor(camera.GetBackgroundColor());
+		RenderCommand::Clear();
+
 		// Main rendering
 		Renderer2D::BeginScene(camera);
 
@@ -257,9 +488,8 @@ namespace Locus
 			for (auto e : view)
 			{
 				Entity entity = Entity(e, this);
-				bool enabled = entity.GetComponent<TagComponent>().Enabled;
 				auto& sprite = entity.GetComponent<SpriteRendererComponent>();
-				if (enabled)
+				if (entity.GetComponent<TagComponent>().Enabled)
 					Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
 			}
 		}
@@ -269,267 +499,235 @@ namespace Locus
 			for (auto e : view)
 			{
 				Entity entity = Entity(e, this);
-				bool enabled = entity.GetComponent<TagComponent>().Enabled;
 				auto& circle = entity.GetComponent<CircleRendererComponent>();
-				if (enabled)
+				if (entity.GetComponent<TagComponent>().Enabled)
 					Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
 			}
 		}
 
 		// 3D grid plane
-		Renderer2D::DrawGrid();
+		if (camera.GetGridVisibility())
+			Renderer2D::DrawGrid();
 
 		Renderer2D::EndScene();
 	}
 
-	void Scene::OnUpdatePhysics(Timestep deltaTime, EditorCamera& camera)
+	void Scene::CreatePhysicsData(Entity entity)
 	{
-		// Main rendering
-		Renderer2D::BeginScene(camera);
+		auto& tc = entity.GetComponent<TransformComponent>();
 
-		// --- Physics --------------------------------------------------------
+		b2Body* entityBody = nullptr;
+		float mass = -1.0f;
+
+		// If entity has a collider and rigidbody
+		if (entity.HasComponent<Rigidbody2DComponent>())
 		{
-			m_Box2DWorld->Step(deltaTime, 6, 2); // TODO: paremeterize
-			auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
-			for (auto e : view)
-			{
-				Entity entity = Entity(e, this);
-				if (entity.GetComponent<TagComponent>().Enabled)
-				{
-					auto& transform = entity.GetComponent<TransformComponent>();
-					auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
+			auto& rb2D = entity.GetComponent<Rigidbody2DComponent>();
+			mass = rb2D.Mass;
 
-					b2Body* body = (b2Body*)rb2d.RuntimeBody;
-					const b2Vec2& position = body->GetPosition();
-					transform.LocalPosition = { position.x, position.y , 0.0f };
-					transform.SetLocalRotation({ 0, 0, body->GetAngle() });
-				}
-			}
+			// Body
+			b2BodyDef bodyDef;
+			bodyDef.type = Utils::Rigidbody2DTypeToBox2DType(rb2D.BodyType);
+			bodyDef.position.Set(tc.LocalPosition.x, tc.LocalPosition.y);
+			bodyDef.angle = glm::radians(tc.LocalRotation.z);
+			bodyDef.linearDamping = rb2D.LinearDamping;
+			bodyDef.angularDamping = rb2D.AngularDamping;
+			bodyDef.fixedRotation = rb2D.FixedRotation;
+			bodyDef.gravityScale = rb2D.GravityScale;
+			bodyDef.bullet = rb2D.IsBullet;
+			bodyDef.userData.pointer = (uintptr_t)entity.GetUUID();
+			entityBody = m_Box2DWorld->CreateBody(&bodyDef);
+			rb2D.RuntimeBody = entityBody;
+			b2MassData massData = {};
+			massData.mass = rb2D.Mass;
+			massData.I = entityBody->GetInertia();
+			massData.center = entityBody->GetLocalCenter();
+			entityBody->SetMassData(&massData);
 		}
-
-		{ // Sprite
-			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent, TagComponent>();
-			for (auto e : view)
-			{
-				Entity entity = Entity(e, this);
-				bool enabled = entity.GetComponent<TagComponent>().Enabled;
-				auto& sprite = entity.GetComponent<SpriteRendererComponent>();
-				if (enabled)
-					Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
-			}
-		}
-
-		{ // Circle
-			auto view = m_Registry.view<TransformComponent, CircleRendererComponent, TagComponent>();
-			for (auto e : view)
-			{
-				Entity entity = Entity(e, this);
-				bool enabled = entity.GetComponent<TagComponent>().Enabled;
-				auto& circle = entity.GetComponent<CircleRendererComponent>();
-				if (enabled)
-					Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
-			}
-		}
-
-		Renderer2D::EndScene();
-	}
-
-	void Scene::OnRuntimeStart()
-	{
-		// --- Native Script --------------------------------------------------
+		else
 		{
-			auto view = m_Registry.view<NativeScriptComponent, TagComponent>();
-			for (auto entity : view)
+			// If entity has a collider but no rigidbody
+			if (entity.HasComponent<BoxCollider2DComponent>() || entity.HasComponent<CircleCollider2DComponent>())
 			{
-				auto& nsc = view.get<NativeScriptComponent>(entity);
-				bool enabled = view.get<TagComponent>(entity).Enabled;
-				if (enabled)
-				{
-					nsc.Instance = nsc.InstantiateScript();
-					nsc.Instance->m_Entity = Entity(entity, this);
-					nsc.Instance->OnCreate();
-				}
+				mass = 0.0f;
+
+				b2BodyDef bodyDef;
+				bodyDef.type = b2BodyType::b2_staticBody;
+				bodyDef.position.Set(tc.LocalPosition.x, tc.LocalPosition.y);
+				bodyDef.angle = glm::radians(tc.LocalRotation.z);
+				bodyDef.userData.pointer = (uintptr_t)entity.GetUUID();
+				entityBody = m_Box2DWorld->CreateBody(&bodyDef);
 			}
 		}
 
-		// --- C# Scripts -----------------------------------------------------
+		if (entity.HasComponent<BoxCollider2DComponent>()) // TODO: Check memory leak
 		{
-			ScriptEngine::OnRuntimeStart(this);
-			auto view = m_Registry.view<ScriptComponent, TagComponent, IDComponent>();
-			for (auto e : view)
-			{
-				Entity entity = Entity(e, this);
-				auto& sc = view.get<ScriptComponent>(e);
-				bool enabled = view.get<TagComponent>(e).Enabled;
-				UUID id = view.get<IDComponent>(e).ID;
-				if (enabled)
-				{
-					ScriptEngine::OnCreateEntityScript(entity);
-				}
-			}
+			auto& b2D = entity.GetComponent<BoxCollider2DComponent>();
+			
+			b2Vec2 size = { b2D.Size.x * tc.LocalScale.x, b2D.Size.y * tc.LocalScale.y };
+			b2Vec2 offset = { tc.LocalScale.x * b2D.Offset.x, tc.LocalScale.y * b2D.Offset.y };
+			float angle = 0.0f; // TODO
+
+			b2PolygonShape box;
+			box.SetAsBox(size.x / 2, size.y / 2, offset, angle);
+			b2FixtureDef fixtureDef; // Move this to collider
+			fixtureDef.density = mass; // TODO: Calculate mass from body and implement multiple fixtures per body.
+			fixtureDef.friction = b2D.Friction;
+			fixtureDef.restitution = b2D.Restitution;
+			fixtureDef.restitutionThreshold = b2D.RestitutionThreshold;
+			fixtureDef.shape = &box;
+			fixtureDef.filter.categoryBits = b2D.CollisionCategory;
+			fixtureDef.filter.maskBits = b2D.CollisionMask;
+			b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);
+			b2D.RuntimeFixture = fixture;
 		}
-		
-		// --- Physics --------------------------------------------------------
+		else if (entity.HasComponent<CircleCollider2DComponent>())
 		{
-			m_Box2DWorld = new b2World({ 0.0f, -9.8f });
-			auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
-			for (auto e : view)
-			{
-				Entity entity = Entity(e, this);
-				if (entity.GetComponent<TagComponent>().Enabled)
-				{
-					auto& tc = entity.GetComponent<TransformComponent>();
-					auto& rb2D = entity.GetComponent<Rigidbody2DComponent>();
+			auto& c2D = entity.GetComponent<CircleCollider2DComponent>();
 
-					// Body
-					b2BodyDef bodyDef;
-					bodyDef.type = Rigidbody2DTypeToBox2DType(rb2D.BodyType);
+			float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
+			b2Vec2 offset = { maxScale * c2D.Offset.x, maxScale * c2D.Offset.y };
+			float radius = maxScale * c2D.Radius;
 
-					bodyDef.position.Set(tc.LocalPosition.x, tc.LocalPosition.y);
-					bodyDef.angle = tc.LocalRotation.z;
-					bodyDef.linearDamping = rb2D.LinearDamping;
-					bodyDef.angularDamping = rb2D.AngularDamping;
-					bodyDef.fixedRotation = rb2D.FixedRotation;
-					bodyDef.gravityScale = rb2D.GravityScale;
-					b2Body* entityBody = m_Box2DWorld->CreateBody(&bodyDef);
-					rb2D.RuntimeBody = entityBody;
-					b2MassData massData;
-					massData.mass = rb2D.Mass;
-					massData.I = entityBody->GetInertia();
-					massData.center = entityBody->GetLocalCenter();
-					entityBody->SetMassData(&massData);
-
-					b2FixtureDef fixtureDef;
-					fixtureDef.density = rb2D.Mass;
-					fixtureDef.friction = rb2D.Friction;
-					fixtureDef.restitution = rb2D.Restitution;
-					fixtureDef.restitutionThreshold = rb2D.RestitutionThreshold;
-					fixtureDef.filter.categoryBits = 0x0001;
-					fixtureDef.filter.maskBits = 0xFFFF;
-
-					if (entity.HasComponent<BoxCollider2DComponent>())
-					{
-						auto& b2D = entity.GetComponent<BoxCollider2DComponent>();
-
-						b2Vec2 size = { b2D.Size.x * tc.LocalScale.x, b2D.Size.y * tc.LocalScale.y };
-						b2Vec2 offset = { tc.LocalScale.x * b2D.Offset.x, tc.LocalScale.y * b2D.Offset.y };
-						float angle = 0.0f; // TODO
-
-						b2PolygonShape box;
-						box.SetAsBox(size.x / 2, size.y / 2, offset, angle);
-						fixtureDef.shape = &box;
-						fixtureDef.filter.categoryBits = b2D.CollisionCategory;
-						fixtureDef.filter.maskBits = b2D.CollisionMask;
-						b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);
-						b2D.RuntimeFixture = fixture;
-					}
-					else if (entity.HasComponent<CircleCollider2DComponent>())
-					{
-						auto& c2D = entity.GetComponent<CircleCollider2DComponent>();
-
-						float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
-						b2Vec2 offset = { maxScale * c2D.Offset.x, maxScale * c2D.Offset.y };
-						float radius = maxScale * c2D.Radius;
-
-						b2CircleShape circle;
-						circle.m_p = offset;
-						circle.m_radius = radius;
-						fixtureDef.shape = &circle;
-						fixtureDef.filter.categoryBits = c2D.CollisionCategory;
-						fixtureDef.filter.maskBits = c2D.CollisionMask;
-						b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);
-						c2D.RuntimeFixture = fixture;
-					}
-				}
-			}
+			b2CircleShape circle;
+			b2FixtureDef fixtureDef; // Move this to collider
+			fixtureDef.density = mass;
+			fixtureDef.friction = c2D.Friction;
+			fixtureDef.restitution = c2D.Restitution;
+			fixtureDef.restitutionThreshold = c2D.RestitutionThreshold;
+			circle.m_p = offset;
+			circle.m_radius = radius;
+			fixtureDef.shape = &circle;
+			fixtureDef.filter.categoryBits = c2D.CollisionCategory;
+			fixtureDef.filter.maskBits = c2D.CollisionMask;
+			b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);
+			c2D.RuntimeFixture = fixture;
 		}
 	}
 
-	void Scene::OnPhysicsStart()
+	void Scene::UpdatePhysicsData(Entity entity)
 	{
-		// --- Physics --------------------------------------------------------
+		auto& tc = entity.GetComponent<TransformComponent>();
+
+		// Create data if physics data doesn't exist
+		if (entity.HasComponent<Rigidbody2DComponent>())
 		{
-			m_Box2DWorld = new b2World({ 0.0f, -9.8f });
-			auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
-			for (auto e : view)
+			if (entity.GetComponent<Rigidbody2DComponent>().RuntimeBody == nullptr)
+				CreatePhysicsData(entity);
+		}
+		if (entity.HasComponent<BoxCollider2DComponent>())
+		{
+			if (entity.GetComponent<BoxCollider2DComponent>().RuntimeFixture == nullptr)
+				CreatePhysicsData(entity);
+		}
+		if (entity.HasComponent<CircleCollider2DComponent>())
+		{
+			if (entity.GetComponent<CircleCollider2DComponent>().RuntimeFixture == nullptr)
+				CreatePhysicsData(entity);
+		}
+
+		// Profile performance vs not checking each property for a change.
+		if (entity.HasComponent<Rigidbody2DComponent>())
+		{
+			auto& rb2D = entity.GetComponent<Rigidbody2DComponent>();
+			b2Body* runtimeBody = (b2Body*)rb2D.RuntimeBody;
+			
+			if (runtimeBody->GetType() != Utils::Rigidbody2DTypeToBox2DType(rb2D.BodyType))
+				runtimeBody->SetType(Utils::Rigidbody2DTypeToBox2DType(rb2D.BodyType));
+
+			if (runtimeBody->GetMass() != rb2D.Mass)
 			{
-				Entity entity = Entity(e, this);
-				if (entity.GetComponent<TagComponent>().Enabled)
-				{
-					auto& tc = entity.GetComponent<TransformComponent>();
-					auto& rb2D = entity.GetComponent<Rigidbody2DComponent>();
+				b2MassData massData = {};
+				massData.mass = rb2D.Mass;
+				massData.I = runtimeBody->GetInertia();
+				massData.center = runtimeBody->GetLocalCenter();
+				runtimeBody->SetMassData(&massData);
+			}
 
-					// Body
-					b2BodyDef bodyDef;
-					bodyDef.type = Rigidbody2DTypeToBox2DType(rb2D.BodyType);
+			if (runtimeBody->GetGravityScale() != rb2D.GravityScale)
+				runtimeBody->SetGravityScale(rb2D.GravityScale);
+			if (runtimeBody->GetLinearDamping() != rb2D.LinearDamping)
+				runtimeBody->SetLinearDamping(rb2D.LinearDamping);
+			if (runtimeBody->GetAngularDamping() != rb2D.AngularDamping)
+				runtimeBody->SetAngularDamping(rb2D.AngularDamping);
+			if (runtimeBody->IsFixedRotation() != rb2D.FixedRotation)
+				runtimeBody->SetFixedRotation(rb2D.FixedRotation);
+			if (runtimeBody->IsBullet() != rb2D.IsBullet)
+				runtimeBody->SetBullet(rb2D.IsBullet);
+		}
 
-					bodyDef.position.Set(tc.LocalPosition.x, tc.LocalPosition.y);
-					bodyDef.angle = tc.LocalRotation.z;
-					bodyDef.linearDamping = rb2D.LinearDamping;
-					bodyDef.angularDamping = rb2D.AngularDamping;
-					bodyDef.fixedRotation = rb2D.FixedRotation;
-					bodyDef.gravityScale = rb2D.GravityScale;
-					b2Body* entityBody = m_Box2DWorld->CreateBody(&bodyDef);
-					rb2D.RuntimeBody = entityBody;
-					b2MassData massData;
-					massData.mass = rb2D.Mass;
-					massData.I = entityBody->GetInertia();
-					massData.center = entityBody->GetLocalCenter();
-					entityBody->SetMassData(&massData);
+		if (entity.HasComponent<BoxCollider2DComponent>())
+		{
+			auto& b2D = entity.GetComponent<BoxCollider2DComponent>();
 
-					b2FixtureDef fixtureDef;
-					fixtureDef.density = rb2D.Mass;
-					fixtureDef.friction = rb2D.Friction;
-					fixtureDef.restitution = rb2D.Restitution;
-					fixtureDef.restitutionThreshold = rb2D.RestitutionThreshold;
-					fixtureDef.filter.categoryBits = 0x0001;
-					fixtureDef.filter.maskBits = 0xFFFF;
+			b2Vec2 size = { b2D.Size.x * tc.LocalScale.x, b2D.Size.y * tc.LocalScale.y };
+			b2Vec2 offset = { tc.LocalScale.x * b2D.Offset.x, tc.LocalScale.y * b2D.Offset.y };
+			float angle = 0.0f; // TODO
+			float mass = entity.HasComponent<Rigidbody2DComponent>() ? entity.GetComponent<Rigidbody2DComponent>().Mass : 0.0f;
 
-					if (entity.HasComponent<BoxCollider2DComponent>())
-					{
-						auto& b2D = entity.GetComponent<BoxCollider2DComponent>();
+			b2Fixture* runtimeFixture = (b2Fixture*)b2D.RuntimeFixture;
+			b2PolygonShape* shape = (b2PolygonShape*)runtimeFixture->GetShape();
 
-						b2Vec2 size = { b2D.Size.x * tc.LocalScale.x, b2D.Size.y * tc.LocalScale.y };
-						b2Vec2 offset = { tc.LocalScale.x * b2D.Offset.x, tc.LocalScale.y * b2D.Offset.y };
-						float angle = 0.0f; // TODO
-
-						b2PolygonShape box;
-						box.SetAsBox(size.x / 2, size.y / 2, offset, angle);
-						fixtureDef.shape = &box;
-						fixtureDef.filter.categoryBits = b2D.CollisionCategory;
-						fixtureDef.filter.maskBits = b2D.CollisionMask;
-
-						b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);
-						b2D.RuntimeFixture = fixture;
-					}
-					else if (entity.HasComponent<CircleCollider2DComponent>())
-					{
-						auto& c2D = entity.GetComponent<CircleCollider2DComponent>();
-
-						float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
-						b2Vec2 offset = { maxScale * c2D.Offset.x, maxScale * c2D.Offset.y };
-						float radius = maxScale * c2D.Radius;
-
-						b2CircleShape circle;
-						circle.m_p = offset;
-						circle.m_radius = radius;
-						fixtureDef.shape = &circle;
-						fixtureDef.filter.categoryBits = c2D.CollisionCategory;
-						fixtureDef.filter.maskBits = c2D.CollisionMask;
-						b2Fixture* fixture = entityBody->CreateFixture(&fixtureDef);
-						c2D.RuntimeFixture = fixture;
-					}
-				}
+			// TODO: Collision jittery when changed during runtime
+			shape->SetAsBox(size.x / 2, size.y / 2, offset, angle);
+			// Check if shape is changed
+			/*b2PolygonShape thisShape;
+			thisShape.SetAsBox(size.x / 2, size.y / 2, offset, angle);
+			if (thisShape.m_vertices[0] != shape->m_vertices[0] || thisShape.m_vertices[1] != shape->m_vertices[1]
+				|| thisShape.m_vertices[2] != shape->m_vertices[2] || thisShape.m_vertices[3] != shape->m_vertices[3])
+			{
+				for (int i = 0; i < 4; i++)
+					shape->m_vertices[i] = thisShape.m_vertices[i];
+			}*/
+			if (runtimeFixture->GetDensity() != mass)
+				runtimeFixture->SetDensity(mass);
+			if (runtimeFixture->GetFriction() != b2D.Friction)
+				runtimeFixture->SetFriction(b2D.Friction);
+			if (runtimeFixture->GetRestitution() != b2D.Restitution)
+				runtimeFixture->SetRestitution(b2D.Restitution);
+			if (runtimeFixture->GetRestitutionThreshold() != b2D.RestitutionThreshold)
+				runtimeFixture->SetRestitutionThreshold(b2D.RestitutionThreshold);
+			if (runtimeFixture->GetFilterData().categoryBits != b2D.CollisionCategory || runtimeFixture->GetFilterData().maskBits != b2D.CollisionMask)
+			{
+				b2Filter filter;
+				filter.categoryBits = b2D.CollisionCategory;
+				filter.maskBits = b2D.CollisionMask;
+				runtimeFixture->SetFilterData(filter);
 			}
 		}
-	}
 
-	void Scene::OnRuntimeStop()
-	{
-		delete m_Box2DWorld;
-		m_Box2DWorld = nullptr;
+		if (entity.HasComponent<CircleCollider2DComponent>())
+		{
+			auto& c2D = entity.GetComponent<CircleCollider2DComponent>();
 
-		ScriptEngine::OnRuntimeStop();
+			float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
+			b2Vec2 offset = { maxScale * c2D.Offset.x, maxScale * c2D.Offset.y };
+			float radius = maxScale * c2D.Radius;
+			float mass = entity.HasComponent<Rigidbody2DComponent>() ? entity.GetComponent<Rigidbody2DComponent>().Mass : 0.0f;
+
+			b2Fixture* runtimeFixture = (b2Fixture*)c2D.RuntimeFixture;
+			b2CircleShape* shape = (b2CircleShape*)runtimeFixture->GetShape();
+			
+			if (shape->m_radius != radius)
+				shape->m_radius = radius;
+			if (shape->m_p != offset)
+				shape->m_p = offset;
+			if (runtimeFixture->GetDensity() != mass)
+				runtimeFixture->SetDensity(mass);
+			if (runtimeFixture->GetFriction() != c2D.Friction)
+				runtimeFixture->SetFriction(c2D.Friction);
+			if (runtimeFixture->GetRestitution() != c2D.Restitution)
+				runtimeFixture->SetRestitution(c2D.Restitution);
+			if (runtimeFixture->GetRestitutionThreshold() != c2D.RestitutionThreshold)
+				runtimeFixture->SetRestitutionThreshold(c2D.RestitutionThreshold);
+			if (runtimeFixture->GetFilterData().categoryBits != c2D.CollisionCategory || runtimeFixture->GetFilterData().maskBits != c2D.CollisionMask)
+			{
+				b2Filter filter;
+				filter.categoryBits = c2D.CollisionCategory;
+				filter.maskBits = c2D.CollisionMask;
+				runtimeFixture->SetFilterData(filter);
+			}
+		}
 	}
 
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)
@@ -551,24 +749,19 @@ namespace Locus
 	Entity Scene::GetPrimaryCameraEntity()
 	{
 		auto view = m_Registry.view<CameraComponent>();
-		for (auto entity : view)
+		for (auto e : view)
 		{
-			if (view.get<CameraComponent>(entity).Primary)
-				return Entity(entity, this);
+			Entity entity = Entity(e, this);
+			if (entity.GetComponent<CameraComponent>().Primary)
+				return entity;
 		}
-		return {};
+		return Entity::Null;
 	}
 
 	Entity Scene::GetEntityByUUID(UUID uuid)
 	{
-		auto view = m_Registry.view<IDComponent>();
-		for (auto e : view)
-		{
-			Entity entity = Entity(e, this);
-			if (entity.GetComponent<IDComponent>().ID == uuid)
-				return entity;
-		}
-
+		if (m_Entities.find(uuid) != m_Entities.end())
+			return m_Entities[uuid];
 		return Entity::Null;
 	}
 
@@ -577,8 +770,8 @@ namespace Locus
 		glm::mat4 transform(1.0f);
 		auto& tc = entity.GetComponent<TransformComponent>();
 
-		if (tc.Parent != Entity::Null)
-			transform = GetWorldTransform(tc.Parent);
+		if (tc.Parent)
+			transform = GetWorldTransform(GetEntityByUUID(tc.Parent));
 
 		return transform * tc.GetLocalTransform();
 	}

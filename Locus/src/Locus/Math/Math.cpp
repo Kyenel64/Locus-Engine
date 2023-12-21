@@ -7,12 +7,12 @@
 
 namespace Locus::Math
 {
-
 	glm::vec3 Scale(const glm::vec3& v, float desiredLength)
 	{
 		return v * desiredLength / length(v);
 	}
 
+	// Modified from glm::decompose()
 	bool Decompose(const glm::mat4& transform, glm::vec3& scale, glm::quat& rotation, glm::vec3& position)
 	{
 		glm::mat4 localTransform = transform;
@@ -98,5 +98,4 @@ namespace Locus::Math
 
 		return true;
 	}
-
 }

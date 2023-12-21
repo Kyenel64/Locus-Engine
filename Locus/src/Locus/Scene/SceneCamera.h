@@ -1,6 +1,5 @@
 // --- SceneCamera ------------------------------------------------------------
-// Runtime camera. There can be multiple scene cameras within a scene but only
-//    one can be the primary.
+// Runtime camera. The first primary scene camera will be enabled on runtime.
 #pragma once
 
 #include "Locus/Renderer/Camera.h"
@@ -14,12 +13,11 @@ namespace Locus
 
 	public:
 		SceneCamera();
-		virtual ~SceneCamera() = default;
+		~SceneCamera() = default;
 
 		void SetOrthographic(float size, float nearClip, float farClip);
 		void SetPerspective(float verticalFOV, float nearClip, float farClip);
 
-		// -- Both ------------------------------------------------------------
 		void SetViewportSize(uint32_t width, uint32_t height);
 
 		void SetProjectionType(ProjectionType type) { m_ProjectionType = type; RecalculateProjection(); }
@@ -31,7 +29,7 @@ namespace Locus
 		glm::vec4& GetBackgroundColor() { return m_BackgroundColor; }
 
 
-		// --- Perspective ----------------------------------------------------
+		// --- Perspective ---
 		void SetPerspectiveFOV(float verticalFOV) { m_PerspectiveFOV = verticalFOV; RecalculateProjection(); }
 		float GetPerspectiveFOV() const { return m_PerspectiveFOV; }
 		float& GetPerspectiveFOV() { return m_PerspectiveFOV; }
@@ -42,8 +40,7 @@ namespace Locus
 		float GetPerspectiveFarClip() const { return m_PerspectiveFar; }
 		float& GetPerspectiveFarClip() { return m_PerspectiveFar; }
 
-
-		// --- Orthographic ---------------------------------------------------
+		// --- Orthographic ---
 		void SetOrthographicSize(float size) { m_OrthographicSize = size; RecalculateProjection(); }
 		float GetOrthographicSize() const { return m_OrthographicSize; }
 		float& GetOrthographicSize() { return m_OrthographicSize; }
@@ -61,13 +58,12 @@ namespace Locus
 		float m_AspectRatio = 0.0f;
 		glm::vec4 m_BackgroundColor = glm::vec4(0.25f, 0.5f, 0.5f, 1.0f);
 		
-		// Orthographics
+		// Orthographic
 		float m_OrthographicSize = 5.0f;
 		float m_OrthographicNear = -1.0f, m_OrthographicFar = 1000.0f;
 
 		// Perspective
-		float m_PerspectiveFOV = glm::radians(45.0f);
+		float m_PerspectiveFOV = 45.0f;
 		float m_PerspectiveNear = 0.01f, m_PerspectiveFar = 1000.0f;
-
 	};
 }

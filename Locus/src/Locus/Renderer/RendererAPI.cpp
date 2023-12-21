@@ -2,7 +2,6 @@
 #include "RendererAPI.h"
 
 #include "Locus/Renderer/Renderer.h"
-
 #include "Platform/OpenGL/OpenGLRendererAPI.h"
 
 namespace Locus

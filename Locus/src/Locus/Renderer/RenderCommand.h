@@ -1,6 +1,5 @@
 // --- RenderCommand ----------------------------------------------------------
-// Interface for rendering commands. Implementation sets s_RendererAPI to 
-// a specific rendering API.
+// Interface for rendering commands. Implementation is renderer API dependent.
 #pragma once
 
 #include "Locus/Renderer/RendererAPI.h"

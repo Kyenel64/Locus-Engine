@@ -1,20 +1,6 @@
 // --- MouseCodes -------------------------------------------------------------
-// Locus mouse button codes matches GLFW3 format
+// Locus mousecodes. Uses the same mousecodes as GLFW3.
 #pragma once
-
-// From glfw3.h keycodes
-//#define LOCUS_MOUSE_BUTTON_1         0
-//#define LOCUS_MOUSE_BUTTON_2         1
-//#define LOCUS_MOUSE_BUTTON_3         2
-//#define LOCUS_MOUSE_BUTTON_4         3
-//#define LOCUS_MOUSE_BUTTON_5         4
-//#define LOCUS_MOUSE_BUTTON_6         5
-//#define LOCUS_MOUSE_BUTTON_7         6
-//#define LOCUS_MOUSE_BUTTON_8         7
-//#define LOCUS_MOUSE_BUTTON_LAST      LOCUS_MOUSE_BUTTON_8
-//#define LOCUS_MOUSE_BUTTON_LEFT      LOCUS_MOUSE_BUTTON_1
-//#define LOCUS_MOUSE_BUTTON_RIGHT     LOCUS_MOUSE_BUTTON_2
-//#define LOCUS_MOUSE_BUTTON_MIDDLE    LOCUS_MOUSE_BUTTON_3
 
 namespace Locus
 {

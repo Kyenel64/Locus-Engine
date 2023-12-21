@@ -18,20 +18,34 @@ namespace Locus
 		RegisterComponents();
 
 		LINK_INTERNAL_CALL(DebugLog);
-		LINK_INTERNAL_CALL(CreateEntity);
 
+		// Entity
+		LINK_INTERNAL_CALL(Entity_CreateEntity);
 		LINK_INTERNAL_CALL(Entity_HasComponent);
 		LINK_INTERNAL_CALL(Entity_AddComponent);
 		LINK_INTERNAL_CALL(Entity_GetTag);
 		LINK_INTERNAL_CALL(Entity_SetTag);
+		LINK_INTERNAL_CALL(Entity_GetGroup);
+		LINK_INTERNAL_CALL(Entity_SetGroup);
 		LINK_INTERNAL_CALL(Entity_GetEnabled);
 		LINK_INTERNAL_CALL(Entity_SetEnabled);
 		LINK_INTERNAL_CALL(Entity_Find);
+		LINK_INTERNAL_CALL(Entity_Destroy);
 
+		// Vec2
+		LINK_INTERNAL_CALL(Vec2_Distance);
+		LINK_INTERNAL_CALL(Vec2_Length);
+
+		// Vec3
 		LINK_INTERNAL_CALL(Vec3_Cross);
 		LINK_INTERNAL_CALL(Vec3_Distance);
 		LINK_INTERNAL_CALL(Vec3_Length);
 
+		// Vec4
+		LINK_INTERNAL_CALL(Vec4_Distance);
+		LINK_INTERNAL_CALL(Vec4_Length);
+
+		// Transform Component
 		LINK_INTERNAL_CALL(TransformComponent_GetLocalTransform);
 		LINK_INTERNAL_CALL(TransformComponent_GetWorldTransform);
 		LINK_INTERNAL_CALL(TransformComponent_GetWorldToLocal);
@@ -42,8 +56,46 @@ namespace Locus
 		LINK_INTERNAL_CALL(TransformComponent_GetLocalScale);
 		LINK_INTERNAL_CALL(TransformComponent_SetLocalScale);
 
+		// Sprite Renderer Component
+		LINK_INTERNAL_CALL(SpriteRendererComponent_GetColor);
+		LINK_INTERNAL_CALL(SpriteRendererComponent_SetColor);
+		LINK_INTERNAL_CALL(SpriteRendererComponent_GetTilingFactor);
+		LINK_INTERNAL_CALL(SpriteRendererComponent_SetTilingFactor);
+
+		// Circle Renderer Component
+		LINK_INTERNAL_CALL(CircleRendererComponent_GetColor);
+		LINK_INTERNAL_CALL(CircleRendererComponent_SetColor);
+		LINK_INTERNAL_CALL(CircleRendererComponent_GetThickness);
+		LINK_INTERNAL_CALL(CircleRendererComponent_SetThickness);
+		LINK_INTERNAL_CALL(CircleRendererComponent_GetFade);
+		LINK_INTERNAL_CALL(CircleRendererComponent_SetFade);
+
+		// Rigidbody2D Component
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_GetBodyType);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_SetBodyType);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_GetMass);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_SetMass);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_GetGravityScale);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_SetGravityScale);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_GetLinearDamping);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_SetLinearDamping);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_GetAngularDamping);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_SetAngularDamping);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_GetFixedRotation);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_SetFixedRotation);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_GetIsBullet);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_SetIsBullet);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_AddForce);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_AddLinearImpulse);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_GetPosition);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_SetPosition);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_GetVelocity);
+		LINK_INTERNAL_CALL(Rigidbody2DComponent_SetVelocity);
+
+		// Input
 		LINK_INTERNAL_CALL(Input_IsKeyPressed);
-		
+		LINK_INTERNAL_CALL(Input_IsKeyHeld);
+		LINK_INTERNAL_CALL(Input_IsKeyReleased);
 	}
 
 	template<typename T>

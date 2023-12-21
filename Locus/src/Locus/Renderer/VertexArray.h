@@ -1,6 +1,5 @@
 // --- VertexArray ------------------------------------------------------------
 // Interface for vertex arrays. 
-// Create() checks RendererAPI and creates a RenderAPI specific VertexArray.
 #pragma once
 
 #include "Locus/Renderer/Buffer.h"
@@ -10,6 +9,8 @@ namespace Locus
 	class VertexArray
 	{
 	public:
+		virtual ~VertexArray() = default;
+
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 

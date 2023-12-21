@@ -6,7 +6,7 @@
 
 #include "Locus/Core/PlatformDetection.h"
 
-// --- Debugs -----------------------------------------------------------------
+// --- Debug ---
 #ifdef LOCUS_DEBUG
 	#define LOCUS_ENABLE_ASSERTS
 #endif
@@ -20,7 +20,7 @@
 #endif
 
 
-// --- Utility ----------------------------------------------------------------
+// --- Utility ---
 #define BIT(x) (1 << x)
 
 #define LOCUS_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
@@ -29,7 +29,8 @@
 // Pass in function and types of parameters.
 #define LOCUS_BIND_FN(func, ...) std::function([&](__VA_ARGS__ val) { func(val); })
 
-// --- Memory Management ------------------------------------------------------
+
+// --- Memory Management ---
 namespace Locus
 {
 	template<typename T>

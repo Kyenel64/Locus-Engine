@@ -122,7 +122,6 @@ namespace Locus
 		CompileOrGetVulkanBinaries(sources);
 		CompileOrGetOpenGLBinaries();
 		CreateProgram();
-
 	}
 
 	OpenGLShader::~OpenGLShader()

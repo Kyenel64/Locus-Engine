@@ -1,13 +1,13 @@
-// --- VertexBuffer & IndexBuffer ---------------------------------------------
-// Interface classes for vertex buffer and index buffer.
-// Create function checks system and returns renderer API specific buffer class
+// --- Buffer -----------------------------------------------------------------
+// RendererAPI agnostic interface classes for buffers.
+// Includes BufferLayout, VertexBuffer, and IndexBuffer.
+// Implementations are in the rendererAPI platform directory.
 #pragma once
 
 #include "Locus/Core/Log.h"
 
 namespace Locus
 {
-
 	enum class ShaderDataType
 	{
 		None = 0, Float, Float2, Float3, Float4, Mat3, Mat4, Int, Int2, Int3, Int4, Bool
@@ -42,7 +42,8 @@ namespace Locus
 		uint32_t Offset;
 		bool Normalized;
 
-		BufferElement() {}
+		BufferElement() = default;
+		~BufferElement() = default;
 
 		BufferElement(ShaderDataType type, const std::string& name, bool normalized = false)
 			: Name(name), Type(type), Size(ShaderDataTypeSize(type)), Offset(0), Normalized(normalized)
@@ -71,14 +72,17 @@ namespace Locus
 		}
 	};
 
-	// --- BufferLayout -------------------------------------------------------
 
+
+	// --- BufferLayout -------------------------------------------------------
+	// Layout class for the vertex buffer. Takes in as many BufferElement
+	//	structs in the constructor.
 	class BufferLayout
 	{
 	public:
-		BufferLayout() {}
+		BufferLayout() = default;
+		~BufferLayout() = default;
 
-		// Initializer lets us initialize a list of objects
 		BufferLayout(const std::initializer_list<BufferElement>& elements) : m_Elements(elements)
 		{
 			CalculateOffsetAndStride();
@@ -87,10 +91,10 @@ namespace Locus
 		inline uint32_t GetStride() const { return m_Stride; }
 		inline const std::vector<BufferElement>& GetElements() const { return m_Elements; }
 
-		std::vector<BufferElement>::iterator begin() { return m_Elements.begin(); }
-		std::vector<BufferElement>::iterator end() { return m_Elements.end(); }
-		std::vector<BufferElement>::const_iterator begin() const { return m_Elements.begin(); }
-		std::vector<BufferElement>::const_iterator end() const { return m_Elements.end(); }
+		inline std::vector<BufferElement>::iterator begin() { return m_Elements.begin(); }
+		inline std::vector<BufferElement>::iterator end() { return m_Elements.end(); }
+		inline std::vector<BufferElement>::const_iterator begin() const { return m_Elements.begin(); }
+		inline std::vector<BufferElement>::const_iterator end() const { return m_Elements.end(); }
 
 	private:
 		// Calculate offset for each element and the stride of BufferLayout
@@ -101,7 +105,6 @@ namespace Locus
 				element.Offset = m_Stride;
 				m_Stride += element.Size;
 			}
-
 		}
 
 	private:
@@ -109,12 +112,13 @@ namespace Locus
 		uint32_t m_Stride = 0;
 	};
 
-	// --- VertexBuffer -------------------------------------------------------
 
+
+	// --- VertexBuffer -------------------------------------------------------
 	class VertexBuffer
 	{
 	public:
-		virtual ~VertexBuffer() {}
+		virtual ~VertexBuffer() = default;
 
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
@@ -128,12 +132,13 @@ namespace Locus
 		static Ref<VertexBuffer> Create(float* vertices, uint32_t size);
 	};
 
-	// --- IndexBuffer --------------------------------------------------------
 
+
+	// --- IndexBuffer --------------------------------------------------------
 	class IndexBuffer
 	{
 	public:
-		virtual ~IndexBuffer() {}
+		virtual ~IndexBuffer() = default;
 
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;

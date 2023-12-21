@@ -1,5 +1,5 @@
 // --- Timer ------------------------------------------------------------------
-// Uses chrono for timing.
+// Timer class. Uses chrono for precise timing.
 #pragma once
 
 #include <chrono>

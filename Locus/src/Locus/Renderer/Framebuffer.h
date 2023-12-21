@@ -1,5 +1,5 @@
 // --- Framebuffer ------------------------------------------------------------
-// Framebuffer interface class.
+// Framebuffer interface.
 #pragma once
 
 #include <glm/glm.hpp>
@@ -46,10 +46,12 @@ namespace Locus
 		//bool SwapChainTarget = false;
 	};
 
+
+
 	class Framebuffer
 	{
 	public:
-		virtual ~Framebuffer() {}
+		virtual ~Framebuffer() = default;
 		virtual void Bind() = 0;
 		virtual void Unbind() = 0;
 
@@ -63,6 +65,5 @@ namespace Locus
 		virtual const FramebufferSpecification& GetSpecification() const = 0;
 
 		static Ref<Framebuffer> Create(const FramebufferSpecification& specs);
-
 	};
 }

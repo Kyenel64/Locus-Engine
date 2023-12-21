@@ -40,7 +40,8 @@ project "Locus"
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.Box2D}",
-		"%{IncludeDir.VulkanSDK}"
+		"%{IncludeDir.VulkanSDK}",
+		"%{IncludeDir.mono}"
 	}
 
 	links
@@ -53,12 +54,22 @@ project "Locus"
 		"Box2D"
 	}
 
+	linkoptions { "-IGNORE:4006" }
+
 	filter "system:windows"
 		systemversion "latest"
 
 		defines
 		{
 			"GLFW_INCLUDE_NONE"
+		}
+
+		links
+		{
+			"%{Library.WinSock}",
+			"%{Library.WinMM}",
+			"%{Library.WinVersion}",
+			"%{Library.BCrypt}",
 		}
 
 	filter "configurations:Debug"
@@ -70,7 +81,8 @@ project "Locus"
 		{
 			"%{Library.ShaderC_Debug}",
 			"%{Library.SPIRV_Cross_Debug}",
-			"%{Library.SPIRV_Cross_GLSL_Debug}"
+			"%{Library.SPIRV_Cross_GLSL_Debug}",
+			"%{Library.monoDebug}"
 		}
 
 	filter "configurations:Release"
@@ -82,7 +94,8 @@ project "Locus"
 		{
 			"%{Library.ShaderC_Release}",
 			"%{Library.SPIRV_Cross_Release}",
-			"%{Library.SPIRV_Cross_GLSL_Release}"
+			"%{Library.SPIRV_Cross_GLSL_Release}",
+			"%{Library.monoRelease}"
 		}
 
 	filter "configurations:Dist"
@@ -94,5 +107,6 @@ project "Locus"
 		{
 			"%{Library.ShaderC_Release}",
 			"%{Library.SPIRV_Cross_Release}",
-			"%{Library.SPIRV_Cross_GLSL_Release}"
+			"%{Library.SPIRV_Cross_GLSL_Release}",
+			"%{Library.monoRelease}"
 		}

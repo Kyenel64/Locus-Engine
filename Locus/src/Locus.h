@@ -1,10 +1,10 @@
 // --- Locus -------------------------------------------------------------------
-// For other projects to include.
-
+// Main include file for client applications.
 #pragma once
 
 // --- Core ---
 #include "Locus/Core/Application.h"
+#include "Locus/Core/Core.h"
 #include "Locus/Core/Log.h"
 #include "Locus/Core/Layer.h"
 #include "Locus/Core/Input.h"
@@ -12,6 +12,9 @@
 #include "Locus/Core/MouseCodes.h"
 #include "Locus/Core/Timestep.h"
 #include "Locus/Core/Timer.h"
+
+// --- Debug ---
+#include "Locus/Debug/Instrumentor.h"
 
 // --- ImGui ---
 #include "Locus/ImGui/ImGuiLayer.h"
@@ -31,17 +34,17 @@
 #include "Locus/Renderer/SubTexture2D.h"
 #include "Locus/Renderer/Framebuffer.h"
 #include "Locus/Renderer/EditorCamera.h"
-#include "Locus/Renderer/OrthographicCamera.h"
-#include "Locus/Renderer/OrthographicCameraController.h"
 
 // --- Scene ---
 #include "Locus/Scene/Scene.h"
-#include "Locus/Scene/Graveyard.h"
 #include "Locus/Scene/Entity.h"
 #include "Locus/Scene/ScriptableEntity.h"
 #include "Locus/Scene/Components.h"
 #include "Locus/Scene/SceneCamera.h"
 #include "Locus/Scene/SceneSerializer.h"
+
+// --- Scripting ---
+#include "Locus/Scripting/ScriptEngine.h"
 
 // --- Utils ---
 #include "Locus/Utils/PlatformUtils.h"

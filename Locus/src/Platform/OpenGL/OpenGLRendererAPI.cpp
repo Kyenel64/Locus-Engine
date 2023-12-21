@@ -3,14 +3,8 @@
 
 namespace Locus
 {
-	void OpenGLMessageCallback(
-		unsigned source,
-		unsigned type,
-		unsigned id,
-		unsigned severity,
-		int length,
-		const char* message,
-		const void* userParam)
+	static void OpenGLMessageCallback( unsigned source, unsigned type, unsigned id, unsigned severity,
+		int length, const char* message, const void* userParam)
 	{
 		switch (severity)
 		{
@@ -22,6 +16,7 @@ namespace Locus
 
 		LOCUS_CORE_ASSERT(false, "Unknown severity level!");
 	}
+
 	void OpenGLRendererAPI::Init()
 	{
 		LOCUS_PROFILE_FUNCTION();
@@ -32,10 +27,12 @@ namespace Locus
 			glDebugMessageCallback(OpenGLMessageCallback, nullptr);
 			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
 		#endif
+
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_LINE_SMOOTH);
 	}
 
 	void OpenGLRendererAPI::SetClearColor(const glm::vec4 color)
@@ -55,8 +52,19 @@ namespace Locus
 		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
 	}
 
+	void OpenGLRendererAPI::DrawLine(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)
+	{
+		vertexArray->Bind();
+		glDrawArrays(GL_LINES, 0, vertexCount);
+	}
+
 	void OpenGLRendererAPI::Resize(int x, int y, int width, int height)
 	{
 		glViewport(x, y, width, height);
+	}
+
+	void OpenGLRendererAPI::SetLineWidth(float width)
+	{
+		glLineWidth(width);
 	}
 }

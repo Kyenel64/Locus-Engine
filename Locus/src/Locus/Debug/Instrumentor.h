@@ -9,7 +9,8 @@
 #include <fstream>
 #include <thread>
 
-namespace Locus {
+namespace Locus
+{
 	struct ProfileResult
 	{
 		std::string Name;
@@ -24,11 +25,6 @@ namespace Locus {
 
 	class Instrumentor
 	{
-	private:
-		InstrumentationSession* m_CurrentSession;
-		std::ofstream m_OutputStream;
-		int m_ProfileCount;
-		int m_Frames = 0;
 	public:
 		Instrumentor()
 			: m_CurrentSession(nullptr), m_ProfileCount(0)
@@ -92,7 +88,15 @@ namespace Locus {
 			static Instrumentor instance;
 			return instance;
 		}
+
+	private:
+		InstrumentationSession* m_CurrentSession;
+		std::ofstream m_OutputStream;
+		int m_ProfileCount;
+		int m_Frames = 0;
 	};
+
+
 
 	class InstrumentationTimer
 	{
@@ -130,13 +134,13 @@ namespace Locus {
 
 #define LOCUS_PROFILE 0
 #if LOCUS_PROFILE
-#define LOCUS_PROFILE_BEGIN_SESSION(name, filepath) ::Locus::Instrumentor::Get().BeginSession(name, filepath)
-#define LOCUS_PROFILE_END_SESSION() ::Locus::Instrumentor::Get().EndSession()
-#define LOCUS_PROFILE_SCOPE(name) ::Locus::InstrumentationTimer timer##__LINE__(name);
-#define LOCUS_PROFILE_FUNCTION() LOCUS_PROFILE_SCOPE(__FUNCSIG__)
+	#define LOCUS_PROFILE_BEGIN_SESSION(name, filepath) ::Locus::Instrumentor::Get().BeginSession(name, filepath)
+	#define LOCUS_PROFILE_END_SESSION() ::Locus::Instrumentor::Get().EndSession()
+	#define LOCUS_PROFILE_SCOPE(name) ::Locus::InstrumentationTimer timer##__LINE__(name);
+	#define LOCUS_PROFILE_FUNCTION() LOCUS_PROFILE_SCOPE(__FUNCSIG__)
 #else
-#define LOCUS_PROFILE_BEGIN_SESSION(name, filepath)
-#define LOCUS_PROFILE_END_SESSION()
-#define LOCUS_PROFILE_SCOPE(name)
-#define LOCUS_PROFILE_FUNCTION()
+	#define LOCUS_PROFILE_BEGIN_SESSION(name, filepath)
+	#define LOCUS_PROFILE_END_SESSION()
+	#define LOCUS_PROFILE_SCOPE(name)
+	#define LOCUS_PROFILE_FUNCTION()
 #endif

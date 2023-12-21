@@ -1,12 +1,14 @@
 // --- Input ------------------------------------------------------------------
-// Application input class. The Locus-Editor also handles ImGui inputs. See if
-//    it is better to use Locus inputs for ImGui as well.
-// Implementation for this will be handled in:
-//    Platform/{Platform}/{Platform}Input.cpp
+// Application input class. Implementation is platform dependent. The cpp
+//	file is contained in the platform directory.
 #pragma once
+
+#include <queue>
+#include <map>
 
 #include <glm/glm.hpp>
 
+#include "Locus/Core/KeyCodes.h"
 #include "Locus/Core/Core.h"
 
 namespace Locus
@@ -14,11 +16,26 @@ namespace Locus
 	class Input
 	{
 	public:
-		static bool IsKeyPressed(int keycode);
-		static bool IsMouseButtonPressed(int button);
+		// --- Key Input ---
+		static bool IsKeyPressed(KeyCode keycode);
+		static bool IsKeyHeld(KeyCode keycode);
+		static bool IsKeyReleased(KeyCode keycode);
 
+		static void SetKeyState(KeyCode keycode, KeyState keystate);
+		static KeyState GetKeyState(KeyCode keycode);
+
+		// Called OnUpdate() to process keystates
+		static void ProcessKeys();
+
+		static bool IsMouseButtonPressed(KeyCode button);
+
+		// --- Mouse Input ---
 		static glm::vec2 GetMousePosition();
 		static float GetMouseX();
 		static float GetMouseY();
+
+	private:
+		inline static std::map<KeyCode, KeyState> s_KeyState;
+		inline static std::queue<KeyCode> s_UnhandledKeys;
 	};
 }

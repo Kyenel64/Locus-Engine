@@ -5,9 +5,6 @@
 
 namespace Locus
 {
-
-	Renderer::SceneData* Renderer::s_SceneData = new Renderer::SceneData;
-
 	void Renderer::Init()
 	{
 		LOCUS_PROFILE_FUNCTION();
@@ -26,14 +23,8 @@ namespace Locus
 		RenderCommand::Resize(0, 0, width, height);
 	}
 
-	void Renderer::BeginScene(OrthographicCamera& camera)
-	{
-		s_SceneData->ViewProjectionMatrix = camera.GetViewProjectionMatrix();
-	}
-
 	void Renderer::EndScene()
 	{
 
 	}
-
 }

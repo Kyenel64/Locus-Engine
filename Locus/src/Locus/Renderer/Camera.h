@@ -1,5 +1,5 @@
 // --- Camera -----------------------------------------------------------------
-// Base camera class. Only handles projection
+// Base camera class. Only handles the projection matrix.
 #pragma once
 
 #include <glm/glm.hpp>

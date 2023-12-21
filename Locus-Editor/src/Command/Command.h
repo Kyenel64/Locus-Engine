@@ -1,3 +1,5 @@
+// --- Command ----------------------------------------------------------------
+// Command interface for command pattern. Handles execution, undo and merging.
 #pragma once
 
 #include <Locus.h>

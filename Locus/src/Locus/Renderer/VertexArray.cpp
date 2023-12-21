@@ -2,7 +2,6 @@
 #include "VertexArray.h"
 
 #include "Locus/Renderer/Renderer.h"
-
 #include "Platform/OpenGL/OpenGLVertexArray.h"
 
 namespace Locus

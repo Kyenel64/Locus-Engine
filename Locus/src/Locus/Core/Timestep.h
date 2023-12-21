@@ -1,5 +1,5 @@
 // --- Timestep ---------------------------------------------------------------
-// Holds deltaTime data
+// Deltatime. Used in the update loop.
 #pragma once
 
 namespace Locus
@@ -8,6 +8,7 @@ namespace Locus
 	{
 	public:
 		Timestep(float time = 0.0f) : m_Time(time) {}
+		~Timestep() = default;
 
 		operator float() const { return m_Time; }
 		

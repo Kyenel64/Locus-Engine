@@ -2,7 +2,6 @@
 #include "Texture.h"
 
 #include "Locus/Renderer/Renderer.h"
-
 #include "Platform/OpenGL/OpenGLTexture.h"
 
 namespace Locus

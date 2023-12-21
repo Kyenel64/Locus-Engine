@@ -1,6 +1,5 @@
 // --- Texture ----------------------------------------------------------------
-// Texture interfaces. 2D. 3D in the future.
-// Create() creates a RendererAPI specific texture object.
+// Texture interface.
 #pragma once
 
 #include "Locus/Core/Core.h"
@@ -26,6 +25,8 @@ namespace Locus
 		virtual bool operator==(const Texture& other) const = 0;
 	};
 	
+
+
 	class Texture2D : public Texture
 	{
 	public:

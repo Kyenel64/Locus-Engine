@@ -1,5 +1,5 @@
 // --- PlatformDetection ------------------------------------------------------
-// Platform detection using predefined macros.
+// Platform detection to define platform dependent macros.
 
 #ifdef _WIN32
 	/* Windows x64/x86 */

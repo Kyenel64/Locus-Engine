@@ -7,7 +7,7 @@
 namespace Locus
 {
 	// TODO: move to project folder in the future when we create project folders
-	extern const std::filesystem::path g_ProjectPath = "assets";
+	extern const std::filesystem::path g_ProjectPath = "SandboxProject/Assets";
 
 	ContentBrowserPanel::ContentBrowserPanel()
 		: m_CurrentDirectory(g_ProjectPath)
@@ -18,22 +18,23 @@ namespace Locus
 
 	void ContentBrowserPanel::OnImGuiRender()
 	{
-		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar;
-		ImGui::Begin(" Content Browser ", false, windowFlags);
+		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_TabBarAlignLeft | ImGuiWindowFlags_DockedWindowBorder;
+		ImGui::Begin("Content Browser", false, windowFlags);
 
-		static ImGuiTableFlags tableFlags = ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Resizable
+		ImGuiTableFlags tableFlags = ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Resizable
 			| ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg;
-		ImGui::PushStyleColor(ImGuiCol_TableRowBg, { 0.2f, 0.2f, 0.2f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_TableRowBg, LocusColors::Transparent);
 		if (ImGui::BeginTable("CBTable", 2, tableFlags))
 		{
 			ImGui::TableNextRow(ImGuiTableRowFlags_None, ImGui::GetContentRegionAvail().y);
 			ImGui::TableNextColumn();
-			// --- Project view ---------------------------------------------------
+
+			// --- Project view ---
 			DrawRootDirectoryView();
 
 			ImGui::TableNextColumn();
 
-			// --- Directory view -------------------------------------------------
+			// --- Directory view ---
 			DrawCurrentDirectoryView();
 
 			ImGui::EndTable();
@@ -65,7 +66,7 @@ namespace Locus
 			columnCount = 1;
 
 		static ImGuiTableFlags flags = ImGuiTableFlags_RowBg;
-		ImGui::PushStyleColor(ImGuiCol_TableRowBg, { 0.2f, 0.2f, 0.2f, 1.0f });
+		ImGui::PushStyleColor(ImGuiCol_TableRowBg, LocusColors::MediumDarkGrey);
 		if (ImGui::BeginTable("DVTable", columnCount, flags))
 		{
 			ImGui::TableNextRow(ImGuiTableRowFlags_None, ImGui::GetContentRegionAvail().y - 40.0f);
@@ -115,7 +116,7 @@ namespace Locus
 				ImGui::TextWrapped(filenameString.c_str());
 			}
 			ImGui::TableNextRow(ImGuiTableRowFlags_None, 40.0f);
-			ImGui::Text("Testing Rowfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+			ImGui::Text("Testing Row");
 
 			ImGui::EndTable();
 		}

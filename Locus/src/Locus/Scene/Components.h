@@ -1,6 +1,20 @@
 // --- Components -------------------------------------------------------------
-// Holds all component classes for Locus's ECS.
+// Components for Locus ECS.
+// Components:
+//	Tag
+//	Transform
+//	Child
+//	SpriteRenderer
+//	CircleRenderer
+//	Camera
+//	Rigidbody2D
+//	BoxCollider2D
+//	CircleCollider2D
+//	NativeScript
+//	Script
 #pragma once
+
+#include <stack>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -17,6 +31,8 @@
 
 namespace Locus
 {
+	enum class Rigidbody2DType { Static = 0, Dynamic = 1, Kinematic = 2 };
+
 	struct IDComponent
 	{
 		UUID ID;
@@ -28,6 +44,7 @@ namespace Locus
 	struct TagComponent
 	{
 		std::string Tag;
+		std::string Group;
 		bool Enabled = true;
 
 		TagComponent() = default;
@@ -38,7 +55,7 @@ namespace Locus
 	struct ChildComponent
 	{
 		uint32_t ChildCount = 0;
-		std::vector<Entity> ChildEntities;
+		std::vector<UUID> ChildEntities;
 
 		ChildComponent() = default;
 		ChildComponent(const ChildComponent&) = default;
@@ -46,13 +63,15 @@ namespace Locus
 
 	struct TransformComponent
 	{
-		Entity Self = Entity::Null;
-		Entity Parent = Entity::Null;
+		UUID Self = 0;
+		UUID Parent = 0;
 
 		glm::vec3 LocalPosition = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 LocalScale = { 1.0f, 1.0f, 1.0f };
 
 	private:
+		// Rotations are private to force using setters to sync both euler and quat.
+		// In degrees
 		glm::vec3 LocalRotation = { 0.0f, 0.0f, 0.0f };
 		glm::quat LocalRotationQuat = { 0.0f, 0.0f, 0.0f, 0.0f };
 
@@ -69,20 +88,20 @@ namespace Locus
 				 * glm::scale(glm::mat4(1.0f), LocalScale);
 		}
 
-		// Position
-		glm::vec3 GetLocalRotation() const { return LocalRotation; }
-		glm::quat GetLocalRotationQuat() const { return LocalRotationQuat; }
+		// In degrees
+		const glm::vec3& GetLocalRotation() const { return LocalRotation; }
+		const glm::quat& GetLocalRotationQuat() const { return LocalRotationQuat; }
 
 		void SetLocalRotation(const glm::vec3& rotation)
 		{
 			LocalRotation = rotation;
-			LocalRotationQuat = glm::quat(LocalRotation);
+			LocalRotationQuat = glm::quat(glm::radians(LocalRotation));
 		}
 
 		void SetLocalRotationQuat(const glm::quat& quat)
 		{
 			LocalRotationQuat = quat;
-			LocalRotation = glm::eulerAngles(LocalRotationQuat);
+			LocalRotation = glm::degrees(glm::eulerAngles(LocalRotationQuat));
 		}
 
 		friend class Scene;
@@ -94,7 +113,7 @@ namespace Locus
 	struct SpriteRendererComponent
 	{
 		// TODO: Take in a material
-		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
+		glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		Ref<Texture2D> Texture;
 		std::string TexturePath;
 		float TilingFactor = 1.0f;
@@ -106,7 +125,7 @@ namespace Locus
 
 	struct CircleRendererComponent
 	{
-		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
+		glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		float Thickness = 1.0f;
 		float Fade = 0.005f;
 
@@ -126,21 +145,16 @@ namespace Locus
 
 	struct Rigidbody2DComponent
 	{
-		enum class Rigidbody2DType { Static = 0, Dynamic = 1, Kinematic = 2};
 		Rigidbody2DType BodyType = Rigidbody2DType::Dynamic;
 
 		// Body
 		float Mass = 1.0f;
 		float GravityScale = 1.0f;
-		float LinearDrag = 1.0f;
-		float AngularDrag = 0.05f;
+		float LinearDamping = 0.0f;
+		float AngularDamping = 0.01f;
 		bool FixedRotation = false;
-
-		// Fixture. TODO: Put in physics material
-		float Friction = 0.2f; // 0 - 1
-		float Restitution = 0.0f; // 0 - 1
-		float RestitutionThreshold = 1.0f;
-
+		bool IsBullet = false;
+		
 		void* RuntimeBody = nullptr;
 
 		Rigidbody2DComponent() = default;
@@ -149,8 +163,14 @@ namespace Locus
 
 	struct BoxCollider2DComponent
 	{
-		// Polygon shape
-		uint16_t CollisionLayer = 1;
+		// Fixture. TODO: Put in physics material
+		float Friction = 0.3f; // 0 - 1
+		float Restitution = 0.0f; // 0 - 1
+		float RestitutionThreshold = 1.0f;
+
+		uint16_t CollisionCategory = 0x0001;
+		uint16_t CollisionMask = 0xFFFF;
+
 		glm::vec2 Offset = { 0.0f, 0.0f };
 		glm::vec2 Size = { 1.0f, 1.0f };
 
@@ -160,15 +180,32 @@ namespace Locus
 		BoxCollider2DComponent(const BoxCollider2DComponent&) = default;
 	};
 
+	struct CircleCollider2DComponent
+	{
+		// Fixture. TODO: Put in physics material
+		float Friction = 0.2f; // 0 - 1
+		float Restitution = 0.0f; // 0 - 1
+		float RestitutionThreshold = 1.0f;
+
+		uint16_t CollisionCategory = 0x0001;
+		uint16_t CollisionMask = 0xFFFF;
+
+		glm::vec2 Offset = { 0.0f, 0.0f };
+		float Radius = 0.5f;
+
+		void* RuntimeFixture = nullptr;
+
+		CircleCollider2DComponent() = default;
+		CircleCollider2DComponent(const CircleCollider2DComponent&) = default;
+	};
+
 	class ScriptableEntity;
 
 	struct NativeScriptComponent
 	{
 		ScriptableEntity* Instance = nullptr;
 
-		// Creates a function ptr called InstantiateScript that takes no args and returns ScriptableEntity*
 		ScriptableEntity* (*InstantiateScript)();
-		// Creates a void func ptr called DestroyScript that takes in NativeScriptComponent*
 		void (*DestroyScript)(NativeScriptComponent*);
 
 		template <typename T>
@@ -179,26 +216,46 @@ namespace Locus
 		}
 	};
 
-	struct ComponentsList
+	struct ScriptComponent
 	{
-		TagComponent Tag;
-		TransformComponent Transform;
-		SpriteRendererComponent SpriteRenderer;
-		CameraComponent Camera;
-		NativeScriptComponent NativeScript;
-		Rigidbody2DComponent Rigidbody2D;
-		BoxCollider2DComponent BoxCollider2D;
+		std::string ScriptClass;
+
+		ScriptComponent() = default;
+		ScriptComponent(const ScriptComponent&) = default;
+		ScriptComponent(const std::string& scriptClass) : ScriptClass(scriptClass) {}
 	};
+
 
 	enum class ComponentType
 	{
 		None = 0,
 		Tag,
 		Transform,
+		Child,
 		SpriteRenderer,
+		CircleRenderer,
 		Camera,
 		Rigidbody2D,
 		BoxCollider2D,
-		NativeScript
+		CircleCollider2D,
+		NativeScript,
+		Script
+	};
+
+	struct ComponentData
+	{
+		Entity EntityID;
+		Ref<IDComponent> ID;
+		Ref<TagComponent> Tag;
+		Ref<ChildComponent> Child;
+		Ref<TransformComponent> Transform;
+		Ref<SpriteRendererComponent> SpriteRenderer;
+		Ref<CircleRendererComponent> CircleRenderer;
+		Ref<CameraComponent> Camera;
+		Ref<Rigidbody2DComponent> Rigidbody2D;
+		Ref<BoxCollider2DComponent> BoxCollider2D;
+		Ref<CircleCollider2DComponent> CircleCollider2D;
+		Ref<NativeScriptComponent> NativeScript;
+		Ref<ScriptComponent> Script;
 	};
 }

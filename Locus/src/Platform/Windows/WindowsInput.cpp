@@ -7,15 +7,48 @@
 
 namespace Locus
 {
-
-	bool Input::IsKeyPressed(const int keycode)
+	bool Input::IsKeyPressed(const KeyCode keycode)
 	{
-		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
-		auto state = glfwGetKey(window, keycode);
-		return state == GLFW_PRESS || state == GLFW_REPEAT;
+		return s_KeyState.find(keycode) != s_KeyState.end() && s_KeyState[keycode] == KeyState::Pressed;
 	}
 
-	bool Input::IsMouseButtonPressed(const int button)
+	bool Input::IsKeyHeld(KeyCode keycode)
+	{
+		return s_KeyState.find(keycode) != s_KeyState.end() && s_KeyState[keycode] == KeyState::Repeat;
+	}
+
+	bool Input::IsKeyReleased(KeyCode keycode)
+	{
+		return s_KeyState.find(keycode) != s_KeyState.end() && s_KeyState[keycode] == KeyState::Released;
+	}
+
+	void Input::SetKeyState(KeyCode keycode, KeyState keystate)
+	{
+		s_KeyState[keycode] = keystate;
+		if (keystate != KeyState::None)
+			s_UnhandledKeys.push(keycode);
+	}
+
+	KeyState Input::GetKeyState(KeyCode keycode)
+	{
+		return s_KeyState.find(keycode) != s_KeyState.end() ? s_KeyState[keycode] : KeyState::None;
+	}
+
+	void Input::ProcessKeys()
+	{
+		while (!s_UnhandledKeys.empty())
+		{
+			KeyCode key = s_UnhandledKeys.front();
+			// Set keystate to repeat right after first pressed event.
+			if (Input::GetKeyState(key) == KeyState::Pressed)
+				Input::SetKeyState(key, KeyState::Repeat);
+			if (Input::GetKeyState(key) == KeyState::Released)
+				Input::SetKeyState(key, KeyState::None);
+			s_UnhandledKeys.pop();
+		}
+	}
+
+	bool Input::IsMouseButtonPressed(const KeyCode button)
 	{
 		auto* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 		auto state = glfwGetMouseButton(window, button);

@@ -13,9 +13,7 @@ namespace Locus
 	class WindowsWindow : public Window
 	{
 	public:
-		// Calls Init()
 		WindowsWindow(const WindowProps& props);
-		// Calls Shutdown()
 		virtual ~WindowsWindow();
 
 		virtual void OnUpdate() override;
@@ -25,7 +23,7 @@ namespace Locus
 
 		virtual inline float GetTime() const override { return (float)glfwGetTime(); }
 
-		virtual inline void SetEventCallback(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
+		virtual inline void SetEventCallback(const std::function<void(Event&)>& callback) override { m_Data.EventCallback = callback; }
 		virtual void SetVSync(bool enabled) override;
 		virtual bool IsVSync() const override;
 
@@ -47,7 +45,7 @@ namespace Locus
 			unsigned int Height = 1080;
 			bool VSync = true;
 
-			EventCallbackFn EventCallback;
+			std::function<void(Event&)> EventCallback;
 		};
 
 		WindowData m_Data;

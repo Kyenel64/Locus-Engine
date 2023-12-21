@@ -13,9 +13,12 @@
 #include "Panels/SceneHierarchyPanel.h"
 #include "Panels/ContentBrowserPanel.h"
 #include "Panels/PropertiesPanel.h"
+#include "Panels/ConsolePanel.h"
 
 namespace Locus
 {
+	enum class LayoutStyle { Default = 0 };
+
 	class LocusEditorLayer : public Layer
 	{
 	public:
@@ -28,45 +31,65 @@ namespace Locus
 		virtual void OnEvent(Event& event) override;
 		virtual void OnImGuiRender() override;
 
+		void SetSavedStatus(bool status) { m_IsSaved = status; }
+
 	private:
 		// Events
+		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnKeyPressed(KeyPressedEvent& e);
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
-
-		void OnMouseButtonReleased();
 
 		// Serialization
 		void NewScene();
 		void OpenScene();
 		void OpenScene(const std::filesystem::path& path);
-		void SaveSceneAs();
-		void SaveScene();
+		bool SaveSceneAs();
+		bool SaveScene();
 
 		// Viewport
-		void showGizmoUI();
+		void DrawGizmo();
 		void ProcessViewportDragDrop();
 		void OnScenePlay();
+		void OnPhysicsPlay();
 		void OnSceneStop();
-		void OnScenePause();
 
 		// Layout
-		void DrawLayoutTable();
+		void DrawViewport();
+		void DrawViewportToolbar(const glm::vec2& position);
+		void DrawDefaultLayout();
 		void DrawToolbar();
 		void DrawDebugPanel();
-		void OpenSavePopup();
+		void ProcessSavePopup();
+		void ProcessViewSettingsPopup();
+
+		// Overlay
+		void OnRenderOverlay();
+		void DrawCollisionMesh();
+		// Draws to a framebuffer. Rendering is separate.
+		void DrawActiveCameraView();
 
 	private:
+		glm::vec2 m_WindowSize;
+		bool m_IsSaved = true;
+		bool m_OpenSavePopup = false;
+		bool m_BlockEditorKeyInput = false;
+
 		// Scene
 		std::string m_SavePath;
 		Ref<Scene> m_ActiveScene;
 		Ref<Scene> m_EditorScene;
-		enum class SceneState { Edit = 0, Play = 1, Pause = 2};
+		enum class SceneState { Edit = 0, Play, Pause, Physics, PhysicsPause};
 		SceneState m_SceneState = SceneState::Edit;
 
 		// Textures
-		Ref<Texture2D> m_PlayButton;
-		Ref<Texture2D> m_PauseButton;
-		Ref<Texture2D> m_StopButton;
+		Ref<Texture2D> m_PlayIcon;
+		Ref<Texture2D> m_PauseIcon;
+		Ref<Texture2D> m_StopIcon;
+		Ref<Texture2D> m_PhysicsIcon;
+		Ref<Texture2D> m_PointerIcon;
+		Ref<Texture2D> m_TranslateIcon;
+		Ref<Texture2D> m_RotateIcon;
+		Ref<Texture2D> m_ScaleIcon;
 
 		// Viewport
 		Ref<Framebuffer> m_Framebuffer;
@@ -74,6 +97,13 @@ namespace Locus
 		bool m_ViewportFocused = false, m_ViewportHovered = false;
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
 		glm::vec2 m_ViewportBounds[2];
+
+		// Overlay
+		glm::vec4 m_CollisionMeshColor;
+		glm::vec4 m_FocusOutlineColor;
+		bool m_ShowAllCollisionMesh = false;
+		Ref<Framebuffer> m_ActiveCameraFramebuffer;
+		glm::vec2 m_ActiveCameraViewportSize;
 
 		// Entity
 		Entity m_HoveredEntity;
@@ -89,15 +119,9 @@ namespace Locus
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 		ContentBrowserPanel m_ContentBrowserPanel;
 		PropertiesPanel m_PropertiesPanel;
+		ConsolePanel m_ConsolePanel;
 
 		// Layout
-		float m_ViewportHeight; // Makes more sense to do m_LeftSplitterPos & m_RightSplitterPos
-		float m_HierarchyHeight;
-		float m_CenterSplitterPos;
-		glm::vec2 m_FrameSizes[4];
-		glm::vec2 m_FramePositions[4];
-
-		enum class LayoutStyle { Default = 0 };
 		LayoutStyle m_LayoutStyle = LayoutStyle::Default;
 	};
 }

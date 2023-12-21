@@ -1,6 +1,9 @@
 #include "Lpch.h"
 #include "WindowsWindow.h"
 
+#include <stb_image.h>
+
+#include "Locus/Core/Input.h"
 #include "Locus/Events/ApplicationEvent.h"
 #include "Locus/Events/MouseEvent.h"
 #include "Locus/Events/KeyEvent.h"
@@ -56,13 +59,20 @@ namespace Locus
 			#endif
 			m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 			glfwMaximizeWindow(m_Window);
+			glfwGetWindowSize(m_Window, &(int&)m_Data.Width, &(int&)m_Data.Height); // Set window size after maximizing window
 		}
 		m_Context = GraphicsContext::Create(m_Window);
 		m_Context->Init();
 		++s_GLFWWindowCount;
 
 		glfwSetWindowUserPointer(m_Window, &m_Data);
-		SetVSync(true);
+		SetVSync(m_Data.VSync);
+
+		// Set window icon
+		GLFWimage icons[1] = {};
+		icons[0].pixels = stbi_load("resources/icons/LocusLogoIcon.png", &icons[0].width, &icons[0].height, 0, 4);
+		glfwSetWindowIcon(m_Window, 1, icons);
+		stbi_image_free(icons[0].pixels);
 
 		// --- Set GLFW callbacks ---------------------------------------------
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
@@ -95,18 +105,14 @@ namespace Locus
 				{
 					KeyPressedEvent event(key, 0);
 					data.EventCallback(event);
+					Input::SetKeyState(key, KeyState::Pressed);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
 					KeyReleasedEvent event(key);
 					data.EventCallback(event);
-					break;
-				}
-				case GLFW_REPEAT:
-				{
-					KeyPressedEvent event(key, 1);
-					data.EventCallback(event);
+					Input::SetKeyState(key, KeyState::Released);
 					break;
 				}
 			}

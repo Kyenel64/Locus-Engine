@@ -1,3 +1,7 @@
+// --- MouseEvent -------------------------------------------------------------
+// Contains events related to mouse input.
+// Includes MouseMovedEvent, MouseScrolledEvent, MouseButtonEvent, 
+//	MouseButtonPressedEvent, and MouseButtonReleasedEvent.
 #pragma once
 
 #include <sstream>
@@ -7,7 +11,7 @@
 
 namespace Locus
 {
-	// Event class for mouse movement
+	// --- MouseMovedEvent ----------------------------------------------------
 	class MouseMovedEvent : public Event
 	{
 	public:
@@ -30,7 +34,9 @@ namespace Locus
 		float m_MouseX, m_MouseY;
 	};
 
-	// Event class for mouse scroll
+
+
+	// --- MouseScrolledEvent -------------------------------------------------
 	class MouseScrolledEvent : public Event
 	{
 	public:
@@ -52,7 +58,10 @@ namespace Locus
 		float m_XOffset, m_YOffset;
 	};
 
-	// Parent class for mouse button events
+
+
+	// --- MouseButtonEvent ---------------------------------------------------
+	// Parent class for MouseButtonPressedEvent and MouseButtonReleasedEvent.
 	class MouseButtonEvent : public Event
 	{
 	public:
@@ -65,7 +74,9 @@ namespace Locus
 		int m_Button;
 	};
 
-	// Mouse button event class for mouse presses
+
+
+	// --- MouseButtonPressedEvent --------------------------------------------
 	class MouseButtonPressedEvent : public MouseButtonEvent
 	{
 	public:
@@ -81,7 +92,9 @@ namespace Locus
 		EVENT_CLASS_TYPE(MouseButtonPressed)
 	};
 
-	// Mouse button event class for mouse release
+
+
+	// --- MouseButtonReleasedEvent -------------------------------------------
 	class MouseButtonReleasedEvent : public MouseButtonEvent
 	{
 	public:

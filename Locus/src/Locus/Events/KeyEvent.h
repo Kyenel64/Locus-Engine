@@ -1,3 +1,6 @@
+// --- KeyEvent ---------------------------------------------------------------
+// Key input events. Includes KeyEvent, KeyPressedEvent, KeyReleasedEvent, 
+//	and KeyTypedEvent
 #pragma once
 
 #include "Locus/Core/KeyCodes.h"
@@ -5,7 +8,7 @@
 
 namespace Locus
 {
-	// Parent class for key events
+	// --- KeyEvent -----------------------------------------------------------
 	class KeyEvent : public Event
 	{
 	public:
@@ -13,12 +16,14 @@ namespace Locus
 
 		EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)
 	protected:
-		KeyEvent(int keycode) : m_KeyCode(keycode) {} // Protected constructor for parent class
+		KeyEvent(int keycode) : m_KeyCode(keycode) {}
 
 		int m_KeyCode;
 	};
 
-	// Event class for key press
+
+
+	// --- KeyPressedEvent ----------------------------------------------------
 	class KeyPressedEvent : public KeyEvent
 	{
 	public:
@@ -38,7 +43,9 @@ namespace Locus
 		int m_RepeatCount;
 	};
 
-	// Event class for key release
+
+
+	// --- KeyReleasedEvent ---------------------------------------------------
 	class KeyReleasedEvent : public KeyEvent
 	{
 	public:
@@ -54,7 +61,9 @@ namespace Locus
 		EVENT_CLASS_TYPE(KeyReleased);
 	};
 
-	// Event class for key typed
+
+
+	// --- KeyTypedEvent ------------------------------------------------------
 	class KeyTypedEvent : public KeyEvent
 	{
 	public:

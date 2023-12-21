@@ -1,6 +1,5 @@
 // --- OpenGLTexture ----------------------------------------------------------
-// OpenGL specific texure class. Handles initial setup and binding.
-// 2D. 3D in the future.
+// OpenGL texure class.
 #pragma once
 
 #include <glad/glad.h>
@@ -16,16 +15,14 @@ namespace Locus
 		OpenGLTexture2D(const std::string& path);
 		virtual ~OpenGLTexture2D();
 
-		virtual uint32_t GetWidth() const override { return m_Width; }
-		virtual uint32_t GetHeight() const override { return m_Height; }
-		virtual uint32_t GetRendererID() const override { return m_RendererID; }
-
-		virtual const std::string& GetTexturePath() const override { return m_Path; }
-		virtual const std::string GetTextureName() const override;
-
 		virtual void SetData(void* data, uint32_t size) override;
-
 		virtual void Bind(uint32_t slot = 0) const override;
+
+		virtual inline uint32_t GetWidth() const override { return m_Width; }
+		virtual inline uint32_t GetHeight() const override { return m_Height; }
+		virtual inline uint32_t GetRendererID() const override { return m_RendererID; }
+		virtual inline const std::string& GetTexturePath() const override { return m_Path; }
+		virtual const std::string GetTextureName() const override;
 
 		virtual bool operator==(const Texture& other) const override
 		{

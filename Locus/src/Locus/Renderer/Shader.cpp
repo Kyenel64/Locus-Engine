@@ -2,7 +2,6 @@
 #include "Shader.h"
 
 #include "Locus/Renderer/Renderer.h"
-
 #include "Platform/OpenGL/OpenGLShader.h"
 
 namespace Locus
@@ -32,6 +31,7 @@ namespace Locus
 	}
 
 	
+
 	// --- ShaderLibrary ---------------------------------------------------------
 	void ShaderLibrary::Add(const std::string& name, const Ref<Shader>& shader)
 	{

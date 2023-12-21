@@ -34,5 +34,4 @@ namespace Locus
 
 		glfwSwapBuffers(m_WindowHandle);
 	}
-
 }

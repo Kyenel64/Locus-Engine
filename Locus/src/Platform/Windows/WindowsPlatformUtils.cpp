@@ -49,5 +49,4 @@ namespace Locus
 		}
 		return std::string();
 	}
-
 }

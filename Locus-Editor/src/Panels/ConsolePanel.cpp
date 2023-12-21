@@ -1,6 +1,8 @@
 #include "Lpch.h"
 #include "ConsolePanel.h"
 
+#include <chrono>
+
 #include <ImGui/imgui.h>
 #include <ImGui/imgui_internal.h>
 
@@ -153,7 +155,14 @@ namespace Locus
 		while (!exceptions.empty())
 		{
 			ExceptionData& data = exceptions.front();
-			log.AddLog("[12:39:59] %s - %s\n%s\n---\n", data.Type.c_str(), data.Message.c_str(), data.Trace.c_str());
+
+			const std::time_t t_c = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+			std::tm local_tm;
+			localtime_s(&local_tm, &t_c);
+			int hour = local_tm.tm_hour;
+			int minute = local_tm.tm_min;
+			int second = local_tm.tm_sec;
+			log.AddLog("[%02d:%02d:%02d] %s - %s\n%s\n---\n", hour, minute, second, data.Type.c_str(), data.Message.c_str(), data.Trace.c_str());
 			exceptions.pop();
 		}
 		

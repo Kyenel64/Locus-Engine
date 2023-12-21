@@ -639,7 +639,7 @@ namespace Locus
 		m_PropertiesPanel.OnImGuiRender();
 		m_ContentBrowserPanel.OnImGuiRender();
 		m_ConsolePanel.OnImGuiRender();
-		ImGui::ShowDemoWindow();
+		//ImGui::ShowDemoWindow();
 
 
 		ProcessSavePopup();

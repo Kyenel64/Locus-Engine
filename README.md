@@ -42,15 +42,14 @@ Locus is still in early stages of development. Progress for Locus can be followe
 - Run Scripts/Setup.bat to install premake and generate a Visual Studio solution.
 - IMPORTANT: Make sure 'Shader Toolchain Debug Symbols - 64-bit' is selected if the Vulkan pop-up opens.
 
-#### 2.1 (Temp) Build SandboxProject
-- NOTE: Locus currently does not have a proper project directory system setup. There is a placeholder project directory called "SandboxProject" in the "Locus-Editor" folder. <br>
-You will need to manually generate and build the sandbox project solution for now.
-- Run Locus-Editor/SandboxProject/Setup.bat.
-- Open and build Locus-Editor/SandboxProject/Sandbox.sln.
-
 #### 3. Build using Visual Studio
 - Open Locus.sln
 - Build solution. (Locus-Editor should be selected as the startup project).
+
+#### 3.1 (Temp) Build SandboxProject
+- Before running Locus, you need to build the "SandboxProject" in the "Locus-Editor" directory. Locus does not have a proper project system setup yet so this is a temporary solution.
+- Run Locus-Editor/SandboxProject/Setup.bat.
+- Open and build Locus-Editor/SandboxProject/Sandbox.sln.
 
 #### 4. Running the engine editor
 - The .exe file will be generated in bin/(Config)-windows-x86_64/Locus-Editor

@@ -2,8 +2,6 @@
 // Locus's editor. Uses dockspace ImGui.
 #pragma once
 
-#include <filesystem>
-
 #include <Locus.h>
 
 #include "Command/Command.h"

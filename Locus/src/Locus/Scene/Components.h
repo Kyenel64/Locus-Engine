@@ -199,23 +199,6 @@ namespace Locus
 		CircleCollider2DComponent(const CircleCollider2DComponent&) = default;
 	};
 
-	class ScriptableEntity;
-
-	struct NativeScriptComponent
-	{
-		ScriptableEntity* Instance = nullptr;
-
-		ScriptableEntity* (*InstantiateScript)();
-		void (*DestroyScript)(NativeScriptComponent*);
-
-		template <typename T>
-		void Bind()
-		{
-			InstantiateScript = []() { return static_cast<ScriptableEntity*>(new T()); };
-			DestroyScript = [](NativeScriptComponent* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };
-		}
-	};
-
 	struct ScriptComponent
 	{
 		std::string ScriptClass;
@@ -238,7 +221,6 @@ namespace Locus
 		Rigidbody2D,
 		BoxCollider2D,
 		CircleCollider2D,
-		NativeScript,
 		Script
 	};
 
@@ -255,7 +237,6 @@ namespace Locus
 		Ref<Rigidbody2DComponent> Rigidbody2D;
 		Ref<BoxCollider2DComponent> BoxCollider2D;
 		Ref<CircleCollider2DComponent> CircleCollider2D;
-		Ref<NativeScriptComponent> NativeScript;
 		Ref<ScriptComponent> Script;
 	};
 }

@@ -11,11 +11,22 @@
 
 namespace Locus
 {
-	extern const std::filesystem::path g_ProjectPath;
-
 	LocusEditorLayer::LocusEditorLayer()
 		: Layer("LocusEditorLayer")
 	{
+		Application::Get().GetWindow().SetFullscreen();
+
+		m_ProjectPath = Application::Get().GetProjectPath();
+		m_ProjectName = Application::Get().GetProjectName();
+
+		// Initialize panels
+		m_SceneHierarchyPanel = CreateRef<SceneHierarchyPanel>();
+		m_PropertiesPanel = CreateRef<PropertiesPanel>();
+		m_ContentBrowserPanel = CreateRef<ContentBrowserPanel>();
+		m_ConsolePanel = CreateRef<ConsolePanel>();
+
+		CommandHistory::Init(this);
+
 		m_PlayIcon = Texture2D::Create("resources/icons/PlayIcon.png");
 		m_StopIcon = Texture2D::Create("resources/icons/StopIcon.png");
 		m_PauseIcon = Texture2D::Create("resources/icons/PauseIcon.png");
@@ -25,7 +36,6 @@ namespace Locus
 		m_ScaleIcon = Texture2D::Create("resources/icons/ScaleIcon.png");
 		m_RotateIcon = Texture2D::Create("resources/icons/RotateIcon.png");
 
-		CommandHistory::Init(this);
 	}
 
 	LocusEditorLayer::~LocusEditorLayer()
@@ -54,20 +64,9 @@ namespace Locus
 		m_EditorScene = CreateRef<Scene>();
 		m_ActiveScene = m_EditorScene;
 
-		// Open startup project given through args
-		auto commandLineArgs = Application::Get().GetCommandLineArgs();
-		if (commandLineArgs.Count > 1)
-		{
-			auto sceneFilePath = commandLineArgs[1];
-			SceneSerializer serializer(m_ActiveScene);
-			serializer.Deserialize(sceneFilePath);
-			m_SavePath = sceneFilePath;
-			LOCUS_CORE_INFO("Loaded startup scene: {0}", commandLineArgs[1]);
-		}
-
 		// Panels
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-		m_PropertiesPanel.SetContext(m_ActiveScene);
+		m_SceneHierarchyPanel->SetScene(m_ActiveScene);
+		m_PropertiesPanel->SetScene(m_ActiveScene);
 
 		// Editor Camera
 		m_EditorCamera = EditorCamera(30.0f, 1920.0f / 1080.0f, 0.1f, 10000.0f);
@@ -158,10 +157,10 @@ namespace Locus
 			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY); // TODO: This is really slow??
 			m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 		}
-		m_SelectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+		m_SelectedEntity = m_SceneHierarchyPanel->GetSelectedEntity();
 		if (!m_SelectedEntity.IsValid())
 			m_SelectedEntity = {};
-		m_PropertiesPanel.SetSelectedEntity(m_SelectedEntity);
+		m_PropertiesPanel->SetSelectedEntity(m_SelectedEntity);
 
 		// Gizmo visibility
 		if (m_SelectedEntity.IsValid())
@@ -366,7 +365,7 @@ namespace Locus
 				if (control && shift)
 				{
 					ScriptEngine::ReloadScripts();
-					m_PropertiesPanel.m_ScriptClasses = ScriptEngine::GetClassNames();
+					m_PropertiesPanel->m_ScriptClasses = ScriptEngine::GetClassNames();
 				}
 				else
 				{
@@ -385,7 +384,7 @@ namespace Locus
 		{
 			if (m_ViewportHovered && (!ImGuizmo::IsOver() || ImGuizmo::IsOver() && !m_GizmoVisible))
 			{
-				m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
+				m_SceneHierarchyPanel->SetSelectedEntity(m_HoveredEntity);
 				m_SelectedEntity = m_HoveredEntity;
 				m_GizmoFirstClick = true;
 			}
@@ -402,8 +401,8 @@ namespace Locus
 		m_EditorScene = CreateRef<Scene>();
 		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_ActiveScene = m_EditorScene;
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-		m_PropertiesPanel.SetContext(m_ActiveScene);
+		m_SceneHierarchyPanel->SetScene(m_ActiveScene);
+		m_PropertiesPanel->SetScene(m_ActiveScene);
 		m_SavePath = std::string();
 		m_IsSaved = false;
 		CommandHistory::Reset();
@@ -425,8 +424,8 @@ namespace Locus
 		m_EditorScene = CreateRef<Scene>();
 		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_ActiveScene = m_EditorScene;
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-		m_PropertiesPanel.SetContext(m_ActiveScene);
+		m_SceneHierarchyPanel->SetScene(m_ActiveScene);
+		m_PropertiesPanel->SetScene(m_ActiveScene);
 		SceneSerializer serializer(m_EditorScene);
 		serializer.Deserialize(path.string());
 		m_SavePath = path.string();
@@ -563,7 +562,7 @@ namespace Locus
 				if (m_SceneState == SceneState::Play)
 					OnSceneStop();
 				const wchar_t* path = (const wchar_t*)payload->Data;
-				OpenScene(std::filesystem::path(g_ProjectPath) / path);
+				OpenScene(m_ProjectPath / path);
 			}
 			ImGui::EndDragDropTarget();
 		}
@@ -575,7 +574,7 @@ namespace Locus
 		m_ActiveScene = Scene::Copy(m_EditorScene);
 		ScriptEngine::OnRuntimeStart(m_ActiveScene);
 		m_ActiveScene->OnRuntimeStart();
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_SceneHierarchyPanel->SetScene(m_ActiveScene);
 		ImGui::SetWindowFocus("Viewport");
 	}
 
@@ -584,7 +583,7 @@ namespace Locus
 		m_SceneState = SceneState::Physics;
 		m_ActiveScene = Scene::Copy(m_EditorScene);
 		m_ActiveScene->OnPhysicsStart();
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_SceneHierarchyPanel->SetScene(m_ActiveScene);
 		ImGui::SetWindowFocus("Viewport");
 	}
 
@@ -596,7 +595,7 @@ namespace Locus
 		m_ActiveScene->OnRuntimeStop();
 
 		m_ActiveScene = m_EditorScene;
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_SceneHierarchyPanel->SetScene(m_ActiveScene);
 	}
 
 	void LocusEditorLayer::DrawDefaultLayout()
@@ -635,10 +634,10 @@ namespace Locus
 		DrawToolbar();
 		DrawViewport();
 		DrawDebugPanel();
-		m_SceneHierarchyPanel.OnImGuiRender();
-		m_PropertiesPanel.OnImGuiRender();
-		m_ContentBrowserPanel.OnImGuiRender();
-		m_ConsolePanel.OnImGuiRender();
+		m_SceneHierarchyPanel->OnImGuiRender();
+		m_PropertiesPanel->OnImGuiRender();
+		m_ContentBrowserPanel->OnImGuiRender();
+		m_ConsolePanel->OnImGuiRender();
 		//ImGui::ShowDemoWindow();
 
 
@@ -848,7 +847,7 @@ namespace Locus
 			if (ImGui::MenuItem("Reload Scripts", "Ctrl+Shift+R"))
 			{
 				ScriptEngine::ReloadScripts();
-				m_PropertiesPanel.m_ScriptClasses = ScriptEngine::GetClassNames();
+				m_PropertiesPanel->m_ScriptClasses = ScriptEngine::GetClassNames();
 			}
 			ImGui::EndPopup();
 		}

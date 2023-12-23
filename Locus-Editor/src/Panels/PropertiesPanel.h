@@ -11,11 +11,10 @@ namespace Locus
 	class PropertiesPanel
 	{
 	public:
-		PropertiesPanel() = default;
-		PropertiesPanel(const Ref<Scene>& context);
+		PropertiesPanel();
 		~PropertiesPanel() = default;
 
-		void SetContext(const Ref<Scene>& context);
+		void SetScene(const Ref<Scene>& context);
 
 		void OnImGuiRender();
 
@@ -36,6 +35,8 @@ namespace Locus
 	private:
 		Ref<Scene> m_ActiveScene;
 		Entity m_SelectedEntity;
+
+		std::filesystem::path m_ProjectDirectory;
 
 		// Textures
 		Ref<Texture2D> m_MenuIcon;

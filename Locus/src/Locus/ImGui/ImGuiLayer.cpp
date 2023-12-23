@@ -1,6 +1,9 @@
 #include "Lpch.h"
 #include "ImGuiLayer.h"
 
+#include <backends/imgui_impl_glfw.cpp>
+#include <backends/imgui_impl_opengl3.cpp>
+
 #include <imgui.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <backends/imgui_impl_glfw.h>

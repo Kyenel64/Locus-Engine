@@ -6,6 +6,8 @@ project "Locus-Editor"
 	
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
+
+	debugdir "%{wks.location}/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/%{prj.name}"
 	
 	files
 	{
@@ -34,7 +36,9 @@ project "Locus-Editor"
 		"{COPY} %{prj.location}/resources %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/resources",
 		"{COPY} %{prj.location}/mono %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/mono",
 		"{COPY} %{prj.location}/SandboxProject %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/SandboxProject",
-		"{COPY} %{prj.location}/imgui.ini %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/"
+		"{COPY} %{prj.location}/imgui.ini %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/",
+		"{COPY} %{wks.location}/Scripts/projectPremakeTemplate.lua %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/",
+		"{COPY} %{wks.location}/premake/bin/premake5.exe %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/"
 	}
 	
 	filter "system:windows"

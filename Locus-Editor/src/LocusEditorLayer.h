@@ -71,6 +71,8 @@ namespace Locus
 		bool m_IsSaved = true;
 		bool m_OpenSavePopup = false;
 		bool m_BlockEditorKeyInput = false;
+		std::filesystem::path m_ProjectPath;
+		std::string m_ProjectName;
 
 		// Scene
 		std::string m_SavePath;
@@ -114,10 +116,10 @@ namespace Locus
 		bool m_GizmoFirstClick = true;
 
 		// Panels
-		SceneHierarchyPanel m_SceneHierarchyPanel;
-		ContentBrowserPanel m_ContentBrowserPanel;
-		PropertiesPanel m_PropertiesPanel;
-		ConsolePanel m_ConsolePanel;
+		Ref<SceneHierarchyPanel> m_SceneHierarchyPanel;
+		Ref<ContentBrowserPanel> m_ContentBrowserPanel;
+		Ref<PropertiesPanel> m_PropertiesPanel;
+		Ref<ConsolePanel> m_ConsolePanel;
 
 		// Layout
 		LayoutStyle m_LayoutStyle = LayoutStyle::Default;

@@ -6,12 +6,10 @@
 
 namespace Locus
 {
-	// TODO: move to project folder in the future when we create project folders
-	extern const std::filesystem::path g_ProjectPath = "SandboxProject/Assets";
-
 	ContentBrowserPanel::ContentBrowserPanel()
-		: m_CurrentDirectory(g_ProjectPath)
 	{
+		m_ProjectDirectory = Application::Get().GetProjectPath() / "Assets";
+		m_CurrentDirectory = m_ProjectDirectory;
 		m_FolderIcon = Texture2D::Create("resources/icons/FolderIcon.png");
 		m_FileIcon = Texture2D::Create("resources/icons/FileIcon.png");
 	}
@@ -46,7 +44,7 @@ namespace Locus
 
 	void ContentBrowserPanel::DrawCurrentDirectoryView()
 	{
-		if (m_CurrentDirectory != g_ProjectPath)
+		if (m_CurrentDirectory != m_ProjectDirectory)
 		{
 			if (ImGui::Button("<-"))
 			{
@@ -75,7 +73,7 @@ namespace Locus
 				ImGui::TableNextColumn();
 
 				const auto& path = entry.path();
-				auto relativePath = std::filesystem::relative(path, g_ProjectPath);
+				auto relativePath = std::filesystem::relative(path, m_ProjectDirectory);
 				std::string filenameString = relativePath.filename().string();
 
 				// Find extension

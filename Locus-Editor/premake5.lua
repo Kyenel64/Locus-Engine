@@ -21,6 +21,7 @@ project "Locus-Editor"
 		"%{wks.location}/Locus/vendor/spdlog/include",
 		"%{wks.location}/Locus/vendor",
 		"%{wks.location}/Locus/src",
+		"%{wks.location}/Locus-Launcher/src",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.ImGuizmo}"
@@ -28,17 +29,17 @@ project "Locus-Editor"
 	
 	links
 	{
-		"Locus"
+		"Locus",
+		"Locus-Launcher"
 	}
 
 	postbuildcommands
 	{
 		"{COPY} %{prj.location}/resources %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/resources",
 		"{COPY} %{prj.location}/mono %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/mono",
-		"{COPY} %{prj.location}/SandboxProject %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/SandboxProject",
+		"{COPY} %{prj.location}/SampleProject %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/SampleProject",
 		"{COPY} %{prj.location}/imgui.ini %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/",
-		"{COPY} %{wks.location}/Scripts/projectPremakeTemplate.lua %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/",
-		"{COPY} %{wks.location}/premake/bin/premake5.exe %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/"
+		"{COPY} %{prj.location}/projectGeneration %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/projectGeneration"
 	}
 	
 	filter "system:windows"

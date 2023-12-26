@@ -14,18 +14,17 @@
 
 namespace Locus
 {
-	extern const std::filesystem::path g_ProjectPath;
-
-	PropertiesPanel::PropertiesPanel(const Ref<Scene>& context)
+	PropertiesPanel::PropertiesPanel()
+		: m_ProjectDirectory(Application::Get().GetProjectPath())
 	{
-		SetContext(context);
+
 	}
 
-	void PropertiesPanel::SetContext(const Ref<Scene>& context)
+	void PropertiesPanel::SetScene(const Ref<Scene>& context)
 	{
 		m_ActiveScene = context;
 		m_SelectedEntity = {};
-		
+
 		// Create textures
 		m_MenuIcon = Texture2D::Create("resources/icons/MenuIcon.png");
 		m_FolderIcon = Texture2D::Create("resources/icons/FolderIcon.png");
@@ -324,7 +323,7 @@ namespace Locus
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TEXTURE_ITEM_PATH"))
 					{
 						const wchar_t* path = (const wchar_t*)payload->Data;
-						std::filesystem::path texturePath = std::filesystem::path(g_ProjectPath) / path;
+						std::filesystem::path texturePath = std::filesystem::path(m_ProjectDirectory) / path;
 						CommandHistory::AddCommand(new ChangeTextureCommand(Texture2D::Create(texturePath.string()), component.Texture, component.TexturePath));
 					}
 					ImGui::EndDragDropTarget();
@@ -662,11 +661,6 @@ namespace Locus
 			m_ClipboardComponent.CircleCollider2D = CreateRef<CircleCollider2DComponent>(m_SelectedEntity.GetComponent<CircleCollider2DComponent>());
 			m_ClipboardComponentType = ComponentType::CircleCollider2D;
 		}
-		if (typeid(T) == typeid(NativeScriptComponent))
-		{
-			m_ClipboardComponent.NativeScript = CreateRef<NativeScriptComponent>(m_SelectedEntity.GetComponent<NativeScriptComponent>());
-			m_ClipboardComponentType = ComponentType::NativeScript;
-		}
 		if (typeid(T) == typeid(ScriptComponent))
 		{
 			m_ClipboardComponent.Script = CreateRef<ScriptComponent>(m_SelectedEntity.GetComponent<ScriptComponent>());
@@ -693,8 +687,6 @@ namespace Locus
 		case Locus::ComponentType::BoxCollider2D: selectedEntity.AddOrReplaceComponent<BoxCollider2DComponent>(*m_ClipboardComponent.BoxCollider2D);
 			break;
 		case Locus::ComponentType::CircleCollider2D: selectedEntity.AddOrReplaceComponent<CircleCollider2DComponent>(*m_ClipboardComponent.CircleCollider2D);
-			break;
-		case Locus::ComponentType::NativeScript: selectedEntity.AddOrReplaceComponent<NativeScriptComponent>(*m_ClipboardComponent.NativeScript);
 			break;
 		case Locus::ComponentType::Script: selectedEntity.AddOrReplaceComponent<ScriptComponent>(*m_ClipboardComponent.Script);
 			break;

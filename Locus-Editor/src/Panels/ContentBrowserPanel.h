@@ -21,6 +21,7 @@ namespace Locus
 		void DrawRootDirectoryView();
 
 	private:
+		std::filesystem::path m_ProjectDirectory;
 		std::filesystem::path m_CurrentDirectory;
 		Ref<Texture2D> m_FolderIcon;
 		Ref<Texture2D> m_FileIcon;

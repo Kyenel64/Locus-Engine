@@ -1,5 +1,5 @@
-project "Sandbox"
-	kind "ConsoleApp"
+project "Locus-Launcher"
+	kind "StaticLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "off"
@@ -7,38 +7,56 @@ project "Sandbox"
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
+	pchheader "LLpch.h"
+	pchsource "src/LLpch.cpp"
+
 	files
 	{
 		"src/**.h",
 		"src/**.cpp",
+		"vendor/glm/glm/**.hpp",
+		"vendor/glm/glm/**.inl",
+	}
+
+	defines
+	{
+		"_CRT_SECURE_NO_WARNINGS"
 	}
 
 	includedirs
 	{
-		"%{wks.location}/Locus/vendor/spdlog/include",
-		"%{wks.location}/Locus/src",
-		"%{wks.location}/Locus/vendor",
+		"src",
+		"vendor/spdlog/include",
+		"%{IncludeDir.GLFW}",
+		"%{IncludeDir.Glad}",
+		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.entt}"
+		"%{IncludeDir.yaml_cpp}"
 	}
 
 	links
 	{
-		"Locus"
+		"GLFW",
+		"Glad",
+		"ImGui",
+		"opengl32.lib",
+		"yaml-cpp",
 	}
+
+	linkoptions { "-IGNORE:4006" }
 
 	filter "system:windows"
 		systemversion "latest"
+
+		defines
+		{
+			"GLFW_INCLUDE_NONE"
+		}
 
 	filter "configurations:Debug"
 		defines "LOCUS_DEBUG"
 		runtime "Debug" -- /MDd
 		symbols "on"
-
-		linkoptions
-		{
-			"/ignore:4099"
-		}
 
 	filter "configurations:Release"
 		defines "LOCUS_RELEASE"
@@ -49,4 +67,3 @@ project "Sandbox"
 		defines "LOCUS_DIST"
 		runtime "Release" -- /MD
 		optimize "on"
-		

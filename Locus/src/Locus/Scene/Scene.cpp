@@ -12,7 +12,6 @@
 #include "Locus/Renderer/RenderCommand.h"
 #include "Locus/Renderer/EditorCamera.h"
 #include "Locus/Scene/Components.h"
-#include "Locus/Scene/ScriptableEntity.h"
 #include "Locus/Scene/Entity.h"
 #include "Locus/Scripting/ScriptEngine.h"
 #include "Locus/Physics2D/ContactListener2D.h"
@@ -115,7 +114,6 @@ namespace Locus
 		CopyComponent<Rigidbody2DComponent>(from, to);
 		CopyComponent<BoxCollider2DComponent>(from, to);
 		CopyComponent<CircleCollider2DComponent>(from, to);
-		CopyComponent<NativeScriptComponent>(from, to);
 		CopyComponent<ScriptComponent>(from, to);
 	}
 
@@ -185,19 +183,6 @@ namespace Locus
 					const b2Vec2& position = body->GetPosition();
 					transform.LocalPosition = { position.x, position.y , 0.0f };
 					transform.SetLocalRotation({ 0, 0, glm::degrees(body->GetAngle()) });
-				}
-			}
-		}
-		// --- Update Native Scripts ---
-		{
-			auto view = m_Registry.view<NativeScriptComponent, TagComponent>();
-			for (auto e : view)
-			{
-				Entity entity = Entity(e, this);
-				auto& nsc = view.get<NativeScriptComponent>(entity);
-				if (entity.GetComponent<TagComponent>().Enabled)
-				{
-					nsc.Instance->OnUpdate(deltaTime);
 				}
 			}
 		}
@@ -352,22 +337,6 @@ namespace Locus
 				Entity entity = Entity(e, this);
 				if (entity.GetComponent<TagComponent>().Enabled)
 					CreatePhysicsData(entity);
-			}
-		}
-
-		// --- Native Script ---
-		{
-			auto view = m_Registry.view<NativeScriptComponent, TagComponent>();
-			for (auto e : view)
-			{
-				Entity entity = Entity(e, this);
-				auto& nsc = entity.GetComponent<NativeScriptComponent>();
-				if (entity.GetComponent<TagComponent>().Enabled)
-				{
-					nsc.Instance = nsc.InstantiateScript();
-					nsc.Instance->m_Entity = entity;
-					nsc.Instance->OnCreate();
-				}
 			}
 		}
 
@@ -839,12 +808,6 @@ namespace Locus
 
 	template<>
 	void Scene::OnComponentAdded<CircleCollider2DComponent>(Entity entity, CircleCollider2DComponent& component)
-	{
-
-	}
-
-	template<>
-	void Scene::OnComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent& component)
 	{
 
 	}

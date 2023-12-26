@@ -16,7 +16,7 @@ namespace Locus
 		SceneHierarchyPanel(const Ref<Scene>& context);
 		~SceneHierarchyPanel() = default;
 
-		void SetContext(const Ref<Scene>& context);
+		void SetScene(const Ref<Scene>& context);
 
 		void OnImGuiRender();
 

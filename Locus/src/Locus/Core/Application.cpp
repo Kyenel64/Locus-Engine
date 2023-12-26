@@ -8,8 +8,8 @@ namespace Locus
 {
 	Application* Application::s_Instance = nullptr;
 
-	Application::Application(const std::string& name, ApplicationCommandLineArgs args)
-		: m_CommandLineArgs(args)
+	Application::Application(const std::string& name, const std::string& projectPath, const std::string& projectName)
+		: m_ProjectPath(projectPath), m_ProjectName(projectName)
 	{
 		LOCUS_PROFILE_FUNCTION();
 
@@ -21,12 +21,12 @@ namespace Locus
 		m_Window = Window::Create(name);
 		m_Window->SetEventCallback(LOCUS_BIND_EVENT_FN(Application::OnEvent));
 
-		// Subsystem startups
-		Renderer::Init();
-		ScriptEngine::Init();
-		
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
+
+		// Initialize subsystems if project is set. 
+		Renderer::Init();
+		ScriptEngine::Init();
 	}
 
 	void Application::PushLayer(Layer* layer)

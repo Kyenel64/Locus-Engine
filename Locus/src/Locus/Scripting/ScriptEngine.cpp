@@ -9,6 +9,7 @@
 #include "mono/metadata/exception.h"
 
 #include "Locus/Core/UUID.h"
+#include "Locus/Core/Application.h"
 #include "Locus/Scene/Components.h"
 #include "Locus/Scripting/ScriptLink.h"
 #include "Locus/Scripting/ScriptUtils.h"
@@ -69,6 +70,8 @@ namespace Locus
 		MonoImage* AppAssemblyImage = nullptr;
 
 		Ref<Scene> Scene = nullptr;
+
+		std::filesystem::path AppDllPath = {};
 		
 		bool Debugging = true;
 
@@ -82,7 +85,7 @@ namespace Locus
 		Ref<ScriptClass> EntityBaseClass;
 	};
 
-	static ScriptEngineData* s_Data = nullptr;
+	static ScriptEngineData* s_SEData = nullptr;
 
 	typedef void (*OnUpdateThunk)(MonoObject*, float, MonoException**);
 	typedef void (*OnCreateThunk)(MonoObject*, MonoException**);
@@ -91,12 +94,14 @@ namespace Locus
 	// --- ScriptEngine -------------------------------------------------------
 	void ScriptEngine::Init()
 	{
-		s_Data = new ScriptEngineData();
+		s_SEData = new ScriptEngineData();
+
+		s_SEData->AppDllPath = Application::Get().GetProjectPath().string() + "/bin/" + Application::Get().GetProjectName() + ".dll";
 
 		// Sets the path of .NET system libraries
 		mono_set_assemblies_path("mono/lib");
 
-		if (s_Data->Debugging)
+		if (s_SEData->Debugging)
 		{
 			const char* argv[1] = {
 				//"--debugger-agent=transport=dt_socket,address=127.0.0.1:2550,server=y,suspend=n,loglevel=3,logfile=MonoDebugger.log",
@@ -110,70 +115,80 @@ namespace Locus
 		// Initialize mono runtime
 		MonoDomain* rootDomain = mono_jit_init("LocusJITRuntime");
 		LOCUS_CORE_ASSERT(rootDomain, "Unable to initialize jit runtime!");
-		s_Data->RootDomain = rootDomain;
+		s_SEData->RootDomain = rootDomain;
 
-		if (s_Data->Debugging)
-			mono_debug_domain_create(s_Data->RootDomain);
+		if (s_SEData->Debugging)
+			mono_debug_domain_create(s_SEData->RootDomain);
 
 		mono_thread_set_main(mono_thread_current());
 
-		LoadAssembly("resources/scripts/Locus-Script.dll", s_Data->Debugging);
-		LoadAppAssembly("SandboxProject/bin/Sandbox.dll", s_Data->Debugging); // TODO: set to project path
-		LoadAppAssemblyClasses();
+		LoadAssembly("resources/scripts/Locus-Script.dll", s_SEData->Debugging);
 
-		s_Data->EntityBaseClass = CreateRef<ScriptClass>(s_Data->CoreAssemblyImage, "Locus", "Entity");
+		s_SEData->EntityBaseClass = CreateRef<ScriptClass>(s_SEData->CoreAssemblyImage, "Locus", "Entity");
 
-		// Links C++ internal function definitions to the respective C# method declarations.
-		ScriptLink::RegisterFunctions();
+		if (std::filesystem::exists(s_SEData->AppDllPath))
+		{
+			std::string appAssemblyPath = s_SEData->AppDllPath.string();
+			LoadAppAssembly(appAssemblyPath, s_SEData->Debugging);
+			LoadAppAssemblyClasses();
+			// Links C++ internal function definitions to the respective C# method declarations.
+			ScriptLink::RegisterFunctions();
+		}
 	}
 
 	// Reloads the assembly
 	void ScriptEngine::ReloadScripts()
 	{
 		mono_domain_set(mono_get_root_domain(), false);
-		mono_domain_unload(s_Data->AppDomain);
+		mono_domain_unload(s_SEData->AppDomain);
 
-		LoadAssembly("resources/scripts/Locus-Script.dll", s_Data->Debugging);
-		LoadAppAssembly("SandboxProject/bin/Sandbox.dll", s_Data->Debugging); // TODO: set to project path
-		LoadAppAssemblyClasses();
+		LoadAssembly("resources/scripts/Locus-Script.dll", s_SEData->Debugging);
 
-		s_Data->EntityBaseClass = CreateRef<ScriptClass>(s_Data->CoreAssemblyImage, "Locus", "Entity");
-		// Link C++ functions to C# declarations
-		ScriptLink::RegisterFunctions();
+		s_SEData->EntityBaseClass = CreateRef<ScriptClass>(s_SEData->CoreAssemblyImage, "Locus", "Entity");
+
+		if (std::filesystem::exists(s_SEData->AppDllPath))
+		{
+			std::string appAssemblyPath = s_SEData->AppDllPath.string();
+
+			LoadAppAssembly(appAssemblyPath, s_SEData->Debugging);
+			LoadAppAssemblyClasses();
+			// Link C++ functions to C# declarations
+			ScriptLink::RegisterFunctions();
+		}
 	}
 
 	void ScriptEngine::Shutdown()
 	{
-		s_Data->RootDomain = nullptr;
-		s_Data->AppDomain = nullptr;
-		delete s_Data;
+		s_SEData->RootDomain = nullptr;
+		s_SEData->AppDomain = nullptr;
+		delete s_SEData;
 	}
 
 	// Loads the C# assembly that contains Locus's core API
 	void ScriptEngine::LoadAssembly(const std::string& assemblyPath, bool loadPDB)
 	{
 		// Create app domain. App domains are like separate processes within mono
-		s_Data->AppDomain = mono_domain_create_appdomain("LocusAppDomain", nullptr);
-		LOCUS_CORE_ASSERT(s_Data->AppDomain, "Failed to create mono app domain!");
-		mono_domain_set(s_Data->AppDomain, true);
+		s_SEData->AppDomain = mono_domain_create_appdomain("LocusAppDomain", nullptr);
+		LOCUS_CORE_ASSERT(s_SEData->AppDomain, "Failed to create mono app domain!");
+		mono_domain_set(s_SEData->AppDomain, true);
 
-		s_Data->CoreAssembly = LoadCSharpAssembly(assemblyPath, loadPDB);
-		s_Data->CoreAssemblyImage = mono_assembly_get_image(s_Data->CoreAssembly);
+		s_SEData->CoreAssembly = LoadCSharpAssembly(assemblyPath, loadPDB);
+		s_SEData->CoreAssemblyImage = mono_assembly_get_image(s_SEData->CoreAssembly);
 	}
 
 	// Loads the C# assembly that contains the user-written project code
 	void ScriptEngine::LoadAppAssembly(const std::string& assemblyPath, bool loadPDB)
 	{
-		s_Data->AppAssembly = LoadCSharpAssembly(assemblyPath, loadPDB);
-		s_Data->AppAssemblyImage = mono_assembly_get_image(s_Data->AppAssembly);
+		s_SEData->AppAssembly = LoadCSharpAssembly(assemblyPath, loadPDB);
+		s_SEData->AppAssemblyImage = mono_assembly_get_image(s_SEData->AppAssembly);
 	}
 
 	// Loads all the user-written C# classes and its public fields.
 	void ScriptEngine::LoadAppAssemblyClasses()
 	{
-		s_Data->ScriptClasses.clear();
-		s_Data->ScriptClassNames.clear();
-		const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(s_Data->AppAssemblyImage, MONO_TABLE_TYPEDEF);
+		s_SEData->ScriptClasses.clear();
+		s_SEData->ScriptClassNames.clear();
+		const MonoTableInfo* typeDefinitionsTable = mono_image_get_table_info(s_SEData->AppAssemblyImage, MONO_TABLE_TYPEDEF);
 		int32_t numTypes = mono_table_info_get_rows(typeDefinitionsTable);
 
 		// For each class
@@ -183,8 +198,8 @@ namespace Locus
 			mono_metadata_decode_row(typeDefinitionsTable, i, cols, MONO_TYPEDEF_SIZE);
 
 			// Get namespace and class name
-			const char* namespaceName = mono_metadata_string_heap(s_Data->AppAssemblyImage, cols[MONO_TYPEDEF_NAMESPACE]);
-			const char* className = mono_metadata_string_heap(s_Data->AppAssemblyImage, cols[MONO_TYPEDEF_NAME]);
+			const char* namespaceName = mono_metadata_string_heap(s_SEData->AppAssemblyImage, cols[MONO_TYPEDEF_NAMESPACE]);
+			const char* className = mono_metadata_string_heap(s_SEData->AppAssemblyImage, cols[MONO_TYPEDEF_NAME]);
 
 			// Name formatting
 			std::string classNameStr;
@@ -194,10 +209,10 @@ namespace Locus
 				classNameStr = std::string(className);
 
 			// Create ScriptClass
-			Ref<ScriptClass> scriptClass = CreateRef<ScriptClass>(s_Data->AppAssemblyImage, namespaceName, className);
+			Ref<ScriptClass> scriptClass = CreateRef<ScriptClass>(s_SEData->AppAssemblyImage, namespaceName, className);
 			MonoClass* monoClass = scriptClass->GetMonoClass();
-			s_Data->ScriptClasses[classNameStr] = scriptClass;
-			s_Data->ScriptClassNames.push_back(classNameStr);
+			s_SEData->ScriptClasses[classNameStr] = scriptClass;
+			s_SEData->ScriptClassNames.push_back(classNameStr);
 			LOCUS_CORE_TRACE("Loaded: {}::{}", namespaceName, className);
 
 			// Load public fields contained in the class.
@@ -230,30 +245,30 @@ namespace Locus
 
 	void ScriptEngine::OnRuntimeStart(Ref<Scene> scene)
 	{
-		s_Data->Scene = scene; 
+		s_SEData->Scene = scene; 
 	}
 
 	void ScriptEngine::OnRuntimeStop()
 	{ 
-		s_Data->ScriptInstances.clear();
-		s_Data->Scene = nullptr; 
+		s_SEData->ScriptInstances.clear();
+		s_SEData->Scene = nullptr; 
 	}
 
 	// Creates an instance of the script class and calls Entity
 	void ScriptEngine::OnCreateEntityScript(Entity entity)
 	{
 		auto& sc = entity.GetComponent<ScriptComponent>();
-		if (s_Data->ScriptClasses.find(sc.ScriptClass) != s_Data->ScriptClasses.end())
+		if (s_SEData->ScriptClasses.find(sc.ScriptClass) != s_SEData->ScriptClasses.end())
 		{
 			// Creates a class instance and copies data field data from the editor to the script instance.
-			s_Data->ScriptInstances[entity.GetUUID()] = CreateRef<ScriptInstance>(s_Data->ScriptClasses[sc.ScriptClass], entity.GetUUID());
+			s_SEData->ScriptInstances[entity.GetUUID()] = CreateRef<ScriptInstance>(s_SEData->ScriptClasses[sc.ScriptClass], entity.GetUUID());
 			auto& fields = ScriptEngine::GetFieldInstances(entity.GetUUID());
 			Ref<ScriptInstance> instance = ScriptEngine::GetScriptInstance(entity.GetUUID());
 			for (const auto& [name, field] : fields)
 			{
 				instance->SetFieldValueInternal(name, field.m_Buffer);
 			}
-			s_Data->ScriptInstances[entity.GetUUID()]->InvokeOnCreate();
+			s_SEData->ScriptInstances[entity.GetUUID()]->InvokeOnCreate();
 		}
 		else
 		{
@@ -263,9 +278,9 @@ namespace Locus
 
 	void ScriptEngine::OnUpdateEntityScript(Entity entity, Timestep deltaTime)
 	{
-		if (s_Data->ScriptInstances.find(entity.GetUUID()) != s_Data->ScriptInstances.end())
+		if (s_SEData->ScriptInstances.find(entity.GetUUID()) != s_SEData->ScriptInstances.end())
 		{
-			s_Data->ScriptInstances[entity.GetUUID()]->InvokeOnUpdate(deltaTime);
+			s_SEData->ScriptInstances[entity.GetUUID()]->InvokeOnUpdate(deltaTime);
 		}
 		else
 		{
@@ -281,7 +296,7 @@ namespace Locus
 			classNameStr = std::string(namespaceName) + "::" + std::string(className);
 		else
 			classNameStr = std::string(className);
-		return s_Data->ScriptClasses.find(classNameStr) != s_Data->ScriptClasses.end();
+		return s_SEData->ScriptClasses.find(classNameStr) != s_SEData->ScriptClasses.end();
 	}
 
 	void ScriptEngine::InvokeMethod(Ref<ScriptInstance> instance, MonoMethod* method, void** params)
@@ -292,26 +307,26 @@ namespace Locus
 	}
 
 	// Getters
-	MonoImage* ScriptEngine::GetImage() { return s_Data->CoreAssemblyImage; }
-	Ref<Scene> ScriptEngine::GetScene() { return s_Data->Scene; }
-	std::vector<std::string> ScriptEngine::GetClassNames() { return s_Data->ScriptClassNames; }
-	Ref<ScriptClass> ScriptEngine::GetEntityBaseClass() { return s_Data->EntityBaseClass; }
-	MonoDomain* ScriptEngine::GetAppDomain() { return s_Data->AppDomain; }
-	std::queue<ExceptionData>& ScriptEngine::GetExceptions() { return s_Data->Exceptions; }
-	std::map<std::string, ScriptClassFieldInstance>& ScriptEngine::GetFieldInstances(UUID id) { return s_Data->FieldInstances[id]; }
+	MonoImage* ScriptEngine::GetImage() { return s_SEData->CoreAssemblyImage; }
+	Ref<Scene> ScriptEngine::GetScene() { return s_SEData->Scene; }
+	std::vector<std::string> ScriptEngine::GetClassNames() { return s_SEData->ScriptClassNames; }
+	Ref<ScriptClass> ScriptEngine::GetEntityBaseClass() { return s_SEData->EntityBaseClass; }
+	MonoDomain* ScriptEngine::GetAppDomain() { return s_SEData->AppDomain; }
+	std::queue<ExceptionData>& ScriptEngine::GetExceptions() { return s_SEData->Exceptions; }
+	std::map<std::string, ScriptClassFieldInstance>& ScriptEngine::GetFieldInstances(UUID id) { return s_SEData->FieldInstances[id]; }
 
 	Ref<ScriptClass> ScriptEngine::GetScriptClass(const std::string& name)
 	{
-		if (s_Data->ScriptClasses.find(name) != s_Data->ScriptClasses.end())
-			return s_Data->ScriptClasses[name];
+		if (s_SEData->ScriptClasses.find(name) != s_SEData->ScriptClasses.end())
+			return s_SEData->ScriptClasses[name];
 		else
 			return nullptr;
 	}
 
 	Ref<ScriptInstance> ScriptEngine::GetScriptInstance(UUID id)
 	{
-		if (s_Data->ScriptInstances.find(id) != s_Data->ScriptInstances.end())
-			return s_Data->ScriptInstances[id];
+		if (s_SEData->ScriptInstances.find(id) != s_SEData->ScriptInstances.end())
+			return s_SEData->ScriptInstances[id];
 		else
 			return nullptr;
 	}
@@ -330,7 +345,7 @@ namespace Locus
 	MonoObject* ScriptClass::Instantiate()
 	{
 		// Create mono object and call constructor
-		MonoObject* instance = mono_object_new(s_Data->AppDomain, m_MonoClass);
+		MonoObject* instance = mono_object_new(s_SEData->AppDomain, m_MonoClass);
 		mono_runtime_object_init(instance);
 		return instance;
 	}
@@ -370,7 +385,7 @@ namespace Locus
 		m_OnUpdateFunc = m_ScriptClass->GetMethod("OnUpdate", 1);
 
 		// Call Entity base class constructor
-		MonoMethod* entityBaseConstructor = s_Data->EntityBaseClass->GetMethod(".ctor", 1);
+		MonoMethod* entityBaseConstructor = s_SEData->EntityBaseClass->GetMethod(".ctor", 1);
 		UUID id = m_UUID;
 		void* idPtr = &id;
 		MonoObject* exception = nullptr;

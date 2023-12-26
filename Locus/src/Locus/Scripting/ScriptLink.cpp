@@ -131,7 +131,6 @@ namespace Locus
 		RegisterComponent<Rigidbody2DComponent>();
 		RegisterComponent<BoxCollider2DComponent>();
 		RegisterComponent<CircleCollider2DComponent>();
-		RegisterComponent<NativeScriptComponent>();
 		RegisterComponent<ScriptComponent>();
 	}
 }

@@ -44,6 +44,7 @@ Locus is still in early stages of development. Progress for Locus can be followe
 
 #### 3. Build using Visual Studio
 - Open Locus.sln
+- Build the Locus-Script project before building the solution.
 - Build solution. (Locus-Editor should be selected as the startup project).
 
 #### 4. Running the engine editor

@@ -18,7 +18,7 @@ namespace LocusLauncher
 		// Temp: Include sample project for demo purposes.
 		std::shared_ptr<ProjectData> sampleProjectData = std::make_shared<ProjectData>();
 		sampleProjectData->ProjectName = "Sandbox";
-		sampleProjectData->ProjectPath = "SampleProject";
+		sampleProjectData->ProjectPath = m_LocusEditorPath / "SampleProject";
 		bool sampleProjectExists = false;
 		for (auto projectData : m_ProjectList)
 		{

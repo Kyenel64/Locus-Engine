@@ -379,3 +379,8 @@ Locus-Editor/imgui.ini
 scripts/__pycache__
 premake/
 
+!SampleProject/bin/
+!SampleProject/int/
+!SampleProject/.vs
+!SampleProject/Sandbox.csproj
+!SampleProject/Sandbox.sln

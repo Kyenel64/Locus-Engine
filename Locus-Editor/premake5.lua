@@ -37,7 +37,6 @@ project "Locus-Editor"
 	{
 		"{COPY} %{prj.location}/resources %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/resources",
 		"{COPY} %{prj.location}/mono %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/mono",
-		"{COPY} %{prj.location}/SampleProject %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/SampleProject",
 		"{COPY} %{prj.location}/imgui.ini %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/",
 		"{COPY} %{prj.location}/projectGeneration %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/projectGeneration"
 	}

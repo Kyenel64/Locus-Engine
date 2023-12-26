@@ -14,19 +14,6 @@ namespace LocusLauncher
 	{
 		Serializer::DeserializeProjects(m_ProjectList);
 		m_LocusEditorPath = std::filesystem::current_path();
-
-		// Temp: Include sample project for demo purposes.
-		std::shared_ptr<ProjectData> sampleProjectData = std::make_shared<ProjectData>();
-		sampleProjectData->ProjectName = "Sandbox";
-		sampleProjectData->ProjectPath = m_LocusEditorPath / "SampleProject";
-		bool sampleProjectExists = false;
-		for (auto projectData : m_ProjectList)
-		{
-			if (projectData->ProjectPath == sampleProjectData->ProjectPath && projectData->ProjectName == sampleProjectData->ProjectName)
-				sampleProjectExists = true;
-		}
-		if (!sampleProjectExists)
-			m_ProjectList.push_back(sampleProjectData);
 	}
 
 	LocalProjectsPanel::~LocalProjectsPanel()

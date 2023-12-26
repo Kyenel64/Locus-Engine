@@ -14,10 +14,10 @@ namespace Locus
 
 	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& context)
 	{
-		SetContext(context);
+		SetScene(context);
 	}
 
-	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
+	void SceneHierarchyPanel::SetScene(const Ref<Scene>& context)
 	{
 		m_ActiveScene = context;
 		m_SelectedEntity = {};

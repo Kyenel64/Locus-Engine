@@ -38,8 +38,6 @@ namespace Locus
 			data->BoxCollider2D = CreateRef<BoxCollider2DComponent>(entity.GetComponent<BoxCollider2DComponent>());
 		if (entity.HasComponent<CircleCollider2DComponent>())
 			data->CircleCollider2D = CreateRef<CircleCollider2DComponent>(entity.GetComponent<CircleCollider2DComponent>());
-		if (entity.HasComponent<NativeScriptComponent>())
-			data->NativeScript = CreateRef<NativeScriptComponent>(entity.GetComponent<NativeScriptComponent>());
 		if (entity.HasComponent<ScriptComponent>())
 			data->Script = CreateRef<ScriptComponent>(entity.GetComponent<ScriptComponent>());
 	}
@@ -64,8 +62,6 @@ namespace Locus
 			entity.AddComponent<BoxCollider2DComponent>(*data->BoxCollider2D);
 		if (data->CircleCollider2D)
 			entity.AddComponent<CircleCollider2DComponent>(*data->CircleCollider2D);
-		if (data->NativeScript)
-			entity.AddComponent<NativeScriptComponent>(*data->NativeScript);
 		if (data->Script)
 			entity.AddComponent<ScriptComponent>(*data->Script);
 	}

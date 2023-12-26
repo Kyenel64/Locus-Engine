@@ -38,7 +38,6 @@
 // --- Scene ---
 #include "Locus/Scene/Scene.h"
 #include "Locus/Scene/Entity.h"
-#include "Locus/Scene/ScriptableEntity.h"
 #include "Locus/Scene/Components.h"
 #include "Locus/Scene/SceneCamera.h"
 #include "Locus/Scene/SceneSerializer.h"

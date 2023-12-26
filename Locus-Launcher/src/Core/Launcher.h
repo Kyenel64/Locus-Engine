@@ -1,7 +1,7 @@
 #pragma once
 
-#include <string>
-
+#include "GUI.h"
+#include "Window.h"
 #include "LocalProjectsPanel.h"
 
 struct GLFWwindow;
@@ -16,25 +16,15 @@ namespace LocusLauncher
 		~Launcher();
 
 		void Run();
-
-		void OnImGuiRender();
-
-		void InitGLFW();
-		void InitImGui();
-
-		void CenterGLFWWindow();
-		void SetDarkTheme();
-
 		void Close() { m_IsRunning = false; }
 
 		inline static Launcher& Get() { return *s_Instance; }
+		inline Window& GetWindow() const { return *m_Window; }
 
 	private:
 		static Launcher* s_Instance;
-		GLFWwindow* m_Window = nullptr;
-		uint32_t m_WindowWidth;
-		uint32_t m_WindowHeight;
-		std::string m_WindowName = "Locus Launcher";
+		std::unique_ptr<Window> m_Window = nullptr;
+		std::unique_ptr<GUI> m_GUI = nullptr;
 		bool m_IsRunning = true;
 
 		LocalProjectsPanel m_LocalProjectsPanel;

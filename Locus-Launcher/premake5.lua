@@ -7,6 +7,8 @@ project "Locus-Launcher"
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
+	pchheader "LLpch.h"
+	pchsource "src/LLpch.cpp"
 
 	files
 	{

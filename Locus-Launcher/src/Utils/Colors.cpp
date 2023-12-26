@@ -1,3 +1,4 @@
+#include "LLpch.h"
 #include "Colors.h"
 
 namespace LocusLauncher

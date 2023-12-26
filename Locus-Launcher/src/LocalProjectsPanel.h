@@ -1,8 +1,5 @@
 #pragma once
 
-#include <string>
-#include <filesystem>
-
 namespace LocusLauncher
 {
 	struct ProjectData
@@ -15,17 +12,29 @@ namespace LocusLauncher
 	{
 	public:
 		LocalProjectsPanel();
-		~LocalProjectsPanel() = default;
+		~LocalProjectsPanel();
 
 		void OnImGuiRender();
 
 	private:
-		void OpenProject(const std::string& projectPath, const std::string& projectName);
-		void GenerateProject(const std::string& projectPath, const std::string& projectName);
+		// Relaunches Locus-Editor with selected project.
+		bool OpenProject(const std::string& projectPath, const std::string& projectName);
+
+		// Creates a locus project in the given project path. 
+		bool GenerateProject(const std::string& projectPath, const std::string& projectName);
+
+		void ProcessCreateNewProjectPopup();
+		void ProcessProjectDoesNotExistPopup();
 
 	private:
 		std::filesystem::path m_LocusEditorPath;
-		ProjectData* m_SelectedProject = nullptr;
-		std::vector<ProjectData> m_ProjectList;
+		std::shared_ptr<ProjectData> m_SelectedProject = nullptr;
+		std::vector<std::shared_ptr<ProjectData>> m_ProjectList;
+
+		std::string m_NewProjectName;
+		std::string m_NewProjectPath;
+
+		bool m_OpenCreateNewProjectPopup = false;
+		bool m_OpenProjectDoesNotExistPopup = false;
 	};
 }

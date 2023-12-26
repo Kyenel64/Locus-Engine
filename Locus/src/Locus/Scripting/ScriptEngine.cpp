@@ -126,7 +126,7 @@ namespace Locus
 
 		s_SEData->EntityBaseClass = CreateRef<ScriptClass>(s_SEData->CoreAssemblyImage, "Locus", "Entity");
 
-		if (!Application::Get().GetProjectPath().empty())
+		if (std::filesystem::exists(s_SEData->AppDllPath))
 		{
 			std::string appAssemblyPath = s_SEData->AppDllPath.string();
 			LoadAppAssembly(appAssemblyPath, s_SEData->Debugging);
@@ -146,7 +146,7 @@ namespace Locus
 
 		s_SEData->EntityBaseClass = CreateRef<ScriptClass>(s_SEData->CoreAssemblyImage, "Locus", "Entity");
 
-		if (!Application::Get().GetProjectPath().empty())
+		if (std::filesystem::exists(s_SEData->AppDllPath))
 		{
 			std::string appAssemblyPath = s_SEData->AppDllPath.string();
 

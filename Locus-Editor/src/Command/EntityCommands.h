@@ -30,6 +30,8 @@ namespace Locus
 			data->SpriteRenderer = CreateRef<SpriteRendererComponent>(entity.GetComponent<SpriteRendererComponent>());
 		if (entity.HasComponent<CircleRendererComponent>())
 			data->CircleRenderer = CreateRef<CircleRendererComponent>(entity.GetComponent<CircleRendererComponent>());
+		if (entity.HasComponent<CubeRendererComponent>())
+			data->CubeRenderer = CreateRef<CubeRendererComponent>(entity.GetComponent<CubeRendererComponent>());
 		if (entity.HasComponent<CameraComponent>())
 			data->Camera = CreateRef<CameraComponent>(entity.GetComponent<CameraComponent>());
 		if (entity.HasComponent<Rigidbody2DComponent>())
@@ -54,6 +56,8 @@ namespace Locus
 			entity.AddComponent<SpriteRendererComponent>(*data->SpriteRenderer);
 		if (data->CircleRenderer)
 			entity.AddComponent<CircleRendererComponent>(*data->CircleRenderer);
+		if (data->CubeRenderer)
+			entity.AddComponent<CubeRendererComponent>(*data->CubeRenderer);
 		if (data->Camera)
 			entity.AddComponent<CameraComponent>(*data->Camera);
 		if (data->Rigidbody2D)

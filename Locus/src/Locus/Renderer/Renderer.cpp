@@ -2,6 +2,7 @@
 #include "Renderer.h"
 
 #include "Locus/Renderer/Renderer2D.h"
+#include "Locus/Renderer/Renderer3D.h"
 
 namespace Locus
 {
@@ -11,6 +12,7 @@ namespace Locus
 
 		RenderCommand::Init();
 		Renderer2D::Init();
+		Renderer3D::Init();
 	}
 
 	void Renderer::Shutdown()

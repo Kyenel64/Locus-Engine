@@ -6,12 +6,16 @@
 //	Child
 //	SpriteRenderer
 //	CircleRenderer
+//	CubeRenderer
 //	Camera
 //	Rigidbody2D
 //	BoxCollider2D
 //	CircleCollider2D
 //	NativeScript
 //	Script
+// 
+// Classes to edit when writing a new component:
+//	Scene.cpp, PropertiesPanel.cpp, SceneSerializer.cpp, EntityCommands.h
 #pragma once
 
 #include <stack>
@@ -133,6 +137,15 @@ namespace Locus
 		CircleRendererComponent(const CircleRendererComponent&) = default;
 	};
 
+	struct CubeRendererComponent
+	{
+		glm::vec4 Color = { 0.5f, 0.5f, 0.5f, 1.0f };
+
+		CubeRendererComponent() = default;
+		CubeRendererComponent(const CubeRendererComponent&) = default;
+		CubeRendererComponent(const glm::vec4& color) : Color(color) {}
+	};
+
 	struct CameraComponent
 	{
 		SceneCamera Camera;
@@ -217,6 +230,7 @@ namespace Locus
 		Child,
 		SpriteRenderer,
 		CircleRenderer,
+		CubeRenderer,
 		Camera,
 		Rigidbody2D,
 		BoxCollider2D,
@@ -233,6 +247,7 @@ namespace Locus
 		Ref<TransformComponent> Transform;
 		Ref<SpriteRendererComponent> SpriteRenderer;
 		Ref<CircleRendererComponent> CircleRenderer;
+		Ref<CubeRendererComponent> CubeRenderer;
 		Ref<CameraComponent> Camera;
 		Ref<Rigidbody2DComponent> Rigidbody2D;
 		Ref<BoxCollider2DComponent> BoxCollider2D;

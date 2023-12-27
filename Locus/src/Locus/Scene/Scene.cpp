@@ -9,6 +9,7 @@
 #include <box2d/b2_fixture.h>
 
 #include "Locus/Renderer/Renderer2D.h"
+#include "Locus/Renderer/Renderer3D.h"
 #include "Locus/Renderer/RenderCommand.h"
 #include "Locus/Renderer/EditorCamera.h"
 #include "Locus/Scene/Components.h"
@@ -122,7 +123,7 @@ namespace Locus
 		RenderCommand::SetClearColor(camera.GetBackgroundColor());
 		RenderCommand::Clear();
 
-		// Main rendering
+		// --- 2D rendering ---
 		Renderer2D::BeginScene(camera);
 
 		{ // Sprite
@@ -147,11 +148,28 @@ namespace Locus
 			}
 		}
 
+		Renderer2D::EndScene();
+
+
+		// --- 3D rendering ---
+		Renderer3D::BeginScene(camera);
+
+		{ // Cube
+			auto view = m_Registry.view<TransformComponent, CubeRendererComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				auto& cube = entity.GetComponent<CubeRendererComponent>();
+				if (entity.GetComponent<TagComponent>().Enabled)
+					Renderer3D::DrawCube(GetWorldTransform(entity), cube.Color, (int)e);
+			}
+		}
+
 		// 3D grid plane
 		if (camera.GetGridVisibility())
-			Renderer2D::DrawGrid();
+			Renderer3D::DrawGrid();
 
-		Renderer2D::EndScene();
+		Renderer3D::EndScene();
 	}
 
 	void Scene::OnRuntimeUpdate(Timestep deltaTime)
@@ -290,11 +308,10 @@ namespace Locus
 		RenderCommand::SetClearColor(camera.GetBackgroundColor());
 		RenderCommand::Clear();
 
-		// Main rendering
+		// --- 2D Rendering ---
 		Renderer2D::BeginScene(camera);
 
-		// --- Sprite ---
-		{
+		{ // Sprite
 			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent, TagComponent>();
 			for (auto e : view)
 			{
@@ -305,8 +322,7 @@ namespace Locus
 			}
 		}
 
-		// --- Circle ---
-		{
+		{ // Circle
 			auto view = m_Registry.view<TransformComponent, CircleRendererComponent, TagComponent>();
 			for (auto e : view)
 			{
@@ -317,11 +333,28 @@ namespace Locus
 			}
 		}
 
+		Renderer2D::EndScene();
+
+
+		// --- 3D rendering ---
+		Renderer3D::BeginScene(camera);
+
+		{ // Cube
+			auto view = m_Registry.view<TransformComponent, CubeRendererComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				auto& cube = entity.GetComponent<CubeRendererComponent>();
+				if (entity.GetComponent<TagComponent>().Enabled)
+					Renderer3D::DrawCube(GetWorldTransform(entity), cube.Color, (int)e);
+			}
+		}
+
 		// 3D grid plane
 		if (camera.GetGridVisibility())
-			Renderer2D::DrawGrid();
+			Renderer3D::DrawGrid();
 
-		Renderer2D::EndScene();
+		Renderer3D::EndScene();
 	}
 
 	void Scene::OnRuntimeStart()
@@ -449,7 +482,7 @@ namespace Locus
 		RenderCommand::SetClearColor(camera.GetBackgroundColor());
 		RenderCommand::Clear();
 
-		// Main rendering
+		// --- 2D Rendering ---
 		Renderer2D::BeginScene(camera);
 
 		{ // Sprite
@@ -474,11 +507,28 @@ namespace Locus
 			}
 		}
 
+		Renderer2D::EndScene();
+
+
+		// --- 3D rendering ---
+		Renderer3D::BeginScene(camera);
+
+		{ // Cube
+			auto view = m_Registry.view<TransformComponent, CubeRendererComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				auto& cube = entity.GetComponent<CubeRendererComponent>();
+				if (entity.GetComponent<TagComponent>().Enabled)
+					Renderer3D::DrawCube(GetWorldTransform(entity), cube.Color, (int)e);
+			}
+		}
+
 		// 3D grid plane
 		if (camera.GetGridVisibility())
-			Renderer2D::DrawGrid();
+			Renderer3D::DrawGrid();
 
-		Renderer2D::EndScene();
+		Renderer3D::EndScene();
 	}
 
 	void Scene::CreatePhysicsData(Entity entity)
@@ -783,6 +833,12 @@ namespace Locus
 
 	template<>
 	void Scene::OnComponentAdded<CircleRendererComponent>(Entity entity, CircleRendererComponent& component)
+	{
+
+	}
+
+	template<>
+	void Scene::OnComponentAdded<CubeRendererComponent>(Entity entity, CubeRendererComponent& component)
 	{
 
 	}

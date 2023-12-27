@@ -237,6 +237,17 @@ namespace Locus
 			out << YAML::EndMap;
 		}
 
+		// --- Cube Renderer Component ---
+		if (entity.HasComponent<CubeRendererComponent>())
+		{
+			auto& crc = entity.GetComponent<CubeRendererComponent>();
+
+			out << YAML::Key << "CubeRendererComponent";
+			out << YAML::BeginMap; // Cube Renderer Component
+			out << YAML::Key << "Color" << YAML::Value << crc.Color;
+			out << YAML::EndMap;
+		}
+
 		// --- Camera Component ---
 		if (entity.HasComponent<CameraComponent>())
 		{
@@ -467,6 +478,14 @@ namespace Locus
 					crc.Color = circleRendererComponent["Color"].as<glm::vec4>();
 					crc.Thickness = circleRendererComponent["Thickness"].as<float>();
 					crc.Fade = circleRendererComponent["Fade"].as<float>();
+				}
+
+				// --- Cube Renderer Component ---
+				auto cubeRendererComponent = entity["CubeRendererComponent"];
+				if (cubeRendererComponent)
+				{
+					auto& crc = deserializedEntity.AddComponent<CubeRendererComponent>();
+					crc.Color = cubeRendererComponent["Color"].as<glm::vec4>();
 				}
 
 				// --- Camera Component ---

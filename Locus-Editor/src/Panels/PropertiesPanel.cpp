@@ -78,6 +78,15 @@ namespace Locus
 					ImGui::CloseCurrentPopup();
 				}
 
+				if (ImGui::MenuItem("Cube Renderer"))
+				{
+					if (!m_SelectedEntity.HasComponent<CubeRendererComponent>())
+						CommandHistory::AddCommand(new AddComponentCommand<CubeRendererComponent>(m_ActiveScene, m_SelectedEntity));
+					else
+						LOCUS_CORE_WARN("This entity already has a Cube Renderer Component");
+					ImGui::CloseCurrentPopup();
+				}
+
 				if (ImGui::MenuItem("Rigidbody 2D"))
 				{
 					if (!m_SelectedEntity.HasComponent<Rigidbody2DComponent>())
@@ -353,6 +362,12 @@ namespace Locus
 				Widgets::DrawValueControl("Thickness", component.Thickness, 1.0f, 0.01f, "%.3f", -1.0f, -1.0f, 0.0f, 1.0f);
 
 				Widgets::DrawValueControl("Fade", component.Fade, 0.005f, 0.01f, "%.3f", -1.0f, -1.0f, 0.0001f, FLT_MAX);
+			});
+
+		// --- Cube Renderer Component ----------------------------------------
+		DrawComponentUI<CubeRendererComponent>("Cube Renderer", entity, [this](auto& component) 
+			{
+				Widgets::DrawColorControl("Color", component.Color, { 0.5f, 0.5f, 0.5f, 1.0f });
 			});
 
 		// --- Rigidbody2D Component ------------------------------------------
@@ -641,6 +656,11 @@ namespace Locus
 			m_ClipboardComponent.CircleRenderer = CreateRef<CircleRendererComponent>(m_SelectedEntity.GetComponent<CircleRendererComponent>());
 			m_ClipboardComponentType = ComponentType::CircleRenderer;
 		}
+		if (typeid(T) == typeid(CubeRendererComponent))
+		{
+			m_ClipboardComponent.CubeRenderer = CreateRef<CubeRendererComponent>(m_SelectedEntity.GetComponent<CubeRendererComponent>());
+			m_ClipboardComponentType = ComponentType::CubeRenderer;
+		}
 		if (typeid(T) == typeid(CameraComponent))
 		{
 			m_ClipboardComponent.Camera = CreateRef<CameraComponent>(m_SelectedEntity.GetComponent<CameraComponent>());
@@ -679,6 +699,8 @@ namespace Locus
 		case Locus::ComponentType::SpriteRenderer: selectedEntity.AddOrReplaceComponent<SpriteRendererComponent>(*m_ClipboardComponent.SpriteRenderer);
 			break;
 		case Locus::ComponentType::CircleRenderer: selectedEntity.AddOrReplaceComponent<CircleRendererComponent>(*m_ClipboardComponent.CircleRenderer);
+			break;
+		case Locus::ComponentType::CubeRenderer: selectedEntity.AddOrReplaceComponent<CubeRendererComponent>(*m_ClipboardComponent.CubeRenderer);
 			break;
 		case Locus::ComponentType::Camera: selectedEntity.AddOrReplaceComponent<CameraComponent>(*m_ClipboardComponent.Camera);
 			break;

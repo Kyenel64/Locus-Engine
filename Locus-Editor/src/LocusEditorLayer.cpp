@@ -86,7 +86,7 @@ namespace Locus
 	{
 		// Profiling
 		LOCUS_PROFILE_FUNCTION();
-		Renderer2D::StatsStartFrame();
+		RendererStats::StatsStartFrame();
 
 		// On viewport resize
 		if (FramebufferSpecification spec = m_Framebuffer->GetSpecification();
@@ -106,7 +106,7 @@ namespace Locus
 			m_WindowSize = { Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight() };
 		}
 
-		Renderer2D::ResetStats();
+		RendererStats::ResetStats();
 		m_Framebuffer->Bind();
 		m_Framebuffer->ClearAttachmentInt(1, -1);
 
@@ -185,7 +185,7 @@ namespace Locus
 
 		Input::ProcessKeys();
 
-		Renderer2D::StatsEndFrame();
+		RendererStats::StatsEndFrame();
 	}
 
 	void LocusEditorLayer::OnEvent(Event& e)
@@ -1086,8 +1086,8 @@ namespace Locus
 		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_TabBarAlignLeft | ImGuiWindowFlags_DockedWindowBorder;
 		ImGui::Begin("Debug", false, windowFlags);
 
-		auto stats = Renderer2D::GetStats();
-		ImGui::Text("Renderer2D Stats:");
+		auto& stats = RendererStats::GetStats();
+		ImGui::Text("Renderer Stats:");
 		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
 		ImGui::Text("Quads: %d", stats.QuadCount);
 		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());

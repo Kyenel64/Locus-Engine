@@ -25,6 +25,8 @@
 // --- Renderer ---
 #include "Locus/Renderer/Renderer.h"
 #include "Locus/Renderer/Renderer2D.h"
+#include "Locus/Renderer/Renderer3D.h"
+#include "Locus/Renderer/RendererStats.h"
 #include "Locus/Renderer/RendererAPI.h"
 #include "Locus/Renderer/RenderCommand.h"
 #include "Locus/Renderer/Buffer.h"

@@ -4,6 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Locus/Renderer/RendererStats.h"
 #include "Locus/Renderer/RenderCommand.h"
 #include "Locus/Renderer/VertexArray.h"
 #include "Locus/Renderer/Shader.h"
@@ -247,6 +248,8 @@ namespace Locus
 
 			s_Data.CubeShader->Bind();
 			RenderCommand::DrawIndexed(s_Data.CubeVA, s_Data.CubeIndexCount);
+
+			RendererStats::GetStats().DrawCalls++;
 		}
 
 		if (s_Data.GridIndexCount)
@@ -256,6 +259,8 @@ namespace Locus
 
 			s_Data.GridShader->Bind();
 			RenderCommand::DrawIndexed(s_Data.GridVA, s_Data.GridIndexCount);
+
+			RendererStats::GetStats().DrawCalls++;
 		}
 	}
 
@@ -288,6 +293,8 @@ namespace Locus
 		}
 
 		s_Data.CubeIndexCount += 36;
+
+		RendererStats::GetStats().CubeCount++;
 	}
 
 	void Renderer3D::DrawGrid()

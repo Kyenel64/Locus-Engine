@@ -4,6 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Locus/Renderer/RendererStats.h"
 #include "Locus/Renderer/RenderCommand.h"
 #include "Locus/Renderer/VertexArray.h"
 #include "Locus/Renderer/Shader.h"
@@ -82,8 +83,6 @@ namespace Locus
 
 		glm::vec4 QuadVertexPositions[4];
 		glm::vec2 TexCoords[4];
-
-		Renderer2D::Statistics Stats;
 
 		struct CameraData
 		{
@@ -256,7 +255,7 @@ namespace Locus
 			s_Data.QuadShader->Bind();
 			RenderCommand::DrawIndexed(s_Data.QuadVA, s_Data.QuadIndexCount);
 
-			s_Data.Stats.DrawCalls++;
+			RendererStats::GetStats().DrawCalls++;
 		}
 		
 		if (s_Data.CircleIndexCount)
@@ -267,7 +266,7 @@ namespace Locus
 			s_Data.CircleShader->Bind();
 			RenderCommand::DrawIndexed(s_Data.CircleVA, s_Data.CircleIndexCount);
 
-			s_Data.Stats.DrawCalls++;
+			RendererStats::GetStats().DrawCalls++;
 		}
 
 		if (s_Data.LineVertexCount)
@@ -279,7 +278,7 @@ namespace Locus
 			RenderCommand::SetLineWidth(s_Data.LineWidth);
 			RenderCommand::DrawLine(s_Data.LineVA, s_Data.LineVertexCount);
 
-			s_Data.Stats.DrawCalls++;
+			RendererStats::GetStats().DrawCalls++;
 		}
 	}
 
@@ -322,7 +321,7 @@ namespace Locus
 
 		s_Data.QuadIndexCount += 6;
 
-		s_Data.Stats.QuadCount++;
+		RendererStats::GetStats().QuadCount++;
 	}
 
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor, int entityID)
@@ -365,7 +364,7 @@ namespace Locus
 
 		s_Data.QuadIndexCount += 6;
 
-		s_Data.Stats.QuadCount++;
+		RendererStats::GetStats().QuadCount++;
 	}
 
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<SubTexture2D>& subTexture, float tilingFactor, const glm::vec4& tintColor, int entityID)
@@ -410,7 +409,7 @@ namespace Locus
 
 		s_Data.QuadIndexCount += 6;
 
-		s_Data.Stats.QuadCount++;
+		RendererStats::GetStats().QuadCount++;
 	}
 
 	void Renderer2D::DrawSprite(const glm::mat4& transform, SpriteRendererComponent& src, int entityID)
@@ -440,7 +439,7 @@ namespace Locus
 
 		s_Data.CircleIndexCount += 6;
 
-		s_Data.Stats.QuadCount++;
+		RendererStats::GetStats().QuadCount++;
 	}
 
 	void Renderer2D::DrawDebugCircle(const glm::mat4& transform, const glm::vec4& color, uint32_t sides)
@@ -591,35 +590,5 @@ namespace Locus
 	void Renderer2D::SetLineWidth(float width)
 	{
 		s_Data.LineWidth = width;
-	}
-
-	// --- Stats --------------------------------------------------------------
-
-	void Renderer2D::ResetStats()
-	{
-		//memset(&s_Data.Stats, 0, sizeof(Statistics));
-		s_Data.Stats.DrawCalls = 0;
-		s_Data.Stats.QuadCount = 0;
-		s_Data.Stats.FrameTime = 0;
-	}
-
-	Renderer2D::Statistics Renderer2D::GetStats()
-	{
-		return s_Data.Stats;
-	}
-
-	void Renderer2D::StatsStartFrame()
-	{
-		s_Data.Stats.StartTime = std::chrono::steady_clock().now();
-	}
-
-	void Renderer2D::StatsEndFrame()
-	{
-		s_Data.Stats.EndTime = std::chrono::steady_clock().now();
-		long long start = std::chrono::time_point_cast<std::chrono::microseconds>(s_Data.Stats.StartTime).time_since_epoch().count();
-		long long end = std::chrono::time_point_cast<std::chrono::microseconds>(s_Data.Stats.EndTime).time_since_epoch().count();
-		s_Data.Stats.FrameTime = (end - start) * 0.001f;
-		s_Data.Stats.FramesPerSecond = 1.0f / s_Data.Stats.FrameTime * 1000.0f;
-
 	}
 }

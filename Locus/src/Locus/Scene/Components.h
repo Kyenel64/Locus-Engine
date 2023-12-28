@@ -7,6 +7,7 @@
 //	SpriteRenderer
 //	CircleRenderer
 //	CubeRenderer
+//	PointLight
 //	Camera
 //	Rigidbody2D
 //	BoxCollider2D
@@ -139,11 +140,23 @@ namespace Locus
 
 	struct CubeRendererComponent
 	{
-		glm::vec4 Color = { 0.5f, 0.5f, 0.5f, 1.0f };
+		// TODO: Put in material
+		glm::vec4 Albedo = { 0.5f, 0.5f, 0.5f, 1.0f };
+		float Metallic = 0.5f;
+		float Roughness = 0.5f;
+		float AO = 0.5f;
 
 		CubeRendererComponent() = default;
 		CubeRendererComponent(const CubeRendererComponent&) = default;
-		CubeRendererComponent(const glm::vec4& color) : Color(color) {}
+	};
+
+	struct PointLightComponent
+	{
+		glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
+		float Intensity = 1.0f;
+
+		PointLightComponent() = default;
+		PointLightComponent(const PointLightComponent&) = default;
 	};
 
 	struct CameraComponent
@@ -221,7 +234,6 @@ namespace Locus
 		ScriptComponent(const std::string& scriptClass) : ScriptClass(scriptClass) {}
 	};
 
-
 	enum class ComponentType
 	{
 		None = 0,
@@ -231,6 +243,7 @@ namespace Locus
 		SpriteRenderer,
 		CircleRenderer,
 		CubeRenderer,
+		PointLight,
 		Camera,
 		Rigidbody2D,
 		BoxCollider2D,
@@ -248,6 +261,7 @@ namespace Locus
 		Ref<SpriteRendererComponent> SpriteRenderer;
 		Ref<CircleRendererComponent> CircleRenderer;
 		Ref<CubeRendererComponent> CubeRenderer;
+		Ref<PointLightComponent> PointLight;
 		Ref<CameraComponent> Camera;
 		Ref<Rigidbody2DComponent> Rigidbody2D;
 		Ref<BoxCollider2DComponent> BoxCollider2D;

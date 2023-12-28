@@ -87,6 +87,15 @@ namespace Locus
 					ImGui::CloseCurrentPopup();
 				}
 
+				if (ImGui::MenuItem("Point Light"))
+				{
+					if (!m_SelectedEntity.HasComponent<PointLightComponent>())
+						CommandHistory::AddCommand(new AddComponentCommand<PointLightComponent>(m_ActiveScene, m_SelectedEntity));
+					else
+						LOCUS_CORE_WARN("This entity already has a Point Light Component");
+					ImGui::CloseCurrentPopup();
+				}
+
 				if (ImGui::MenuItem("Rigidbody 2D"))
 				{
 					if (!m_SelectedEntity.HasComponent<Rigidbody2DComponent>())
@@ -367,7 +376,21 @@ namespace Locus
 		// --- Cube Renderer Component ----------------------------------------
 		DrawComponentUI<CubeRendererComponent>("Cube Renderer", entity, [this](auto& component) 
 			{
-				Widgets::DrawColorControl("Color", component.Color, { 0.5f, 0.5f, 0.5f, 1.0f });
+				Widgets::DrawColorControl("Albedo", component.Albedo, { 0.5f, 0.5f, 0.5f, 1.0f });
+
+				Widgets::DrawValueControl("Metallic", component.Metallic, 0.5f, 0.05f, nullptr, -1.0f, -1.0f, 0.0f, 1.0f);
+
+				Widgets::DrawValueControl("Roughness", component.Roughness, 0.5f, 0.05f, nullptr, -1.0f, -1.0f, 0.0f, 1.0f);
+
+				Widgets::DrawValueControl("AO", component.AO, 0.5f, 0.05f, nullptr, -1.0f, -1.0f, 0.0f, 1.0f);
+			});
+
+		// --- Point Light Component ----------------------------------------
+		DrawComponentUI<PointLightComponent>("Point Light", entity, [this](auto& component)
+			{
+				Widgets::DrawColorControl("Color", component.Color, { 1.0f, 1.0f, 1.0f, 1.0f });
+
+				Widgets::DrawValueControl("Intensity", component.Intensity, 1.0f);
 			});
 
 		// --- Rigidbody2D Component ------------------------------------------
@@ -661,6 +684,11 @@ namespace Locus
 			m_ClipboardComponent.CubeRenderer = CreateRef<CubeRendererComponent>(m_SelectedEntity.GetComponent<CubeRendererComponent>());
 			m_ClipboardComponentType = ComponentType::CubeRenderer;
 		}
+		if (typeid(T) == typeid(PointLightComponent))
+		{
+			m_ClipboardComponent.PointLight = CreateRef<PointLightComponent>(m_SelectedEntity.GetComponent<PointLightComponent>());
+			m_ClipboardComponentType = ComponentType::PointLight;
+		}
 		if (typeid(T) == typeid(CameraComponent))
 		{
 			m_ClipboardComponent.Camera = CreateRef<CameraComponent>(m_SelectedEntity.GetComponent<CameraComponent>());
@@ -701,6 +729,8 @@ namespace Locus
 		case Locus::ComponentType::CircleRenderer: selectedEntity.AddOrReplaceComponent<CircleRendererComponent>(*m_ClipboardComponent.CircleRenderer);
 			break;
 		case Locus::ComponentType::CubeRenderer: selectedEntity.AddOrReplaceComponent<CubeRendererComponent>(*m_ClipboardComponent.CubeRenderer);
+			break;
+		case Locus::ComponentType::PointLight: selectedEntity.AddOrReplaceComponent<PointLightComponent>(*m_ClipboardComponent.PointLight);
 			break;
 		case Locus::ComponentType::Camera: selectedEntity.AddOrReplaceComponent<CameraComponent>(*m_ClipboardComponent.Camera);
 			break;

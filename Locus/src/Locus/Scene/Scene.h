@@ -15,6 +15,20 @@ namespace Locus
 	class Entity;
 	class ContactListener2D;
 
+	struct PointLight
+	{
+		glm::vec4 Position = glm::vec4(0.0f);
+		glm::vec4 Color = glm::vec4(0.0f);
+		float Intensity = 1.0f;
+		bool Enabled = false;
+		glm::vec2 padding;
+	};
+
+	struct SceneLighting
+	{
+		PointLight PointLights[16]; // TODO: Use deferred shading for unlimited light sources
+	};
+
 	class Scene
 	{
 	public:
@@ -72,6 +86,8 @@ namespace Locus
 
 		glm::mat4 Scene::GetWorldTransform(Entity entity);
 
+		const SceneLighting& GetLightingData() const { return m_SceneLighting; }
+
 		void SetSceneName(const std::string& name) { m_SceneName = name; }
 
 	private:
@@ -86,6 +102,10 @@ namespace Locus
 		b2World* m_Box2DWorld = nullptr;
 		Ref<ContactListener2D> m_ContactListener;
 
+		// Lighting
+		SceneLighting m_SceneLighting;
+
+	public:
 		friend class Entity;
 		friend class SceneSerializer;
 	};

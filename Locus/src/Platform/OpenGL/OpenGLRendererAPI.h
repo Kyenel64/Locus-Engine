@@ -19,6 +19,8 @@ namespace Locus
 
 		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) override;
 
+		virtual void DrawArray(const Ref<VertexArray>& vertexArray, uint32_t vertexCount = 0) override;
+
 		virtual void DrawLine(const Ref<VertexArray>& vertexArray, uint32_t vertexCount = 0) override;
 
 		virtual void Resize(int x, int y, int width, int height) override;

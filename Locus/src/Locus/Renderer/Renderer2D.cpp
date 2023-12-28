@@ -83,13 +83,6 @@ namespace Locus
 
 		glm::vec4 QuadVertexPositions[4];
 		glm::vec2 TexCoords[4];
-
-		struct CameraData
-		{
-			glm::mat4 ViewProjection;
-		};
-		CameraData CameraBuffer;
-		Ref<UniformBuffer> CameraUniformBuffer;
 	};
 
 	static Renderer2DData s_Data;
@@ -186,9 +179,6 @@ namespace Locus
 		s_Data.TexCoords[1] = { 1.0f, 0.0f };
 		s_Data.TexCoords[2] = { 1.0f, 1.0f };
 		s_Data.TexCoords[3] = { 0.0f, 1.0f };
-
-		s_Data.CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DData::CameraData), 0);
-		
 	}
 
 	void Renderer2D::Shutdown()
@@ -200,22 +190,16 @@ namespace Locus
 		delete[] s_Data.LineVertexBufferBase;
 	}
 
-	void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform)
-	{
-		LOCUS_PROFILE_FUNCTION();
-		
-		s_Data.CameraBuffer.ViewProjection = camera.GetProjection() * glm::inverse(transform);
-		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer2DData::CameraData));
-
-		StartBatch();
-	}
-
 	void Renderer2D::BeginScene(const EditorCamera& camera)
 	{
 		LOCUS_PROFILE_FUNCTION();
 
-		s_Data.CameraBuffer.ViewProjection = camera.GetViewProjectionMatrix();
-		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer2DData::CameraData));
+		StartBatch();
+	}
+
+	void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform)
+	{
+		LOCUS_PROFILE_FUNCTION();
 
 		StartBatch();
 	}

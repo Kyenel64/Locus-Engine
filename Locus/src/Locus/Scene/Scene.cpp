@@ -8,6 +8,7 @@
 #include <box2d/b2_circle_shape.h>
 #include <box2d/b2_fixture.h>
 
+#include "Locus/Renderer/Renderer.h"
 #include "Locus/Renderer/Renderer2D.h"
 #include "Locus/Renderer/Renderer3D.h"
 #include "Locus/Renderer/RenderCommand.h"
@@ -111,6 +112,8 @@ namespace Locus
 		CopyComponent<TransformComponent>(from, to);
 		CopyComponent<SpriteRendererComponent>(from, to);
 		CopyComponent<CircleRendererComponent>(from, to);
+		CopyComponent<CubeRendererComponent>(from, to);
+		CopyComponent<PointLightComponent>(from, to);
 		CopyComponent<CameraComponent>(from, to);
 		CopyComponent<Rigidbody2DComponent>(from, to);
 		CopyComponent<BoxCollider2DComponent>(from, to);
@@ -120,12 +123,35 @@ namespace Locus
 
 	void Scene::OnEditorUpdate(Timestep deltaTime, EditorCamera& camera)
 	{
-		RenderCommand::SetClearColor(camera.GetBackgroundColor());
-		RenderCommand::Clear();
+		// --- Lighting ---
+		{ // Point lights
+			int index = 0;
+			auto view = m_Registry.view<TransformComponent, PointLightComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				auto& pointLight = entity.GetComponent<PointLightComponent>();
+				if (entity.GetComponent<TagComponent>().Enabled)
+				{
+					glm::vec3 worldPosition;
+					glm::mat4 worldTransform = GetWorldTransform(entity);
+					Math::Decompose(worldTransform, glm::vec3(), glm::quat(), worldPosition);
+					glm::vec4 newWorldPosition = { worldPosition.x, worldPosition.y, worldPosition.z, 1.0f};
+					m_SceneLighting.PointLights[index].Position = newWorldPosition;
+					m_SceneLighting.PointLights[index].Color = pointLight.Color;
+					m_SceneLighting.PointLights[index].Intensity = pointLight.Intensity;
+					m_SceneLighting.PointLights[index].Enabled = true;
+		
+					index++;
+				}
+			}
+		}
 
-		// --- 2D rendering ---
+		// --- Rendering ---
+		Renderer::BeginScene(camera);
+
+		// 2D
 		Renderer2D::BeginScene(camera);
-
 		{ // Sprite
 			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent, TagComponent>();
 			for (auto e : view)
@@ -147,13 +173,10 @@ namespace Locus
 					Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
 			}
 		}
-
 		Renderer2D::EndScene();
 
-
-		// --- 3D rendering ---
-		Renderer3D::BeginScene(camera);
-
+		// 3D
+		Renderer3D::BeginScene(camera, this);
 		{ // Cube
 			auto view = m_Registry.view<TransformComponent, CubeRendererComponent, TagComponent>();
 			for (auto e : view)
@@ -161,7 +184,7 @@ namespace Locus
 				Entity entity = Entity(e, this);
 				auto& cube = entity.GetComponent<CubeRendererComponent>();
 				if (entity.GetComponent<TagComponent>().Enabled)
-					Renderer3D::DrawCube(GetWorldTransform(entity), cube.Color, (int)e);
+					Renderer3D::DrawCube(GetWorldTransform(entity), cube, (int)e);
 			}
 		}
 
@@ -170,13 +193,14 @@ namespace Locus
 			Renderer3D::DrawGrid();
 
 		Renderer3D::EndScene();
+
+		Renderer::EndScene();
 	}
 
 	void Scene::OnRuntimeUpdate(Timestep deltaTime)
 	{
 		// --- Physics ---
-		// Check physics data for changes
-		{
+		{ // Check physics data for changes
 			auto view = m_Registry.view<IDComponent>();
 			for (auto e : view)
 			{
@@ -184,8 +208,8 @@ namespace Locus
 				UpdatePhysicsData(entity);
 			}
 		}
-		// Simulate physics
-		{
+
+		{ // Simulate physics
 			m_Box2DWorld->Step(deltaTime, 6, 2); // TODO: paremeterize
 			m_ContactListener->Execute();
 			auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
@@ -207,19 +231,40 @@ namespace Locus
 
 		// --- Update C# Scripts ---
 		{
-			// Example API
 			auto view = m_Registry.view<ScriptComponent, TagComponent>();
 			for (auto e : view)
 			{
 				Entity entity = Entity(e, this);
 				if (entity.GetComponent<TagComponent>().Enabled)
-				{
 					ScriptEngine::OnUpdateEntityScript(entity, deltaTime);
+			}
+		}
+
+		// --- Lighting ---
+		{ // Point lights
+			int index = 0;
+			auto view = m_Registry.view<TransformComponent, PointLightComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				auto& pointLight = entity.GetComponent<PointLightComponent>();
+				if (entity.GetComponent<TagComponent>().Enabled)
+				{
+					glm::vec3 worldPosition;
+					glm::mat4 worldTransform = GetWorldTransform(entity);
+					Math::Decompose(worldTransform, glm::vec3(), glm::quat(), worldPosition);
+					glm::vec4 newWorldPosition = { worldPosition.x, worldPosition.y, worldPosition.z, 1.0f };
+					m_SceneLighting.PointLights[index].Position = newWorldPosition;
+					m_SceneLighting.PointLights[index].Color = pointLight.Color;
+					m_SceneLighting.PointLights[index].Intensity = pointLight.Intensity;
+					m_SceneLighting.PointLights[index].Enabled = true;
+
+					index++;
 				}
 			}
 		}
 
-		// --- Rendering 2D ---
+		// --- Rendering ---
 		// Find first camera with "Primary" property enabled.
 		SceneCamera* mainCamera = nullptr;
 		glm::mat4 cameraTransform;
@@ -233,15 +278,12 @@ namespace Locus
 				cameraTransform = GetWorldTransform(primaryCameraEntity);
 			}
 		}
-		// Render if main camera exists
 		if (mainCamera)
 		{
-			// Main rendering
-			RenderCommand::SetClearColor(mainCamera->GetBackgroundColor());
-			RenderCommand::Clear();
+			Renderer::BeginScene(*mainCamera, cameraTransform);
 
+			// 2D
 			Renderer2D::BeginScene(*mainCamera, cameraTransform);
-
 			{ // Sprite
 				auto view = m_Registry.view<TransformComponent, SpriteRendererComponent, TagComponent>();
 				for (auto e : view)
@@ -263,8 +305,23 @@ namespace Locus
 						Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
 				}
 			}
-			
 			Renderer2D::EndScene();
+
+			// 3D
+			Renderer3D::BeginScene(*mainCamera, cameraTransform, this);
+			{ // Cube
+				auto view = m_Registry.view<TransformComponent, CubeRendererComponent, TagComponent>();
+				for (auto e : view)
+				{
+					Entity entity = Entity(e, this);
+					auto& cube = entity.GetComponent<CubeRendererComponent>();
+					if (entity.GetComponent<TagComponent>().Enabled)
+						Renderer3D::DrawCube(GetWorldTransform(entity), cube, (int)e);
+				}
+			}
+			Renderer3D::EndScene();
+
+			Renderer::EndScene();
 		}
 		else
 		{
@@ -276,8 +333,7 @@ namespace Locus
 	void Scene::OnPhysicsUpdate(Timestep deltaTime, EditorCamera& camera)
 	{
 		// --- Physics ---
-		// Check physics data for changes
-		{
+		{ // Check physics data for changes
 			auto view = m_Registry.view<IDComponent>();
 			for (auto e : view)
 			{
@@ -285,8 +341,7 @@ namespace Locus
 				UpdatePhysicsData(entity);
 			}
 		}
-		// Simulate physics
-		{
+		{ // Simulate physics
 			m_Box2DWorld->Step(deltaTime, 6, 2); // TODO: paremeterize
 			auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
 			for (auto e : view)
@@ -305,12 +360,35 @@ namespace Locus
 			}
 		}
 
-		RenderCommand::SetClearColor(camera.GetBackgroundColor());
-		RenderCommand::Clear();
+		// --- Lighting ---
+		{ // Point lights
+			int index = 0;
+			auto view = m_Registry.view<TransformComponent, PointLightComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				auto& pointLight = entity.GetComponent<PointLightComponent>();
+				if (entity.GetComponent<TagComponent>().Enabled)
+				{
+					glm::vec3 worldPosition;
+					glm::mat4 worldTransform = GetWorldTransform(entity);
+					Math::Decompose(worldTransform, glm::vec3(), glm::quat(), worldPosition);
+					glm::vec4 newWorldPosition = { worldPosition.x, worldPosition.y, worldPosition.z, 1.0f };
+					m_SceneLighting.PointLights[index].Position = newWorldPosition;
+					m_SceneLighting.PointLights[index].Color = pointLight.Color;
+					m_SceneLighting.PointLights[index].Intensity = pointLight.Intensity;
+					m_SceneLighting.PointLights[index].Enabled = true;
 
-		// --- 2D Rendering ---
+					index++;
+				}
+			}
+		}
+
+		// --- Rendering ---
+		Renderer::BeginScene(camera);
+
+		// 2D
 		Renderer2D::BeginScene(camera);
-
 		{ // Sprite
 			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent, TagComponent>();
 			for (auto e : view)
@@ -332,13 +410,11 @@ namespace Locus
 					Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
 			}
 		}
-
 		Renderer2D::EndScene();
 
 
-		// --- 3D rendering ---
-		Renderer3D::BeginScene(camera);
-
+		// 3D
+		Renderer3D::BeginScene(camera, this);
 		{ // Cube
 			auto view = m_Registry.view<TransformComponent, CubeRendererComponent, TagComponent>();
 			for (auto e : view)
@@ -346,15 +422,16 @@ namespace Locus
 				Entity entity = Entity(e, this);
 				auto& cube = entity.GetComponent<CubeRendererComponent>();
 				if (entity.GetComponent<TagComponent>().Enabled)
-					Renderer3D::DrawCube(GetWorldTransform(entity), cube.Color, (int)e);
+					Renderer3D::DrawCube(GetWorldTransform(entity), cube, (int)e);
 			}
 		}
-
 		// 3D grid plane
 		if (camera.GetGridVisibility())
 			Renderer3D::DrawGrid();
 
 		Renderer3D::EndScene();
+
+		Renderer::EndScene();
 	}
 
 	void Scene::OnRuntimeStart()
@@ -418,7 +495,31 @@ namespace Locus
 
 	void Scene::OnRuntimePause(Timestep deltaTime)
 	{
-		// --- Rendering 2D ---
+		// --- Lighting ---
+		{ // Point lights
+			int index = 0;
+			auto view = m_Registry.view<TransformComponent, PointLightComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				auto& pointLight = entity.GetComponent<PointLightComponent>();
+				if (entity.GetComponent<TagComponent>().Enabled)
+				{
+					glm::vec3 worldPosition;
+					glm::mat4 worldTransform = GetWorldTransform(entity);
+					Math::Decompose(worldTransform, glm::vec3(), glm::quat(), worldPosition);
+					glm::vec4 newWorldPosition = { worldPosition.x, worldPosition.y, worldPosition.z, 1.0f };
+					m_SceneLighting.PointLights[index].Position = newWorldPosition;
+					m_SceneLighting.PointLights[index].Color = pointLight.Color;
+					m_SceneLighting.PointLights[index].Intensity = pointLight.Intensity;
+					m_SceneLighting.PointLights[index].Enabled = true;
+
+					index++;
+				}
+			}
+		}
+
+		// --- Rendering ---
 		// Find first camera with "Primary" property enabled.
 		SceneCamera* mainCamera = nullptr;
 		glm::mat4 cameraTransform;
@@ -437,15 +538,12 @@ namespace Locus
 				}
 			}
 		}
-		// Render if main camera exists
 		if (mainCamera)
 		{
-			// Main rendering
-			RenderCommand::SetClearColor(mainCamera->GetBackgroundColor());
-			RenderCommand::Clear();
+			Renderer::BeginScene(*mainCamera, cameraTransform);
 
+			// 2D
 			Renderer2D::BeginScene(*mainCamera, cameraTransform);
-
 			{ // Sprite
 				auto view = m_Registry.view<TransformComponent, SpriteRendererComponent, TagComponent>();
 				for (auto e : view)
@@ -467,8 +565,23 @@ namespace Locus
 						Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
 				}
 			}
-
 			Renderer2D::EndScene();
+
+			// 3D
+			Renderer3D::BeginScene(*mainCamera, cameraTransform, this);
+			{ // Cube
+				auto view = m_Registry.view<TransformComponent, CubeRendererComponent, TagComponent>();
+				for (auto e : view)
+				{
+					Entity entity = Entity(e, this);
+					auto& cube = entity.GetComponent<CubeRendererComponent>();
+					if (entity.GetComponent<TagComponent>().Enabled)
+						Renderer3D::DrawCube(GetWorldTransform(entity), cube, (int)e);
+				}
+			}
+			Renderer3D::EndScene();
+
+			Renderer::EndScene();
 		}
 		else
 		{
@@ -479,12 +592,35 @@ namespace Locus
 
 	void Scene::OnPhysicsPause(Timestep deltaTime, EditorCamera& camera)
 	{
-		RenderCommand::SetClearColor(camera.GetBackgroundColor());
-		RenderCommand::Clear();
+		// --- Lighting ---
+		{ // Point lights
+			int index = 0;
+			auto view = m_Registry.view<TransformComponent, PointLightComponent, TagComponent>();
+			for (auto e : view)
+			{
+				Entity entity = Entity(e, this);
+				auto& pointLight = entity.GetComponent<PointLightComponent>();
+				if (entity.GetComponent<TagComponent>().Enabled)
+				{
+					glm::vec3 worldPosition;
+					glm::mat4 worldTransform = GetWorldTransform(entity);
+					Math::Decompose(worldTransform, glm::vec3(), glm::quat(), worldPosition);
+					glm::vec4 newWorldPosition = { worldPosition.x, worldPosition.y, worldPosition.z, 1.0f };
+					m_SceneLighting.PointLights[index].Position = newWorldPosition;
+					m_SceneLighting.PointLights[index].Color = pointLight.Color;
+					m_SceneLighting.PointLights[index].Intensity = pointLight.Intensity;
+					m_SceneLighting.PointLights[index].Enabled = true;
 
-		// --- 2D Rendering ---
+					index++;
+				}
+			}
+		}
+
+		// --- Rendering ---
+		Renderer::BeginScene(camera);
+
+		// 2D
 		Renderer2D::BeginScene(camera);
-
 		{ // Sprite
 			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent, TagComponent>();
 			for (auto e : view)
@@ -506,13 +642,11 @@ namespace Locus
 					Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
 			}
 		}
-
 		Renderer2D::EndScene();
 
 
-		// --- 3D rendering ---
-		Renderer3D::BeginScene(camera);
-
+		// --- Rendering ---
+		Renderer3D::BeginScene(camera, this);
 		{ // Cube
 			auto view = m_Registry.view<TransformComponent, CubeRendererComponent, TagComponent>();
 			for (auto e : view)
@@ -520,15 +654,16 @@ namespace Locus
 				Entity entity = Entity(e, this);
 				auto& cube = entity.GetComponent<CubeRendererComponent>();
 				if (entity.GetComponent<TagComponent>().Enabled)
-					Renderer3D::DrawCube(GetWorldTransform(entity), cube.Color, (int)e);
+					Renderer3D::DrawCube(GetWorldTransform(entity), cube, (int)e);
 			}
 		}
-
 		// 3D grid plane
 		if (camera.GetGridVisibility())
 			Renderer3D::DrawGrid();
 
 		Renderer3D::EndScene();
+
+		Renderer::EndScene();
 	}
 
 	void Scene::CreatePhysicsData(Entity entity)
@@ -870,6 +1005,12 @@ namespace Locus
 
 	template<>
 	void Scene::OnComponentAdded<ScriptComponent>(Entity entity, ScriptComponent& component)
+	{
+
+	}
+
+	template<>
+	void Scene::OnComponentAdded<PointLightComponent>(Entity entity, PointLightComponent& component)
 	{
 
 	}

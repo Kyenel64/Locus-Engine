@@ -244,7 +244,22 @@ namespace Locus
 
 			out << YAML::Key << "CubeRendererComponent";
 			out << YAML::BeginMap; // Cube Renderer Component
-			out << YAML::Key << "Color" << YAML::Value << crc.Color;
+			out << YAML::Key << "Albedo" << YAML::Value << crc.Albedo;
+			out << YAML::Key << "Metallic" << YAML::Value << crc.Metallic;
+			out << YAML::Key << "Roughness" << YAML::Value << crc.Roughness;
+			out << YAML::Key << "AO" << YAML::Value << crc.AO;
+			out << YAML::EndMap;
+		}
+
+		// --- Point Light Component ---
+		if (entity.HasComponent<PointLightComponent>())
+		{
+			auto& plc = entity.GetComponent<PointLightComponent>();
+
+			out << YAML::Key << "PointLightComponent";
+			out << YAML::BeginMap; // Point Light Component
+			out << YAML::Key << "Color" << YAML::Value << plc.Color;
+			out << YAML::Key << "Intensity" << YAML::Value << plc.Intensity;
 			out << YAML::EndMap;
 		}
 
@@ -485,7 +500,19 @@ namespace Locus
 				if (cubeRendererComponent)
 				{
 					auto& crc = deserializedEntity.AddComponent<CubeRendererComponent>();
-					crc.Color = cubeRendererComponent["Color"].as<glm::vec4>();
+					crc.Albedo = cubeRendererComponent["Albedo"].as<glm::vec4>();
+					crc.Metallic = cubeRendererComponent["Metallic"].as<float>();
+					crc.Roughness = cubeRendererComponent["Roughness"].as<float>();
+					crc.AO = cubeRendererComponent["AO"].as<float>();
+				}
+
+				// --- Point Light Component ---
+				auto pointLightComponent = entity["PointLightComponent"];
+				if (pointLightComponent)
+				{
+					auto& plc = deserializedEntity.AddComponent<PointLightComponent>();
+					plc.Color = pointLightComponent["Color"].as<glm::vec4>();
+					plc.Intensity = pointLightComponent["Intensity"].as<float>();
 				}
 
 				// --- Camera Component ---

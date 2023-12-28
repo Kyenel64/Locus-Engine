@@ -9,6 +9,7 @@ layout(location = 0) in int a_Index;
 layout(std140, binding = 0) uniform Camera
 {
 	mat4 u_ViewProjection;
+    vec4 u_CameraPosition;
 };
 
 layout(location = 0) out vec3 v_NearPoint;

@@ -1251,11 +1251,13 @@ namespace Locus
 				m_ActiveCameraFramebuffer->Bind();
 				m_Framebuffer->ClearAttachmentInt(1, -1);
 
-				RenderCommand::SetClearColor(camera.GetBackgroundColor());
-				RenderCommand::Clear();
+				glm::mat4 cameraTransform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
 
-				Renderer2D::BeginScene(camera, m_ActiveScene->GetWorldTransform(m_SelectedEntity));
+				// --- Rendering ---
+				Renderer::BeginScene(camera, cameraTransform);
 
+				// 2D
+				Renderer2D::BeginScene(camera, cameraTransform);
 				{ // Sprite
 					auto view = m_ActiveScene->GetEntitiesWith<SpriteRendererComponent>();
 					for (auto e : view)
@@ -1279,8 +1281,23 @@ namespace Locus
 							Renderer2D::DrawCircle(m_ActiveScene->GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, -1);
 					}
 				}
-
 				Renderer2D::EndScene();
+
+				// 3D
+				Renderer3D::BeginScene(camera, cameraTransform, m_ActiveScene.get());
+				{ // Cube
+					auto view = m_ActiveScene->GetEntitiesWith<TransformComponent, CubeRendererComponent, TagComponent>();
+					for (auto e : view)
+					{
+						Entity entity = Entity(e, m_ActiveScene.get());
+						auto& cube = entity.GetComponent<CubeRendererComponent>();
+						if (entity.GetComponent<TagComponent>().Enabled)
+							Renderer3D::DrawCube(m_ActiveScene->GetWorldTransform(entity), cube, (int)e);
+					}
+				}
+				Renderer3D::EndScene();
+
+				Renderer::EndScene();
 
 				m_ActiveCameraFramebuffer->Unbind();
 			}

@@ -14,6 +14,7 @@ layout(location = 5) in int a_EntityID;
 layout(std140, binding = 0) uniform Camera
 {
 	mat4 u_ViewProjection;
+	vec4 u_CameraPosition;
 };
 
 struct VertexOutput

@@ -4,6 +4,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Locus/Scene/Entity.h"
+#include "Locus/Scene/Scene.h"
 #include "Locus/Renderer/RendererStats.h"
 #include "Locus/Renderer/RenderCommand.h"
 #include "Locus/Renderer/VertexArray.h"
@@ -15,7 +17,14 @@ namespace Locus
 	struct CubeVertex
 	{
 		glm::vec3 WorldPosition;
-		glm::vec4 Color;
+		glm::vec3 Normal;
+
+		// TODO: Probably put material data in uniform buffer
+		glm::vec4 Albedo; 
+		float Metallic;
+		float Roughness;
+		float AO;
+
 		int EntityID;
 	};
 
@@ -40,7 +49,7 @@ namespace Locus
 		Ref<VertexBuffer> GridVB;
 		Ref<Shader> GridShader;
 
-		uint32_t CubeIndexCount = 0;
+		uint32_t CubeVertexCount = 0;
 		CubeVertex* CubeVertexBufferBase = nullptr;
 		CubeVertex* CubeVertexBufferPtr = nullptr;
 
@@ -48,15 +57,12 @@ namespace Locus
 		GridVertex* GridVertexBufferBase = nullptr;
 		GridVertex* GridVertexBufferPtr = nullptr;
 
-		glm::vec4 CubeVertexPositions[8];
+		glm::vec4 CubeVertexPositions[36];
+		glm::vec3 CubeVertexNormals[36];
 
-		// Camera
-		struct CameraData
-		{
-			glm::mat4 ViewProjection;
-		};
-		CameraData CameraBuffer;
-		Ref<UniformBuffer> CameraUniformBuffer;
+		// Lighting data
+		SceneLighting SceneLightingBuffer;
+		Ref<UniformBuffer> SceneLightingUniformBuffer;
 
 		// Grid
 		struct GridData
@@ -70,7 +76,7 @@ namespace Locus
 		Ref<UniformBuffer> GridUniformBuffer;
 	};
 
-	static Renderer3DData s_Data;
+	static Renderer3DData s_R3DData;
 
 	void Renderer3D::Init()
 	{
@@ -78,89 +84,29 @@ namespace Locus
 
 		// --- Cube -----------------------------------------------------------
 		// Vertex array
-		s_Data.CubeVA = VertexArray::Create();
+		s_R3DData.CubeVA = VertexArray::Create();
 		// Vertex buffer
-		s_Data.CubeVB = VertexBuffer::Create(s_Data.MaxVertices * sizeof(CubeVertex));
-		s_Data.CubeVB->SetLayout({
+		s_R3DData.CubeVB = VertexBuffer::Create(s_R3DData.MaxVertices * sizeof(CubeVertex));
+		s_R3DData.CubeVB->SetLayout({
 			{ ShaderDataType::Float3, "a_Position" },
-			{ ShaderDataType::Float4, "a_Color" },
+			{ ShaderDataType::Float3, "a_Normal"},
+			{ ShaderDataType::Float4, "a_Albedo" },
+			{ ShaderDataType::Float, "a_Metallic" },
+			{ ShaderDataType::Float, "a_Roughness" },
+			{ ShaderDataType::Float, "a_AO"},
 			{ ShaderDataType::Int, "a_EntityID" }
 		});
-		s_Data.CubeVA->AddVertexBuffer(s_Data.CubeVB);
-		// Index buffer
-		uint32_t* cubeIndices = new uint32_t[s_Data.MaxIndices];
-		uint32_t offset = 0;
-		for (uint32_t i = 0; i < s_Data.MaxIndices; i += 36)
-		{
-			// Front
-			cubeIndices[i + 0] = offset + 0;
-			cubeIndices[i + 1] = offset + 1;
-			cubeIndices[i + 2] = offset + 2;
-
-			cubeIndices[i + 3] = offset + 2;
-			cubeIndices[i + 4] = offset + 3;
-			cubeIndices[i + 5] = offset + 0;
-
-			// Left
-			cubeIndices[i + 6] = offset + 4;
-			cubeIndices[i + 7] = offset + 5;
-			cubeIndices[i + 8] = offset + 1;
-
-			cubeIndices[i + 9] = offset + 1;
-			cubeIndices[i + 10] = offset + 0;
-			cubeIndices[i + 11] = offset + 4;
-
-			// Back
-			cubeIndices[i + 12] = offset + 7;
-			cubeIndices[i + 13] = offset + 6;
-			cubeIndices[i + 14] = offset + 5;
-
-			cubeIndices[i + 15] = offset + 5;
-			cubeIndices[i + 16] = offset + 4;
-			cubeIndices[i + 17] = offset + 7;
-
-			// Right
-			cubeIndices[i + 18] = offset + 3;
-			cubeIndices[i + 19] = offset + 2;
-			cubeIndices[i + 20] = offset + 6;
-
-			cubeIndices[i + 21] = offset + 6;
-			cubeIndices[i + 22] = offset + 7;
-			cubeIndices[i + 23] = offset + 3;
-
-			// Top
-			cubeIndices[i + 24] = offset + 1;
-			cubeIndices[i + 25] = offset + 5;
-			cubeIndices[i + 26] = offset + 6;
-
-			cubeIndices[i + 27] = offset + 6;
-			cubeIndices[i + 28] = offset + 2;
-			cubeIndices[i + 29] = offset + 1;
-
-			// Bottom
-			cubeIndices[i + 30] = offset + 0;
-			cubeIndices[i + 31] = offset + 4;
-			cubeIndices[i + 32] = offset + 7;
-
-			cubeIndices[i + 33] = offset + 7;
-			cubeIndices[i + 34] = offset + 3;
-			cubeIndices[i + 35] = offset + 0;
-
-			offset += 8;
-		}
-		Ref<IndexBuffer> cubeIB = IndexBuffer::Create(cubeIndices, s_Data.MaxIndices);
-		s_Data.CubeVA->SetIndexBuffer(cubeIB);
-		delete[] cubeIndices;
-		s_Data.CubeVertexBufferBase = new CubeVertex[s_Data.MaxVertices];
+		s_R3DData.CubeVA->AddVertexBuffer(s_R3DData.CubeVB);
+		s_R3DData.CubeVertexBufferBase = new CubeVertex[s_R3DData.MaxVertices];
 
 		// --- Grid -----------------------------------------------------------
-		s_Data.GridVA = VertexArray::Create();
+		s_R3DData.GridVA = VertexArray::Create();
 		// Create VB
-		s_Data.GridVB = VertexBuffer::Create(4 * sizeof(GridVertex));
-		s_Data.GridVB->SetLayout({
+		s_R3DData.GridVB = VertexBuffer::Create(4 * sizeof(GridVertex));
+		s_R3DData.GridVB->SetLayout({
 			{ ShaderDataType::Int, "a_Index"}
 			});
-		s_Data.GridVA->AddVertexBuffer(s_Data.GridVB);
+		s_R3DData.GridVA->AddVertexBuffer(s_R3DData.GridVB);
 		// Create IB
 		uint32_t* gridIndices = new uint32_t[6];
 		gridIndices[0] = 0;
@@ -172,49 +118,150 @@ namespace Locus
 		gridIndices[5] = 0;
 
 		Ref<IndexBuffer> gridIB = IndexBuffer::Create(gridIndices, 6);
-		s_Data.GridVA->SetIndexBuffer(gridIB);
+		s_R3DData.GridVA->SetIndexBuffer(gridIB);
 		delete[] gridIndices;
-		s_Data.GridVertexBufferBase = new GridVertex[4];
+		s_R3DData.GridVertexBufferBase = new GridVertex[4];
 
 		// --- Initializations ------------------------------------------------
-		s_Data.CubeShader = Shader::Create("resources/shaders/3DCube.glsl");
-		s_Data.GridShader = Shader::Create("resources/shaders/GridShader.glsl");
+		s_R3DData.CubeShader = Shader::Create("resources/shaders/3DCube.glsl");
+		s_R3DData.GridShader = Shader::Create("resources/shaders/GridShader.glsl");
 
-		// Define cube vertices
-		s_Data.CubeVertexPositions[0] = { -0.5f, -0.5f,  0.5f, 1.0f };
-		s_Data.CubeVertexPositions[1] = { -0.5f,  0.5f,  0.5f, 1.0f };
-		s_Data.CubeVertexPositions[2] = {  0.5f,  0.5f,  0.5f, 1.0f };
-		s_Data.CubeVertexPositions[3] = {  0.5f, -0.5f,  0.5f, 1.0f };
-		s_Data.CubeVertexPositions[4] = { -0.5f, -0.5f, -0.5f, 1.0f };
-		s_Data.CubeVertexPositions[5] = { -0.5f,  0.5f, -0.5f, 1.0f };
-		s_Data.CubeVertexPositions[6] = {  0.5f,  0.5f, -0.5f, 1.0f };
-		s_Data.CubeVertexPositions[7] = {  0.5f, -0.5f, -0.5f, 1.0f };
+		// Define cube vertices and normals
+#pragma region Cube vertex definitions
+		glm::vec4 vertexPos[8] = {};
+		vertexPos[0] = { -0.5f, -0.5f,  0.5f, 1.0f };
+		vertexPos[1] = { -0.5f,  0.5f,  0.5f, 1.0f };
+		vertexPos[2] = {  0.5f,  0.5f,  0.5f, 1.0f };
+		vertexPos[3] = {  0.5f, -0.5f,  0.5f, 1.0f };
+		vertexPos[4] = { -0.5f, -0.5f, -0.5f, 1.0f };
+		vertexPos[5] = { -0.5f,  0.5f, -0.5f, 1.0f };
+		vertexPos[6] = {  0.5f,  0.5f, -0.5f, 1.0f };
+		vertexPos[7] = {  0.5f, -0.5f, -0.5f, 1.0f };
 
-		s_Data.CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer3DData::CameraData), 0);
-		s_Data.GridUniformBuffer = UniformBuffer::Create(sizeof(Renderer3DData::GridData), 1);
+		s_R3DData.CubeVertexPositions[0] = vertexPos[0];
+		s_R3DData.CubeVertexPositions[1] = vertexPos[1];
+		s_R3DData.CubeVertexPositions[2] = vertexPos[2];
+		s_R3DData.CubeVertexPositions[3] = vertexPos[0];
+		s_R3DData.CubeVertexPositions[4] = vertexPos[2];
+		s_R3DData.CubeVertexPositions[5] = vertexPos[3];
+
+		s_R3DData.CubeVertexPositions[6] = vertexPos[4];
+		s_R3DData.CubeVertexPositions[7] = vertexPos[5];
+		s_R3DData.CubeVertexPositions[8] = vertexPos[1];
+		s_R3DData.CubeVertexPositions[9] = vertexPos[4];
+		s_R3DData.CubeVertexPositions[10] = vertexPos[1];
+		s_R3DData.CubeVertexPositions[11] = vertexPos[0];
+
+		s_R3DData.CubeVertexPositions[12] = vertexPos[7];
+		s_R3DData.CubeVertexPositions[13] = vertexPos[6];
+		s_R3DData.CubeVertexPositions[14] = vertexPos[5];
+		s_R3DData.CubeVertexPositions[15] = vertexPos[7];
+		s_R3DData.CubeVertexPositions[16] = vertexPos[5];
+		s_R3DData.CubeVertexPositions[17] = vertexPos[4];
+
+		s_R3DData.CubeVertexPositions[18] = vertexPos[3];
+		s_R3DData.CubeVertexPositions[19] = vertexPos[2];
+		s_R3DData.CubeVertexPositions[20] = vertexPos[6];
+		s_R3DData.CubeVertexPositions[21] = vertexPos[3];
+		s_R3DData.CubeVertexPositions[22] = vertexPos[6];
+		s_R3DData.CubeVertexPositions[23] = vertexPos[7];
+
+		s_R3DData.CubeVertexPositions[24] = vertexPos[1];
+		s_R3DData.CubeVertexPositions[25] = vertexPos[5];
+		s_R3DData.CubeVertexPositions[26] = vertexPos[6];
+		s_R3DData.CubeVertexPositions[27] = vertexPos[1];
+		s_R3DData.CubeVertexPositions[28] = vertexPos[6];
+		s_R3DData.CubeVertexPositions[29] = vertexPos[2];
+
+		s_R3DData.CubeVertexPositions[30] = vertexPos[0];
+		s_R3DData.CubeVertexPositions[31] = vertexPos[4];
+		s_R3DData.CubeVertexPositions[32] = vertexPos[7];
+		s_R3DData.CubeVertexPositions[33] = vertexPos[0];
+		s_R3DData.CubeVertexPositions[34] = vertexPos[7];
+		s_R3DData.CubeVertexPositions[35] = vertexPos[3];
+
+		s_R3DData.CubeVertexNormals[0] = { 0, 0, 1 };
+		s_R3DData.CubeVertexNormals[1] = { 0, 0, 1 };
+		s_R3DData.CubeVertexNormals[2] = { 0, 0, 1 };
+		s_R3DData.CubeVertexNormals[3] = { 0, 0, 1 };
+		s_R3DData.CubeVertexNormals[4] = { 0, 0, 1 };
+		s_R3DData.CubeVertexNormals[5] = { 0, 0, 1 };
+
+		s_R3DData.CubeVertexNormals[6] =  { -1, 0, 0 };
+		s_R3DData.CubeVertexNormals[7] =  { -1, 0, 0 };
+		s_R3DData.CubeVertexNormals[8] =  { -1, 0, 0 };
+		s_R3DData.CubeVertexNormals[9] =  { -1, 0, 0 };
+		s_R3DData.CubeVertexNormals[10] = { -1, 0, 0 };
+		s_R3DData.CubeVertexNormals[11] = { -1, 0, 0 };
+
+		s_R3DData.CubeVertexNormals[12] = { 0, 0, -1 };
+		s_R3DData.CubeVertexNormals[13] = { 0, 0, -1 };
+		s_R3DData.CubeVertexNormals[14] = { 0, 0, -1 };
+		s_R3DData.CubeVertexNormals[15] = { 0, 0, -1 };
+		s_R3DData.CubeVertexNormals[16] = { 0, 0, -1 };
+		s_R3DData.CubeVertexNormals[17] = { 0, 0, -1 };
+
+		s_R3DData.CubeVertexNormals[18] = { 1, 0, 0 };
+		s_R3DData.CubeVertexNormals[19] = { 1, 0, 0 };
+		s_R3DData.CubeVertexNormals[20] = { 1, 0, 0 };
+		s_R3DData.CubeVertexNormals[21] = { 1, 0, 0 };
+		s_R3DData.CubeVertexNormals[22] = { 1, 0, 0 };
+		s_R3DData.CubeVertexNormals[23] = { 1, 0, 0 };
+
+		s_R3DData.CubeVertexNormals[24] = { 0, 1, 0 };
+		s_R3DData.CubeVertexNormals[25] = { 0, 1, 0 };
+		s_R3DData.CubeVertexNormals[26] = { 0, 1, 0 };
+		s_R3DData.CubeVertexNormals[27] = { 0, 1, 0 };
+		s_R3DData.CubeVertexNormals[28] = { 0, 1, 0 };
+		s_R3DData.CubeVertexNormals[29] = { 0, 1, 0 };
+
+		s_R3DData.CubeVertexNormals[30] = { 0, -1, 0 };
+		s_R3DData.CubeVertexNormals[31] = { 0, -1, 0 };
+		s_R3DData.CubeVertexNormals[32] = { 0, -1, 0 };
+		s_R3DData.CubeVertexNormals[33] = { 0, -1, 0 };
+		s_R3DData.CubeVertexNormals[34] = { 0, -1, 0 };
+		s_R3DData.CubeVertexNormals[35] = { 0, -1, 0 };
+
+#pragma endregion Cube vertex definitions
+		
+		// Uniform buffers
+		s_R3DData.GridUniformBuffer = UniformBuffer::Create(sizeof(Renderer3DData::GridData), 1);
+		s_R3DData.SceneLightingUniformBuffer = UniformBuffer::Create(sizeof(SceneLighting), 2);
 	}
 
 	void Renderer3D::Shutdown()
 	{
 		LOCUS_PROFILE_FUNCTION();
 
-		delete[] s_Data.CubeVertexBufferBase;
-		delete[] s_Data.GridVertexBufferBase;
+		delete[] s_R3DData.CubeVertexBufferBase;
+		delete[] s_R3DData.GridVertexBufferBase;
 	}
 
-	void Renderer3D::BeginScene(const EditorCamera& camera)
+	void Renderer3D::BeginScene(const EditorCamera& camera, Scene* scene)
 	{
 		LOCUS_PROFILE_FUNCTION();
 
-		s_Data.CameraBuffer.ViewProjection = camera.GetViewProjectionMatrix();
-		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer3DData::CameraData));
+		// Lighting
+		s_R3DData.SceneLightingBuffer = scene->GetLightingData();
+		s_R3DData.SceneLightingUniformBuffer->SetData(&s_R3DData.SceneLightingBuffer, sizeof(SceneLighting));
 
 		// Editor grid
-		s_Data.GridBuffer.Color = camera.GetGridColor();
-		s_Data.GridBuffer.Near = camera.GetNearClip();
-		s_Data.GridBuffer.Far = camera.GetFarClip();
-		s_Data.GridBuffer.GridScale = camera.GetGridScale();
-		s_Data.GridUniformBuffer->SetData(&s_Data.GridBuffer, sizeof(Renderer3DData::GridData));
+		s_R3DData.GridBuffer.Color = camera.GetGridColor();
+		s_R3DData.GridBuffer.Near = camera.GetNearClip();
+		s_R3DData.GridBuffer.Far = camera.GetFarClip();
+		s_R3DData.GridBuffer.GridScale = camera.GetGridScale();
+		s_R3DData.GridUniformBuffer->SetData(&s_R3DData.GridBuffer, sizeof(Renderer3DData::GridData));
+
+		StartBatch();
+	}
+
+	void Renderer3D::BeginScene(const Camera& camera, const glm::mat4& transform, Scene* scene)
+	{
+		LOCUS_PROFILE_FUNCTION();
+
+		// Lighting
+		s_R3DData.SceneLightingBuffer = scene->GetLightingData();
+		s_R3DData.SceneLightingUniformBuffer->SetData(&s_R3DData.SceneLightingBuffer, sizeof(SceneLighting));
 
 		StartBatch();
 	}
@@ -230,35 +277,35 @@ namespace Locus
 	{
 		LOCUS_PROFILE_FUNCTION();
 
-		s_Data.CubeIndexCount = 0;
-		s_Data.CubeVertexBufferPtr = s_Data.CubeVertexBufferBase;
+		s_R3DData.CubeVertexCount = 0;
+		s_R3DData.CubeVertexBufferPtr = s_R3DData.CubeVertexBufferBase;
 
-		s_Data.GridIndexCount = 0;
-		s_Data.GridVertexBufferPtr = s_Data.GridVertexBufferBase;
+		s_R3DData.GridIndexCount = 0;
+		s_R3DData.GridVertexBufferPtr = s_R3DData.GridVertexBufferBase;
 	}
 
 	void Renderer3D::Flush()
 	{
 		LOCUS_PROFILE_FUNCTION();
 
-		if (s_Data.CubeIndexCount)
+		if (s_R3DData.CubeVertexCount)
 		{
-			uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.CubeVertexBufferPtr - (uint8_t*)s_Data.CubeVertexBufferBase);
-			s_Data.CubeVB->SetData(s_Data.CubeVertexBufferBase, dataSize);
+			uint32_t dataSize = (uint32_t)((uint8_t*)s_R3DData.CubeVertexBufferPtr - (uint8_t*)s_R3DData.CubeVertexBufferBase);
+			s_R3DData.CubeVB->SetData(s_R3DData.CubeVertexBufferBase, dataSize);
 
-			s_Data.CubeShader->Bind();
-			RenderCommand::DrawIndexed(s_Data.CubeVA, s_Data.CubeIndexCount);
+			s_R3DData.CubeShader->Bind();
+			RenderCommand::DrawArray(s_R3DData.CubeVA, s_R3DData.CubeVertexCount);
 
 			RendererStats::GetStats().DrawCalls++;
 		}
 
-		if (s_Data.GridIndexCount)
+		if (s_R3DData.GridIndexCount)
 		{
-			uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.GridVertexBufferPtr - (uint8_t*)s_Data.GridVertexBufferBase);
-			s_Data.GridVB->SetData(s_Data.GridVertexBufferBase, dataSize);
+			uint32_t dataSize = (uint32_t)((uint8_t*)s_R3DData.GridVertexBufferPtr - (uint8_t*)s_R3DData.GridVertexBufferBase);
+			s_R3DData.GridVB->SetData(s_R3DData.GridVertexBufferBase, dataSize);
 
-			s_Data.GridShader->Bind();
-			RenderCommand::DrawIndexed(s_Data.GridVA, s_Data.GridIndexCount);
+			s_R3DData.GridShader->Bind();
+			RenderCommand::DrawIndexed(s_R3DData.GridVA, s_R3DData.GridIndexCount);
 
 			RendererStats::GetStats().DrawCalls++;
 		}
@@ -270,29 +317,33 @@ namespace Locus
 
 		EndScene();
 		
-		s_Data.CubeIndexCount = 0;
-		s_Data.CubeVertexBufferPtr = s_Data.CubeVertexBufferBase;
+		s_R3DData.CubeVertexCount = 0;
+		s_R3DData.CubeVertexBufferPtr = s_R3DData.CubeVertexBufferBase;
 
-		s_Data.GridIndexCount = 0;
-		s_Data.GridVertexBufferPtr = s_Data.GridVertexBufferBase;
+		s_R3DData.GridIndexCount = 0;
+		s_R3DData.GridVertexBufferPtr = s_R3DData.GridVertexBufferBase;
 	}
 
-	void Renderer3D::DrawCube(const glm::mat4& transform, const glm::vec4& color, int entityID)
+	void Renderer3D::DrawCube(const glm::mat4& transform, const CubeRendererComponent& crc, int entityID)
 	{
 		LOCUS_PROFILE_FUNCTION();
 
-		if (s_Data.CubeIndexCount >= Renderer3DData::MaxIndices)
+		if (s_R3DData.CubeVertexCount >= Renderer3DData::MaxIndices)
 			FlushAndReset();
 
-		for (uint32_t i = 0; i < 8; i++)
+		for (uint32_t i = 0; i < 36; i++)
 		{
-			s_Data.CubeVertexBufferPtr->WorldPosition = transform * s_Data.CubeVertexPositions[i];
-			s_Data.CubeVertexBufferPtr->Color = color;
-			s_Data.CubeVertexBufferPtr->EntityID = entityID;
-			s_Data.CubeVertexBufferPtr++;
+			s_R3DData.CubeVertexBufferPtr->WorldPosition = transform * s_R3DData.CubeVertexPositions[i];
+			s_R3DData.CubeVertexBufferPtr->Normal = s_R3DData.CubeVertexNormals[i];
+			s_R3DData.CubeVertexBufferPtr->Albedo = crc.Albedo;
+			s_R3DData.CubeVertexBufferPtr->Metallic = crc.Metallic;
+			s_R3DData.CubeVertexBufferPtr->Roughness = crc.Roughness;
+			s_R3DData.CubeVertexBufferPtr->AO = crc.AO;
+			s_R3DData.CubeVertexBufferPtr->EntityID = entityID;
+			s_R3DData.CubeVertexBufferPtr++;
 		}
 
-		s_Data.CubeIndexCount += 36;
+		s_R3DData.CubeVertexCount += 36;
 
 		RendererStats::GetStats().CubeCount++;
 	}
@@ -303,10 +354,10 @@ namespace Locus
 
 		for (uint32_t i = 0; i < 4; i++)
 		{
-			s_Data.GridVertexBufferPtr->Index = i;
-			s_Data.GridVertexBufferPtr++;
+			s_R3DData.GridVertexBufferPtr->Index = i;
+			s_R3DData.GridVertexBufferPtr++;
 		}
 
-		s_Data.GridIndexCount += 6;
+		s_R3DData.GridIndexCount += 6;
 	}
 }

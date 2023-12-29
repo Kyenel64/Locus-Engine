@@ -33,11 +33,23 @@ namespace Locus
 		glm::vec2 padding;
 	};
 
+	struct SpotLight
+	{
+		glm::vec4 Position = glm::vec4(0.0f);
+		glm::vec4 Direction = glm::vec4(0.0f);
+		glm::vec4 Color = glm::vec4(0.0f);
+		float CutOff = 0.0f;
+		float OuterCutOff = 0.0f;
+		float Intensity = 0.0f;
+		bool Enabled = false;
+	};
+
 	struct SceneLighting
 	{
 		// TODO: Use deferred shading for unlimited light sources
 		DirectionalLight DirectionalLights[16];
 		PointLight PointLights[16];
+		SpotLight SpotLights[16];
 	};
 
 	class Scene
@@ -107,6 +119,7 @@ namespace Locus
 		void ClearLightingData();
 		void ProcessPointLights();
 		void ProcessDirectionalLights();
+		void ProcessSpotLights();
 		void DrawSprites();
 		void DrawCircles();
 		void DrawCubes();

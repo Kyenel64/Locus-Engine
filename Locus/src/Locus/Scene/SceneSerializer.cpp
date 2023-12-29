@@ -275,6 +275,20 @@ namespace Locus
 			out << YAML::EndMap;
 		}
 
+		// --- Spot Light Component ---
+		if (entity.HasComponent<SpotLightComponent>())
+		{
+			auto& slc = entity.GetComponent<SpotLightComponent>();
+
+			out << YAML::Key << "SpotLightComponent";
+			out << YAML::BeginMap; // Spot Light Component
+			out << YAML::Key << "Color" << YAML::Value << slc.Color;
+			out << YAML::Key << "Intensity" << YAML::Value << slc.Intensity;
+			out << YAML::Key << "CutOff" << YAML::Value << slc.CutOff;
+			out << YAML::Key << "OuterCutOff" << YAML::Value << slc.OuterCutOff;
+			out << YAML::EndMap;
+		}
+
 		// --- Camera Component ---
 		if (entity.HasComponent<CameraComponent>())
 		{
@@ -534,6 +548,17 @@ namespace Locus
 					auto& dlc = deserializedEntity.AddComponent<DirectionalLightComponent>();
 					dlc.Color = directionalLightComponent["Color"].as<glm::vec4>();
 					dlc.Intensity = directionalLightComponent["Intensity"].as<float>();
+				}
+
+				// --- Spot Light Component ---
+				auto spotLightComponent = entity["SpotLightComponent"];
+				if (spotLightComponent)
+				{
+					auto& slc = deserializedEntity.AddComponent<SpotLightComponent>();
+					slc.Color = spotLightComponent["Color"].as<glm::vec4>();
+					slc.Intensity = spotLightComponent["Intensity"].as<float>();
+					slc.CutOff = spotLightComponent["CutOff"].as<float>();
+					slc.OuterCutOff = spotLightComponent["OuterCutOff"].as<float>();
 				}
 
 				// --- Camera Component ---

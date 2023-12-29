@@ -115,6 +115,7 @@ namespace Locus
 		CopyComponent<CubeRendererComponent>(from, to);
 		CopyComponent<PointLightComponent>(from, to);
 		CopyComponent<DirectionalLightComponent>(from, to);
+		CopyComponent<SpotLightComponent>(from, to);
 		CopyComponent<CameraComponent>(from, to);
 		CopyComponent<Rigidbody2DComponent>(from, to);
 		CopyComponent<BoxCollider2DComponent>(from, to);
@@ -128,6 +129,7 @@ namespace Locus
 		ClearLightingData();
 		ProcessPointLights();
 		ProcessDirectionalLights();
+		ProcessSpotLights();
 
 		// --- Rendering ---
 		Renderer::BeginScene(camera);
@@ -194,6 +196,7 @@ namespace Locus
 		ClearLightingData();
 		ProcessPointLights();
 		ProcessDirectionalLights();
+		ProcessSpotLights();
 
 		// --- Rendering ---
 		// Find first camera with "Primary" property enabled.
@@ -266,6 +269,7 @@ namespace Locus
 		ClearLightingData();
 		ProcessPointLights();
 		ProcessDirectionalLights();
+		ProcessSpotLights();
 
 		// --- Rendering ---
 		Renderer::BeginScene(camera);
@@ -350,6 +354,7 @@ namespace Locus
 		ClearLightingData();
 		ProcessPointLights();
 		ProcessDirectionalLights();
+		ProcessSpotLights();
 
 		// --- Rendering ---
 		// Find first camera with "Primary" property enabled.
@@ -399,6 +404,7 @@ namespace Locus
 		ClearLightingData();
 		ProcessPointLights();
 		ProcessDirectionalLights();
+		ProcessSpotLights();
 
 		// --- Rendering ---
 		Renderer::BeginScene(camera);
@@ -424,6 +430,7 @@ namespace Locus
 		ClearLightingData();
 		ProcessPointLights();
 		ProcessDirectionalLights();
+		ProcessSpotLights();
 
 		// --- Rendering ---
 		SceneCamera& camera = entity.GetComponent<CameraComponent>().Camera;
@@ -456,6 +463,13 @@ namespace Locus
 			m_SceneLighting.DirectionalLights[i].Color = glm::vec4(0.0f);
 			m_SceneLighting.DirectionalLights[i].Intensity = 0.0f;
 			m_SceneLighting.DirectionalLights[i].Enabled = false;
+			m_SceneLighting.SpotLights[i].Position = glm::vec4(0.0f);
+			m_SceneLighting.SpotLights[i].Direction = glm::vec4(0.0f);
+			m_SceneLighting.SpotLights[i].Color = glm::vec4(0.0f);
+			m_SceneLighting.SpotLights[i].Intensity = 0.0f;
+			m_SceneLighting.SpotLights[i].CutOff = 0.0f;
+			m_SceneLighting.SpotLights[i].OuterCutOff = 0.0f;
+			m_SceneLighting.SpotLights[i].Enabled = false;
 		}
 	}
 
@@ -501,6 +515,36 @@ namespace Locus
 				m_SceneLighting.DirectionalLights[index].Color = directionalLight.Color;
 				m_SceneLighting.DirectionalLights[index].Intensity = directionalLight.Intensity;
 				m_SceneLighting.DirectionalLights[index].Enabled = true;
+
+				index++;
+			}
+		}
+	}
+
+	void Scene::ProcessSpotLights()
+	{
+		int index = 0;
+		auto view = m_Registry.view<TransformComponent, SpotLightComponent, TagComponent>();
+		for (auto e : view)
+		{
+			Entity entity = Entity(e, this);
+			auto& directionalLight = entity.GetComponent<SpotLightComponent>();
+			if (entity.GetComponent<TagComponent>().Enabled)
+			{
+				// Calculate the forward vector of the directional light.
+				glm::quat worldRotationQuat;
+				glm::mat4 worldTransform = GetWorldTransform(entity);
+				Math::Decompose(worldTransform, glm::vec3(), worldRotationQuat, glm::vec3());
+				glm::vec3 worldRotationEuler = glm::eulerAngles(worldRotationQuat);
+				glm::vec4 lightDirection = { cos(worldRotationEuler.x) * sin(worldRotationEuler.y), -sin(worldRotationEuler.x), cos(worldRotationEuler.x) * cos(worldRotationEuler.y), 1.0f };
+
+				m_SceneLighting.SpotLights[index].Position = { worldTransform[3].x, worldTransform[3].y, worldTransform[3].z, 1.0f };
+				m_SceneLighting.SpotLights[index].Direction = lightDirection;
+				m_SceneLighting.SpotLights[index].Color = directionalLight.Color;
+				m_SceneLighting.SpotLights[index].Intensity = directionalLight.Intensity;
+				m_SceneLighting.SpotLights[index].CutOff = cos(glm::radians(directionalLight.CutOff));
+				m_SceneLighting.SpotLights[index].OuterCutOff = cos(glm::radians(directionalLight.OuterCutOff));
+				m_SceneLighting.SpotLights[index].Enabled = true;
 
 				index++;
 			}
@@ -863,6 +907,12 @@ namespace Locus
 
 	template<>
 	void Scene::OnComponentAdded<DirectionalLightComponent>(Entity entity, DirectionalLightComponent& component)
+	{
+
+	}
+
+	template<>
+	void Scene::OnComponentAdded<SpotLightComponent>(Entity entity, SpotLightComponent& component)
 	{
 
 	}

@@ -105,6 +105,15 @@ namespace Locus
 					ImGui::CloseCurrentPopup();
 				}
 
+				if (ImGui::MenuItem("Spot Light"))
+				{
+					if (!m_SelectedEntity.HasComponent<SpotLightComponent>())
+						CommandHistory::AddCommand(new AddComponentCommand<SpotLightComponent>(m_ActiveScene, m_SelectedEntity));
+					else
+						LOCUS_CORE_WARN("This entity already has a Spot Light Component");
+					ImGui::CloseCurrentPopup();
+				}
+
 				if (ImGui::MenuItem("Rigidbody 2D"))
 				{
 					if (!m_SelectedEntity.HasComponent<Rigidbody2DComponent>())
@@ -408,6 +417,18 @@ namespace Locus
 				Widgets::DrawColorControl("Color", component.Color, { 1.0f, 1.0f, 1.0f, 1.0f });
 
 				Widgets::DrawValueControl("Intensity", component.Intensity, 1.0f, 0.1f, nullptr, -1.0f, -1.0f, 0.0f, FLT_MAX);
+			});
+
+		// --- Spot Light Component ----------------------------------------
+		DrawComponentUI<SpotLightComponent>("Spot Light", entity, [this](auto& component)
+			{
+				Widgets::DrawColorControl("Color", component.Color, { 1.0f, 1.0f, 1.0f, 1.0f });
+
+				Widgets::DrawValueControl("Intensity", component.Intensity, 1.0f, 0.1f, nullptr, -1.0f, -1.0f, 0.0f, FLT_MAX);
+
+				Widgets::DrawValueControl("CutOff", component.CutOff, 10.0f, 0.1f, nullptr, -1.0f, -1.0f, 0.0f, FLT_MAX);
+
+				Widgets::DrawValueControl("OuterCutOff", component.OuterCutOff, 20.0f, 0.1f, nullptr, -1.0f, -1.0f, 0.0f, FLT_MAX);
 			});
 
 		// --- Rigidbody2D Component ------------------------------------------

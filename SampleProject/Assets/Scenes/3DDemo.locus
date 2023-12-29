@@ -119,3 +119,24 @@ Entities:
     DirectionalLightComponent:
       Color: [1, 1, 1, 1]
       Intensity: 0.400000006
+  - Entity: 10373646394376031043
+    TagComponent:
+      Tag: SpotLight
+      Group: Default
+      Enabled: true
+    TransformComponent:
+      Self: 10373646394376031043
+      Parent: 0
+      LocalPosition: [0.560014188, 2.9963429, -0.361718476]
+      LocalRotation: [76.6962128, -59.5866623, 0]
+      LocalRotationQuat: [0.538430333, -0.389675409, 0.30827871, 0.680595338]
+      LocalScale: [0.360000014, 0.360000014, 0.360000014]
+    SpriteRendererComponent:
+      Color: [0.896551609, 0, 1, 1]
+      TexturePath: ""
+      TilingFactor: 1
+    SpotLightComponent:
+      Color: [0.898039222, 0, 1, 1]
+      Intensity: 181
+      CutOff: 15.1000004
+      OuterCutOff: 57.5

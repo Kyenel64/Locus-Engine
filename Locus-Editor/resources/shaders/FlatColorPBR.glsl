@@ -66,8 +66,20 @@ struct PointLight
 	vec2 padding;
 };
 
+struct SpotLight
+{
+	vec4 Position;
+	vec4 Direction;
+	vec4 Color;
+	float CutOff;
+	float OuterCutOff;
+	float Intensity;
+	bool Enabled;
+};
+
 #define MAX_DIRECTIONAL_LIGHTS 16
 #define MAX_POINT_LIGHTS 16
+#define MAX_SPOT_LIGHTS 16
 
 const float PI = 3.14159265359;
 
@@ -84,6 +96,7 @@ layout (std140, binding = 2) uniform Lighting
 {
 	DirectionalLight u_DirectionalLights[MAX_DIRECTIONAL_LIGHTS];
 	PointLight u_PointLights[MAX_POINT_LIGHTS];
+	SpotLight u_SpotLights[MAX_SPOT_LIGHTS];
 };
 
 layout (location = 0) out vec4 o_Color;
@@ -96,6 +109,7 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0);
 
 vec3 CalculatePointLight(PointLight pointLight, vec3 n, vec3 v, vec3 f0);
 vec3 CalculateDirectionalLight(DirectionalLight directionalLight, vec3 n, vec3 v, vec3 f0);
+vec3 CalculateSpotLight(SpotLight spotLight, vec3 n, vec3 v, vec3 f0);
 
 void main()
 {
@@ -121,6 +135,13 @@ void main()
 	{
 		if (u_DirectionalLights[i].Enabled)
 			Lo += CalculateDirectionalLight(u_DirectionalLights[i], N, vec3(1.0f), F0);
+	}
+
+	// Spot lights
+	for (int i = 0; i < MAX_SPOT_LIGHTS; i++) 
+	{
+		if (u_SpotLights[i].Enabled)
+			Lo += CalculateSpotLight(u_SpotLights[i], N, V, F0);
 	}
 	
 	// Temporary flat ambient color
@@ -215,17 +236,54 @@ vec3 CalculatePointLight(PointLight pointLight, vec3 n, vec3 v, vec3 f0)
 
 vec3 CalculateDirectionalLight(DirectionalLight directionalLight, vec3 n, vec3 v, vec3 f0)
 {
-	//// calculate per-light radiance
-	//vec3 L = normalize(pointLight.Position.xyz - v_FragPos);
-	//vec3 H = normalize(v + L);
-	//float distance = length(pointLight.Position.xyz - v_FragPos);
-	//float attenuation = 1.0 / (distance * distance);
-	//vec3 radiance = pointLight.Color.xyz * pointLight.Intensity * attenuation;
-
 	// calculate per-light radiance
 	vec3 L = normalize(-directionalLight.Direction.xyz);
 	vec3 H = normalize(v + L);
 	vec3 radiance = directionalLight.Color.xyz * directionalLight.Intensity;
+
+	// Cook-Torrance BRDF
+	float NDF = DistributionGGX(n, H, v_Roughness);
+	float G   = GeometrySmith(n, v, L, v_Roughness);
+	vec3 F    = fresnelSchlick(clamp(dot(H, v), 0.0, 1.0), f0);
+	
+	vec3 numerator    = NDF * G * F; 
+	float denominator = 4.0 * max(dot(n, v), 0.0) * max(dot(n, L), 0.0) + 0.0001; // + 0.0001 to prevent divide by zero
+	vec3 specular = numerator / denominator;
+	
+	// kS is equal to Fresnel
+	vec3 kS = F;
+	// for energy conservation, the diffuse and specular light can't
+	// be above 1.0 (unless the surface emits light); to preserve this
+	// relationship the diffuse component (kD) should equal 1.0 - kS.
+	vec3 kD = vec3(1.0) - kS;
+	// multiply kD by the inverse metalness such that only non-metals 
+	// have diffuse lighting, or a linear blend if partly metal (pure metals
+	// have no diffuse light).
+	kD *= 1.0 - v_Metallic;
+
+	// scale light by NdotL
+	float NdotL = max(dot(n, L), 0.0);
+
+	// add to outgoing radiance Lo
+	return (kD * v_Albedo.xyz / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+}
+
+vec3 CalculateSpotLight(SpotLight spotLight, vec3 n, vec3 v, vec3 f0)
+{
+	// calculate per-light radiance
+	vec3 L = normalize(spotLight.Position.xyz - v_FragPos);
+	vec3 H = normalize(v + L);
+	float distance = length(spotLight.Position.xyz - v_FragPos);
+	float attenuation = 1.0 / (distance * distance);
+
+	// spotlight calculations
+	float theta = dot(L, normalize(-spotLight.Direction.xyz));
+	float epsilon = spotLight.CutOff - spotLight.OuterCutOff;
+	float intensity = clamp((theta - spotLight.OuterCutOff) / epsilon, 0.0f, 1.0f);
+	if (theta < spotLight.OuterCutOff)
+		return vec3(0.0f);
+
+	vec3 radiance = spotLight.Color.xyz * spotLight.Intensity * attenuation * intensity;
 
 	// Cook-Torrance BRDF
 	float NDF = DistributionGGX(n, H, v_Roughness);

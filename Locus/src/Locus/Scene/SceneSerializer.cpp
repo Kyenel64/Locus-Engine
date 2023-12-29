@@ -263,6 +263,18 @@ namespace Locus
 			out << YAML::EndMap;
 		}
 
+		// --- Directional Light Component ---
+		if (entity.HasComponent<DirectionalLightComponent>())
+		{
+			auto& dlc = entity.GetComponent<DirectionalLightComponent>();
+
+			out << YAML::Key << "DirectionalLightComponent";
+			out << YAML::BeginMap; // Directional Light Component
+			out << YAML::Key << "Color" << YAML::Value << dlc.Color;
+			out << YAML::Key << "Intensity" << YAML::Value << dlc.Intensity;
+			out << YAML::EndMap;
+		}
+
 		// --- Camera Component ---
 		if (entity.HasComponent<CameraComponent>())
 		{
@@ -513,6 +525,15 @@ namespace Locus
 					auto& plc = deserializedEntity.AddComponent<PointLightComponent>();
 					plc.Color = pointLightComponent["Color"].as<glm::vec4>();
 					plc.Intensity = pointLightComponent["Intensity"].as<float>();
+				}
+
+				// --- Directional Light Component ---
+				auto directionalLightComponent = entity["DirectionalLightComponent"];
+				if (directionalLightComponent)
+				{
+					auto& dlc = deserializedEntity.AddComponent<DirectionalLightComponent>();
+					dlc.Color = directionalLightComponent["Color"].as<glm::vec4>();
+					dlc.Intensity = directionalLightComponent["Intensity"].as<float>();
 				}
 
 				// --- Camera Component ---

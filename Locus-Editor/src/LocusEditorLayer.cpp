@@ -468,7 +468,7 @@ namespace Locus
 		ImGuizmo::SetOrthographic(false);
 		ImGuizmo::SetDrawlist();
 		ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportSize.x, m_ViewportSize.y);
-		ImGuizmo::AllowAxisFlip(false);
+		ImGuizmo::AllowAxisFlip(true);
 
 		// Camera
 		const glm::mat4* proj = nullptr;
@@ -487,7 +487,6 @@ namespace Locus
 				auto& camera = primaryCameraEntity.GetComponent<CameraComponent>();
 				proj = &camera.Camera.GetProjection();
 				view = &glm::inverse(m_ActiveScene->GetWorldTransform(primaryCameraEntity));
-				//view = &primaryCameraEntity.GetComponent<TransformComponent>().GetLocalTransform();
 			}
 		}
 
@@ -1246,59 +1245,9 @@ namespace Locus
 		{
 			if (m_SelectedEntity.HasComponent<CameraComponent>())
 			{
-				SceneCamera& camera = m_SelectedEntity.GetComponent<CameraComponent>().Camera;
-				camera.SetViewportSize((uint32_t)(m_ViewportSize.x * 0.2f), (uint32_t)(m_ViewportSize.y * 0.2f));
 				m_ActiveCameraFramebuffer->Bind();
-				m_Framebuffer->ClearAttachmentInt(1, -1);
-
-				glm::mat4 cameraTransform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
-
-				// --- Rendering ---
-				Renderer::BeginScene(camera, cameraTransform);
-
-				// 2D
-				Renderer2D::BeginScene(camera, cameraTransform);
-				{ // Sprite
-					auto view = m_ActiveScene->GetEntitiesWith<SpriteRendererComponent>();
-					for (auto e : view)
-					{
-						Entity entity = Entity(e, m_ActiveScene.get());
-						bool enabled = entity.GetComponent<TagComponent>().Enabled;
-						auto& sprite = entity.GetComponent<SpriteRendererComponent>();
-						if (enabled)
-							Renderer2D::DrawSprite(m_ActiveScene->GetWorldTransform(entity), sprite, -1);
-					}
-				}
-
-				{ // Circle
-					auto view = m_ActiveScene->GetEntitiesWith<CircleRendererComponent>();
-					for (auto e : view)
-					{
-						Entity entity = Entity(e, m_ActiveScene.get());
-						bool enabled = entity.GetComponent<TagComponent>().Enabled;
-						auto& circle = entity.GetComponent<CircleRendererComponent>();
-						if (enabled)
-							Renderer2D::DrawCircle(m_ActiveScene->GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, -1);
-					}
-				}
-				Renderer2D::EndScene();
-
-				// 3D
-				Renderer3D::BeginScene(camera, cameraTransform, m_ActiveScene.get());
-				{ // Cube
-					auto view = m_ActiveScene->GetEntitiesWith<TransformComponent, CubeRendererComponent, TagComponent>();
-					for (auto e : view)
-					{
-						Entity entity = Entity(e, m_ActiveScene.get());
-						auto& cube = entity.GetComponent<CubeRendererComponent>();
-						if (entity.GetComponent<TagComponent>().Enabled)
-							Renderer3D::DrawCube(m_ActiveScene->GetWorldTransform(entity), cube, (int)e);
-					}
-				}
-				Renderer3D::EndScene();
-
-				Renderer::EndScene();
-
+				//m_Framebuffer->ClearAttachmentInt(1, -1);
+				m_ActiveScene->OnPreviewUpdate(m_SelectedEntity);
 				m_ActiveCameraFramebuffer->Unbind();
 			}
 		}

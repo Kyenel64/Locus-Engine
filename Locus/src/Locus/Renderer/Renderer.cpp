@@ -53,6 +53,7 @@ namespace Locus
 		RenderCommand::Clear();
 
 		s_Data.CameraBuffer.ViewProjection = camera.GetProjection() * glm::inverse(transform);
+		s_Data.CameraBuffer.CameraPosition = { transform[3].x, transform[3].y, transform[3].z, 1.0f };
 		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(RendererData::CameraData));
 	}
 

@@ -19,14 +19,25 @@ namespace Locus
 	{
 		glm::vec4 Position = glm::vec4(0.0f);
 		glm::vec4 Color = glm::vec4(0.0f);
-		float Intensity = 1.0f;
+		float Intensity = 0.0f;
+		bool Enabled = false;
+		glm::vec2 padding;
+	};
+
+	struct DirectionalLight
+	{
+		glm::vec4 Direction = glm::vec4(0.0f);
+		glm::vec4 Color = glm::vec4(0.0f);
+		float Intensity = 0.0f;
 		bool Enabled = false;
 		glm::vec2 padding;
 	};
 
 	struct SceneLighting
 	{
-		PointLight PointLights[16]; // TODO: Use deferred shading for unlimited light sources
+		// TODO: Use deferred shading for unlimited light sources
+		DirectionalLight DirectionalLights[16];
+		PointLight PointLights[16];
 	};
 
 	class Scene
@@ -54,6 +65,7 @@ namespace Locus
 		// On Update
 		void OnRuntimeUpdate(Timestep deltaTime);
 		void OnPhysicsUpdate(Timestep deltaTime, EditorCamera& camera);
+		void OnPreviewUpdate(Entity entity);
 
 		// On Start
 		void OnRuntimeStart();
@@ -91,6 +103,14 @@ namespace Locus
 		void SetSceneName(const std::string& name) { m_SceneName = name; }
 
 	private:
+
+		void ClearLightingData();
+		void ProcessPointLights();
+		void ProcessDirectionalLights();
+		void DrawSprites();
+		void DrawCircles();
+		void DrawCubes();
+
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);
 	private:

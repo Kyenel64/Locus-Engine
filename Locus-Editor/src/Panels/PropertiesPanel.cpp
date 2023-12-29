@@ -96,6 +96,15 @@ namespace Locus
 					ImGui::CloseCurrentPopup();
 				}
 
+				if (ImGui::MenuItem("Directional Light"))
+				{
+					if (!m_SelectedEntity.HasComponent<DirectionalLightComponent>())
+						CommandHistory::AddCommand(new AddComponentCommand<DirectionalLightComponent>(m_ActiveScene, m_SelectedEntity));
+					else
+						LOCUS_CORE_WARN("This entity already has a Directional Light Component");
+					ImGui::CloseCurrentPopup();
+				}
+
 				if (ImGui::MenuItem("Rigidbody 2D"))
 				{
 					if (!m_SelectedEntity.HasComponent<Rigidbody2DComponent>())
@@ -390,7 +399,15 @@ namespace Locus
 			{
 				Widgets::DrawColorControl("Color", component.Color, { 1.0f, 1.0f, 1.0f, 1.0f });
 
-				Widgets::DrawValueControl("Intensity", component.Intensity, 1.0f);
+				Widgets::DrawValueControl("Intensity", component.Intensity, 1.0f, 0.1f, nullptr, -1.0f, -1.0f, 0.0f, FLT_MAX);
+			});
+
+		// --- Directional Light Component ----------------------------------------
+		DrawComponentUI<DirectionalLightComponent>("Directional Light", entity, [this](auto& component)
+			{
+				Widgets::DrawColorControl("Color", component.Color, { 1.0f, 1.0f, 1.0f, 1.0f });
+
+				Widgets::DrawValueControl("Intensity", component.Intensity, 1.0f, 0.1f, nullptr, -1.0f, -1.0f, 0.0f, FLT_MAX);
 			});
 
 		// --- Rigidbody2D Component ------------------------------------------

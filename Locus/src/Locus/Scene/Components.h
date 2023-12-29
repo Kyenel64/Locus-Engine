@@ -8,6 +8,7 @@
 //	CircleRenderer
 //	CubeRenderer
 //	PointLight
+//	DirectionalLight
 //	Camera
 //	Rigidbody2D
 //	BoxCollider2D
@@ -159,6 +160,15 @@ namespace Locus
 		PointLightComponent(const PointLightComponent&) = default;
 	};
 
+	struct DirectionalLightComponent
+	{
+		glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
+		float Intensity = 1.0f;
+
+		DirectionalLightComponent() = default;
+		DirectionalLightComponent(const DirectionalLightComponent&) = default;
+	};
+
 	struct CameraComponent
 	{
 		SceneCamera Camera;
@@ -244,6 +254,7 @@ namespace Locus
 		CircleRenderer,
 		CubeRenderer,
 		PointLight,
+		DirectionalLight,
 		Camera,
 		Rigidbody2D,
 		BoxCollider2D,
@@ -262,6 +273,7 @@ namespace Locus
 		Ref<CircleRendererComponent> CircleRenderer;
 		Ref<CubeRendererComponent> CubeRenderer;
 		Ref<PointLightComponent> PointLight;
+		Ref<DirectionalLightComponent> DirectionalLight;
 		Ref<CameraComponent> Camera;
 		Ref<Rigidbody2DComponent> Rigidbody2D;
 		Ref<BoxCollider2DComponent> BoxCollider2D;

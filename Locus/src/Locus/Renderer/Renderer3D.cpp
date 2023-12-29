@@ -123,7 +123,7 @@ namespace Locus
 		s_R3DData.GridVertexBufferBase = new GridVertex[4];
 
 		// --- Initializations ------------------------------------------------
-		s_R3DData.CubeShader = Shader::Create("resources/shaders/3DCube.glsl");
+		s_R3DData.CubeShader = Shader::Create("resources/shaders/FlatColorPBR.glsl");
 		s_R3DData.GridShader = Shader::Create("resources/shaders/GridShader.glsl");
 
 		// Define cube vertices and normals

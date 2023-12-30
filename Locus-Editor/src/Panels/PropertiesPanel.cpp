@@ -15,9 +15,8 @@
 namespace Locus
 {
 	PropertiesPanel::PropertiesPanel()
-		: m_ProjectDirectory(Application::Get().GetProjectPath())
 	{
-
+		m_ProjectDirectory = Application::Get().GetProjectPath() / "Assets";
 	}
 
 	void PropertiesPanel::SetScene(const Ref<Scene>& context)
@@ -395,12 +394,18 @@ namespace Locus
 		DrawComponentUI<CubeRendererComponent>("Cube Renderer", entity, [this](auto& component) 
 			{
 				Widgets::DrawColorControl("Albedo", component.Albedo, { 0.5f, 0.5f, 0.5f, 1.0f });
+				Widgets::DrawTextureSlot("Albedo Texture", component.AlbedoTexture, m_ProjectDirectory);
+
+				Widgets::DrawTextureSlot("Normal Texture", component.NormalTexture, m_ProjectDirectory);
 
 				Widgets::DrawValueControl("Metallic", component.Metallic, 0.5f, 0.05f, nullptr, -1.0f, -1.0f, 0.0f, 1.0f);
+				Widgets::DrawTextureSlot("Metallic Texture", component.MetallicTexture, m_ProjectDirectory);
 
 				Widgets::DrawValueControl("Roughness", component.Roughness, 0.5f, 0.05f, nullptr, -1.0f, -1.0f, 0.0f, 1.0f);
+				Widgets::DrawTextureSlot("Roughness Texture", component.RoughnessTexture, m_ProjectDirectory);
 
 				Widgets::DrawValueControl("AO", component.AO, 0.5f, 0.05f, nullptr, -1.0f, -1.0f, 0.0f, 1.0f);
+				Widgets::DrawTextureSlot("AO Texture", component.AOTexture, m_ProjectDirectory);
 			});
 
 		// --- Point Light Component ----------------------------------------

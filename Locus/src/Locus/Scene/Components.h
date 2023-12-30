@@ -147,6 +147,11 @@ namespace Locus
 		float Metallic = 0.5f;
 		float Roughness = 0.5f;
 		float AO = 0.5f;
+		Ref<Texture2D> AlbedoTexture = nullptr;
+		Ref<Texture2D> NormalTexture = nullptr;
+		Ref<Texture2D> MetallicTexture = nullptr;
+		Ref<Texture2D> RoughnessTexture = nullptr;
+		Ref<Texture2D> AOTexture = nullptr;
 
 		CubeRendererComponent() = default;
 		CubeRendererComponent(const CubeRendererComponent&) = default;

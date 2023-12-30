@@ -39,11 +39,6 @@ namespace Locus
 		int EntityID;
 	};
 
-	struct GridVertex
-	{
-		int Index;
-	};
-
 	struct Renderer2DData
 	{
 		static const uint32_t MaxQuads = 20000; // Max quads for each draw call.
@@ -158,11 +153,6 @@ namespace Locus
 		s_Data.WhiteTexture = Texture2D::Create(1, 1);
 		uint64_t whiteTextureData = 0xfffffffff;
 		s_Data.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
-
-		// Create and initialize textures
-		int32_t samplers[s_Data.MaxTextureSlots] = {};
-		for (uint32_t i = 0; i < s_Data.MaxTextureSlots; i++)
-			samplers[i] = i;
 
 		s_Data.QuadShader = Shader::Create("resources/shaders/2DQuad.glsl");
 		s_Data.CircleShader = Shader::Create("resources/shaders/2DCircle.glsl");

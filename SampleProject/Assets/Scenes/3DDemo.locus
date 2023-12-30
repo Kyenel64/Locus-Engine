@@ -49,8 +49,8 @@ Entities:
       LocalRotationQuat: [0, 0, 0, 1]
       LocalScale: [11.0494995, 0.149778917, 11.0494995]
     CubeRendererComponent:
-      Albedo: [0.261419237, 0.628352523, 0.252785504, 1]
-      Metallic: 0.550000012
+      Albedo: [0.321839094, 0.321839273, 1, 1]
+      Metallic: 0.699999988
       Roughness: 0.25
       AO: 1
   - Entity: 12283204534066177914

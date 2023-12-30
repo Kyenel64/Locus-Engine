@@ -383,4 +383,42 @@ namespace Locus::Widgets
 		ImGui::PopID();
 		ImGui::PopStyleVar();
 	}
+
+	void Widgets::DrawTextureSlot(const std::string& name, Ref<Texture2D>& texture, const std::filesystem::path& projectDirectory, float labelWidth, float inputWidth)
+	{
+		// Sprite
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, ImGui::GetStyle().ItemSpacing.y });
+
+		Widgets::DrawControlLabel(name.c_str(), {ImGui::GetContentRegionAvail().x * 0.5f, 50.0f});
+
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+			if (ImGui::IsMouseDoubleClicked(0))
+				texture = nullptr;
+		}
+
+		ImGui::SameLine();
+
+		ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_FrameBg));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyleColorVec4(ImGuiCol_FrameBgHovered));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyleColorVec4(ImGuiCol_FrameBgActive));
+		if (texture == nullptr)
+			ImGui::Button("##EmptyTexture", { 50.0f, 50.0f });
+		else
+			ImGui::ImageButton((ImTextureID)(uint64_t)texture->GetRendererID(), { 50.0f, 50.0f }, { 0, 1 }, { 1, 0 });
+
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TEXTURE_ITEM_PATH"))
+			{
+				const wchar_t* path = (const wchar_t*)payload->Data;
+				std::filesystem::path texturePath = projectDirectory / path;
+				CommandHistory::AddCommand(new ChangeTextureCommand(Texture2D::Create(texturePath.string()), texture, std::string()));
+			}
+			ImGui::EndDragDropTarget();
+		}
+		ImGui::PopStyleColor(3);
+		ImGui::PopStyleVar();
+	}
 }

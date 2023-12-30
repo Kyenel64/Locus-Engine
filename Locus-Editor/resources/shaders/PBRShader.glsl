@@ -1,4 +1,4 @@
-// --- FlatColorPBR -----------------------------------------------------------
+// --- PBRShader --------------------------------------------------------------
 // PBR shader for non-textured 3D objects.
 
 // --- Vertex Shader ---
@@ -7,11 +7,17 @@
 
 layout (location = 0) in vec3 a_Position;
 layout (location = 1) in vec3 a_Normal;
-layout (location = 2) in vec4 a_Albedo;
-layout (location = 3) in float a_Metallic;
-layout (location = 4) in float a_Roughness;
-layout (location = 5) in float a_AO;
-layout (location = 6) in int a_EntityID;
+layout (location = 2) in vec2 a_TexCoord;
+layout (location = 3) in vec4 a_Albedo;
+layout (location = 4) in float a_Metallic;
+layout (location = 5) in float a_Roughness;
+layout (location = 6) in float a_AO;
+layout (location = 7) in int a_AlbedoTexIndex;
+layout (location = 8) in int a_NormalTexIndex;
+layout (location = 9) in int a_MetallicTexIndex;
+layout (location = 10) in int a_RoughnessTexIndex;
+layout (location = 11) in int a_AOTexIndex;
+layout (location = 12) in int a_EntityID;
 
 layout(std140, binding = 0) uniform Camera
 {
@@ -22,21 +28,35 @@ layout(std140, binding = 0) uniform Camera
 
 layout (location = 0) out vec3 v_FragPos;
 layout (location = 1) out vec3 v_Normal;
-layout (location = 2) out flat vec4 v_Albedo;
-layout (location = 3) out flat float v_Metallic;
-layout (location = 4) out flat float v_Roughness;
-layout (location = 5) out flat float v_AO;
-layout (location = 6) out flat int v_EntityID;
-layout (location = 7) out flat vec3 v_ViewPos;
+layout (location = 2) out vec2 v_TexCoord;
+layout (location = 3) out flat vec4 v_Albedo;
+layout (location = 4) out flat float v_Metallic;
+layout (location = 5) out flat float v_Roughness;
+layout (location = 6) out flat float v_AO;
+layout (location = 7) out flat int v_AlbedoTexIndex;
+layout (location = 8) out flat int v_NormalTexIndex;
+layout (location = 9) out flat int v_MetallicTexIndex;
+layout (location = 10) out flat int v_RoughnessTexIndex;
+layout (location = 11) out flat int v_AOTexIndex;
+layout (location = 12) out flat int v_EntityID;
+layout (location = 13) out flat vec3 v_ViewPos;
 
 void main()
 {
 	v_FragPos = a_Position;
 	v_Normal = a_Normal;
+	v_TexCoord = a_TexCoord;
 	v_Albedo = a_Albedo;
 	v_Metallic = a_Metallic;
 	v_Roughness = a_Roughness;
 	v_AO = a_AO;
+
+	v_AlbedoTexIndex = a_AlbedoTexIndex;
+	v_NormalTexIndex = a_NormalTexIndex;
+	v_MetallicTexIndex = a_MetallicTexIndex;
+	v_RoughnessTexIndex = a_RoughnessTexIndex;
+	v_AOTexIndex = a_AOTexIndex;
+
 	v_EntityID = a_EntityID;
 	v_ViewPos = u_CameraPosition.xyz;
 
@@ -86,12 +106,18 @@ const float PI = 3.14159265359;
 
 layout (location = 0) in vec3 v_FragPos;
 layout (location = 1) in vec3 v_Normal;
-layout (location = 2) in flat vec4 v_Albedo;
-layout (location = 3) in flat float v_Metallic;
-layout (location = 4) in flat float v_Roughness;
-layout (location = 5) in flat float v_AO;
-layout (location = 6) in flat int v_EntityID;
-layout (location = 7) in flat vec3 v_ViewPos;
+layout (location = 2) in vec2 v_TexCoord;
+layout (location = 3) in flat vec4 v_Albedo;
+layout (location = 4) in flat float v_Metallic;
+layout (location = 5) in flat float v_Roughness;
+layout (location = 6) in flat float v_AO;
+layout (location = 7) in flat int v_AlbedoTexIndex;
+layout (location = 8) in flat int v_NormalTexIndex;
+layout (location = 9) in flat int v_MetallicTexIndex;
+layout (location = 10) in flat int v_RoughnessTexIndex;
+layout (location = 11) in flat int v_AOTexIndex;
+layout (location = 12) in flat int v_EntityID;
+layout (location = 13) in flat vec3 v_ViewPos;
 
 layout (std140, binding = 2) uniform Lighting
 {
@@ -100,6 +126,8 @@ layout (std140, binding = 2) uniform Lighting
 	SpotLight u_SpotLights[MAX_SPOT_LIGHTS];
 };
 
+layout(binding = 0) uniform sampler2D u_Textures[32];
+
 layout (location = 0) out vec4 o_Color;
 layout (location = 1) out int o_EntityID;
 
@@ -107,20 +135,51 @@ float DistributionGGX(vec3 N, vec3 H, float roughness);
 float GeometrySchlickGGX(float NdotV, float roughness);
 float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
 vec3 fresnelSchlick(float cosTheta, vec3 F0);
+vec3 getNormalFromMap();
 
-vec3 CalculatePointLight(PointLight pointLight, vec3 n, vec3 v, vec3 f0);
-vec3 CalculateDirectionalLight(DirectionalLight directionalLight, vec3 n, vec3 v, vec3 f0);
-vec3 CalculateSpotLight(SpotLight spotLight, vec3 n, vec3 v, vec3 f0);
+vec3 CalculatePointLight(PointLight pointLight, vec3 n, vec3 v, vec3 f0, vec3 albedoVal, float metallicVal, float roughnessVal);
+vec3 CalculateDirectionalLight(DirectionalLight directionalLight, vec3 n, vec3 v, vec3 f0, vec3 albedoVal, float metallicVal, float roughnessVal);
+vec3 CalculateSpotLight(SpotLight spotLight, vec3 n, vec3 v, vec3 f0, vec3 albedoVal, float metallicVal, float roughnessVal);
 
 void main()
 {
-	vec3 N = normalize(v_Normal);
+	// Albedo
+	vec3 albedo;
+	if (v_AlbedoTexIndex != 0)
+		albedo = pow(texture(u_Textures[v_AlbedoTexIndex], v_TexCoord).xyz, vec3(2.2f));
+	else
+		albedo = v_Albedo.xyz;
+	// Normal
+	vec3 N;
+	if (v_NormalTexIndex != 0)
+		N = getNormalFromMap();
+	else
+		N = normalize(v_Normal);
+	// Metallic
+	float metallic;
+	if (v_MetallicTexIndex != 0)
+		metallic = texture(u_Textures[v_MetallicTexIndex], v_TexCoord).r;
+	else
+		metallic = v_Metallic;
+	// Roughness
+	float roughness;
+	if (v_RoughnessTexIndex != 0)
+		roughness = texture(u_Textures[v_RoughnessTexIndex], v_TexCoord).r;
+	else
+		roughness = v_Roughness;
+	// AO
+	float ao;
+	if (v_AOTexIndex != 0)
+		ao = texture(u_Textures[v_AOTexIndex], v_TexCoord).r;
+	else
+		ao = v_AO;
+
 	vec3 V = normalize(v_ViewPos - v_FragPos);
 
 	// calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
 	// of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
 	vec3 F0 = vec3(0.04); 
-	F0 = mix(F0, v_Albedo.xyz, v_Metallic);
+	F0 = mix(F0, albedo, metallic);
 
 	vec3 Lo = vec3(0.0);
 
@@ -128,25 +187,25 @@ void main()
 	for (int i = 0; i < MAX_POINT_LIGHTS; i++) 
 	{
 		if (u_PointLights[i].Enabled)
-			Lo += CalculatePointLight(u_PointLights[i], N, V, F0);
+			Lo += CalculatePointLight(u_PointLights[i], N, V, F0, albedo, metallic, roughness);
 	}
 
 	// Directional lights
 	for (int i = 0; i < MAX_DIRECTIONAL_LIGHTS; i++) 
 	{
 		if (u_DirectionalLights[i].Enabled)
-			Lo += CalculateDirectionalLight(u_DirectionalLights[i], N, vec3(1.0f), F0);
+			Lo += CalculateDirectionalLight(u_DirectionalLights[i], N, vec3(1.0f), F0, albedo, metallic, roughness);
 	}
 
 	// Spot lights
 	for (int i = 0; i < MAX_SPOT_LIGHTS; i++) 
 	{
 		if (u_SpotLights[i].Enabled)
-			Lo += CalculateSpotLight(u_SpotLights[i], N, V, F0);
+			Lo += CalculateSpotLight(u_SpotLights[i], N, V, F0, albedo, metallic, roughness);
 	}
 	
 	// Temporary flat ambient color
-	vec3 ambient = vec3(0.03) * v_Albedo.xyz * v_AO;
+	vec3 ambient = vec3(0.03) * albedo * ao;
 	vec3 color = ambient + Lo;
 
 	// HDR tonemapping
@@ -199,7 +258,24 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 	return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
-vec3 CalculatePointLight(PointLight pointLight, vec3 n, vec3 v, vec3 f0)
+vec3 getNormalFromMap()
+{
+	vec3 tangentNormal = texture(u_Textures[v_NormalTexIndex], v_TexCoord).xyz * 2.0 - 1.0;
+
+	vec3 Q1  = dFdx(v_FragPos);
+	vec3 Q2  = dFdy(v_FragPos);
+	vec2 st1 = dFdx(v_TexCoord);
+	vec2 st2 = dFdy(v_TexCoord);
+
+	vec3 N   = normalize(v_Normal);
+	vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
+	vec3 B  = -normalize(cross(N, T));
+	mat3 TBN = mat3(T, B, N);
+
+	return normalize(TBN * tangentNormal);
+}
+
+vec3 CalculatePointLight(PointLight pointLight, vec3 n, vec3 v, vec3 f0, vec3 albedoVal, float metallicVal, float roughnessVal)
 {
 	// calculate per-light radiance
 	vec3 L = normalize(pointLight.Position.xyz - v_FragPos);
@@ -209,8 +285,8 @@ vec3 CalculatePointLight(PointLight pointLight, vec3 n, vec3 v, vec3 f0)
 	vec3 radiance = pointLight.Color.xyz * pointLight.Intensity * attenuation;
 
 	// Cook-Torrance BRDF
-	float NDF = DistributionGGX(n, H, v_Roughness);
-	float G   = GeometrySmith(n, v, L, v_Roughness);
+	float NDF = DistributionGGX(n, H, roughnessVal);
+	float G   = GeometrySmith(n, v, L, roughnessVal);
 	vec3 F    = fresnelSchlick(clamp(dot(H, v), 0.0, 1.0), f0);
 	
 	vec3 numerator    = NDF * G * F; 
@@ -226,16 +302,16 @@ vec3 CalculatePointLight(PointLight pointLight, vec3 n, vec3 v, vec3 f0)
 	// multiply kD by the inverse metalness such that only non-metals 
 	// have diffuse lighting, or a linear blend if partly metal (pure metals
 	// have no diffuse light).
-	kD *= 1.0 - v_Metallic;
+	kD *= 1.0 - metallicVal;
 
 	// scale light by NdotL
 	float NdotL = max(dot(n, L), 0.0);
 
 	// add to outgoing radiance Lo
-	return (kD * v_Albedo.xyz / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+	return (kD * albedoVal / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
 }
 
-vec3 CalculateDirectionalLight(DirectionalLight directionalLight, vec3 n, vec3 v, vec3 f0)
+vec3 CalculateDirectionalLight(DirectionalLight directionalLight, vec3 n, vec3 v, vec3 f0, vec3 albedoVal, float metallicVal, float roughnessVal)
 {
 	// calculate per-light radiance
 	vec3 L = normalize(-directionalLight.Direction.xyz);
@@ -243,8 +319,8 @@ vec3 CalculateDirectionalLight(DirectionalLight directionalLight, vec3 n, vec3 v
 	vec3 radiance = directionalLight.Color.xyz * directionalLight.Intensity;
 
 	// Cook-Torrance BRDF
-	float NDF = DistributionGGX(n, H, v_Roughness);
-	float G   = GeometrySmith(n, v, L, v_Roughness);
+	float NDF = DistributionGGX(n, H, roughnessVal);
+	float G   = GeometrySmith(n, v, L, roughnessVal);
 	vec3 F    = fresnelSchlick(clamp(dot(H, v), 0.0, 1.0), f0);
 	
 	vec3 numerator    = NDF * G * F; 
@@ -260,16 +336,16 @@ vec3 CalculateDirectionalLight(DirectionalLight directionalLight, vec3 n, vec3 v
 	// multiply kD by the inverse metalness such that only non-metals 
 	// have diffuse lighting, or a linear blend if partly metal (pure metals
 	// have no diffuse light).
-	kD *= 1.0 - v_Metallic;
+	kD *= 1.0 - metallicVal;
 
 	// scale light by NdotL
 	float NdotL = max(dot(n, L), 0.0);
 
 	// add to outgoing radiance Lo
-	return (kD * v_Albedo.xyz / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+	return (kD * albedoVal / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
 }
 
-vec3 CalculateSpotLight(SpotLight spotLight, vec3 n, vec3 v, vec3 f0)
+vec3 CalculateSpotLight(SpotLight spotLight, vec3 n, vec3 v, vec3 f0, vec3 albedoVal, float metallicVal, float roughnessVal)
 {
 	// calculate per-light radiance
 	vec3 L = normalize(spotLight.Position.xyz - v_FragPos);
@@ -287,8 +363,8 @@ vec3 CalculateSpotLight(SpotLight spotLight, vec3 n, vec3 v, vec3 f0)
 	vec3 radiance = spotLight.Color.xyz * spotLight.Intensity * attenuation * intensity;
 
 	// Cook-Torrance BRDF
-	float NDF = DistributionGGX(n, H, v_Roughness);
-	float G   = GeometrySmith(n, v, L, v_Roughness);
+	float NDF = DistributionGGX(n, H, roughnessVal);
+	float G   = GeometrySmith(n, v, L, roughnessVal);
 	vec3 F    = fresnelSchlick(clamp(dot(H, v), 0.0, 1.0), f0);
 	
 	vec3 numerator    = NDF * G * F; 
@@ -304,11 +380,11 @@ vec3 CalculateSpotLight(SpotLight spotLight, vec3 n, vec3 v, vec3 f0)
 	// multiply kD by the inverse metalness such that only non-metals 
 	// have diffuse lighting, or a linear blend if partly metal (pure metals
 	// have no diffuse light).
-	kD *= 1.0 - v_Metallic;
+	kD *= 1.0 - metallicVal;
 
 	// scale light by NdotL
 	float NdotL = max(dot(n, L), 0.0);
 
 	// add to outgoing radiance Lo
-	return (kD * v_Albedo.xyz / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+	return (kD * albedoVal / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
 }

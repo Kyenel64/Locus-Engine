@@ -3,6 +3,8 @@
 // Also manages globally used uniform buffers.
 #pragma once
 
+#include "Locus/Renderer/Shader.h"
+#include "Locus/Renderer/Texture.h"
 #include "Locus/Renderer/Framebuffer.h"
 #include "Locus/Renderer/RenderCommand.h"
 #include "Locus/Renderer/EditorCamera.h"
@@ -23,10 +25,12 @@ namespace Locus
 
 		static void EndScene();
 
-		static void DrawOutlinePostProcess(const glm::vec2& viewportSize, Ref<Framebuffer> frameBuffer);
+		// Renders a post process effect to the texture
+		static void DrawPostProcess(Ref<Texture> texture, Ref<Shader> shader);
 
 		static void OnWindowResize(uint32_t width, uint32_t height);
 
 		inline static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
+		static std::vector<int>& GetUBOBindings();
 	};
 }

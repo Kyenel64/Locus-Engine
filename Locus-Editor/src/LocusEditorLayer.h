@@ -102,10 +102,12 @@ namespace Locus
 		glm::vec4 m_CollisionMeshColor;
 		glm::vec4 m_FocusOutlineColor;
 		bool m_ShowAllCollisionMesh = false;
+		glm::vec2 m_ActiveCameraViewportSize;
 		Ref<Framebuffer> m_ActiveCameraFramebuffer;
 		Ref<Framebuffer> m_MaskFramebuffer;
+		Ref<Texture> m_MaskTexture;
 		Ref<Shader> m_MaskShader;
-		glm::vec2 m_ActiveCameraViewportSize;
+		Ref<Shader> OutlinePostProcessShader;
 
 		// Entity
 		Entity m_HoveredEntity;

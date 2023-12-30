@@ -39,6 +39,7 @@ namespace Locus
 
 		// Shaders
 		m_MaskShader = Shader::Create("resources/shaders/MaskShader.glsl");
+		OutlinePostProcessShader = Shader::Create("resources/shaders/OutlinePostProcessShader.glsl");
 	}
 
 	LocusEditorLayer::~LocusEditorLayer()
@@ -70,6 +71,7 @@ namespace Locus
 		maskFramebufferSpecs.Width = 1920;
 		maskFramebufferSpecs.Height = 1080;
 		m_MaskFramebuffer = Framebuffer::Create(maskFramebufferSpecs);
+		m_MaskTexture = Texture2D::Create(m_MaskFramebuffer->GetSpecification().Width, m_MaskFramebuffer->GetSpecification().Height, m_MaskFramebuffer->GetColorAttachmentRendererID(0));
 
 		// Scene
 		m_EditorScene = CreateRef<Scene>();
@@ -225,7 +227,7 @@ namespace Locus
 	void LocusEditorLayer::OnRenderOverlay()
 	{
 		if (m_SelectedEntity.IsValid())
-			Renderer::DrawOutlinePostProcess(m_ViewportSize, m_MaskFramebuffer);
+			Renderer::DrawPostProcess(m_MaskTexture, OutlinePostProcessShader);
 	}
 
 	bool LocusEditorLayer::OnWindowClose(WindowCloseEvent& e)

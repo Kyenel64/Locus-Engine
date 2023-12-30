@@ -10,7 +10,7 @@
 
 namespace Locus
 {
-	struct OutlineVertex
+	struct ScreenVertex
 	{
 		glm::vec2 Position;
 		glm::vec2 TexCoords;
@@ -28,10 +28,13 @@ namespace Locus
 		CameraData CameraBuffer;
 		Ref<UniformBuffer> CameraUniformBuffer;
 
-		// Outline
-		Ref<VertexArray> OutlineVA;
-		Ref<VertexBuffer> OutlineVB;
-		Ref<Shader> OutlinePostProcessShader;
+		// Screen
+		Ref<VertexArray> ScreenVA;
+		Ref<VertexBuffer> ScreenVB;
+		ScreenVertex ScreenVertexBuffer[6];
+
+		// Debug
+		std::vector<int> UBOBindings;
 	};
 
 	static RendererData s_Data;
@@ -44,16 +47,33 @@ namespace Locus
 		Renderer2D::Init();
 		Renderer3D::Init();
 
+		// --- Screen ---
 		// Vertex array
-		s_Data.OutlineVA = VertexArray::Create();
+		s_Data.ScreenVA = VertexArray::Create();
 		// Vertex buffer
-		s_Data.OutlineVB = VertexBuffer::Create(6 * sizeof(OutlineVertex));
-		s_Data.OutlineVB->SetLayout({
+		s_Data.ScreenVB = VertexBuffer::Create(6 * sizeof(ScreenVertex));
+		s_Data.ScreenVB->SetLayout({
 			{ ShaderDataType::Float2, "a_Position" },
 			{ ShaderDataType::Float2, "a_TexCoord"}
 			});
-		s_Data.OutlineVA->AddVertexBuffer(s_Data.OutlineVB);
-		s_Data.OutlinePostProcessShader = Shader::Create("resources/shaders/OutlinePostProcessShader.glsl");
+		s_Data.ScreenVA->AddVertexBuffer(s_Data.ScreenVB);
+		// Define screen vertex data
+#pragma region Screen vertex definitions
+		s_Data.ScreenVertexBuffer[0].Position = { -1.0f, -1.0f };
+		s_Data.ScreenVertexBuffer[0].TexCoords = { 0, 0 };
+		s_Data.ScreenVertexBuffer[1].Position = { -1.0f, 1.0f };
+		s_Data.ScreenVertexBuffer[1].TexCoords = { 0, 1 };
+		s_Data.ScreenVertexBuffer[2].Position = { 1.0f, 1.0f };
+		s_Data.ScreenVertexBuffer[2].TexCoords = { 1, 1 };
+		s_Data.ScreenVertexBuffer[3].Position = { -1.0f, -1.0f };
+		s_Data.ScreenVertexBuffer[3].TexCoords = { 0, 0 };
+		s_Data.ScreenVertexBuffer[4].Position = { 1.0f, 1.0f };
+		s_Data.ScreenVertexBuffer[4].TexCoords = { 1, 1 };
+		s_Data.ScreenVertexBuffer[5].Position = { 1.0f, -1.0f };
+		s_Data.ScreenVertexBuffer[5].TexCoords = { 1, 0 };
+
+#pragma endregion Screen vertex definitions
+		s_Data.ScreenVB->SetData(s_Data.ScreenVertexBuffer, sizeof(ScreenVertex) * 6);
 
 		// Initialize uniform buffer object used in both Renderer2D and Renderer3D
 		s_Data.CameraUniformBuffer = UniformBuffer::Create(sizeof(RendererData::CameraData), 0);
@@ -90,29 +110,14 @@ namespace Locus
 
 	}
 
-	void Renderer::DrawOutlinePostProcess(const glm::vec2& viewportSize, Ref<Framebuffer> frameBuffer)
+	void Renderer::DrawPostProcess(Ref<Texture> texture, Ref<Shader> shader)
 	{
-		s_Data.CameraBuffer.ViewportSize = viewportSize;
+		s_Data.CameraBuffer.ViewportSize = { texture->GetWidth(), texture->GetHeight() };
 		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(RendererData::CameraData));
 
-		if (frameBuffer)
-			frameBuffer->BindTexture(0);
-
-		OutlineVertex vertexBuffer[6];
-
-		glm::vec2 vertexPos[6] = { { -1.0f, -1.0f, }, { -1.0f, 1.0f }, { 1.0f, 1.0f }, { -1.0f, -1.0f }, { 1.0f, 1.0f }, { 1.0f, -1.0f} };
-		glm::vec2 texCoords[6] = { { 0, 0 }, { 0, 1 }, { 1, 1 }, { 0, 0 }, { 1, 1 }, { 1, 0 } };
-
-		for (uint32_t i = 0; i < 6; i++)
-		{
-			vertexBuffer[i].Position = vertexPos[i];
-			vertexBuffer[i].TexCoords = texCoords[i];
-		}
-
-		s_Data.OutlineVB->SetData(vertexBuffer, sizeof(OutlineVertex) * 6);
-
-		s_Data.OutlinePostProcessShader->Bind();
-		RenderCommand::DrawArray(s_Data.OutlineVA, 6);
+		texture->Bind();
+		shader->Bind();
+		RenderCommand::DrawArray(s_Data.ScreenVA, 6);
 
 		RendererStats::GetStats().DrawCalls++;
 	}
@@ -120,5 +125,10 @@ namespace Locus
 	void Renderer::OnWindowResize(uint32_t width, uint32_t height)
 	{
 		RenderCommand::Resize(0, 0, width, height);
+	}
+
+	std::vector<int>& Renderer::GetUBOBindings()
+	{
+		return s_Data.UBOBindings;
 	}
 }

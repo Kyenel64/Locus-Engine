@@ -22,8 +22,10 @@ namespace Locus
 
 		static void FlushAndReset();
 
+		// TODO: Take in optional shader for custom shaders
 		static void DrawCube(const glm::mat4& transform, const CubeRendererComponent& crc, int entityID);
 
+		static void DrawCubeMask(const glm::mat4& transform);
 		static void DrawGrid();
 	};
 }

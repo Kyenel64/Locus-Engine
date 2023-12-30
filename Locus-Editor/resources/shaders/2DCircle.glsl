@@ -15,6 +15,7 @@ layout(std140, binding = 0) uniform Camera
 {
 	mat4 u_ViewProjection;
 	vec4 u_CameraPosition;
+	vec2 u_ViewportSize;
 };
 
 struct VertexOutput
@@ -66,8 +67,7 @@ void main()
 	if (circle == 0.0f)
 		discard;
 
+	// --- Outputs ---
 	o_Color = Input.Color;
-	o_Color.a *= circle;
-
 	o_EntityID = v_EntityID;
 }

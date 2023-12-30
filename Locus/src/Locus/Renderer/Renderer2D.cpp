@@ -266,6 +266,27 @@ namespace Locus
 		}
 	}
 
+	void Renderer2D::DrawQuadMask(const glm::mat4& transform)
+	{
+		LOCUS_PROFILE_FUNCTION();
+
+		s_Data.QuadIndexCount = 0;
+		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
+
+		for (uint32_t i = 0; i < 4; i++)
+		{
+			s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[i];
+			s_Data.QuadVertexBufferPtr++;
+		}
+
+		s_Data.QuadVB->SetData(s_Data.QuadVertexBufferBase, sizeof(QuadVertex) * 4);
+
+		RenderCommand::DrawIndexed(s_Data.QuadVA, 6);
+
+		RendererStats::GetStats().QuadCount++;
+		RendererStats::GetStats().DrawCalls++;
+	}
+
 	void Renderer2D::FlushAndReset()
 	{
 		EndScene();

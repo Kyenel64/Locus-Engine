@@ -40,6 +40,7 @@ namespace Locus
 
 		const std::filesystem::path& GetProjectPath() const { return m_ProjectPath; }
 		const std::string& GetProjectName() const { return m_ProjectName; }
+		inline uint32_t GetFPS() const { return m_FPS; }
 
 		inline bool IsRunning() const { return m_Running; }
 	private:
@@ -59,5 +60,6 @@ namespace Locus
 		LayerStack m_LayerStack;
 
 		float m_LastFrameTime = 0.0f;
+		uint32_t m_FPS = 0;
 	};
 }

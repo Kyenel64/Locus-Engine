@@ -348,6 +348,23 @@ namespace Locus
 		RendererStats::GetStats().CubeCount++;
 	}
 
+	void Renderer3D::DrawCubeMask(const glm::mat4& transform)
+	{
+		s_R3DData.CubeVertexCount = 0;
+		s_R3DData.CubeVertexBufferPtr = s_R3DData.CubeVertexBufferBase;
+
+		for (uint32_t i = 0; i < 36; i++)
+		{
+			s_R3DData.CubeVertexBufferPtr->WorldPosition = transform * s_R3DData.CubeVertexPositions[i];
+			s_R3DData.CubeVertexBufferPtr++;
+		}
+		s_R3DData.CubeVB->SetData(s_R3DData.CubeVertexBufferBase, sizeof(CubeVertex) * 36);
+
+		RenderCommand::DrawArray(s_R3DData.CubeVA, 36);
+
+		RendererStats::GetStats().DrawCalls++;
+	}
+
 	void Renderer3D::DrawGrid()
 	{
 		LOCUS_PROFILE_FUNCTION();

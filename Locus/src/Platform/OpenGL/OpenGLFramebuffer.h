@@ -19,6 +19,7 @@ namespace Locus
 
 		virtual void Resize(uint32_t width, uint32_t height) override;
 		virtual int ReadPixel(uint32_t attachmentIndex, int x, int y) override;
+		virtual void BindTexture(uint32_t attachmentIndex) override;
 
 		virtual void ClearAttachmentInt(uint32_t attachmentIndex, int value) override;
 		virtual void ClearAttachmentColor(uint32_t attachmentIndex, const glm::vec4& value) override;

@@ -45,6 +45,7 @@ namespace Locus
 		inline float GetNearClip() const { return m_NearClip; }
 		inline float GetFarClip() const { return m_FarClip; }
 		inline const glm::vec4& GetBackgroundColor() const { return m_BackgroundColor; }
+		inline glm::vec2 GetViewportSize() const { return { m_ViewportWidth, m_ViewportHeight }; }
 
 
 

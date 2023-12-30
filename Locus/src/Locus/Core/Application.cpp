@@ -20,6 +20,7 @@ namespace Locus
 
 		m_Window = Window::Create(name);
 		m_Window->SetEventCallback(LOCUS_BIND_EVENT_FN(Application::OnEvent));
+		m_Window->SetVSync(false);
 
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
@@ -90,6 +91,18 @@ namespace Locus
 
 			// Call window OnUpdate() after all layers
 			m_Window->OnUpdate();
+
+			// Calculate FPS
+			static int frames = 0;
+			static float timer = 1.0f;
+			timer -= timestep;
+			frames++;
+			if (timer <= 0.0f)
+			{
+				m_FPS = frames;
+				timer = 1.0f;
+				frames = 0;
+			}
 		}
 	}
 

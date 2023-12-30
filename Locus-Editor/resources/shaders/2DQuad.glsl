@@ -15,6 +15,7 @@ layout(std140, binding = 0) uniform Camera
 {
 	mat4 u_ViewProjection;
 	vec4 u_CameraPosition;
+	vec2 u_ViewportSize;
 };
 
 struct VertexOutput
@@ -106,7 +107,7 @@ void main()
 	if (texColor.a == 0.0) // TOOD: Implement order independent transparency
 		discard;
 
+	// --- Outputs ---
 	o_Color = texColor;
-
 	o_EntityID = v_EntityID;
 }

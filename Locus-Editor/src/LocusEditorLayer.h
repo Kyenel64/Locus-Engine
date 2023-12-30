@@ -62,9 +62,9 @@ namespace Locus
 
 		// Overlay
 		void OnRenderOverlay();
-		void DrawCollisionMesh();
 		// Draws to a framebuffer. Rendering is separate.
 		void DrawActiveCameraView();
+		void DrawToMaskFramebuffer();
 
 	private:
 		glm::vec2 m_WindowSize;
@@ -103,6 +103,8 @@ namespace Locus
 		glm::vec4 m_FocusOutlineColor;
 		bool m_ShowAllCollisionMesh = false;
 		Ref<Framebuffer> m_ActiveCameraFramebuffer;
+		Ref<Framebuffer> m_MaskFramebuffer;
+		Ref<Shader> m_MaskShader;
 		glm::vec2 m_ActiveCameraViewportSize;
 
 		// Entity

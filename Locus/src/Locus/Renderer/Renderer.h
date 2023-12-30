@@ -3,6 +3,7 @@
 // Also manages globally used uniform buffers.
 #pragma once
 
+#include "Locus/Renderer/Framebuffer.h"
 #include "Locus/Renderer/RenderCommand.h"
 #include "Locus/Renderer/EditorCamera.h"
 #include "Locus/Scene/SceneCamera.h"
@@ -21,6 +22,8 @@ namespace Locus
 		static void BeginScene(const SceneCamera& camera, const glm::mat4& transform);
 
 		static void EndScene();
+
+		static void DrawOutlinePostProcess(const glm::vec2& viewportSize, Ref<Framebuffer> frameBuffer);
 
 		static void OnWindowResize(uint32_t width, uint32_t height);
 

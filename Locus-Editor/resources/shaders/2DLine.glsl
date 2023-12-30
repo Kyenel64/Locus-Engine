@@ -12,6 +12,7 @@ layout(std140, binding = 0) uniform Camera
 {
 	mat4 u_ViewProjection;
 	vec4 u_CameraPosition;
+	vec2 u_ViewportSize;
 };
 
 layout(location = 0) out vec4 v_Color;

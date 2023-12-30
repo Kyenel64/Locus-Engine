@@ -143,7 +143,7 @@ namespace Locus
 	struct CubeRendererComponent
 	{
 		// TODO: Put in material
-		glm::vec4 Albedo = { 0.5f, 0.5f, 0.5f, 1.0f };
+		glm::vec4 Albedo = { 1.0f, 1.0f, 1.0f, 1.0f };
 		float Metallic = 0.5f;
 		float Roughness = 0.5f;
 		float AO = 0.5f;

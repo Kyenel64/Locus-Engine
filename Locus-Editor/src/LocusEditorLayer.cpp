@@ -27,6 +27,7 @@ namespace Locus
 
 		CommandHistory::Init(this);
 
+		// Textures
 		m_PlayIcon = Texture2D::Create("resources/icons/PlayIcon.png");
 		m_StopIcon = Texture2D::Create("resources/icons/StopIcon.png");
 		m_PauseIcon = Texture2D::Create("resources/icons/PauseIcon.png");
@@ -36,6 +37,8 @@ namespace Locus
 		m_ScaleIcon = Texture2D::Create("resources/icons/ScaleIcon.png");
 		m_RotateIcon = Texture2D::Create("resources/icons/RotateIcon.png");
 
+		// Shaders
+		m_MaskShader = Shader::Create("resources/shaders/MaskShader.glsl");
 	}
 
 	LocusEditorLayer::~LocusEditorLayer()
@@ -54,11 +57,19 @@ namespace Locus
 		framebufferSpecs.Height = 1080;
 		m_Framebuffer = Framebuffer::Create(framebufferSpecs);
 
+		// Camera preview
 		FramebufferSpecification activeCameraFramebufferSpecs;
 		activeCameraFramebufferSpecs.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth };
 		activeCameraFramebufferSpecs.Width = 640;
 		activeCameraFramebufferSpecs.Height = 360;
 		m_ActiveCameraFramebuffer = Framebuffer::Create(activeCameraFramebufferSpecs);
+
+		// Mask framebuffer for outline post processing
+		FramebufferSpecification maskFramebufferSpecs;
+		maskFramebufferSpecs.Attachments = { FramebufferTextureFormat::RED_INT };
+		maskFramebufferSpecs.Width = 1920;
+		maskFramebufferSpecs.Height = 1080;
+		m_MaskFramebuffer = Framebuffer::Create(maskFramebufferSpecs);
 
 		// Scene
 		m_EditorScene = CreateRef<Scene>();
@@ -94,6 +105,7 @@ namespace Locus
 			(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
 		{
 			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_MaskFramebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_ActiveCameraViewportSize = m_ViewportSize * 0.2f;
@@ -183,6 +195,9 @@ namespace Locus
 		// Make sure this is after unbinding main framebuffer as it uses a separate framebuffer.
 		DrawActiveCameraView();
 
+		// Render to the mask frame buffer for post processing effects like outlines.
+		DrawToMaskFramebuffer();
+
 		Input::ProcessKeys();
 
 		RendererStats::StatsEndFrame();
@@ -209,40 +224,8 @@ namespace Locus
 
 	void LocusEditorLayer::OnRenderOverlay()
 	{
-		if (m_SceneState == SceneState::Edit)
-		{
-			Renderer2D::BeginScene(m_EditorCamera);
-		}
-		else if (m_SceneState == SceneState::Play)
-		{
-			Entity primaryCamera = m_ActiveScene->GetPrimaryCameraEntity();
-			if (primaryCamera)
-			{
-				glm::mat4 transform = m_ActiveScene->GetWorldTransform(primaryCamera);
-				Renderer2D::BeginScene(primaryCamera.GetComponent<CameraComponent>().Camera, transform);
-			}
-		}
-
-
 		if (m_SelectedEntity.IsValid())
-		{
-			// Display focus outline
-			auto& tc = m_SelectedEntity.GetComponent<TransformComponent>();
-			glm::mat4 transform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
-			transform *= glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0.001f));
-			if (m_SelectedEntity.HasComponent<SpriteRendererComponent>())
-			{
-				Renderer2D::DrawRect(transform, m_FocusOutlineColor);
-			}
-			else if (m_SelectedEntity.HasComponent<CircleRendererComponent>())
-			{
-				Renderer2D::DrawDebugCircle(transform, m_FocusOutlineColor);
-			}
-		}
-
-		DrawCollisionMesh();
-
-		Renderer2D::EndScene();
+			Renderer::DrawOutlinePostProcess(m_ViewportSize, m_MaskFramebuffer);
 	}
 
 	bool LocusEditorLayer::OnWindowClose(WindowCloseEvent& e)
@@ -1085,14 +1068,15 @@ namespace Locus
 		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_TabBarAlignLeft | ImGuiWindowFlags_DockedWindowBorder;
 		ImGui::Begin("Debug", false, windowFlags);
 
+		// FPS
+		ImGui::Text("FPS: %i", Application::Get().GetFPS());
+
 		auto& stats = RendererStats::GetStats();
 		ImGui::Text("Renderer Stats:");
 		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
 		ImGui::Text("Quads: %d", stats.QuadCount);
 		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
 		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
-		ImGui::Text("Frame Time: %f", stats.FrameTime);
-		ImGui::Text("FPS: %f", stats.FramesPerSecond);
 
 		std::string name = "None";
 		if (m_HoveredEntity.IsValid())
@@ -1159,86 +1143,6 @@ namespace Locus
 		ImGui::End();
 	}
 
-	void LocusEditorLayer::DrawCollisionMesh()
-	{
-		// Draw single collision mesh for selected entity
-		if (m_SelectedEntity.IsValid() && !m_ShowAllCollisionMesh)
-		{
-			// Box collider
-			if (m_SelectedEntity.HasComponent<BoxCollider2DComponent>())
-			{
-				auto& b2D = m_SelectedEntity.GetComponent<BoxCollider2DComponent>();
-				auto& tc = m_SelectedEntity.GetComponent<TransformComponent>();
-
-				// Combine the box collider offset and size to the transform
-				glm::mat4 transform = tc.GetLocalTransform();
-				transform *= glm::translate(glm::mat4(1.0f), { b2D.Offset.x, b2D.Offset.y, 0.001f })
-					* glm::scale(glm::mat4(1.0f), { b2D.Size.x, b2D.Size.y, 1.0f });
-
-				Renderer2D::DrawRect(transform, m_CollisionMeshColor);
-			}
-			// Circle collider
-			else if (m_SelectedEntity.HasComponent<CircleCollider2DComponent>())
-			{
-				auto& c2D = m_SelectedEntity.GetComponent<CircleCollider2DComponent>();
-				auto& tc = m_SelectedEntity.GetComponent<TransformComponent>();
-
-				// Combine the box collider offset and size to the transform and
-				// calculate the circle radius for the larger scale axis (x or y).
-				float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
-				glm::mat4 transform = glm::translate(glm::mat4(1.0f), tc.LocalPosition)
-					* glm::rotate(glm::mat4(1.0f), tc.LocalRotation.z, glm::vec3(0, 0, 1))
-					* glm::scale(glm::mat4(1.0f), { maxScale, maxScale, 1.0f });
-				transform *= glm::translate(glm::mat4(1.0f), { c2D.Offset.x, c2D.Offset.y, 0.001f })
-					* glm::scale(glm::mat4(1.0f), { c2D.Radius * 2.0f, c2D.Radius * 2.0f, 1.0f });
-
-				Renderer2D::DrawDebugCircle(transform, m_CollisionMeshColor);
-			}
-		}
-		// Draw collision mesh for all entities in the scene
-		else if (m_ShowAllCollisionMesh)
-		{
-			// Box collider
-			{
-				auto view = m_ActiveScene->GetEntitiesWith<BoxCollider2DComponent>();
-				for (auto e : view)
-				{
-					Entity entity = Entity(e, m_ActiveScene.get());
-					auto& b2D = entity.GetComponent<BoxCollider2DComponent>();
-					auto& tc = entity.GetComponent<TransformComponent>();
-
-					// Circle colliders never becomes ovals. 
-					// Radius of collision circle is always equal to the larger scale axis.
-					glm::mat4 transform = tc.GetLocalTransform();
-					transform *= glm::translate(glm::mat4(1.0f), { b2D.Offset.x, b2D.Offset.y, 0.001f })
-						* glm::scale(glm::mat4(1.0f), { b2D.Size.x, b2D.Size.y, 1.0f });
-					Renderer2D::DrawRect(transform, m_CollisionMeshColor);
-				}
-			}
-			// Circle collider
-			{
-				auto view = m_ActiveScene->GetEntitiesWith<CircleCollider2DComponent>();
-				for (auto e : view)
-				{
-					Entity entity = Entity(e, m_ActiveScene.get());
-					auto& c2D = entity.GetComponent<CircleCollider2DComponent>();
-					auto& tc = entity.GetComponent<TransformComponent>();
-
-					// Circle colliders never becomes ovals. 
-					// Radius of collision circle is always equal to the larger scale axis.
-					float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
-					glm::mat4 transform = glm::translate(glm::mat4(1.0f), tc.LocalPosition)
-						* glm::rotate(glm::mat4(1.0f), tc.LocalRotation.z, glm::vec3(0, 0, 1))
-						* glm::scale(glm::mat4(1.0f), { maxScale, maxScale, 1.0f });
-					transform *= glm::translate(glm::mat4(1.0f), { c2D.Offset.x, c2D.Offset.y, 0.001f })
-						* glm::scale(glm::mat4(1.0f), { c2D.Radius * 2.0f, c2D.Radius * 2.0f, 1.0f });
-
-					Renderer2D::DrawDebugCircle(transform, m_CollisionMeshColor);
-				}
-			}
-		}
-	}
-
 	void LocusEditorLayer::DrawActiveCameraView()
 	{
 		if (m_SelectedEntity.IsValid())
@@ -1246,10 +1150,40 @@ namespace Locus
 			if (m_SelectedEntity.HasComponent<CameraComponent>())
 			{
 				m_ActiveCameraFramebuffer->Bind();
-				//m_Framebuffer->ClearAttachmentInt(1, -1);
 				m_ActiveScene->OnPreviewUpdate(m_SelectedEntity);
 				m_ActiveCameraFramebuffer->Unbind();
 			}
+		}
+	}
+
+	void LocusEditorLayer::DrawToMaskFramebuffer()
+	{
+		// Mask framebuffer
+		m_MaskFramebuffer->ClearAttachmentInt(0, 0);
+		if (m_SelectedEntity.IsValid())
+		{
+			m_MaskFramebuffer->Bind();
+			if (m_SceneState == SceneState::Play || m_SceneState == SceneState::Pause)
+			{
+				if (m_SelectedEntity.HasComponent<CameraComponent>())
+					Renderer::BeginScene(m_SelectedEntity.GetComponent<CameraComponent>().Camera, m_ActiveScene->GetWorldTransform(m_SelectedEntity));
+			}
+			else
+			{
+				Renderer::BeginScene(m_EditorCamera);
+			}
+			
+			m_MaskFramebuffer->ClearAttachmentInt(0, 0);
+
+			m_MaskShader->Bind();
+			if (m_SelectedEntity.HasComponent<CubeRendererComponent>())
+				Renderer3D::DrawCubeMask(m_ActiveScene->GetWorldTransform(m_SelectedEntity));
+			if (m_SelectedEntity.HasComponent<SpriteRendererComponent>() || m_SelectedEntity.HasComponent<CircleRendererComponent>())
+				Renderer2D::DrawQuadMask(m_ActiveScene->GetWorldTransform(m_SelectedEntity));
+			m_MaskShader->Unbind();
+
+			Renderer::EndScene();
+			m_MaskFramebuffer->Unbind();
 		}
 	}
 }

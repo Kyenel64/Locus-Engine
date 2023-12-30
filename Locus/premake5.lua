@@ -41,6 +41,7 @@ project "Locus"
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.Box2D}",
 		"%{IncludeDir.VulkanSDK}",
+		"%{IncludeDir.assimp}",
 		"%{IncludeDir.mono}"
 	}
 
@@ -70,6 +71,7 @@ project "Locus"
 			"%{Library.WinMM}",
 			"%{Library.WinVersion}",
 			"%{Library.BCrypt}",
+			"%{Library.assimp}"
 		}
 
 	filter "configurations:Debug"

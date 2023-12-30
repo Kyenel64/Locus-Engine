@@ -15,6 +15,7 @@ IncludeDir["shaderc"] = "%{wks.location}/Locus/vendor/shaderc/include"
 IncludeDir["SPIRV_Cross"] = "%{wks.location}/Locus/vendor/SPIRV-Cross"
 IncludeDir["Box2D"] = "%{wks.location}/Locus/vendor/Box2D/include"
 IncludeDir["mono"] = "%{wks.location}/Locus/vendor/mono/include"
+IncludeDir["assimp"] = "%{wks.location}/Locus/vendor/assimp/include"
 IncludeDir["VulkanSDK"] = "%{VULKAN_SDK}/Include"
 
 LibraryDir = {}
@@ -39,6 +40,8 @@ Library["SPIRV_Cross_GLSL_Release"] = "%{LibraryDir.VulkanSDK}/spirv-cross-glsl.
 
 Library["monoDebug"] = "%{LibraryDir.monoDebug}/libmono-static-sgen.lib"
 Library["monoRelease"] = "%{LibraryDir.monoRelease}/libmono-static-sgen.lib"
+
+Library["assimp"] = "%{wks.location}/Locus/vendor/assimp/lib/x64/assimp-vc143-mt.lib"
 
 -- Windows
 Library["WinSock"] = "Ws2_32.lib"

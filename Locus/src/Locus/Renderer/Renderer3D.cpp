@@ -79,6 +79,8 @@ namespace Locus
 		std::array<Ref<Texture2D>, MaxTextureSlots> TextureSlots;
 		uint32_t TextureSlotIndex = 1;
 		Ref<Texture2D> WhiteTexture;
+
+		Ref<Shader> TestShader;
 	};
 
 	static Renderer3DData s_R3DData;
@@ -123,6 +125,7 @@ namespace Locus
 		// --- Initializations ------------------------------------------------
 		s_R3DData.PBRShader = Shader::Create("resources/shaders/PBRShader.glsl");
 		s_R3DData.GridShader = Shader::Create("resources/shaders/GridShader.glsl");
+		s_R3DData.TestShader = Shader::Create("resources/shaders/TestShader.glsl");
 
 		// Define cube vertices and normals
 #pragma region Cube vertex definitions
@@ -518,6 +521,13 @@ namespace Locus
 		RenderCommand::DrawArray(s_R3DData.CubeVA, 36);
 
 		RendererStats::GetStats().DrawCalls++;
+	}
+
+	// TODO: Implement
+	void Renderer3D::DrawModel(const glm::mat4& transform, Ref<Model> model, int entityID)
+	{
+		s_R3DData.PBRShader->Bind();
+		RenderCommand::DrawIndexed(model->GetMeshes()[0].GetVertexArray(), model->GetMeshes()[0].GetIndices().size());
 	}
 
 	void Renderer3D::DrawGrid()

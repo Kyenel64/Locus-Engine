@@ -23,6 +23,8 @@
 #include "Locus/Core/Log.h"
 #include "Locus/Debug/Instrumentor.h"
 
+#include <glm/glm.hpp>
+
 #ifdef LOCUS_PLATFORM_WINDOWS
 	#include <Windows.h>
 #endif

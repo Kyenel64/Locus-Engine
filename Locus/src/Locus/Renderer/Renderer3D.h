@@ -2,6 +2,7 @@
 
 #include "Locus/Renderer/EditorCamera.h"
 #include "Locus/Scene/Components.h"
+#include "Locus/Renderer/Model.h"
 
 namespace Locus
 {
@@ -24,6 +25,8 @@ namespace Locus
 
 		// TODO: Take in optional shader for custom shaders
 		static void DrawCube(const glm::mat4& transform, const CubeRendererComponent& crc, int entityID);
+
+		static void DrawModel(const glm::mat4& transform, Ref<Model> model, int entityID);
 
 		static void DrawCubeMask(const glm::mat4& transform);
 		static void DrawGrid();

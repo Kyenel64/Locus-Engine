@@ -7,6 +7,8 @@
 #include "Locus/Core/Timestep.h"
 #include "Locus/Core/UUID.h"
 #include "Locus/Renderer/EditorCamera.h"
+#include "Locus/Renderer/Model.h"
+#include "Locus/Renderer/Material.h"
 
 class b2World;
 
@@ -137,6 +139,9 @@ namespace Locus
 
 		// Lighting
 		SceneLighting m_SceneLighting;
+
+		Ref<Model> m_TestModel;
+		Ref<Material> m_TestMaterial;
 
 	public:
 		friend class Entity;

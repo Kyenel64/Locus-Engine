@@ -8,16 +8,8 @@
 layout (location = 0) in vec3 a_Position;
 layout (location = 1) in vec3 a_Normal;
 layout (location = 2) in vec2 a_TexCoord;
-layout (location = 3) in vec4 a_Albedo;
-layout (location = 4) in float a_Metallic;
-layout (location = 5) in float a_Roughness;
-layout (location = 6) in float a_AO;
-layout (location = 7) in int a_AlbedoTexIndex;
-layout (location = 8) in int a_NormalTexIndex;
-layout (location = 9) in int a_MetallicTexIndex;
-layout (location = 10) in int a_RoughnessTexIndex;
-layout (location = 11) in int a_AOTexIndex;
-layout (location = 12) in int a_EntityID;
+layout (location = 3) in int a_MaterialIndex;
+layout (location = 4) in int a_EntityID;
 
 layout(std140, binding = 0) uniform Camera
 {
@@ -29,35 +21,17 @@ layout(std140, binding = 0) uniform Camera
 layout (location = 0) out vec3 v_FragPos;
 layout (location = 1) out vec3 v_Normal;
 layout (location = 2) out vec2 v_TexCoord;
-layout (location = 3) out flat vec4 v_Albedo;
-layout (location = 4) out flat float v_Metallic;
-layout (location = 5) out flat float v_Roughness;
-layout (location = 6) out flat float v_AO;
-layout (location = 7) out flat int v_AlbedoTexIndex;
-layout (location = 8) out flat int v_NormalTexIndex;
-layout (location = 9) out flat int v_MetallicTexIndex;
-layout (location = 10) out flat int v_RoughnessTexIndex;
-layout (location = 11) out flat int v_AOTexIndex;
-layout (location = 12) out flat int v_EntityID;
-layout (location = 13) out flat vec3 v_ViewPos;
+layout (location = 3) out flat int v_MaterialIndex;
+layout (location = 4) out flat int v_EntityID;
+layout (location = 5) out flat vec3 v_ViewPos;
 
 void main()
 {
 	v_FragPos = a_Position;
 	v_Normal = a_Normal;
 	v_TexCoord = a_TexCoord;
-	v_Albedo = a_Albedo;
-	v_Metallic = a_Metallic;
-	v_Roughness = a_Roughness;
-	v_AO = a_AO;
-
-	v_AlbedoTexIndex = a_AlbedoTexIndex;
-	v_NormalTexIndex = a_NormalTexIndex;
-	v_MetallicTexIndex = a_MetallicTexIndex;
-	v_RoughnessTexIndex = a_RoughnessTexIndex;
-	v_AOTexIndex = a_AOTexIndex;
-
 	v_EntityID = a_EntityID;
+	v_MaterialIndex = a_MaterialIndex;
 	v_ViewPos = u_CameraPosition.xyz;
 
 	gl_Position = u_ViewProjection * vec4(a_Position, 1.0f);
@@ -98,6 +72,20 @@ struct SpotLight
 	bool Enabled;
 };
 
+struct MaterialData
+{
+	vec4 Albedo;
+	float Metallic;
+	float Roughness;
+	float AO;
+
+	int AlbedoTexIndex;
+	int NormalMapTexIndex;
+	int MetallicTexIndex;
+	int RoughnessTexIndex;
+	int AOTexIndex;
+};
+
 #define MAX_DIRECTIONAL_LIGHTS 16
 #define MAX_POINT_LIGHTS 16
 #define MAX_SPOT_LIGHTS 16
@@ -107,17 +95,9 @@ const float PI = 3.14159265359;
 layout (location = 0) in vec3 v_FragPos;
 layout (location = 1) in vec3 v_Normal;
 layout (location = 2) in vec2 v_TexCoord;
-layout (location = 3) in flat vec4 v_Albedo;
-layout (location = 4) in flat float v_Metallic;
-layout (location = 5) in flat float v_Roughness;
-layout (location = 6) in flat float v_AO;
-layout (location = 7) in flat int v_AlbedoTexIndex;
-layout (location = 8) in flat int v_NormalTexIndex;
-layout (location = 9) in flat int v_MetallicTexIndex;
-layout (location = 10) in flat int v_RoughnessTexIndex;
-layout (location = 11) in flat int v_AOTexIndex;
-layout (location = 12) in flat int v_EntityID;
-layout (location = 13) in flat vec3 v_ViewPos;
+layout (location = 3) in flat int v_MaterialIndex;
+layout (location = 4) in flat int v_EntityID;
+layout (location = 5) in flat vec3 v_ViewPos;
 
 layout (std140, binding = 2) uniform Lighting
 {
@@ -126,17 +106,23 @@ layout (std140, binding = 2) uniform Lighting
 	SpotLight u_SpotLights[MAX_SPOT_LIGHTS];
 };
 
+layout (std140, binding = 3) uniform Material
+{
+	MaterialData u_Material[32];
+};
+
+
 layout(binding = 0) uniform sampler2D u_Textures[32];
 
 layout (location = 0) out vec4 o_Color;
 layout (location = 1) out int o_EntityID;
 
+// Declarations
 float DistributionGGX(vec3 N, vec3 H, float roughness);
 float GeometrySchlickGGX(float NdotV, float roughness);
 float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
 vec3 fresnelSchlick(float cosTheta, vec3 F0);
 vec3 getNormalFromMap();
-
 vec3 CalculatePointLight(PointLight pointLight, vec3 n, vec3 v, vec3 f0, vec3 albedoVal, float metallicVal, float roughnessVal);
 vec3 CalculateDirectionalLight(DirectionalLight directionalLight, vec3 n, vec3 v, vec3 f0, vec3 albedoVal, float metallicVal, float roughnessVal);
 vec3 CalculateSpotLight(SpotLight spotLight, vec3 n, vec3 v, vec3 f0, vec3 albedoVal, float metallicVal, float roughnessVal);
@@ -145,34 +131,34 @@ void main()
 {
 	// Albedo
 	vec3 albedo;
-	if (v_AlbedoTexIndex != 0)
-		albedo = pow(texture(u_Textures[v_AlbedoTexIndex], v_TexCoord).xyz, vec3(2.2f));
+	if (u_Material[v_MaterialIndex].AlbedoTexIndex != 0)
+		albedo = pow(texture(u_Textures[u_Material[v_MaterialIndex].AlbedoTexIndex], v_TexCoord).xyz, vec3(2.2f));
 	else
-		albedo = v_Albedo.xyz;
+		albedo = u_Material[v_MaterialIndex].Albedo.xyz;
 	// Normal
 	vec3 N;
-	if (v_NormalTexIndex != 0)
+	if (u_Material[v_MaterialIndex].NormalMapTexIndex != 0)
 		N = getNormalFromMap();
 	else
 		N = normalize(v_Normal);
 	// Metallic
 	float metallic;
-	if (v_MetallicTexIndex != 0)
-		metallic = texture(u_Textures[v_MetallicTexIndex], v_TexCoord).r;
+	if (u_Material[v_MaterialIndex].MetallicTexIndex != 0)
+		metallic = texture(u_Textures[u_Material[v_MaterialIndex].MetallicTexIndex], v_TexCoord).r;
 	else
-		metallic = v_Metallic;
+		metallic = u_Material[v_MaterialIndex].Metallic;
 	// Roughness
 	float roughness;
-	if (v_RoughnessTexIndex != 0)
-		roughness = texture(u_Textures[v_RoughnessTexIndex], v_TexCoord).r;
+	if (u_Material[v_MaterialIndex].RoughnessTexIndex != 0)
+		roughness = texture(u_Textures[u_Material[v_MaterialIndex].RoughnessTexIndex], v_TexCoord).r;
 	else
-		roughness = v_Roughness;
+		roughness = u_Material[v_MaterialIndex].Roughness;
 	// AO
 	float ao;
-	if (v_AOTexIndex != 0)
-		ao = texture(u_Textures[v_AOTexIndex], v_TexCoord).r;
+	if (u_Material[v_MaterialIndex].AOTexIndex != 0)
+		ao = texture(u_Textures[u_Material[v_MaterialIndex].AOTexIndex], v_TexCoord).r;
 	else
-		ao = v_AO;
+		ao = u_Material[v_MaterialIndex].AO;
 
 	vec3 V = normalize(v_ViewPos - v_FragPos);
 
@@ -260,7 +246,7 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 
 vec3 getNormalFromMap()
 {
-	vec3 tangentNormal = texture(u_Textures[v_NormalTexIndex], v_TexCoord).xyz * 2.0 - 1.0;
+	vec3 tangentNormal = texture(u_Textures[u_Material[v_MaterialIndex].NormalMapTexIndex], v_TexCoord).xyz * 2.0 - 1.0;
 
 	vec3 Q1  = dFdx(v_FragPos);
 	vec3 Q2  = dFdy(v_FragPos);

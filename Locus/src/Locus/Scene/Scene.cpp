@@ -24,6 +24,17 @@ namespace Locus
 	Scene::Scene()
 	{
 		m_ContactListener = CreateRef<ContactListener2D>();
+		m_TestModel = CreateRef<Model>("C:/Users/Kye/Desktop/Locus-Engine/SampleProject/Assets/Models/backpack.obj");
+		m_TestMaterial = CreateRef<Material>();
+		m_TestMaterial->m_Albedo = { 1.0f, 0.0f, 0.0f };
+		m_TestMaterial->m_Metallic = 0.5f;
+		m_TestMaterial->m_Roughness = 0.2f;
+		m_TestMaterial->m_AO = 0.5f;
+		m_TestMaterial->m_AlbedoTexture = Texture2D::Create("C:/Users/Kye/Desktop/Locus-Engine/SampleProject/Assets/Textures/Backpack/diffuse.jpg");
+		m_TestMaterial->m_NormalMapTexture = Texture2D::Create("C:/Users/Kye/Desktop/Locus-Engine/SampleProject/Assets/Textures/Backpack/normal.png");;
+		m_TestMaterial->m_MetallicTexture = Texture2D::Create("C:/Users/Kye/Desktop/Locus-Engine/SampleProject/Assets/Textures/Backpack/specular.jpg");;
+		m_TestMaterial->m_RoughnessTexture = Texture2D::Create("C:/Users/Kye/Desktop/Locus-Engine/SampleProject/Assets/Textures/Backpack/roughness.jpg");;
+		m_TestMaterial->m_AOTexture = Texture2D::Create("C:/Users/Kye/Desktop/Locus-Engine/SampleProject/Assets/Textures/Backpack/ao.jpg");;
 	}
 
 	Entity Scene::CreateEntity(const std::string& name)
@@ -142,6 +153,8 @@ namespace Locus
 		// 3D
 		Renderer3D::BeginScene(camera, this);
 		DrawCubes();
+		//Renderer3D::DrawMesh(glm::mat4(1.0f), m_TestModel->GetMesh(78), m_TestMaterial, -1);
+		Renderer3D::DrawModel(glm::mat4(1.0f), m_TestModel, m_TestMaterial, -1);
 		Renderer3D::EndScene();
 		// Grid
 		if (camera.GetGridVisibility())

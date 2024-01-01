@@ -19,19 +19,16 @@ namespace Locus
 		glm::vec3 WorldPosition;
 		glm::vec3 Normal;
 		glm::vec2 TexCoords;
+		int MaterialUniformIndex;
+		int EntityID;
+	};
 
-		// TODO: Probably put material data in uniform buffer
-		glm::vec4 Albedo; 
-		float Metallic;
-		float Roughness;
-		float AO;
-
-		int AlbedoTexIndex;
-		int NormalTexIndex;
-		int MetallicTexIndex;
-		int RoughnessTexIndex;
-		int AOTexIndex;
-
+	struct MeshVertex
+	{
+		glm::vec3 WorldPosition;
+		glm::vec3 Normal;
+		glm::vec2 TexCoords;
+		int MaterialUniformIndex;
 		int EntityID;
 	};
 
@@ -41,6 +38,19 @@ namespace Locus
 		static const uint32_t MaxVertices = MaxCubes * 8;
 		static const uint32_t MaxIndices = MaxCubes * 36;
 		static const uint32_t MaxTextureSlots = 32;
+		static const uint32_t MaxMaterialSlots = 32;
+
+		// Mesh
+		Ref<VertexArray> MeshVA;
+		Ref<VertexBuffer> MeshVB;
+		Ref<IndexBuffer> MeshIB;
+
+		uint32_t MeshVertexCount = 0;
+		MeshVertex* MeshVertexBufferBase = nullptr;
+		MeshVertex* MeshVertexBufferPtr = nullptr;
+		uint32_t MeshIndexCount = 0;
+		uint32_t* MeshIndexBufferBase = nullptr;
+		uint32_t* MeshIndexBufferPtr = nullptr;
 
 		// Cube
 		Ref<VertexArray> CubeVA;
@@ -80,7 +90,36 @@ namespace Locus
 		uint32_t TextureSlotIndex = 1;
 		Ref<Texture2D> WhiteTexture;
 
-		Ref<Shader> TestShader;
+		// Material
+		struct MaterialData
+		{
+			Ref<Material> Material;
+
+			int AlbedoTexIndex;
+			int NormalMapTexIndex;
+			int MetallicTexIndex;
+			int RoughnessTexIndex;
+			int AOTexIndex;
+		};
+
+		struct MaterialBufferData
+		{
+			glm::vec4 Albedo;
+			float Metallic;
+			float Roughness;
+			float AO;
+
+			int AlbedoTexIndex;
+			int NormalMapTexIndex;
+			int MetallicTexIndex;
+			int RoughnessTexIndex;
+			int AOTexIndex;
+		};
+
+		MaterialBufferData MaterialBuffer[MaxMaterialSlots];
+		Ref<UniformBuffer> MaterialUniformBuffer;
+		std::array<MaterialData, MaxMaterialSlots> MaterialSlots;
+		uint32_t MaterialSlotIndex = 0;
 	};
 
 	static Renderer3DData s_R3DData;
@@ -88,6 +127,22 @@ namespace Locus
 	void Renderer3D::Init()
 	{
 		LOCUS_PROFILE_FUNCTION();
+
+		// --- Mesh -----------------------------------------------------------
+		s_R3DData.MeshVA = VertexArray::Create();
+		s_R3DData.MeshIB = IndexBuffer::Create(nullptr, s_R3DData.MaxIndices);
+		s_R3DData.MeshVB = VertexBuffer::Create(s_R3DData.MaxVertices * sizeof(MeshVertex));
+		s_R3DData.MeshVB->SetLayout({
+			{ ShaderDataType::Float3, "a_Position" },
+			{ ShaderDataType::Float3, "a_Normal"},
+			{ ShaderDataType::Float2, "a_TexCoord"},
+			{ ShaderDataType::Int, "a_MaterialUniformIndex" },
+			{ ShaderDataType::Int, "a_EntityID" }
+			});
+		s_R3DData.MeshVA->AddVertexBuffer(s_R3DData.MeshVB);
+		s_R3DData.MeshVA->SetIndexBuffer(s_R3DData.MeshIB);
+		s_R3DData.MeshVertexBufferBase = new MeshVertex[s_R3DData.MaxVertices];
+		s_R3DData.MeshIndexBufferBase = new uint32_t[s_R3DData.MaxIndices];
 
 		// --- Cube -----------------------------------------------------------
 		// Vertex array
@@ -98,15 +153,7 @@ namespace Locus
 			{ ShaderDataType::Float3, "a_Position" },
 			{ ShaderDataType::Float3, "a_Normal"},
 			{ ShaderDataType::Float2, "a_TexCoord"},
-			{ ShaderDataType::Float4, "a_Albedo" },
-			{ ShaderDataType::Float, "a_Metallic" },
-			{ ShaderDataType::Float, "a_Roughness" },
-			{ ShaderDataType::Float, "a_AO"},
-			{ ShaderDataType::Int, "a_AlbedoTexIndex"},
-			{ ShaderDataType::Int, "a_NormalTexIndex"},
-			{ ShaderDataType::Int, "a_MetallicTexIndex"},
-			{ ShaderDataType::Int, "a_RoughnessTexIndex"},
-			{ ShaderDataType::Int, "a_AOTexIndex"},
+			{ ShaderDataType::Int, "a_MaterialUniformIndex" },
 			{ ShaderDataType::Int, "a_EntityID" }
 		});
 		s_R3DData.CubeVA->AddVertexBuffer(s_R3DData.CubeVB);
@@ -125,7 +172,6 @@ namespace Locus
 		// --- Initializations ------------------------------------------------
 		s_R3DData.PBRShader = Shader::Create("resources/shaders/PBRShader.glsl");
 		s_R3DData.GridShader = Shader::Create("resources/shaders/GridShader.glsl");
-		s_R3DData.TestShader = Shader::Create("resources/shaders/TestShader.glsl");
 
 		// Define cube vertices and normals
 #pragma region Cube vertex definitions
@@ -270,6 +316,7 @@ namespace Locus
 		// Uniform buffers
 		s_R3DData.GridUniformBuffer = UniformBuffer::Create(sizeof(Renderer3DData::GridData), 1);
 		s_R3DData.SceneLightingUniformBuffer = UniformBuffer::Create(sizeof(SceneLighting), 2);
+		s_R3DData.MaterialUniformBuffer = UniformBuffer::Create(sizeof(Renderer3DData::MaterialBufferData) * s_R3DData.MaxMaterialSlots, 3);
 
 		// White Texture
 		s_R3DData.WhiteTexture = Texture2D::Create(1, 1);
@@ -283,6 +330,8 @@ namespace Locus
 		LOCUS_PROFILE_FUNCTION();
 
 		delete[] s_R3DData.CubeVertexBufferBase;
+		delete[] s_R3DData.MeshVertexBufferBase;
+		delete[] s_R3DData.MeshIndexBufferBase;
 	}
 
 	void Renderer3D::BeginScene(const EditorCamera& camera, Scene* scene)
@@ -328,25 +377,60 @@ namespace Locus
 		s_R3DData.CubeVertexCount = 0;
 		s_R3DData.CubeVertexBufferPtr = s_R3DData.CubeVertexBufferBase;
 
+		s_R3DData.MeshVertexCount = 0;
+		s_R3DData.MeshVertexBufferPtr = s_R3DData.MeshVertexBufferBase;
+
+		s_R3DData.MeshIndexCount = 0;
+		s_R3DData.MeshIndexBufferPtr = s_R3DData.MeshIndexBufferBase;
+
 		s_R3DData.TextureSlotIndex = 1;
+		s_R3DData.MaterialSlotIndex = 0;
 	}
 
 	void Renderer3D::Flush()
 	{
 		LOCUS_PROFILE_FUNCTION();
 
+		// Bind textures and uniforms
+		for (uint32_t i = 0; i < s_R3DData.TextureSlotIndex; i++)
+		{
+			s_R3DData.TextureSlots[i]->Bind(i);
+		}
+		for (uint32_t i = 0; i < s_R3DData.MaterialSlotIndex; i++)
+		{
+			s_R3DData.MaterialBuffer[i].Albedo = glm::vec4(s_R3DData.MaterialSlots[i].Material->m_Albedo, 1.0f);
+			s_R3DData.MaterialBuffer[i].Metallic = s_R3DData.MaterialSlots[i].Material->m_Metallic;
+			s_R3DData.MaterialBuffer[i].Roughness = s_R3DData.MaterialSlots[i].Material->m_Roughness;
+			s_R3DData.MaterialBuffer[i].AO = s_R3DData.MaterialSlots[i].Material->m_AO;
+			s_R3DData.MaterialBuffer[i].AlbedoTexIndex = s_R3DData.MaterialSlots[i].AlbedoTexIndex;
+			s_R3DData.MaterialBuffer[i].NormalMapTexIndex = s_R3DData.MaterialSlots[i].NormalMapTexIndex;
+			s_R3DData.MaterialBuffer[i].MetallicTexIndex = s_R3DData.MaterialSlots[i].MetallicTexIndex;
+			s_R3DData.MaterialBuffer[i].RoughnessTexIndex = s_R3DData.MaterialSlots[i].RoughnessTexIndex;
+			s_R3DData.MaterialBuffer[i].AOTexIndex = s_R3DData.MaterialSlots[i].AOTexIndex;
+		}
+		s_R3DData.MaterialUniformBuffer->SetData(&s_R3DData.MaterialBuffer, sizeof(Renderer3DData::MaterialData) * s_R3DData.MaxMaterialSlots);
+
+		// Cube
 		if (s_R3DData.CubeVertexCount)
 		{
 			uint32_t dataSize = (uint32_t)((uint8_t*)s_R3DData.CubeVertexBufferPtr - (uint8_t*)s_R3DData.CubeVertexBufferBase);
 			s_R3DData.CubeVB->SetData(s_R3DData.CubeVertexBufferBase, dataSize);
 
-			// Bind textures
-			for (uint32_t i = 0; i < s_R3DData.TextureSlotIndex; i++)
-				s_R3DData.TextureSlots[i]->Bind(i);
-
 			s_R3DData.PBRShader->Bind();
 			RenderCommand::DrawArray(s_R3DData.CubeVA, s_R3DData.CubeVertexCount);
+			RendererStats::GetStats().DrawCalls++;
+		}
 
+		// Mesh
+		if (s_R3DData.MeshIndexCount)
+		{
+			uint32_t vDataSize = (uint32_t)((uint8_t*)s_R3DData.MeshVertexBufferPtr - (uint8_t*)s_R3DData.MeshVertexBufferBase);
+			s_R3DData.MeshVB->SetData(s_R3DData.MeshVertexBufferBase, vDataSize);
+			uint32_t iDataSize = (uint32_t)((uint8_t*)s_R3DData.MeshIndexBufferPtr - (uint8_t*)s_R3DData.MeshIndexBufferBase);
+			s_R3DData.MeshIB->SetData(s_R3DData.MeshIndexBufferBase, iDataSize);
+
+			s_R3DData.PBRShader->Bind();
+			RenderCommand::DrawArray(s_R3DData.MeshVA, s_R3DData.MeshIndexCount);
 			RendererStats::GetStats().DrawCalls++;
 		}
 	}
@@ -360,7 +444,14 @@ namespace Locus
 		s_R3DData.CubeVertexCount = 0;
 		s_R3DData.CubeVertexBufferPtr = s_R3DData.CubeVertexBufferBase;
 
+		s_R3DData.MeshVertexCount = 0;
+		s_R3DData.MeshVertexBufferPtr = s_R3DData.MeshVertexBufferBase;
+
+		s_R3DData.MeshIndexCount = 0;
+		s_R3DData.MeshIndexBufferPtr = s_R3DData.MeshIndexBufferBase;
+
 		s_R3DData.TextureSlotIndex = 1;
+		s_R3DData.MaterialSlotIndex = 0;
 	}
 
 	void Renderer3D::DrawCube(const glm::mat4& transform, const CubeRendererComponent& crc, int entityID)
@@ -371,132 +462,32 @@ namespace Locus
 			FlushAndReset();
 
 		// Add texture to texture slot. Handles duplicates.
-		int albedoTexIndex = 0;
-		int normalTexIndex = 0;
-		int metallicTexIndex = 0;
-		int roughnessTexIndex = 0;
-		int aoTexIndex = 0;
-		if (crc.AlbedoTexture)
-		{
-			for (uint32_t i = 1; i < s_R3DData.TextureSlotIndex; i++)
-			{
-				if (*s_R3DData.TextureSlots[i].get() == *crc.AlbedoTexture.get())
-				{
-					albedoTexIndex = i;
-					break;
-				}
-			}
-			if (albedoTexIndex == 0)
-			{
-				if (s_R3DData.TextureSlotIndex >= Renderer3DData::MaxTextureSlots)
-					FlushAndReset();
+		int albedoTexIndex = ProcessTextureSlot(crc.AlbedoTexture);
+		int normalTexIndex = ProcessTextureSlot(crc.NormalTexture);
+		int metallicTexIndex = ProcessTextureSlot(crc.MetallicTexture);
+		int roughnessTexIndex = ProcessTextureSlot(crc.RoughnessTexture);
+		int aoTexIndex = ProcessTextureSlot(crc.AOTexture);
 
-				albedoTexIndex = s_R3DData.TextureSlotIndex;
-				s_R3DData.TextureSlots[s_R3DData.TextureSlotIndex] = crc.AlbedoTexture;
-				s_R3DData.TextureSlotIndex++;
-			}
-		}
-		
-		if (crc.NormalTexture)
-		{
-			for (uint32_t i = 1; i < s_R3DData.TextureSlotIndex; i++)
-			{
-				if (*s_R3DData.TextureSlots[i].get() == *crc.NormalTexture.get())
-				{
-					normalTexIndex = i;
-					break;
-				}
-			}
-			if (normalTexIndex == 0)
-			{
-				if (s_R3DData.TextureSlotIndex >= Renderer3DData::MaxTextureSlots)
-					FlushAndReset();
-
-				normalTexIndex = s_R3DData.TextureSlotIndex;
-				s_R3DData.TextureSlots[s_R3DData.TextureSlotIndex] = crc.NormalTexture;
-				s_R3DData.TextureSlotIndex++;
-			}
-		}
-		
-		if (crc.MetallicTexture)
-		{
-			for (uint32_t i = 1; i < s_R3DData.TextureSlotIndex; i++)
-			{
-				if (*s_R3DData.TextureSlots[i].get() == *crc.MetallicTexture.get())
-				{
-					metallicTexIndex = i;
-					break;
-				}
-			}
-			if (metallicTexIndex == 0)
-			{
-				if (s_R3DData.TextureSlotIndex >= Renderer3DData::MaxTextureSlots)
-					FlushAndReset();
-
-				metallicTexIndex = s_R3DData.TextureSlotIndex;
-				s_R3DData.TextureSlots[s_R3DData.TextureSlotIndex] = crc.MetallicTexture;
-				s_R3DData.TextureSlotIndex++;
-			}
-		}
-
-		if (crc.RoughnessTexture)
-		{
-			for (uint32_t i = 1; i < s_R3DData.TextureSlotIndex; i++)
-			{
-				if (*s_R3DData.TextureSlots[i].get() == *crc.RoughnessTexture.get())
-				{
-					roughnessTexIndex = i;
-					break;
-				}
-			}
-			if (roughnessTexIndex == 0)
-			{
-				if (s_R3DData.TextureSlotIndex >= Renderer3DData::MaxTextureSlots)
-					FlushAndReset();
-
-				roughnessTexIndex = s_R3DData.TextureSlotIndex;
-				s_R3DData.TextureSlots[s_R3DData.TextureSlotIndex] = crc.RoughnessTexture;
-				s_R3DData.TextureSlotIndex++;
-			}
-		}
-
-		if (crc.AOTexture)
-		{
-			for (uint32_t i = 1; i < s_R3DData.TextureSlotIndex; i++)
-			{
-				if (*s_R3DData.TextureSlots[i].get() == *crc.AOTexture.get())
-				{
-					aoTexIndex = i;
-					break;
-				}
-			}
-			if (aoTexIndex == 0)
-			{
-				if (s_R3DData.TextureSlotIndex >= Renderer3DData::MaxTextureSlots)
-					FlushAndReset();
-
-				aoTexIndex = s_R3DData.TextureSlotIndex;
-				s_R3DData.TextureSlots[s_R3DData.TextureSlotIndex] = crc.AOTexture;
-				s_R3DData.TextureSlotIndex++;
-			}
-		}
+		// Material uniform data
+		// Temp: Create material data until cube renderer component has materials.
+		Ref<Material> material = CreateRef<Material>();
+		material->m_Albedo = crc.Albedo;
+		material->m_AlbedoTexture = crc.AlbedoTexture;
+		material->m_NormalMapTexture = crc.NormalTexture;
+		material->m_Metallic = crc.Metallic;
+		material->m_MetallicTexture = crc.MetallicTexture;
+		material->m_Roughness = crc.Roughness;
+		material->m_RoughnessTexture = crc.RoughnessTexture;
+		material->m_AO = crc.AO;
+		material->m_AOTexture = crc.AOTexture;
+		int materialUniformIndex = ProcessMaterialSlot(material, albedoTexIndex, normalTexIndex, metallicTexIndex, roughnessTexIndex, aoTexIndex);
 		
 		for (uint32_t i = 0; i < 36; i++)
 		{
 			s_R3DData.CubeVertexBufferPtr->WorldPosition = transform * s_R3DData.CubeVertexPositions[i];
 			s_R3DData.CubeVertexBufferPtr->Normal = s_R3DData.CubeVertexNormals[i];
 			s_R3DData.CubeVertexBufferPtr->TexCoords = s_R3DData.CubeVertexTexCoords[i];
-			s_R3DData.CubeVertexBufferPtr->Albedo = crc.Albedo;
-			s_R3DData.CubeVertexBufferPtr->Metallic = crc.Metallic;
-			s_R3DData.CubeVertexBufferPtr->Roughness = crc.Roughness;
-			s_R3DData.CubeVertexBufferPtr->AO = crc.AO;
-
-			s_R3DData.CubeVertexBufferPtr->AlbedoTexIndex = albedoTexIndex;
-			s_R3DData.CubeVertexBufferPtr->NormalTexIndex = normalTexIndex;
-			s_R3DData.CubeVertexBufferPtr->MetallicTexIndex = metallicTexIndex;
-			s_R3DData.CubeVertexBufferPtr->RoughnessTexIndex = roughnessTexIndex;
-			s_R3DData.CubeVertexBufferPtr->AOTexIndex = aoTexIndex;
-
+			s_R3DData.CubeVertexBufferPtr->MaterialUniformIndex = materialUniformIndex;
 			s_R3DData.CubeVertexBufferPtr->EntityID = entityID;
 			s_R3DData.CubeVertexBufferPtr++;
 		}
@@ -506,7 +497,63 @@ namespace Locus
 		RendererStats::GetStats().CubeCount++;
 	}
 
-	void Renderer3D::DrawCubeMask(const glm::mat4& transform)
+	void Renderer3D::DrawMesh(const glm::mat4& transform, const Mesh& mesh, Ref<Material> material, int entityID)
+	{
+		LOCUS_PROFILE_FUNCTION();
+
+		if (s_R3DData.MeshIndexCount + mesh.GetIndices().size() >= Renderer3DData::MaxIndices || 
+			s_R3DData.MeshVertexCount + mesh.GetVertices().size() >= Renderer3DData::MaxVertices)
+			FlushAndReset();
+
+		// If texture is not in GPU memory, add texture.
+		// If texture is already in GPU memory, return the slot index of that texture.
+		// If texture limit is reached, flush and reset.
+		int albedoTexIndex = ProcessTextureSlot(material->m_AlbedoTexture);
+		int normalTexIndex = ProcessTextureSlot(material->m_NormalMapTexture);
+		int metallicTexIndex = ProcessTextureSlot(material->m_MetallicTexture);
+		int roughnessTexIndex = ProcessTextureSlot(material->m_RoughnessTexture);
+		int aoTexIndex = ProcessTextureSlot(material->m_AOTexture);
+
+		// Material uniform data
+		int materialUniformIndex = ProcessMaterialSlot(material, albedoTexIndex, normalTexIndex, metallicTexIndex, roughnessTexIndex, aoTexIndex);
+
+		const std::vector<ImportedMeshVertex>& vertices = mesh.GetVertices();
+		const std::vector<uint32_t>& indices = mesh.GetIndices();
+		{
+			LOCUS_PROFILE_SCOPE("Set Vertexbuffer data");
+				
+			for (uint32_t i = 0; i < vertices.size(); i++)
+			{
+				//s_R3DData.MeshVertexBufferPtr->WorldPosition = transform * glm::vec4(vertices[i].Position, 1.0f);
+				s_R3DData.MeshVertexBufferPtr->WorldPosition = vertices[i].Position;
+				s_R3DData.MeshVertexBufferPtr->Normal = vertices[i].Normal;
+				s_R3DData.MeshVertexBufferPtr->TexCoords = vertices[i].TexCoord;
+				s_R3DData.MeshVertexBufferPtr->MaterialUniformIndex = materialUniformIndex;
+				s_R3DData.MeshVertexBufferPtr->EntityID = entityID;
+				s_R3DData.MeshVertexBufferPtr++;
+			}
+		}
+		{
+			LOCUS_PROFILE_SCOPE("Set Indexbuffer data");
+			for (uint32_t i = 0; i < indices.size(); i++)
+			{
+				*s_R3DData.MeshIndexBufferPtr = indices[i];
+				s_R3DData.MeshIndexBufferPtr++;
+			}
+		}
+		
+		s_R3DData.MeshVertexCount += vertices.size();
+		s_R3DData.MeshIndexCount += indices.size();
+	}
+
+	void Renderer3D::DrawModel(const glm::mat4& transform, Ref<Model> model, Ref<Material> material, int entityID)
+	{
+		std::vector<Mesh>& meshes = model->GetMeshes();
+		for (int i = 0; i < meshes.size(); i++)
+			DrawMesh(transform, meshes[i], material, entityID);
+	}
+
+	void Renderer3D::DrawCubeMask(const glm::mat4& transform, Ref<Shader> shader)
 	{
 		s_R3DData.CubeVertexCount = 0;
 		s_R3DData.CubeVertexBufferPtr = s_R3DData.CubeVertexBufferBase;
@@ -518,16 +565,10 @@ namespace Locus
 		}
 		s_R3DData.CubeVB->SetData(s_R3DData.CubeVertexBufferBase, sizeof(CubeVertex) * 36);
 
+		shader->Bind();
 		RenderCommand::DrawArray(s_R3DData.CubeVA, 36);
 
 		RendererStats::GetStats().DrawCalls++;
-	}
-
-	// TODO: Implement
-	void Renderer3D::DrawModel(const glm::mat4& transform, Ref<Model> model, int entityID)
-	{
-		s_R3DData.PBRShader->Bind();
-		RenderCommand::DrawIndexed(model->GetMeshes()[0].GetVertexArray(), model->GetMeshes()[0].GetIndices().size());
 	}
 
 	void Renderer3D::DrawGrid()
@@ -538,5 +579,54 @@ namespace Locus
 		RenderCommand::DrawArray(s_R3DData.GridVA, 6);
 
 		RendererStats::GetStats().DrawCalls++;
+	}
+
+	int Renderer3D::ProcessTextureSlot(Ref<Texture2D> texture)
+	{
+		LOCUS_PROFILE_FUNCTION();
+		if (texture)
+		{
+			for (uint32_t i = 1; i < s_R3DData.TextureSlotIndex; i++)
+			{
+				if (*s_R3DData.TextureSlots[i].get() == *texture.get())
+					return i;
+			}
+
+			if (s_R3DData.TextureSlotIndex >= Renderer3DData::MaxTextureSlots)
+				FlushAndReset();
+
+			int slot = s_R3DData.TextureSlotIndex;
+			s_R3DData.TextureSlots[slot] = texture;
+			s_R3DData.TextureSlotIndex++;
+			return slot;
+		}
+
+		return 0;
+	}
+
+	int Renderer3D::ProcessMaterialSlot(Ref<Material> material, int albedoIndex, int normalIndex, int metallicIndex, int roughnessIndex, int aoIndex)
+	{
+		LOCUS_PROFILE_FUNCTION();
+		if (material)
+		{
+			for (uint32_t i = 1; i < s_R3DData.MaterialSlotIndex; i++)
+			{
+				if (*s_R3DData.MaterialSlots[i].Material.get() == *material.get())
+					return i;
+			}
+			if (s_R3DData.MaterialSlotIndex >= Renderer3DData::MaxMaterialSlots - 1)
+				FlushAndReset();
+
+			int slot = s_R3DData.MaterialSlotIndex;
+			s_R3DData.MaterialSlots[slot].Material = material;
+			s_R3DData.MaterialSlots[slot].AlbedoTexIndex = albedoIndex;
+			s_R3DData.MaterialSlots[slot].NormalMapTexIndex = normalIndex;
+			s_R3DData.MaterialSlots[slot].MetallicTexIndex = metallicIndex;
+			s_R3DData.MaterialSlots[slot].RoughnessTexIndex = roughnessIndex;
+			s_R3DData.MaterialSlots[slot].AOTexIndex = aoIndex;
+			s_R3DData.MaterialSlotIndex++;
+		}
+
+		return 0;
 	}
 }

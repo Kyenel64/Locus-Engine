@@ -256,7 +256,7 @@ namespace Locus
 		}
 	}
 
-	void Renderer2D::DrawQuadMask(const glm::mat4& transform)
+	void Renderer2D::DrawQuadMask(const glm::mat4& transform, Ref<Shader> shader)
 	{
 		LOCUS_PROFILE_FUNCTION();
 
@@ -271,6 +271,7 @@ namespace Locus
 
 		s_Data.QuadVB->SetData(s_Data.QuadVertexBufferBase, sizeof(QuadVertex) * 4);
 
+		shader->Bind();
 		RenderCommand::DrawIndexed(s_Data.QuadVA, 6);
 
 		RendererStats::GetStats().QuadCount++;

@@ -40,14 +40,14 @@ namespace Locus
 
 	Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	{
-		std::vector<MeshVertex> vertices;
+		std::vector<ImportedMeshVertex> vertices;
 		std::vector<uint32_t> indices;
 		std::vector<Ref<Texture2D>> textures;
 
 		// Iterate through each mesh vertex
 		for (size_t i = 0; i < mesh->mNumVertices; i++)
 		{
-			MeshVertex vertex;
+			ImportedMeshVertex vertex;
 
 			// Position
 			vertex.Position.x = mesh->mVertices[i].x;

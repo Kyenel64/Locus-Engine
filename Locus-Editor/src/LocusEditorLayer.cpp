@@ -1177,12 +1177,10 @@ namespace Locus
 			
 			m_MaskFramebuffer->ClearAttachmentInt(0, 0);
 
-			m_MaskShader->Bind();
 			if (m_SelectedEntity.HasComponent<CubeRendererComponent>())
-				Renderer3D::DrawCubeMask(m_ActiveScene->GetWorldTransform(m_SelectedEntity));
+				Renderer3D::DrawCubeMask(m_ActiveScene->GetWorldTransform(m_SelectedEntity), m_MaskShader);
 			if (m_SelectedEntity.HasComponent<SpriteRendererComponent>() || m_SelectedEntity.HasComponent<CircleRendererComponent>())
-				Renderer2D::DrawQuadMask(m_ActiveScene->GetWorldTransform(m_SelectedEntity));
-			m_MaskShader->Unbind();
+				Renderer2D::DrawQuadMask(m_ActiveScene->GetWorldTransform(m_SelectedEntity), m_MaskShader);
 
 			Renderer::EndScene();
 			m_MaskFramebuffer->Unbind();

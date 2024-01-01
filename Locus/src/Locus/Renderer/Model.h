@@ -14,7 +14,8 @@ namespace Locus
 		Model(const std::filesystem::path& filePath);
 		~Model() = default;
 
-		const std::vector<Mesh>& GetMeshes() const { return m_Meshes; }
+		Mesh& GetMesh(int index) { return m_Meshes[index]; }
+		std::vector<Mesh>& GetMeshes() { return m_Meshes; }
 
 	private:
 		void LoadModel();

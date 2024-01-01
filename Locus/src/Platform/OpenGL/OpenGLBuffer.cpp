@@ -87,4 +87,10 @@ namespace Locus
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
+
+	void OpenGLIndexBuffer::SetData(const void* data, uint32_t size)
+	{
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, size, data);
+	}
 }

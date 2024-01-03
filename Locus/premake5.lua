@@ -70,8 +70,7 @@ project "Locus"
 			"%{Library.WinSock}",
 			"%{Library.WinMM}",
 			"%{Library.WinVersion}",
-			"%{Library.BCrypt}",
-			"%{Library.assimp}"
+			"%{Library.BCrypt}"
 		}
 
 	filter "configurations:Debug"
@@ -84,7 +83,8 @@ project "Locus"
 			"%{Library.ShaderC_Debug}",
 			"%{Library.SPIRV_Cross_Debug}",
 			"%{Library.SPIRV_Cross_GLSL_Debug}",
-			"%{Library.monoDebug}"
+			"%{Library.monoDebug}",
+			"%{Library.assimpDebug}"
 		}
 
 	filter "configurations:Release"
@@ -97,7 +97,8 @@ project "Locus"
 			"%{Library.ShaderC_Release}",
 			"%{Library.SPIRV_Cross_Release}",
 			"%{Library.SPIRV_Cross_GLSL_Release}",
-			"%{Library.monoRelease}"
+			"%{Library.monoRelease}",
+			"%{Library.assimpRelease}"
 		}
 
 	filter "configurations:Dist"
@@ -110,5 +111,6 @@ project "Locus"
 			"%{Library.ShaderC_Release}",
 			"%{Library.SPIRV_Cross_Release}",
 			"%{Library.SPIRV_Cross_GLSL_Release}",
-			"%{Library.monoRelease}"
+			"%{Library.monoRelease}",
+			"%{Library.assimpRelease}"
 		}

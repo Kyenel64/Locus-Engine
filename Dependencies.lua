@@ -41,7 +41,8 @@ Library["SPIRV_Cross_GLSL_Release"] = "%{LibraryDir.VulkanSDK}/spirv-cross-glsl.
 Library["monoDebug"] = "%{LibraryDir.monoDebug}/libmono-static-sgen.lib"
 Library["monoRelease"] = "%{LibraryDir.monoRelease}/libmono-static-sgen.lib"
 
-Library["assimp"] = "%{wks.location}/Locus/vendor/assimp/lib/x64/assimp-vc143-mt.lib"
+Library["assimpDebug"] = "%{wks.location}/Locus/vendor/assimp/lib/Debug/assimp-vc143-mtd.lib"
+Library["assimpRelease"] = "%{wks.location}/Locus/vendor/assimp/lib/Release/assimp-vc143-mt.lib"
 
 -- Windows
 Library["WinSock"] = "Ws2_32.lib"

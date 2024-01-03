@@ -38,7 +38,7 @@ project "Locus-Editor"
 		"{COPY} %{prj.location}/resources %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/resources",
 		"{COPY} %{prj.location}/mono %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/mono",
 		"{COPY} %{prj.location}/imgui.ini %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/",
-		"{COPY} %{prj.location}/projectGeneration %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/projectGeneration"
+		"{COPY} %{prj.location}/projectGeneration %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/projectGeneration",
 	}
 	
 	filter "system:windows"
@@ -56,7 +56,8 @@ project "Locus-Editor"
 
 		postbuildcommands
 		{
-			"{COPY} %{VULKAN_SDK}/Bin/shaderc_sharedd.dll %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/"
+			"{COPY} %{VULKAN_SDK}/Bin/shaderc_sharedd.dll %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/",
+			"{COPY} %{wks.location}/Locus/vendor/assimp/lib/Debug/assimp-vc143-mtd.dll %{wks.location}/bin/" .. outputdir .. "/%{prj.name}"
 		}
 
 	filter "configurations:Release"
@@ -66,7 +67,9 @@ project "Locus-Editor"
 
 		postbuildcommands
 		{
-			"{COPY} %{VULKAN_SDK}/Bin/shaderc_shared.dll %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/"
+			-- Copy dlls
+			"{COPY} %{VULKAN_SDK}/Bin/shaderc_shared.dll %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/",
+			"{COPY} %{wks.location}/Locus/vendor/assimp/lib/Release/assimp-vc143-mt.dll %{wks.location}/bin/" .. outputdir .. "/%{prj.name}"
 		}
 
 	filter "configurations:Dist"
@@ -76,7 +79,8 @@ project "Locus-Editor"
 
 		postbuildcommands
 		{
-			"{COPY} %{VULKAN_SDK}/Bin/shaderc_shared.dll %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/"
+			"{COPY} %{VULKAN_SDK}/Bin/shaderc_shared.dll %{wks.location}/bin/" .. outputdir .. "/%{prj.name}/",
+			"{COPY} %{wks.location}/Locus/vendor/assimp/lib/Release/assimp-vc143-mt.dll %{wks.location}/bin/" .. outputdir .. "/%{prj.name}"
 		}
 
 			

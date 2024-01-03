@@ -36,16 +36,6 @@ namespace Locus
 		m_TestMaterial->m_MetallicTexture = Texture2D::Create("C:/Users/Kye/Desktop/Locus-Engine/SampleProject/Assets/Textures/Backpack/specular.jpg");
 		m_TestMaterial->m_RoughnessTexture = Texture2D::Create("C:/Users/Kye/Desktop/Locus-Engine/SampleProject/Assets/Textures/Backpack/roughness.jpg");
 		m_TestMaterial->m_AOTexture = Texture2D::Create("C:/Users/Kye/Desktop/Locus-Engine/SampleProject/Assets/Textures/Backpack/ao.jpg");
-
-		//for (int i = 0; i < 100; i++)
-		//{
-		//	for (int j = 0; j < 10; j++)
-		//	{
-		//		Entity entity = CreateEntity();
-		//		entity.AddComponent<CubeRendererComponent>();
-		//		entity.GetComponent<TransformComponent>().LocalPosition = { j * 2, 0.0f, i * 2 };
-		//	}
-		//}
 	}
 
 	Entity Scene::CreateEntity(const std::string& name)
@@ -135,6 +125,7 @@ namespace Locus
 		CopyComponent<SpriteRendererComponent>(from, to);
 		CopyComponent<CircleRendererComponent>(from, to);
 		CopyComponent<CubeRendererComponent>(from, to);
+		CopyComponent<MeshRendererComponent>(from, to);
 		CopyComponent<PointLightComponent>(from, to);
 		CopyComponent<DirectionalLightComponent>(from, to);
 		CopyComponent<SpotLightComponent>(from, to);
@@ -164,6 +155,7 @@ namespace Locus
 		// 3D
 		Renderer3D::BeginScene(camera, this);
 		DrawCubes();
+		DrawMeshes();
 		//Renderer3D::DrawMesh(glm::mat4(1.0f), m_TestModel->GetMesh(78), m_TestMaterial, -1);
 		glm::mat4 transform = glm::mat4(1.0f);
 		for (int i = 0; i < 80; i++)
@@ -623,6 +615,18 @@ namespace Locus
 		}
 	}
 
+	void Scene::DrawMeshes()
+	{
+		auto view = m_Registry.view<TransformComponent, MeshRendererComponent, TagComponent>();
+		for (auto e : view)
+		{
+			Entity entity = Entity(e, this);
+			auto& mrc = entity.GetComponent<MeshRendererComponent>();
+			if (entity.GetComponent<TagComponent>().Enabled && mrc.Mesh)
+				Renderer3D::DrawModel(GetWorldTransform(entity), mrc.Mesh->GetVertexArray(), m_TestMaterial, (int)e);
+		}
+	}
+
 	void Scene::CreatePhysicsData(Entity entity)
 	{
 		auto& tc = entity.GetComponent<TransformComponent>();
@@ -931,6 +935,12 @@ namespace Locus
 
 	template<>
 	void Scene::OnComponentAdded<CubeRendererComponent>(Entity entity, CubeRendererComponent& component)
+	{
+
+	}
+
+	template<>
+	void Scene::OnComponentAdded<MeshRendererComponent>(Entity entity, MeshRendererComponent& component)
 	{
 
 	}

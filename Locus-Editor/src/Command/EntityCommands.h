@@ -32,6 +32,8 @@ namespace Locus
 			data->CircleRenderer = CreateRef<CircleRendererComponent>(entity.GetComponent<CircleRendererComponent>());
 		if (entity.HasComponent<CubeRendererComponent>())
 			data->CubeRenderer = CreateRef<CubeRendererComponent>(entity.GetComponent<CubeRendererComponent>());
+		if (entity.HasComponent<MeshRendererComponent>())
+			data->MeshRenderer = CreateRef<MeshRendererComponent>(entity.GetComponent<MeshRendererComponent>());
 		if (entity.HasComponent<PointLightComponent>())
 			data->PointLight = CreateRef<PointLightComponent>(entity.GetComponent<PointLightComponent>());
 		if (entity.HasComponent<DirectionalLightComponent>())
@@ -64,6 +66,8 @@ namespace Locus
 			entity.AddComponent<CircleRendererComponent>(*data->CircleRenderer);
 		if (data->CubeRenderer)
 			entity.AddComponent<CubeRendererComponent>(*data->CubeRenderer);
+		if (data->MeshRenderer)
+			entity.AddComponent<MeshRendererComponent>(*data->MeshRenderer);
 		if (data->PointLight)
 			entity.AddComponent<PointLightComponent>(*data->PointLight);
 		if (data->DirectionalLight)

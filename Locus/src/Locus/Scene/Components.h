@@ -7,6 +7,7 @@
 //	SpriteRenderer
 //	CircleRenderer
 //	CubeRenderer
+//	MeshRenderer
 //	PointLight
 //	DirectionalLight
 //	SpotLight
@@ -156,6 +157,14 @@ namespace Locus
 		CubeRendererComponent() = default;
 		CubeRendererComponent(const CubeRendererComponent&) = default;
 	};
+	
+	struct MeshRendererComponent
+	{
+		Ref<Model> Mesh;
+
+		MeshRendererComponent() = default;
+		MeshRendererComponent(const MeshRendererComponent&) = default;
+	};
 
 	struct PointLightComponent
 	{
@@ -270,6 +279,7 @@ namespace Locus
 		SpriteRenderer,
 		CircleRenderer,
 		CubeRenderer,
+		MeshRenderer,
 		PointLight,
 		DirectionalLight,
 		SpotLight,
@@ -290,6 +300,7 @@ namespace Locus
 		Ref<SpriteRendererComponent> SpriteRenderer;
 		Ref<CircleRendererComponent> CircleRenderer;
 		Ref<CubeRendererComponent> CubeRenderer;
+		Ref<MeshRendererComponent> MeshRenderer;
 		Ref<PointLightComponent> PointLight;
 		Ref<DirectionalLightComponent> DirectionalLight;
 		Ref<SpotLightComponent> SpotLight;

@@ -125,6 +125,7 @@ namespace Locus
 		void DrawSprites();
 		void DrawCircles();
 		void DrawCubes();
+		void DrawMeshes();
 
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);

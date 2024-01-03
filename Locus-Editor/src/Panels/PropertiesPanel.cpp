@@ -86,6 +86,15 @@ namespace Locus
 					ImGui::CloseCurrentPopup();
 				}
 
+				if (ImGui::MenuItem("Mesh Renderer"))
+				{
+					if (!m_SelectedEntity.HasComponent<MeshRendererComponent>())
+						CommandHistory::AddCommand(new AddComponentCommand<MeshRendererComponent>(m_ActiveScene, m_SelectedEntity));
+					else
+						LOCUS_CORE_WARN("This entity already has a Mesh Renderer Component");
+					ImGui::CloseCurrentPopup();
+				}
+
 				if (ImGui::MenuItem("Point Light"))
 				{
 					if (!m_SelectedEntity.HasComponent<PointLightComponent>())
@@ -407,6 +416,28 @@ namespace Locus
 				Widgets::DrawValueControl("AO", component.AO, 0.5f, 0.05f, nullptr, -1.0f, -1.0f, 0.0f, 1.0f);
 				Widgets::DrawTextureSlot("AO Texture", component.AOTexture, m_ProjectDirectory);
 			});
+
+		DrawComponentUI<MeshRendererComponent>("Mesh Renderer", entity, [this](auto& component)
+		{
+			Widgets::DrawControlLabel("Mesh");
+			ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_FrameBg));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyleColorVec4(ImGuiCol_FrameBgHovered));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyleColorVec4(ImGuiCol_FrameBgActive));
+
+			ImGui::Button("##MeshButton");
+
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MESH_ITEM_PATH"))
+				{
+					const wchar_t* path = (const wchar_t*)payload->Data;
+					std::filesystem::path meshPath = m_ProjectDirectory / path;
+					component.Mesh = CreateRef<Model>(meshPath);
+				}
+				ImGui::EndDragDropTarget();
+			}
+			ImGui::PopStyleColor(3);
+		});
 
 		// --- Point Light Component ----------------------------------------
 		DrawComponentUI<PointLightComponent>("Point Light", entity, [this](auto& component)

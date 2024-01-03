@@ -97,6 +97,8 @@ namespace Locus
 					else if (extension == "png" || extension == "jpg" || extension == "tiff" || extension == "tif"
 						|| extension == "bmp" || extension == "tga")
 						ImGui::SetDragDropPayload("TEXTURE_ITEM_PATH", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
+					else if (extension == "obj" || extension == "fbx")
+						ImGui::SetDragDropPayload("MESH_ITEM_PATH", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
 
 					ImGui::EndDragDropSource();
 				}

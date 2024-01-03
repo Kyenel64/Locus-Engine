@@ -123,56 +123,62 @@ namespace Locus
 		MeshVertex* cubeVertices = new MeshVertex[36];
 #pragma region Cube vertex definitions
 		glm::vec4 vertexPos[8] = {};
-		vertexPos[0] = { -0.5f, -0.5f,  0.5f, 1.0f };
-		vertexPos[1] = { -0.5f,  0.5f,  0.5f, 1.0f };
-		vertexPos[2] = { 0.5f,  0.5f,  0.5f, 1.0f };
-		vertexPos[3] = { 0.5f, -0.5f,  0.5f, 1.0f };
-		vertexPos[4] = { -0.5f, -0.5f, -0.5f, 1.0f };
-		vertexPos[5] = { -0.5f,  0.5f, -0.5f, 1.0f };
-		vertexPos[6] = { 0.5f,  0.5f, -0.5f, 1.0f };
-		vertexPos[7] = { 0.5f, -0.5f, -0.5f, 1.0f };
+		vertexPos[0] = { -0.5f, -0.5f,  0.5f, 1.0f }; // Bottom Left Front
+		vertexPos[1] = {  0.5f,  0.5f,  0.5f, 1.0f }; // Top Right Front
+		vertexPos[2] = {  0.5f, -0.5f,  0.5f, 1.0f }; // Bottom Right Front
+		vertexPos[3] = { -0.5f,  0.5f,  0.5f, 1.0f }; // Top Left Front
+		vertexPos[4] = { -0.5f, -0.5f, -0.5f, 1.0f }; // Bottom Left Back
+		vertexPos[5] = {  0.5f,  0.5f, -0.5f, 1.0f }; // Top Right Back
+		vertexPos[6] = {  0.5f, -0.5f, -0.5f, 1.0f }; // Bottom Right Back
+		vertexPos[7] = { -0.5f,  0.5f, -0.5f, 1.0f }; // Top Left Back
 
+		// Front
 		cubeVertices[0].Position = vertexPos[0];
-		cubeVertices[1].Position = vertexPos[1];
-		cubeVertices[2].Position = vertexPos[2];
-		cubeVertices[3].Position = vertexPos[0];
-		cubeVertices[4].Position = vertexPos[2];
-		cubeVertices[5].Position = vertexPos[3];
+		cubeVertices[1].Position = vertexPos[2];
+		cubeVertices[2].Position = vertexPos[1];
+		cubeVertices[3].Position = vertexPos[1];
+		cubeVertices[4].Position = vertexPos[3];
+		cubeVertices[5].Position = vertexPos[0];
 		
+		// Back
 		cubeVertices[6].Position = vertexPos[4];
 		cubeVertices[7].Position = vertexPos[5];
-		cubeVertices[8].Position = vertexPos[1];
-		cubeVertices[9].Position = vertexPos[4];
-		cubeVertices[10].Position = vertexPos[1];
-		cubeVertices[11].Position = vertexPos[0];
+		cubeVertices[8].Position = vertexPos[6];
+		cubeVertices[9].Position = vertexPos[5];
+		cubeVertices[10].Position = vertexPos[4];
+		cubeVertices[11].Position = vertexPos[7];
 		
-		cubeVertices[12].Position = vertexPos[7];
-		cubeVertices[13].Position = vertexPos[6];
-		cubeVertices[14].Position = vertexPos[5];
-		cubeVertices[15].Position = vertexPos[7];
-		cubeVertices[16].Position = vertexPos[5];
-		cubeVertices[17].Position = vertexPos[4];
+		// Left
+		cubeVertices[12].Position = vertexPos[3];
+		cubeVertices[13].Position = vertexPos[7];
+		cubeVertices[14].Position = vertexPos[4];
+		cubeVertices[15].Position = vertexPos[4];
+		cubeVertices[16].Position = vertexPos[0];
+		cubeVertices[17].Position = vertexPos[3];
 		
-		cubeVertices[18].Position = vertexPos[3];
-		cubeVertices[19].Position = vertexPos[2];
-		cubeVertices[20].Position = vertexPos[6];
-		cubeVertices[21].Position = vertexPos[3];
-		cubeVertices[22].Position = vertexPos[6];
-		cubeVertices[23].Position = vertexPos[7];
+		// Right
+		cubeVertices[18].Position = vertexPos[1];
+		cubeVertices[19].Position = vertexPos[6];
+		cubeVertices[20].Position = vertexPos[5];
+		cubeVertices[21].Position = vertexPos[6];
+		cubeVertices[22].Position = vertexPos[1];
+		cubeVertices[23].Position = vertexPos[2];
 		
-		cubeVertices[24].Position = vertexPos[1];
-		cubeVertices[25].Position = vertexPos[5];
-		cubeVertices[26].Position = vertexPos[6];
+		// Top
+		cubeVertices[24].Position = vertexPos[7];
+		cubeVertices[25].Position = vertexPos[1];
+		cubeVertices[26].Position = vertexPos[5];
 		cubeVertices[27].Position = vertexPos[1];
-		cubeVertices[28].Position = vertexPos[6];
-		cubeVertices[29].Position = vertexPos[2];
+		cubeVertices[28].Position = vertexPos[7];
+		cubeVertices[29].Position = vertexPos[3];
 		
-		cubeVertices[30].Position = vertexPos[0];
-		cubeVertices[31].Position = vertexPos[4];
-		cubeVertices[32].Position = vertexPos[7];
-		cubeVertices[33].Position = vertexPos[0];
-		cubeVertices[34].Position = vertexPos[7];
-		cubeVertices[35].Position = vertexPos[3];
+		// Bottom
+		cubeVertices[30].Position = vertexPos[4];
+		cubeVertices[31].Position = vertexPos[6];
+		cubeVertices[32].Position = vertexPos[2];
+		cubeVertices[33].Position = vertexPos[2];
+		cubeVertices[34].Position = vertexPos[0];
+		cubeVertices[35].Position = vertexPos[4];
 		
 		cubeVertices[0].Normal = { 0, 0, 1 };
 		cubeVertices[1].Normal = { 0, 0, 1 };
@@ -181,19 +187,19 @@ namespace Locus
 		cubeVertices[4].Normal = { 0, 0, 1 };
 		cubeVertices[5].Normal = { 0, 0, 1 };
 		
-		cubeVertices[6].Normal = { -1, 0, 0 };
-		cubeVertices[7].Normal = { -1, 0, 0 };
-		cubeVertices[8].Normal = { -1, 0, 0 };
-		cubeVertices[9].Normal = { -1, 0, 0 };
-		cubeVertices[10].Normal = { -1, 0, 0 };
-		cubeVertices[11].Normal = { -1, 0, 0 };
+		cubeVertices[6].Normal = { 0, 0, -1 };
+		cubeVertices[7].Normal = { 0, 0, -1 };
+		cubeVertices[8].Normal = { 0, 0, -1 };
+		cubeVertices[9].Normal = { 0, 0, -1 };
+		cubeVertices[10].Normal = { 0, 0, -1 };
+		cubeVertices[11].Normal = { 0, 0, -1 };
 		
-		cubeVertices[12].Normal = { 0, 0, -1 };
-		cubeVertices[13].Normal = { 0, 0, -1 };
-		cubeVertices[14].Normal = { 0, 0, -1 };
-		cubeVertices[15].Normal = { 0, 0, -1 };
-		cubeVertices[16].Normal = { 0, 0, -1 };
-		cubeVertices[17].Normal = { 0, 0, -1 };
+		cubeVertices[12].Normal = { -1, 0, 0 };
+		cubeVertices[13].Normal = { -1, 0, 0 };
+		cubeVertices[14].Normal = { -1, 0, 0 };
+		cubeVertices[15].Normal = { -1, 0, 0 };
+		cubeVertices[16].Normal = { -1, 0, 0 };
+		cubeVertices[17].Normal = { -1, 0, 0 };
 		
 		cubeVertices[18].Normal = { 1, 0, 0 };
 		cubeVertices[19].Normal = { 1, 0, 0 };
@@ -216,47 +222,53 @@ namespace Locus
 		cubeVertices[34].Normal = { 0, -1, 0 };
 		cubeVertices[35].Normal = { 0, -1, 0 };
 		
+		// Front
 		cubeVertices[0].TexCoords = { 0, 0 };
-		cubeVertices[1].TexCoords = { 0, 1 };
+		cubeVertices[1].TexCoords = { 1, 0 };
 		cubeVertices[2].TexCoords = { 1, 1 };
-		cubeVertices[3].TexCoords = { 0, 0 };
-		cubeVertices[4].TexCoords = { 1, 1 };
-		cubeVertices[5].TexCoords = { 1, 0 };
+		cubeVertices[3].TexCoords = { 1, 1 };
+		cubeVertices[4].TexCoords = { 0, 1 };
+		cubeVertices[5].TexCoords = { 0, 0 };
 		
-		cubeVertices[6].TexCoords = { 0, 0 };
-		cubeVertices[7].TexCoords = { 0, 1 };
-		cubeVertices[8].TexCoords = { 1, 1 };
-		cubeVertices[9].TexCoords = { 0, 0 };
-		cubeVertices[10].TexCoords = { 1, 1 };
-		cubeVertices[11].TexCoords = { 1, 0 };
+		// Back
+		cubeVertices[6].TexCoords =  { 0, 0 };
+		cubeVertices[7].TexCoords =  { 1, 1 };
+		cubeVertices[8].TexCoords =  { 1, 0 };
+		cubeVertices[9].TexCoords =  { 1, 1 };
+		cubeVertices[10].TexCoords = { 0, 0 };
+		cubeVertices[11].TexCoords = { 0, 1 };
 		
-		cubeVertices[12].TexCoords = { 0, 0 };
-		cubeVertices[13].TexCoords = { 0, 1 };
-		cubeVertices[14].TexCoords = { 1, 1 };
-		cubeVertices[15].TexCoords = { 0, 0 };
-		cubeVertices[16].TexCoords = { 1, 1 };
+		// Left
+		cubeVertices[12].TexCoords = { 1, 0 };
+		cubeVertices[13].TexCoords = { 1, 1 };
+		cubeVertices[14].TexCoords = { 0, 1 };
+		cubeVertices[15].TexCoords = { 0, 1 };
+		cubeVertices[16].TexCoords = { 0, 0 };
 		cubeVertices[17].TexCoords = { 1, 0 };
 		
-		cubeVertices[18].TexCoords = { 0, 0 };
+		// Right
+		cubeVertices[18].TexCoords = { 1, 0 };
 		cubeVertices[19].TexCoords = { 0, 1 };
 		cubeVertices[20].TexCoords = { 1, 1 };
-		cubeVertices[21].TexCoords = { 0, 0 };
-		cubeVertices[22].TexCoords = { 1, 1 };
-		cubeVertices[23].TexCoords = { 1, 0 };
+		cubeVertices[21].TexCoords = { 0, 1 };
+		cubeVertices[22].TexCoords = { 1, 0 };
+		cubeVertices[23].TexCoords = { 0, 0 };
 		
-		cubeVertices[24].TexCoords = { 0, 0 };
-		cubeVertices[25].TexCoords = { 0, 1 };
+		// Top
+		cubeVertices[24].TexCoords = { 0, 1 };
+		cubeVertices[25].TexCoords = { 1, 0 };
 		cubeVertices[26].TexCoords = { 1, 1 };
-		cubeVertices[27].TexCoords = { 0, 0 };
-		cubeVertices[28].TexCoords = { 1, 1 };
-		cubeVertices[29].TexCoords = { 1, 0 };
+		cubeVertices[27].TexCoords = { 1, 0 };
+		cubeVertices[28].TexCoords = { 0, 1 };
+		cubeVertices[29].TexCoords = { 0, 0 };
 		
-		cubeVertices[30].TexCoords = { 0, 0 };
-		cubeVertices[31].TexCoords = { 0, 1 };
-		cubeVertices[32].TexCoords = { 1, 1 };
-		cubeVertices[33].TexCoords = { 0, 0 };
-		cubeVertices[34].TexCoords = { 1, 1 };
-		cubeVertices[35].TexCoords = { 1, 0 };
+		// Bottom
+		cubeVertices[30].TexCoords = { 0, 1 };
+		cubeVertices[31].TexCoords = { 1, 1 };
+		cubeVertices[32].TexCoords = { 1, 0 };
+		cubeVertices[33].TexCoords = { 1, 0 };
+		cubeVertices[34].TexCoords = { 0, 0 };
+		cubeVertices[35].TexCoords = { 0, 1 };
 
 #pragma endregion Cube vertex definitions
 		s_R3DData.CubeVB->SetData(&cubeVertices[0], sizeof(MeshVertex) * 36);

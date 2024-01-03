@@ -33,6 +33,8 @@ namespace Locus
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_LINE_SMOOTH);
+
+		glEnable(GL_CULL_FACE);
 	}
 
 	void OpenGLRendererAPI::SetClearColor(const glm::vec4 color)

@@ -9,6 +9,7 @@
 #include <glm/glm.hpp>
 
 #include "Locus/Core/KeyCodes.h"
+#include "Locus/Core/MouseCodes.h"
 #include "Locus/Core/Core.h"
 
 namespace Locus
@@ -27,7 +28,7 @@ namespace Locus
 		// Called OnUpdate() to process keystates
 		static void ProcessKeys();
 
-		static bool IsMouseButtonPressed(KeyCode button);
+		static bool IsMouseButtonPressed(MouseCode button);
 
 		// --- Mouse Input ---
 		static glm::vec2 GetMousePosition();

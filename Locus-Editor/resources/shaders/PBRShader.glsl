@@ -5,18 +5,34 @@
 #type vertex
 #version 450 core
 
+struct MeshData
+{
+	mat4 Model;
+	int MaterialIndex;
+	int EntityID;
+	float padding[2];
+};
+
 layout (location = 0) in vec3 a_Position;
 layout (location = 1) in vec3 a_Normal;
 layout (location = 2) in vec2 a_TexCoord;
-layout (location = 3) in int a_MaterialIndex;
-layout (location = 4) in int a_EntityID;
+layout (location = 3) in mat4 a_InstanceModelMatrix;
+layout (location = 7) in int a_MaterialIndex;
+layout (location = 8) in int a_EntityID;
 
 layout(std140, binding = 0) uniform Camera
 {
-	mat4 u_ViewProjection;
+	mat4 u_View;
+	mat4 u_Projection;
 	vec4 u_CameraPosition;
 	vec2 u_ViewportSize;
 };
+
+layout (std140, binding = 4) uniform Mesh
+{
+	MeshData u_Mesh[32];
+};
+
 
 layout (location = 0) out vec3 v_FragPos;
 layout (location = 1) out vec3 v_Normal;
@@ -31,10 +47,10 @@ void main()
 	v_Normal = a_Normal;
 	v_TexCoord = a_TexCoord;
 	v_EntityID = a_EntityID;
-	v_MaterialIndex = a_MaterialIndex;
+	v_MaterialIndex = v_MaterialIndex;
 	v_ViewPos = u_CameraPosition.xyz;
 
-	gl_Position = u_ViewProjection * vec4(a_Position, 1.0f);
+	gl_Position = u_Projection * u_View * a_InstanceModelMatrix * vec4(a_Position, 1.0f);
 }
 
 
@@ -110,7 +126,6 @@ layout (std140, binding = 3) uniform Material
 {
 	MaterialData u_Material[32];
 };
-
 
 layout(binding = 0) uniform sampler2D u_Textures[32];
 

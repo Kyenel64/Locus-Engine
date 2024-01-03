@@ -21,7 +21,8 @@ namespace Locus
 		// Camera
 		struct CameraData
 		{
-			glm::mat4 ViewProjection;
+			glm::mat4 View;
+			glm::mat4 Projection;
 			glm::vec4 CameraPosition;
 			glm::vec2 ViewportSize;
 		};
@@ -89,7 +90,8 @@ namespace Locus
 		RenderCommand::SetClearColor(camera.GetBackgroundColor());
 		RenderCommand::Clear();
 
-		s_Data.CameraBuffer.ViewProjection = camera.GetViewProjectionMatrix();
+		s_Data.CameraBuffer.View = camera.GetViewMatrix();
+		s_Data.CameraBuffer.Projection = camera.GetProjection();
 		s_Data.CameraBuffer.CameraPosition = { camera.GetPosition(), 1.0f };
 		s_Data.CameraBuffer.ViewportSize = camera.GetViewportSize();
 		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(RendererData::CameraData));
@@ -100,7 +102,8 @@ namespace Locus
 		RenderCommand::SetClearColor(camera.GetBackgroundColor());
 		RenderCommand::Clear();
 
-		s_Data.CameraBuffer.ViewProjection = camera.GetProjection() * glm::inverse(transform);
+		s_Data.CameraBuffer.View = glm::inverse(transform);
+		s_Data.CameraBuffer.Projection = camera.GetProjection();
 		s_Data.CameraBuffer.CameraPosition = { transform[3].x, transform[3].y, transform[3].z, 1.0f };
 		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(RendererData::CameraData));
 	}

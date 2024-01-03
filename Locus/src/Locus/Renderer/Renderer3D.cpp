@@ -11,66 +11,31 @@
 #include "Locus/Renderer/VertexArray.h"
 #include "Locus/Renderer/Shader.h"
 #include "Locus/Renderer/UniformBuffer.h"
+#include "Locus/Renderer/Mesh.h"
 
 namespace Locus
 {
-	struct CubeVertex
-	{
-		glm::vec3 WorldPosition;
-		glm::vec3 Normal;
-		glm::vec2 TexCoords;
-		int MaterialUniformIndex;
-		int EntityID;
-	};
-
-	struct MeshVertex
-	{
-		glm::vec3 WorldPosition;
-		glm::vec3 Normal;
-		glm::vec2 TexCoords;
-		int MaterialUniformIndex;
-		int EntityID;
-	};
-
 	struct Renderer3DData
 	{
-		static const uint32_t MaxCubes = 20000;
-		static const uint32_t MaxVertices = MaxCubes * 8;
-		static const uint32_t MaxIndices = MaxCubes * 36;
+		static const uint32_t MaxInstances = 20000;
+		static const uint32_t MaxCubeVertices = MaxInstances * 36;
 		static const uint32_t MaxTextureSlots = 32;
 		static const uint32_t MaxMaterialSlots = 32;
 
-		// Mesh
-		Ref<VertexArray> MeshVA;
-		Ref<VertexBuffer> MeshVB;
-		Ref<IndexBuffer> MeshIB;
+		Ref<Shader> PBRShader;
 
-		uint32_t MeshVertexCount = 0;
-		MeshVertex* MeshVertexBufferBase = nullptr;
-		MeshVertex* MeshVertexBufferPtr = nullptr;
-		uint32_t MeshIndexCount = 0;
-		uint32_t* MeshIndexBufferBase = nullptr;
-		uint32_t* MeshIndexBufferPtr = nullptr;
+		// Model
+		std::unordered_map<Ref<VertexArray>, std::vector<InstanceData>> Models;
 
 		// Cube
 		Ref<VertexArray> CubeVA;
 		Ref<VertexBuffer> CubeVB;
-		Ref<Shader> PBRShader;
-
-		uint32_t CubeVertexCount = 0;
-		CubeVertex* CubeVertexBufferBase = nullptr;
-		CubeVertex* CubeVertexBufferPtr = nullptr;
-
-		glm::vec4 CubeVertexPositions[36];
-		glm::vec3 CubeVertexNormals[36];
-		glm::vec2 CubeVertexTexCoords[36];
+		Ref<VertexBuffer> IndexVB;
 
 		// Grid
 		Ref<VertexArray> GridVA;
 		Ref<VertexBuffer> GridVB;
 		Ref<Shader> GridShader;
-		int GridVertexBuffer[6] = { 0, 1, 2, 2, 3, 0 };
-
 		struct GridData
 		{
 			glm::vec4 Color;
@@ -87,21 +52,10 @@ namespace Locus
 
 		// Textures
 		std::array<Ref<Texture2D>, MaxTextureSlots> TextureSlots;
-		uint32_t TextureSlotIndex = 1;
+		uint32_t TextureSlotIndex;
 		Ref<Texture2D> WhiteTexture;
 
 		// Material
-		struct MaterialData
-		{
-			Ref<Material> Material;
-
-			int AlbedoTexIndex;
-			int NormalMapTexIndex;
-			int MetallicTexIndex;
-			int RoughnessTexIndex;
-			int AOTexIndex;
-		};
-
 		struct MaterialBufferData
 		{
 			glm::vec4 Albedo;
@@ -115,49 +69,40 @@ namespace Locus
 			int RoughnessTexIndex;
 			int AOTexIndex;
 		};
-
 		MaterialBufferData MaterialBuffer[MaxMaterialSlots];
 		Ref<UniformBuffer> MaterialUniformBuffer;
-		std::array<MaterialData, MaxMaterialSlots> MaterialSlots;
 		uint32_t MaterialSlotIndex = 0;
+
+		//InstanceData InstanceBuffer[MaxCubes];
+		uint32_t InstanceIndex;
 	};
 
 	static Renderer3DData s_R3DData;
+
+	uint32_t Renderer3D::GetMaxInstances() { return s_R3DData.MaxInstances; }
 
 	void Renderer3D::Init()
 	{
 		LOCUS_PROFILE_FUNCTION();
 
-		// --- Mesh -----------------------------------------------------------
-		s_R3DData.MeshVA = VertexArray::Create();
-		s_R3DData.MeshIB = IndexBuffer::Create(nullptr, s_R3DData.MaxIndices);
-		s_R3DData.MeshVB = VertexBuffer::Create(s_R3DData.MaxVertices * sizeof(MeshVertex));
-		s_R3DData.MeshVB->SetLayout({
-			{ ShaderDataType::Float3, "a_Position" },
-			{ ShaderDataType::Float3, "a_Normal"},
-			{ ShaderDataType::Float2, "a_TexCoord"},
-			{ ShaderDataType::Int, "a_MaterialUniformIndex" },
-			{ ShaderDataType::Int, "a_EntityID" }
-			});
-		s_R3DData.MeshVA->AddVertexBuffer(s_R3DData.MeshVB);
-		s_R3DData.MeshVA->SetIndexBuffer(s_R3DData.MeshIB);
-		s_R3DData.MeshVertexBufferBase = new MeshVertex[s_R3DData.MaxVertices];
-		s_R3DData.MeshIndexBufferBase = new uint32_t[s_R3DData.MaxIndices];
-
 		// --- Cube -----------------------------------------------------------
 		// Vertex array
 		s_R3DData.CubeVA = VertexArray::Create();
 		// Vertex buffer
-		s_R3DData.CubeVB = VertexBuffer::Create(s_R3DData.MaxVertices * sizeof(CubeVertex));
+		s_R3DData.CubeVB = VertexBuffer::Create(s_R3DData.MaxCubeVertices * sizeof(MeshVertex));
+		s_R3DData.IndexVB = VertexBuffer::Create(s_R3DData.MaxInstances * sizeof(InstanceData));
 		s_R3DData.CubeVB->SetLayout({
 			{ ShaderDataType::Float3, "a_Position" },
-			{ ShaderDataType::Float3, "a_Normal"},
-			{ ShaderDataType::Float2, "a_TexCoord"},
-			{ ShaderDataType::Int, "a_MaterialUniformIndex" },
-			{ ShaderDataType::Int, "a_EntityID" }
-		});
+			{ ShaderDataType::Float3, "a_Normal" },
+			{ ShaderDataType::Float2, "a_TexCoord" }
+			});
+		s_R3DData.IndexVB->SetLayout({ 
+			{ ShaderDataType::Mat4, "a_InstanceModelMatrix", 1},
+			{ ShaderDataType::Int, "a_MaterialIndex", 1},
+			{ ShaderDataType::Int, "a_EntityID", 1}
+			});
 		s_R3DData.CubeVA->AddVertexBuffer(s_R3DData.CubeVB);
-		s_R3DData.CubeVertexBufferBase = new CubeVertex[s_R3DData.MaxVertices];
+		s_R3DData.CubeVA->AddVertexBuffer(s_R3DData.IndexVB);
 
 		// --- Grid -----------------------------------------------------------
 		s_R3DData.GridVA = VertexArray::Create();
@@ -167,152 +112,156 @@ namespace Locus
 			{ ShaderDataType::Int, "a_Index"}
 			});
 		s_R3DData.GridVA->AddVertexBuffer(s_R3DData.GridVB);
-		s_R3DData.GridVB->SetData(&s_R3DData.GridVertexBuffer, sizeof(int) * 6);
+		int gridVertexData[6] = { 0, 1, 2, 2, 3, 0 };
+		s_R3DData.GridVB->SetData(&gridVertexData, sizeof(int) * 6);
 
 		// --- Initializations ------------------------------------------------
 		s_R3DData.PBRShader = Shader::Create("resources/shaders/PBRShader.glsl");
 		s_R3DData.GridShader = Shader::Create("resources/shaders/GridShader.glsl");
 
 		// Define cube vertices and normals
+		MeshVertex* cubeVertices = new MeshVertex[36];
 #pragma region Cube vertex definitions
 		glm::vec4 vertexPos[8] = {};
 		vertexPos[0] = { -0.5f, -0.5f,  0.5f, 1.0f };
 		vertexPos[1] = { -0.5f,  0.5f,  0.5f, 1.0f };
-		vertexPos[2] = {  0.5f,  0.5f,  0.5f, 1.0f };
-		vertexPos[3] = {  0.5f, -0.5f,  0.5f, 1.0f };
+		vertexPos[2] = { 0.5f,  0.5f,  0.5f, 1.0f };
+		vertexPos[3] = { 0.5f, -0.5f,  0.5f, 1.0f };
 		vertexPos[4] = { -0.5f, -0.5f, -0.5f, 1.0f };
 		vertexPos[5] = { -0.5f,  0.5f, -0.5f, 1.0f };
-		vertexPos[6] = {  0.5f,  0.5f, -0.5f, 1.0f };
-		vertexPos[7] = {  0.5f, -0.5f, -0.5f, 1.0f };
+		vertexPos[6] = { 0.5f,  0.5f, -0.5f, 1.0f };
+		vertexPos[7] = { 0.5f, -0.5f, -0.5f, 1.0f };
 
-		s_R3DData.CubeVertexPositions[0] = vertexPos[0];
-		s_R3DData.CubeVertexPositions[1] = vertexPos[1];
-		s_R3DData.CubeVertexPositions[2] = vertexPos[2];
-		s_R3DData.CubeVertexPositions[3] = vertexPos[0];
-		s_R3DData.CubeVertexPositions[4] = vertexPos[2];
-		s_R3DData.CubeVertexPositions[5] = vertexPos[3];
-
-		s_R3DData.CubeVertexPositions[6] = vertexPos[4];
-		s_R3DData.CubeVertexPositions[7] = vertexPos[5];
-		s_R3DData.CubeVertexPositions[8] = vertexPos[1];
-		s_R3DData.CubeVertexPositions[9] = vertexPos[4];
-		s_R3DData.CubeVertexPositions[10] = vertexPos[1];
-		s_R3DData.CubeVertexPositions[11] = vertexPos[0];
-
-		s_R3DData.CubeVertexPositions[12] = vertexPos[7];
-		s_R3DData.CubeVertexPositions[13] = vertexPos[6];
-		s_R3DData.CubeVertexPositions[14] = vertexPos[5];
-		s_R3DData.CubeVertexPositions[15] = vertexPos[7];
-		s_R3DData.CubeVertexPositions[16] = vertexPos[5];
-		s_R3DData.CubeVertexPositions[17] = vertexPos[4];
-
-		s_R3DData.CubeVertexPositions[18] = vertexPos[3];
-		s_R3DData.CubeVertexPositions[19] = vertexPos[2];
-		s_R3DData.CubeVertexPositions[20] = vertexPos[6];
-		s_R3DData.CubeVertexPositions[21] = vertexPos[3];
-		s_R3DData.CubeVertexPositions[22] = vertexPos[6];
-		s_R3DData.CubeVertexPositions[23] = vertexPos[7];
-
-		s_R3DData.CubeVertexPositions[24] = vertexPos[1];
-		s_R3DData.CubeVertexPositions[25] = vertexPos[5];
-		s_R3DData.CubeVertexPositions[26] = vertexPos[6];
-		s_R3DData.CubeVertexPositions[27] = vertexPos[1];
-		s_R3DData.CubeVertexPositions[28] = vertexPos[6];
-		s_R3DData.CubeVertexPositions[29] = vertexPos[2];
-
-		s_R3DData.CubeVertexPositions[30] = vertexPos[0];
-		s_R3DData.CubeVertexPositions[31] = vertexPos[4];
-		s_R3DData.CubeVertexPositions[32] = vertexPos[7];
-		s_R3DData.CubeVertexPositions[33] = vertexPos[0];
-		s_R3DData.CubeVertexPositions[34] = vertexPos[7];
-		s_R3DData.CubeVertexPositions[35] = vertexPos[3];
-
-		s_R3DData.CubeVertexNormals[0] = { 0, 0, 1 };
-		s_R3DData.CubeVertexNormals[1] = { 0, 0, 1 };
-		s_R3DData.CubeVertexNormals[2] = { 0, 0, 1 };
-		s_R3DData.CubeVertexNormals[3] = { 0, 0, 1 };
-		s_R3DData.CubeVertexNormals[4] = { 0, 0, 1 };
-		s_R3DData.CubeVertexNormals[5] = { 0, 0, 1 };
-
-		s_R3DData.CubeVertexNormals[6] =  { -1, 0, 0 };
-		s_R3DData.CubeVertexNormals[7] =  { -1, 0, 0 };
-		s_R3DData.CubeVertexNormals[8] =  { -1, 0, 0 };
-		s_R3DData.CubeVertexNormals[9] =  { -1, 0, 0 };
-		s_R3DData.CubeVertexNormals[10] = { -1, 0, 0 };
-		s_R3DData.CubeVertexNormals[11] = { -1, 0, 0 };
-
-		s_R3DData.CubeVertexNormals[12] = { 0, 0, -1 };
-		s_R3DData.CubeVertexNormals[13] = { 0, 0, -1 };
-		s_R3DData.CubeVertexNormals[14] = { 0, 0, -1 };
-		s_R3DData.CubeVertexNormals[15] = { 0, 0, -1 };
-		s_R3DData.CubeVertexNormals[16] = { 0, 0, -1 };
-		s_R3DData.CubeVertexNormals[17] = { 0, 0, -1 };
-
-		s_R3DData.CubeVertexNormals[18] = { 1, 0, 0 };
-		s_R3DData.CubeVertexNormals[19] = { 1, 0, 0 };
-		s_R3DData.CubeVertexNormals[20] = { 1, 0, 0 };
-		s_R3DData.CubeVertexNormals[21] = { 1, 0, 0 };
-		s_R3DData.CubeVertexNormals[22] = { 1, 0, 0 };
-		s_R3DData.CubeVertexNormals[23] = { 1, 0, 0 };
-
-		s_R3DData.CubeVertexNormals[24] = { 0, 1, 0 };
-		s_R3DData.CubeVertexNormals[25] = { 0, 1, 0 };
-		s_R3DData.CubeVertexNormals[26] = { 0, 1, 0 };
-		s_R3DData.CubeVertexNormals[27] = { 0, 1, 0 };
-		s_R3DData.CubeVertexNormals[28] = { 0, 1, 0 };
-		s_R3DData.CubeVertexNormals[29] = { 0, 1, 0 };
-
-		s_R3DData.CubeVertexNormals[30] = { 0, -1, 0 };
-		s_R3DData.CubeVertexNormals[31] = { 0, -1, 0 };
-		s_R3DData.CubeVertexNormals[32] = { 0, -1, 0 };
-		s_R3DData.CubeVertexNormals[33] = { 0, -1, 0 };
-		s_R3DData.CubeVertexNormals[34] = { 0, -1, 0 };
-		s_R3DData.CubeVertexNormals[35] = { 0, -1, 0 };
-
-		s_R3DData.CubeVertexTexCoords[0] = { 0, 0 };
-		s_R3DData.CubeVertexTexCoords[1] = { 0, 1 };
-		s_R3DData.CubeVertexTexCoords[2] = { 1, 1 };
-		s_R3DData.CubeVertexTexCoords[3] = { 0, 0 };
-		s_R3DData.CubeVertexTexCoords[4] = { 1, 1 };
-		s_R3DData.CubeVertexTexCoords[5] = { 1, 0 };
-
-		s_R3DData.CubeVertexTexCoords[6]  = { 0, 0 };
-		s_R3DData.CubeVertexTexCoords[7]  = { 0, 1 };
-		s_R3DData.CubeVertexTexCoords[8]  = { 1, 1 };
-		s_R3DData.CubeVertexTexCoords[9]  = { 0, 0 };
-		s_R3DData.CubeVertexTexCoords[10] = { 1, 1 };
-		s_R3DData.CubeVertexTexCoords[11] = { 1, 0 };
-
-		s_R3DData.CubeVertexTexCoords[12] = { 0, 0 };
-		s_R3DData.CubeVertexTexCoords[13] = { 0, 1 };
-		s_R3DData.CubeVertexTexCoords[14] = { 1, 1 };
-		s_R3DData.CubeVertexTexCoords[15] = { 0, 0 };
-		s_R3DData.CubeVertexTexCoords[16] = { 1, 1 };
-		s_R3DData.CubeVertexTexCoords[17] = { 1, 0 };
-
-		s_R3DData.CubeVertexTexCoords[18] = { 0, 0 };
-		s_R3DData.CubeVertexTexCoords[19] = { 0, 1 };
-		s_R3DData.CubeVertexTexCoords[20] = { 1, 1 };
-		s_R3DData.CubeVertexTexCoords[21] = { 0, 0 };
-		s_R3DData.CubeVertexTexCoords[22] = { 1, 1 };
-		s_R3DData.CubeVertexTexCoords[23] = { 1, 0 };
-
-		s_R3DData.CubeVertexTexCoords[24] = { 0, 0 };
-		s_R3DData.CubeVertexTexCoords[25] = { 0, 1 };
-		s_R3DData.CubeVertexTexCoords[26] = { 1, 1 };
-		s_R3DData.CubeVertexTexCoords[27] = { 0, 0 };
-		s_R3DData.CubeVertexTexCoords[28] = { 1, 1 };
-		s_R3DData.CubeVertexTexCoords[29] = { 1, 0 };
-
-		s_R3DData.CubeVertexTexCoords[30] = { 0, 0 };
-		s_R3DData.CubeVertexTexCoords[31] = { 0, 1 };
-		s_R3DData.CubeVertexTexCoords[32] = { 1, 1 };
-		s_R3DData.CubeVertexTexCoords[33] = { 0, 0 };
-		s_R3DData.CubeVertexTexCoords[34] = { 1, 1 };
-		s_R3DData.CubeVertexTexCoords[35] = { 1, 0 };
+		cubeVertices[0].Position = vertexPos[0];
+		cubeVertices[1].Position = vertexPos[1];
+		cubeVertices[2].Position = vertexPos[2];
+		cubeVertices[3].Position = vertexPos[0];
+		cubeVertices[4].Position = vertexPos[2];
+		cubeVertices[5].Position = vertexPos[3];
+		
+		cubeVertices[6].Position = vertexPos[4];
+		cubeVertices[7].Position = vertexPos[5];
+		cubeVertices[8].Position = vertexPos[1];
+		cubeVertices[9].Position = vertexPos[4];
+		cubeVertices[10].Position = vertexPos[1];
+		cubeVertices[11].Position = vertexPos[0];
+		
+		cubeVertices[12].Position = vertexPos[7];
+		cubeVertices[13].Position = vertexPos[6];
+		cubeVertices[14].Position = vertexPos[5];
+		cubeVertices[15].Position = vertexPos[7];
+		cubeVertices[16].Position = vertexPos[5];
+		cubeVertices[17].Position = vertexPos[4];
+		
+		cubeVertices[18].Position = vertexPos[3];
+		cubeVertices[19].Position = vertexPos[2];
+		cubeVertices[20].Position = vertexPos[6];
+		cubeVertices[21].Position = vertexPos[3];
+		cubeVertices[22].Position = vertexPos[6];
+		cubeVertices[23].Position = vertexPos[7];
+		
+		cubeVertices[24].Position = vertexPos[1];
+		cubeVertices[25].Position = vertexPos[5];
+		cubeVertices[26].Position = vertexPos[6];
+		cubeVertices[27].Position = vertexPos[1];
+		cubeVertices[28].Position = vertexPos[6];
+		cubeVertices[29].Position = vertexPos[2];
+		
+		cubeVertices[30].Position = vertexPos[0];
+		cubeVertices[31].Position = vertexPos[4];
+		cubeVertices[32].Position = vertexPos[7];
+		cubeVertices[33].Position = vertexPos[0];
+		cubeVertices[34].Position = vertexPos[7];
+		cubeVertices[35].Position = vertexPos[3];
+		
+		cubeVertices[0].Normal = { 0, 0, 1 };
+		cubeVertices[1].Normal = { 0, 0, 1 };
+		cubeVertices[2].Normal = { 0, 0, 1 };
+		cubeVertices[3].Normal = { 0, 0, 1 };
+		cubeVertices[4].Normal = { 0, 0, 1 };
+		cubeVertices[5].Normal = { 0, 0, 1 };
+		
+		cubeVertices[6].Normal = { -1, 0, 0 };
+		cubeVertices[7].Normal = { -1, 0, 0 };
+		cubeVertices[8].Normal = { -1, 0, 0 };
+		cubeVertices[9].Normal = { -1, 0, 0 };
+		cubeVertices[10].Normal = { -1, 0, 0 };
+		cubeVertices[11].Normal = { -1, 0, 0 };
+		
+		cubeVertices[12].Normal = { 0, 0, -1 };
+		cubeVertices[13].Normal = { 0, 0, -1 };
+		cubeVertices[14].Normal = { 0, 0, -1 };
+		cubeVertices[15].Normal = { 0, 0, -1 };
+		cubeVertices[16].Normal = { 0, 0, -1 };
+		cubeVertices[17].Normal = { 0, 0, -1 };
+		
+		cubeVertices[18].Normal = { 1, 0, 0 };
+		cubeVertices[19].Normal = { 1, 0, 0 };
+		cubeVertices[20].Normal = { 1, 0, 0 };
+		cubeVertices[21].Normal = { 1, 0, 0 };
+		cubeVertices[22].Normal = { 1, 0, 0 };
+		cubeVertices[23].Normal = { 1, 0, 0 };
+		
+		cubeVertices[24].Normal = { 0, 1, 0 };
+		cubeVertices[25].Normal = { 0, 1, 0 };
+		cubeVertices[26].Normal = { 0, 1, 0 };
+		cubeVertices[27].Normal = { 0, 1, 0 };
+		cubeVertices[28].Normal = { 0, 1, 0 };
+		cubeVertices[29].Normal = { 0, 1, 0 };
+		
+		cubeVertices[30].Normal = { 0, -1, 0 };
+		cubeVertices[31].Normal = { 0, -1, 0 };
+		cubeVertices[32].Normal = { 0, -1, 0 };
+		cubeVertices[33].Normal = { 0, -1, 0 };
+		cubeVertices[34].Normal = { 0, -1, 0 };
+		cubeVertices[35].Normal = { 0, -1, 0 };
+		
+		cubeVertices[0].TexCoords = { 0, 0 };
+		cubeVertices[1].TexCoords = { 0, 1 };
+		cubeVertices[2].TexCoords = { 1, 1 };
+		cubeVertices[3].TexCoords = { 0, 0 };
+		cubeVertices[4].TexCoords = { 1, 1 };
+		cubeVertices[5].TexCoords = { 1, 0 };
+		
+		cubeVertices[6].TexCoords = { 0, 0 };
+		cubeVertices[7].TexCoords = { 0, 1 };
+		cubeVertices[8].TexCoords = { 1, 1 };
+		cubeVertices[9].TexCoords = { 0, 0 };
+		cubeVertices[10].TexCoords = { 1, 1 };
+		cubeVertices[11].TexCoords = { 1, 0 };
+		
+		cubeVertices[12].TexCoords = { 0, 0 };
+		cubeVertices[13].TexCoords = { 0, 1 };
+		cubeVertices[14].TexCoords = { 1, 1 };
+		cubeVertices[15].TexCoords = { 0, 0 };
+		cubeVertices[16].TexCoords = { 1, 1 };
+		cubeVertices[17].TexCoords = { 1, 0 };
+		
+		cubeVertices[18].TexCoords = { 0, 0 };
+		cubeVertices[19].TexCoords = { 0, 1 };
+		cubeVertices[20].TexCoords = { 1, 1 };
+		cubeVertices[21].TexCoords = { 0, 0 };
+		cubeVertices[22].TexCoords = { 1, 1 };
+		cubeVertices[23].TexCoords = { 1, 0 };
+		
+		cubeVertices[24].TexCoords = { 0, 0 };
+		cubeVertices[25].TexCoords = { 0, 1 };
+		cubeVertices[26].TexCoords = { 1, 1 };
+		cubeVertices[27].TexCoords = { 0, 0 };
+		cubeVertices[28].TexCoords = { 1, 1 };
+		cubeVertices[29].TexCoords = { 1, 0 };
+		
+		cubeVertices[30].TexCoords = { 0, 0 };
+		cubeVertices[31].TexCoords = { 0, 1 };
+		cubeVertices[32].TexCoords = { 1, 1 };
+		cubeVertices[33].TexCoords = { 0, 0 };
+		cubeVertices[34].TexCoords = { 1, 1 };
+		cubeVertices[35].TexCoords = { 1, 0 };
 
 #pragma endregion Cube vertex definitions
-		
+		s_R3DData.CubeVB->SetData(&cubeVertices[0], sizeof(MeshVertex) * 36);
+		delete[] cubeVertices;
+
 		// Uniform buffers
 		s_R3DData.GridUniformBuffer = UniformBuffer::Create(sizeof(Renderer3DData::GridData), 1);
 		s_R3DData.SceneLightingUniformBuffer = UniformBuffer::Create(sizeof(SceneLighting), 2);
@@ -328,10 +277,6 @@ namespace Locus
 	void Renderer3D::Shutdown()
 	{
 		LOCUS_PROFILE_FUNCTION();
-
-		delete[] s_R3DData.CubeVertexBufferBase;
-		delete[] s_R3DData.MeshVertexBufferBase;
-		delete[] s_R3DData.MeshIndexBufferBase;
 	}
 
 	void Renderer3D::BeginScene(const EditorCamera& camera, Scene* scene)
@@ -374,17 +319,10 @@ namespace Locus
 	{
 		LOCUS_PROFILE_FUNCTION();
 
-		s_R3DData.CubeVertexCount = 0;
-		s_R3DData.CubeVertexBufferPtr = s_R3DData.CubeVertexBufferBase;
-
-		s_R3DData.MeshVertexCount = 0;
-		s_R3DData.MeshVertexBufferPtr = s_R3DData.MeshVertexBufferBase;
-
-		s_R3DData.MeshIndexCount = 0;
-		s_R3DData.MeshIndexBufferPtr = s_R3DData.MeshIndexBufferBase;
-
 		s_R3DData.TextureSlotIndex = 1;
 		s_R3DData.MaterialSlotIndex = 0;
+		s_R3DData.InstanceIndex = 0;
+		s_R3DData.Models.clear();
 	}
 
 	void Renderer3D::Flush()
@@ -393,44 +331,19 @@ namespace Locus
 
 		// Bind textures and uniforms
 		for (uint32_t i = 0; i < s_R3DData.TextureSlotIndex; i++)
-		{
 			s_R3DData.TextureSlots[i]->Bind(i);
-		}
-		for (uint32_t i = 0; i < s_R3DData.MaterialSlotIndex; i++)
+		// Materials
+		s_R3DData.MaterialUniformBuffer->SetData(&s_R3DData.MaterialBuffer[0], sizeof(Renderer3DData::MaterialBufferData) * s_R3DData.MaterialSlotIndex);
+
+		s_R3DData.PBRShader->Bind();
+
+		for (auto& [ va, instanceData ] : s_R3DData.Models)
 		{
-			s_R3DData.MaterialBuffer[i].Albedo = glm::vec4(s_R3DData.MaterialSlots[i].Material->m_Albedo, 1.0f);
-			s_R3DData.MaterialBuffer[i].Metallic = s_R3DData.MaterialSlots[i].Material->m_Metallic;
-			s_R3DData.MaterialBuffer[i].Roughness = s_R3DData.MaterialSlots[i].Material->m_Roughness;
-			s_R3DData.MaterialBuffer[i].AO = s_R3DData.MaterialSlots[i].Material->m_AO;
-			s_R3DData.MaterialBuffer[i].AlbedoTexIndex = s_R3DData.MaterialSlots[i].AlbedoTexIndex;
-			s_R3DData.MaterialBuffer[i].NormalMapTexIndex = s_R3DData.MaterialSlots[i].NormalMapTexIndex;
-			s_R3DData.MaterialBuffer[i].MetallicTexIndex = s_R3DData.MaterialSlots[i].MetallicTexIndex;
-			s_R3DData.MaterialBuffer[i].RoughnessTexIndex = s_R3DData.MaterialSlots[i].RoughnessTexIndex;
-			s_R3DData.MaterialBuffer[i].AOTexIndex = s_R3DData.MaterialSlots[i].AOTexIndex;
-		}
-		s_R3DData.MaterialUniformBuffer->SetData(&s_R3DData.MaterialBuffer, sizeof(Renderer3DData::MaterialData) * s_R3DData.MaxMaterialSlots);
-
-		// Cube
-		if (s_R3DData.CubeVertexCount)
-		{
-			uint32_t dataSize = (uint32_t)((uint8_t*)s_R3DData.CubeVertexBufferPtr - (uint8_t*)s_R3DData.CubeVertexBufferBase);
-			s_R3DData.CubeVB->SetData(s_R3DData.CubeVertexBufferBase, dataSize);
-
-			s_R3DData.PBRShader->Bind();
-			RenderCommand::DrawArray(s_R3DData.CubeVA, s_R3DData.CubeVertexCount);
-			RendererStats::GetStats().DrawCalls++;
-		}
-
-		// Mesh
-		if (s_R3DData.MeshIndexCount)
-		{
-			uint32_t vDataSize = (uint32_t)((uint8_t*)s_R3DData.MeshVertexBufferPtr - (uint8_t*)s_R3DData.MeshVertexBufferBase);
-			s_R3DData.MeshVB->SetData(s_R3DData.MeshVertexBufferBase, vDataSize);
-			uint32_t iDataSize = (uint32_t)((uint8_t*)s_R3DData.MeshIndexBufferPtr - (uint8_t*)s_R3DData.MeshIndexBufferBase);
-			s_R3DData.MeshIB->SetData(s_R3DData.MeshIndexBufferBase, iDataSize);
-
-			s_R3DData.PBRShader->Bind();
-			RenderCommand::DrawArray(s_R3DData.MeshVA, s_R3DData.MeshIndexCount);
+			va->GetVertexBuffers()[1]->SetData(instanceData.data(), static_cast<uint32_t>(instanceData.size() * sizeof(InstanceData)));
+			if (va->GetIndexBuffer())
+				RenderCommand::DrawIndexedInstanced(va, va->GetIndexBuffer()->GetCount(), static_cast<uint32_t>(instanceData.size()));
+			else
+				RenderCommand::DrawArrayInstanced(va, 36, static_cast<uint32_t>(instanceData.size())); // Temp for cubes
 			RendererStats::GetStats().DrawCalls++;
 		}
 	}
@@ -441,73 +354,25 @@ namespace Locus
 
 		EndScene();
 		
-		s_R3DData.CubeVertexCount = 0;
-		s_R3DData.CubeVertexBufferPtr = s_R3DData.CubeVertexBufferBase;
-
-		s_R3DData.MeshVertexCount = 0;
-		s_R3DData.MeshVertexBufferPtr = s_R3DData.MeshVertexBufferBase;
-
-		s_R3DData.MeshIndexCount = 0;
-		s_R3DData.MeshIndexBufferPtr = s_R3DData.MeshIndexBufferBase;
-
 		s_R3DData.TextureSlotIndex = 1;
 		s_R3DData.MaterialSlotIndex = 0;
+		s_R3DData.InstanceIndex = 0;
+		s_R3DData.Models.clear();
 	}
 
-	void Renderer3D::DrawCube(const glm::mat4& transform, const CubeRendererComponent& crc, int entityID)
+	void Renderer3D::DrawCube(const glm::mat4& transform, Ref<Material> material, int entityID)
+	{
+		DrawModel(transform, s_R3DData.CubeVA, material, entityID);
+	}
+
+	void Renderer3D::DrawModel(const glm::mat4& transform, Ref<VertexArray> va, Ref<Material> material, int entityID)
 	{
 		LOCUS_PROFILE_FUNCTION();
 
-		if (s_R3DData.CubeVertexCount >= Renderer3DData::MaxVertices)
+		if (s_R3DData.InstanceIndex >= s_R3DData.MaxInstances)
 			FlushAndReset();
 
 		// Add texture to texture slot. Handles duplicates.
-		int albedoTexIndex = ProcessTextureSlot(crc.AlbedoTexture);
-		int normalTexIndex = ProcessTextureSlot(crc.NormalTexture);
-		int metallicTexIndex = ProcessTextureSlot(crc.MetallicTexture);
-		int roughnessTexIndex = ProcessTextureSlot(crc.RoughnessTexture);
-		int aoTexIndex = ProcessTextureSlot(crc.AOTexture);
-
-		// Material uniform data
-		// Temp: Create material data until cube renderer component has materials.
-		Ref<Material> material = CreateRef<Material>();
-		material->m_Albedo = crc.Albedo;
-		material->m_AlbedoTexture = crc.AlbedoTexture;
-		material->m_NormalMapTexture = crc.NormalTexture;
-		material->m_Metallic = crc.Metallic;
-		material->m_MetallicTexture = crc.MetallicTexture;
-		material->m_Roughness = crc.Roughness;
-		material->m_RoughnessTexture = crc.RoughnessTexture;
-		material->m_AO = crc.AO;
-		material->m_AOTexture = crc.AOTexture;
-		int materialUniformIndex = ProcessMaterialSlot(material, albedoTexIndex, normalTexIndex, metallicTexIndex, roughnessTexIndex, aoTexIndex);
-		
-		for (uint32_t i = 0; i < 36; i++)
-		{
-			s_R3DData.CubeVertexBufferPtr->WorldPosition = transform * s_R3DData.CubeVertexPositions[i];
-			s_R3DData.CubeVertexBufferPtr->Normal = s_R3DData.CubeVertexNormals[i];
-			s_R3DData.CubeVertexBufferPtr->TexCoords = s_R3DData.CubeVertexTexCoords[i];
-			s_R3DData.CubeVertexBufferPtr->MaterialUniformIndex = materialUniformIndex;
-			s_R3DData.CubeVertexBufferPtr->EntityID = entityID;
-			s_R3DData.CubeVertexBufferPtr++;
-		}
-
-		s_R3DData.CubeVertexCount += 36;
-
-		RendererStats::GetStats().CubeCount++;
-	}
-
-	void Renderer3D::DrawMesh(const glm::mat4& transform, const Mesh& mesh, Ref<Material> material, int entityID)
-	{
-		LOCUS_PROFILE_FUNCTION();
-
-		if (s_R3DData.MeshIndexCount + mesh.GetIndices().size() >= Renderer3DData::MaxIndices || 
-			s_R3DData.MeshVertexCount + mesh.GetVertices().size() >= Renderer3DData::MaxVertices)
-			FlushAndReset();
-
-		// If texture is not in GPU memory, add texture.
-		// If texture is already in GPU memory, return the slot index of that texture.
-		// If texture limit is reached, flush and reset.
 		int albedoTexIndex = ProcessTextureSlot(material->m_AlbedoTexture);
 		int normalTexIndex = ProcessTextureSlot(material->m_NormalMapTexture);
 		int metallicTexIndex = ProcessTextureSlot(material->m_MetallicTexture);
@@ -515,60 +380,34 @@ namespace Locus
 		int aoTexIndex = ProcessTextureSlot(material->m_AOTexture);
 
 		// Material uniform data
-		int materialUniformIndex = ProcessMaterialSlot(material, albedoTexIndex, normalTexIndex, metallicTexIndex, roughnessTexIndex, aoTexIndex);
+		int materialIndex = ProcessMaterialSlot(material, albedoTexIndex, normalTexIndex, metallicTexIndex, roughnessTexIndex, aoTexIndex);
 
-		const std::vector<ImportedMeshVertex>& vertices = mesh.GetVertices();
-		const std::vector<uint32_t>& indices = mesh.GetIndices();
-		{
-			LOCUS_PROFILE_SCOPE("Set Vertexbuffer data");
-				
-			for (uint32_t i = 0; i < vertices.size(); i++)
-			{
-				//s_R3DData.MeshVertexBufferPtr->WorldPosition = transform * glm::vec4(vertices[i].Position, 1.0f);
-				s_R3DData.MeshVertexBufferPtr->WorldPosition = vertices[i].Position;
-				s_R3DData.MeshVertexBufferPtr->Normal = vertices[i].Normal;
-				s_R3DData.MeshVertexBufferPtr->TexCoords = vertices[i].TexCoord;
-				s_R3DData.MeshVertexBufferPtr->MaterialUniformIndex = materialUniformIndex;
-				s_R3DData.MeshVertexBufferPtr->EntityID = entityID;
-				s_R3DData.MeshVertexBufferPtr++;
-			}
-		}
-		{
-			LOCUS_PROFILE_SCOPE("Set Indexbuffer data");
-			for (uint32_t i = 0; i < indices.size(); i++)
-			{
-				*s_R3DData.MeshIndexBufferPtr = indices[i];
-				s_R3DData.MeshIndexBufferPtr++;
-			}
-		}
+		// Instance data
+		InstanceData data = {};
+		data.ModelMatrix = transform;
+		data.MaterialIndex = materialIndex;
+		data.EntityID = entityID;
+		s_R3DData.Models[va].push_back(data);
 		
-		s_R3DData.MeshVertexCount += vertices.size();
-		s_R3DData.MeshIndexCount += indices.size();
-	}
-
-	void Renderer3D::DrawModel(const glm::mat4& transform, Ref<Model> model, Ref<Material> material, int entityID)
-	{
-		std::vector<Mesh>& meshes = model->GetMeshes();
-		for (int i = 0; i < meshes.size(); i++)
-			DrawMesh(transform, meshes[i], material, entityID);
+		s_R3DData.InstanceIndex++;
 	}
 
 	void Renderer3D::DrawCubeMask(const glm::mat4& transform, Ref<Shader> shader)
 	{
-		s_R3DData.CubeVertexCount = 0;
-		s_R3DData.CubeVertexBufferPtr = s_R3DData.CubeVertexBufferBase;
-
-		for (uint32_t i = 0; i < 36; i++)
-		{
-			s_R3DData.CubeVertexBufferPtr->WorldPosition = transform * s_R3DData.CubeVertexPositions[i];
-			s_R3DData.CubeVertexBufferPtr++;
-		}
-		s_R3DData.CubeVB->SetData(s_R3DData.CubeVertexBufferBase, sizeof(CubeVertex) * 36);
-
-		shader->Bind();
-		RenderCommand::DrawArray(s_R3DData.CubeVA, 36);
-
-		RendererStats::GetStats().DrawCalls++;
+		//s_R3DData.CubeVertexCount = 0;
+		//s_R3DData.CubeVertexBufferPtr = s_R3DData.CubeVertexBufferBase;
+		//
+		//for (uint32_t i = 0; i < 36; i++)
+		//{
+		//	s_R3DData.CubeVertexBufferPtr->WorldPosition = transform * s_R3DData.CubeVertexPositions[i];
+		//	s_R3DData.CubeVertexBufferPtr++;
+		//}
+		//s_R3DData.CubeVB->SetData(s_R3DData.CubeVertexBufferBase, sizeof(CubeVertex) * 36);
+		//
+		//shader->Bind();
+		//RenderCommand::DrawArray(s_R3DData.CubeVA, 36);
+		//
+		//RendererStats::GetStats().DrawCalls++;
 	}
 
 	void Renderer3D::DrawGrid()
@@ -611,19 +450,22 @@ namespace Locus
 		{
 			for (uint32_t i = 1; i < s_R3DData.MaterialSlotIndex; i++)
 			{
-				if (*s_R3DData.MaterialSlots[i].Material.get() == *material.get())
+				if (s_R3DData.MaterialBuffer[i].Albedo == glm::vec4(material->m_Albedo, 1.0f))
 					return i;
 			}
 			if (s_R3DData.MaterialSlotIndex >= Renderer3DData::MaxMaterialSlots - 1)
 				FlushAndReset();
 
 			int slot = s_R3DData.MaterialSlotIndex;
-			s_R3DData.MaterialSlots[slot].Material = material;
-			s_R3DData.MaterialSlots[slot].AlbedoTexIndex = albedoIndex;
-			s_R3DData.MaterialSlots[slot].NormalMapTexIndex = normalIndex;
-			s_R3DData.MaterialSlots[slot].MetallicTexIndex = metallicIndex;
-			s_R3DData.MaterialSlots[slot].RoughnessTexIndex = roughnessIndex;
-			s_R3DData.MaterialSlots[slot].AOTexIndex = aoIndex;
+			s_R3DData.MaterialBuffer[slot].Albedo = glm::vec4(material->m_Albedo, 1.0f);
+			s_R3DData.MaterialBuffer[slot].Metallic = material->m_Metallic;
+			s_R3DData.MaterialBuffer[slot].Roughness = material->m_Roughness;
+			s_R3DData.MaterialBuffer[slot].AO = material->m_AO;
+			s_R3DData.MaterialBuffer[slot].AlbedoTexIndex = albedoIndex;
+			s_R3DData.MaterialBuffer[slot].NormalMapTexIndex = normalIndex;
+			s_R3DData.MaterialBuffer[slot].MetallicTexIndex = metallicIndex;
+			s_R3DData.MaterialBuffer[slot].RoughnessTexIndex = roughnessIndex;
+			s_R3DData.MaterialBuffer[slot].AOTexIndex = aoIndex;
 			s_R3DData.MaterialSlotIndex++;
 		}
 

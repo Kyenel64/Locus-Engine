@@ -67,7 +67,6 @@ namespace Locus
 
 		for (const auto& element : layout)
 		{
-			glEnableVertexAttribArray(m_VertexBufferIndex);
 			switch (element.Type)
 			{
 				case ShaderDataType::Int:
@@ -76,8 +75,12 @@ namespace Locus
 				case ShaderDataType::Int4:
 				case ShaderDataType::Bool:
 				{
+					glEnableVertexAttribArray(m_VertexBufferIndex);
+
 					glVertexAttribIPointer(m_VertexBufferIndex, element.GetComponentCount(), ShaderDataTypeToOpenGLBaseType(element.Type), 
 						layout.GetStride(), (const void*)(size_t)element.Offset);
+					if (element.Instanced)
+						glVertexAttribDivisor(m_VertexBufferIndex, element.Instanced);
 					m_VertexBufferIndex++;
 					break;
 				}
@@ -85,18 +88,48 @@ namespace Locus
 				case ShaderDataType::Float2:
 				case ShaderDataType::Float3:
 				case ShaderDataType::Float4:
-				case ShaderDataType::Mat3:
-				case ShaderDataType::Mat4:
 				{
+					glEnableVertexAttribArray(m_VertexBufferIndex);
+
 					glVertexAttribPointer(m_VertexBufferIndex, element.GetComponentCount(), ShaderDataTypeToOpenGLBaseType(element.Type),
 						element.Normalized ? GL_TRUE : GL_FALSE, layout.GetStride(), (const void*)(size_t)element.Offset);
+					if (element.Instanced)
+						glVertexAttribDivisor(m_VertexBufferIndex, element.Instanced);
 					m_VertexBufferIndex++;
+					break;
+				}
+				case ShaderDataType::Mat4:
+				{
+					glEnableVertexAttribArray(m_VertexBufferIndex);
+					glEnableVertexAttribArray(m_VertexBufferIndex + 1);
+					glEnableVertexAttribArray(m_VertexBufferIndex + 2);
+					glEnableVertexAttribArray(m_VertexBufferIndex + 3);
+					glVertexAttribPointer(m_VertexBufferIndex + 0, 4, ShaderDataTypeToOpenGLBaseType(element.Type),
+						element.Normalized ? GL_TRUE : GL_FALSE, layout.GetStride(), (const void*)(size_t)element.Offset);
+					glVertexAttribPointer(m_VertexBufferIndex + 1, 4, ShaderDataTypeToOpenGLBaseType(element.Type),
+						element.Normalized ? GL_TRUE : GL_FALSE, layout.GetStride(), (const void*)((size_t)element.Offset + (sizeof(float) * 4)));
+					glVertexAttribPointer(m_VertexBufferIndex + 2, 4, ShaderDataTypeToOpenGLBaseType(element.Type),
+						element.Normalized ? GL_TRUE : GL_FALSE, layout.GetStride(), (const void*)((size_t)element.Offset + (sizeof(float) * 8)));
+					glVertexAttribPointer(m_VertexBufferIndex + 3, 4, ShaderDataTypeToOpenGLBaseType(element.Type),
+						element.Normalized ? GL_TRUE : GL_FALSE, layout.GetStride(), (const void*)((size_t)element.Offset + (sizeof(float) * 12)));
+
+					if (element.Instanced)
+					{
+						glVertexAttribDivisor(m_VertexBufferIndex, element.Instanced);
+						glVertexAttribDivisor(m_VertexBufferIndex + 1, element.Instanced);
+						glVertexAttribDivisor(m_VertexBufferIndex + 2, element.Instanced);
+						glVertexAttribDivisor(m_VertexBufferIndex + 3, element.Instanced);
+					}
+					
+					
+					m_VertexBufferIndex += 4;
 					break;
 				}
 				default: LOCUS_CORE_ASSERT(false, "Unknown ShaderDataType!");
 			}
 		}
 		m_VertexBuffers.push_back(vertexBuffer);
+		glBindVertexArray(0);
 	}
 
 	void OpenGLVertexArray::SetIndexBuffer(const Ref<IndexBuffer>& indexBuffer)
@@ -107,5 +140,6 @@ namespace Locus
 		indexBuffer->Bind();
 
 		m_IndexBuffer = indexBuffer;
+		glBindVertexArray(0);
 	}
 }

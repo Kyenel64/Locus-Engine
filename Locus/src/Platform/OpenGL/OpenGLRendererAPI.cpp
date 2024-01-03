@@ -58,6 +58,18 @@ namespace Locus
 		glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 	}
 
+	void OpenGLRendererAPI::DrawIndexedInstanced(const Ref<VertexArray>& vertexArray, uint32_t indexCount, uint32_t instanceCount, uint32_t instanceBase)
+	{
+		vertexArray->Bind();
+		glDrawElementsInstancedBaseInstance(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr, instanceCount, instanceBase);
+	}
+
+	void OpenGLRendererAPI::DrawArrayInstanced(const Ref<VertexArray>& vertexArray, uint32_t vertexCount, uint32_t instanceCount, uint32_t instanceBase)
+	{
+		vertexArray->Bind();
+		glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, vertexCount, instanceCount, instanceBase);
+	}
+
 	void OpenGLRendererAPI::DrawLine(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)
 	{
 		vertexArray->Bind();

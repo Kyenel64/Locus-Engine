@@ -25,12 +25,13 @@ namespace Locus
 		static void FlushAndReset();
 
 		// TODO: Take in optional shader for custom shaders
-		static void DrawCube(const glm::mat4& transform, const CubeRendererComponent& crc, int entityID);
-		static void DrawMesh(const glm::mat4& transform, const Mesh& mesh, Ref<Material> material, int entityID);
-		static void DrawModel(const glm::mat4& transform, Ref<Model> model, Ref<Material> material, int entityID);
+		static void DrawCube(const glm::mat4& transform, Ref<Material> material, int entityID);
+		static void DrawModel(const glm::mat4& transform, Ref<VertexArray> va, Ref<Material> material, int entityID);
 
 		static void DrawCubeMask(const glm::mat4& transform, Ref<Shader> shader);
 		static void DrawGrid();
+
+		static uint32_t GetMaxInstances();
 
 	private:
 		static int ProcessTextureSlot(Ref<Texture2D> texture);

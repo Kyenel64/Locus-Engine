@@ -99,8 +99,6 @@ namespace Locus
 		glm::vec2 m_ViewportBounds[2];
 
 		// Overlay
-		glm::vec4 m_CollisionMeshColor;
-		glm::vec4 m_FocusOutlineColor;
 		bool m_ShowAllCollisionMesh = false;
 		glm::vec2 m_ActiveCameraViewportSize;
 		Ref<Framebuffer> m_ActiveCameraFramebuffer;

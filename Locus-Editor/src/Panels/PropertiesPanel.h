@@ -18,9 +18,6 @@ namespace Locus
 
 		void OnImGuiRender();
 
-		Entity GetSelectedEntity() const { return m_SelectedEntity; }
-		void SetSelectedEntity(Entity entity) { m_SelectedEntity = entity; }
-
 	private:
 		void DrawComponents(Entity entity);
 		template<typename T, typename UIFunction>
@@ -34,7 +31,6 @@ namespace Locus
 
 	private:
 		Ref<Scene> m_ActiveScene;
-		Entity m_SelectedEntity;
 
 		std::filesystem::path m_ProjectDirectory;
 

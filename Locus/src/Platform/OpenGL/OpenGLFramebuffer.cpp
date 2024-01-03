@@ -137,9 +137,11 @@ namespace Locus
 	int OpenGLFramebuffer::ReadPixel(uint32_t attachmentIndex, int x, int y)
 	{
 		LOCUS_CORE_ASSERT(attachmentIndex < m_ColorAttachments.size(), "Attachment Index out of bounds!");
+		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
 		glReadBuffer(GL_COLOR_ATTACHMENT0 + attachmentIndex);
 		int pixelData;
 		glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &pixelData);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		return pixelData;
 	}
 

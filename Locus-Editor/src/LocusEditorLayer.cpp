@@ -11,6 +11,8 @@
 
 namespace Locus
 {
+	extern Entity g_SelectedEntity = {};
+
 	LocusEditorLayer::LocusEditorLayer()
 		: Layer("LocusEditorLayer")
 	{
@@ -85,9 +87,6 @@ namespace Locus
 		m_EditorCamera = EditorCamera(30.0f, 1920.0f / 1080.0f, 0.1f, 10000.0f);
 
 		m_WindowSize = { Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight() };
-
-		m_CollisionMeshColor = ToGLMVec4(LocusColors::LightBlue);
-		m_FocusOutlineColor = ToGLMVec4(LocusColors::Green);
 	}
 
 	void LocusEditorLayer::OnDetach()
@@ -156,28 +155,8 @@ namespace Locus
 			}
 		}
 
-		// Read pixel
-		auto [mx, my] = ImGui::GetMousePos();
-		mx -= m_ViewportBounds[0].x;
-		my -= m_ViewportBounds[0].y;
-		my = m_ViewportSize.y - my;
-		int mouseX = (int)mx;
-		int mouseY = (int)my;
-
-		// Set hovered and selected entity
-		m_HoveredEntity = {};
-		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)m_ViewportSize.x && mouseY < (int)m_ViewportSize.y)
-		{
-			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY); // TODO: This is really slow??
-			m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
-		}
-		m_SelectedEntity = m_SceneHierarchyPanel->GetSelectedEntity();
-		if (!m_SelectedEntity.IsValid())
-			m_SelectedEntity = {};
-		m_PropertiesPanel->SetSelectedEntity(m_SelectedEntity);
-
 		// Gizmo visibility
-		if (m_SelectedEntity.IsValid())
+		if (g_SelectedEntity.IsValid())
 			m_GizmoVisible = true;
 		else
 			m_GizmoVisible = false;
@@ -226,7 +205,7 @@ namespace Locus
 
 	void LocusEditorLayer::OnRenderOverlay()
 	{
-		if (m_SelectedEntity.IsValid())
+		if (g_SelectedEntity.IsValid())
 			Renderer::DrawPostProcess(m_MaskTexture, OutlinePostProcessShader);
 	}
 
@@ -275,8 +254,8 @@ namespace Locus
 			{
 				if (control)
 				{
-					if (m_SelectedEntity)
-						m_ClipboardEntity = m_SelectedEntity;
+					if (g_SelectedEntity)
+						m_ClipboardEntity = g_SelectedEntity;
 				}
 				break;
 			}
@@ -285,8 +264,8 @@ namespace Locus
 			{
 				if (control)
 				{
-					if (m_ClipboardEntity.IsValid())
-						CommandHistory::AddCommand(new DuplicateEntityCommand(m_ActiveScene, m_ClipboardEntity));
+					if (g_SelectedEntity.IsValid())
+						CommandHistory::AddCommand(new DuplicateEntityCommand(m_ActiveScene, g_SelectedEntity));
 				}
 				break;
 			}
@@ -295,24 +274,24 @@ namespace Locus
 			{
 				if (control)
 				{
-					if (m_SelectedEntity)
-						CommandHistory::AddCommand(new DuplicateEntityCommand(m_ActiveScene, m_SelectedEntity));
+					if (g_SelectedEntity)
+						CommandHistory::AddCommand(new DuplicateEntityCommand(m_ActiveScene, g_SelectedEntity));
 				}
 				break;
 			}
 
 			case Key::Delete:
 			{
-				if (m_SelectedEntity)
-					CommandHistory::AddCommand(new DestroyEntityCommand(m_ActiveScene, m_SelectedEntity));
+				if (g_SelectedEntity)
+					CommandHistory::AddCommand(new DestroyEntityCommand(m_ActiveScene, g_SelectedEntity));
 				break;
 			}
 
 			case Key::F:
 			{
-				if (m_SelectedEntity)
+				if (g_SelectedEntity)
 				{
-					glm::mat4 transform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
+					glm::mat4 transform = m_ActiveScene->GetWorldTransform(g_SelectedEntity);
 					glm::vec3 position;
 					Math::Decompose(transform, glm::vec3(), glm::quat(), position);
 					m_EditorCamera.SetFocalPoint(position);
@@ -365,12 +344,20 @@ namespace Locus
 
 	bool LocusEditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& e)
 	{
+		auto [mx, my] = ImGui::GetMousePos();
+		mx -= m_ViewportBounds[0].x;
+		my -= m_ViewportBounds[0].y;
+		my = m_ViewportSize.y - my;
+		int mouseX = (int)mx;
+		int mouseY = (int)my;
+
 		if (e.GetMouseButton() == Mouse::ButtonLeft)
 		{
-			if (m_ViewportHovered && (!ImGuizmo::IsOver() || ImGuizmo::IsOver() && !m_GizmoVisible))
+			if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)m_ViewportSize.x && mouseY < (int)m_ViewportSize.y 
+				&& m_ViewportHovered && (!ImGuizmo::IsOver() || ImGuizmo::IsOver() && !m_GizmoVisible))
 			{
-				m_SceneHierarchyPanel->SetSelectedEntity(m_HoveredEntity);
-				m_SelectedEntity = m_HoveredEntity;
+				int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY); // TODO: This is really slow??
+				g_SelectedEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 				m_GizmoFirstClick = true;
 			}
 		}
@@ -381,7 +368,7 @@ namespace Locus
 	{
 		if (m_SceneState != SceneState::Edit)
 			OnSceneStop();
-		m_SelectedEntity = {};
+		g_SelectedEntity = {};
 		m_HoveredEntity = {};
 		m_EditorScene = CreateRef<Scene>();
 		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
@@ -404,7 +391,7 @@ namespace Locus
 	{
 		if (m_SceneState != SceneState::Edit)
 			OnSceneStop();
-		m_SelectedEntity = {};
+		g_SelectedEntity = {};
 		m_HoveredEntity = {};
 		m_EditorScene = CreateRef<Scene>();
 		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
@@ -476,8 +463,8 @@ namespace Locus
 		}
 
 		// Entity transform
-		auto& tc = m_SelectedEntity.GetComponent<TransformComponent>();
-		glm::mat4& transform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
+		auto& tc = g_SelectedEntity.GetComponent<TransformComponent>();
+		glm::mat4& transform = m_ActiveScene->GetWorldTransform(g_SelectedEntity);
 
 		// Snapping
 		bool snap = Input::IsKeyHeld(Key::LeftControl);
@@ -573,7 +560,7 @@ namespace Locus
 
 	void LocusEditorLayer::OnSceneStop()
 	{
-		m_SelectedEntity = {};
+		g_SelectedEntity = {};
 		m_SceneState = SceneState::Edit;
 		ScriptEngine::OnRuntimeStop();
 		m_ActiveScene->OnRuntimeStop();
@@ -655,7 +642,7 @@ namespace Locus
 
 		// --- Gizmo ---
 		// Checks for first click to prevent moving the object when selecting an entity.
-		if (m_SelectedEntity && m_GizmoType != -1)
+		if (g_SelectedEntity && m_GizmoType != -1)
 		{
 			if (!m_GizmoFirstClick)
 				DrawGizmo();
@@ -668,9 +655,9 @@ namespace Locus
 		DrawViewportToolbar(toolbarPos);
 
 		// --- Active camera view ---
-		if (m_SelectedEntity.IsValid() && m_SceneState == SceneState::Edit)
+		if (g_SelectedEntity.IsValid() && m_SceneState == SceneState::Edit)
 		{
-			if (m_SelectedEntity.HasComponent<CameraComponent>())
+			if (g_SelectedEntity.HasComponent<CameraComponent>())
 			{
 				// Draw view of camera if a camera component is selected
 				float margin = 10.0f;
@@ -932,7 +919,7 @@ namespace Locus
 		ImGui::SetNextWindowPos(center, ImGuiCond_None, { 0.5f, 0.5f });
 		if (ImGui::BeginPopupModal("You have unsaved changes...", &m_OpenSavePopup, ImGuiWindowFlags_AlwaysAutoResize))
 		{
-			m_SelectedEntity = {};
+			g_SelectedEntity = {};
 
 			ImGui::Text("Save Current Project?");
 
@@ -1086,20 +1073,20 @@ namespace Locus
 				name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
 		ImGui::Text("Hovered Entity: %s", name.c_str());
 
-		ImGui::Text("Entity Value: %d", (entt::entity)m_SelectedEntity);
+		ImGui::Text("Entity Value: %d", (entt::entity)g_SelectedEntity);
 
 		// Collision
-		if (m_SelectedEntity.IsValid())
+		if (g_SelectedEntity.IsValid())
 		{
-			if (m_SelectedEntity.HasComponent<BoxCollider2DComponent>())
-				ImGui::Text("Collision category: %d", m_SelectedEntity.GetComponent<BoxCollider2DComponent>().CollisionCategory);
+			if (g_SelectedEntity.HasComponent<BoxCollider2DComponent>())
+				ImGui::Text("Collision category: %d", g_SelectedEntity.GetComponent<BoxCollider2DComponent>().CollisionCategory);
 		}
 		// Child debug
-		if (m_SelectedEntity.IsValid())
+		if (g_SelectedEntity.IsValid())
 		{
-			if (m_SelectedEntity.HasComponent<ChildComponent>())
+			if (g_SelectedEntity.HasComponent<ChildComponent>())
 			{
-				auto& cc = m_SelectedEntity.GetComponent<ChildComponent>();
+				auto& cc = g_SelectedEntity.GetComponent<ChildComponent>();
 				ImGui::Separator();
 				ImGui::Text("Children:");
 				ImGui::Indent();
@@ -1113,12 +1100,12 @@ namespace Locus
 		}
 
 		// Transforms
-		if (m_SelectedEntity.IsValid())
+		if (g_SelectedEntity.IsValid())
 		{
 			ImGui::Separator();
 			ImGui::Text("Transforms");
 
-			auto& tc = m_SelectedEntity.GetComponent<TransformComponent>();
+			auto& tc = g_SelectedEntity.GetComponent<TransformComponent>();
 			if (tc.Parent)
 				ImGui::Text("Parent: %s", m_ActiveScene->GetEntityByUUID(tc.Parent).GetComponent<TagComponent>().Tag.c_str());
 			else
@@ -1126,7 +1113,7 @@ namespace Locus
 
 			ImGui::Text("Self: %s", m_ActiveScene->GetEntityByUUID(tc.Self).GetComponent<TagComponent>().Tag.c_str());
 
-			glm::mat4 worldTransform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
+			glm::mat4 worldTransform = m_ActiveScene->GetWorldTransform(g_SelectedEntity);
 			glm::vec3 worldPosition, worldScale;
 			glm::quat worldRotationQuat;
 			Math::Decompose(worldTransform, worldScale, worldRotationQuat, worldPosition);
@@ -1147,12 +1134,12 @@ namespace Locus
 
 	void LocusEditorLayer::DrawActiveCameraView()
 	{
-		if (m_SelectedEntity.IsValid())
+		if (g_SelectedEntity.IsValid())
 		{
-			if (m_SelectedEntity.HasComponent<CameraComponent>())
+			if (g_SelectedEntity.HasComponent<CameraComponent>())
 			{
 				m_ActiveCameraFramebuffer->Bind();
-				m_ActiveScene->OnPreviewUpdate(m_SelectedEntity);
+				m_ActiveScene->OnPreviewUpdate(g_SelectedEntity);
 				m_ActiveCameraFramebuffer->Unbind();
 			}
 		}
@@ -1162,13 +1149,13 @@ namespace Locus
 	{
 		// Mask framebuffer
 		m_MaskFramebuffer->ClearAttachmentInt(0, 0);
-		if (m_SelectedEntity.IsValid())
+		if (g_SelectedEntity.IsValid())
 		{
 			m_MaskFramebuffer->Bind();
 			if (m_SceneState == SceneState::Play || m_SceneState == SceneState::Pause)
 			{
-				if (m_SelectedEntity.HasComponent<CameraComponent>())
-					Renderer::BeginScene(m_SelectedEntity.GetComponent<CameraComponent>().Camera, m_ActiveScene->GetWorldTransform(m_SelectedEntity));
+				if (g_SelectedEntity.HasComponent<CameraComponent>())
+					Renderer::BeginScene(g_SelectedEntity.GetComponent<CameraComponent>().Camera, m_ActiveScene->GetWorldTransform(g_SelectedEntity));
 			}
 			else
 			{
@@ -1177,10 +1164,10 @@ namespace Locus
 			
 			m_MaskFramebuffer->ClearAttachmentInt(0, 0);
 
-			if (m_SelectedEntity.HasComponent<CubeRendererComponent>())
-				Renderer3D::DrawCubeMask(m_ActiveScene->GetWorldTransform(m_SelectedEntity), m_MaskShader);
-			if (m_SelectedEntity.HasComponent<SpriteRendererComponent>() || m_SelectedEntity.HasComponent<CircleRendererComponent>())
-				Renderer2D::DrawQuadMask(m_ActiveScene->GetWorldTransform(m_SelectedEntity), m_MaskShader);
+			if (g_SelectedEntity.HasComponent<CubeRendererComponent>())
+				Renderer3D::DrawCubeMask(m_ActiveScene->GetWorldTransform(g_SelectedEntity), m_MaskShader);
+			if (g_SelectedEntity.HasComponent<SpriteRendererComponent>() || g_SelectedEntity.HasComponent<CircleRendererComponent>())
+				Renderer2D::DrawQuadMask(m_ActiveScene->GetWorldTransform(g_SelectedEntity), m_MaskShader);
 
 			Renderer::EndScene();
 			m_MaskFramebuffer->Unbind();

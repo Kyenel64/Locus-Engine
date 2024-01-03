@@ -14,6 +14,8 @@
 
 namespace Locus
 {
+	extern Entity g_SelectedEntity;
+
 	PropertiesPanel::PropertiesPanel()
 	{
 		m_ProjectDirectory = Application::Get().GetProjectPath() / "Assets";
@@ -22,7 +24,6 @@ namespace Locus
 	void PropertiesPanel::SetScene(const Ref<Scene>& context)
 	{
 		m_ActiveScene = context;
-		m_SelectedEntity = {};
 
 		// Create textures
 		m_MenuIcon = Texture2D::Create("resources/icons/MenuIcon.png");
@@ -36,10 +37,10 @@ namespace Locus
 		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_TabBarAlignLeft | ImGuiWindowFlags_DockedWindowBorder;
 		ImGui::Begin("Properties", false, windowFlags);
 
-		if (m_SelectedEntity.IsValid())
+		if (g_SelectedEntity.IsValid())
 		{
 			// --- Draw properties for all active components ---
-			DrawComponents(m_SelectedEntity);
+			DrawComponents(g_SelectedEntity);
 
 
 			// --- Draw Add Component button ---
@@ -52,8 +53,8 @@ namespace Locus
 			{
 				if (ImGui::MenuItem("Camera"))
 				{
-					if (!m_SelectedEntity.HasComponent<CameraComponent>())
-						CommandHistory::AddCommand(new AddComponentCommand<CameraComponent>(m_ActiveScene, m_SelectedEntity));
+					if (!g_SelectedEntity.HasComponent<CameraComponent>())
+						CommandHistory::AddCommand(new AddComponentCommand<CameraComponent>(m_ActiveScene, g_SelectedEntity));
 					else
 						LOCUS_CORE_WARN("This entity already has a Camera Component");
 					ImGui::CloseCurrentPopup();
@@ -61,8 +62,8 @@ namespace Locus
 
 				if (ImGui::MenuItem("Sprite Renderer"))
 				{
-					if (!m_SelectedEntity.HasComponent<SpriteRendererComponent>())
-						CommandHistory::AddCommand(new AddComponentCommand<SpriteRendererComponent>(m_ActiveScene, m_SelectedEntity));
+					if (!g_SelectedEntity.HasComponent<SpriteRendererComponent>())
+						CommandHistory::AddCommand(new AddComponentCommand<SpriteRendererComponent>(m_ActiveScene, g_SelectedEntity));
 					else
 						LOCUS_CORE_WARN("This entity already has a Sprite Renderer Component");
 					ImGui::CloseCurrentPopup();
@@ -70,8 +71,8 @@ namespace Locus
 
 				if (ImGui::MenuItem("Circle Renderer"))
 				{
-					if (!m_SelectedEntity.HasComponent<CircleRendererComponent>())
-						CommandHistory::AddCommand(new AddComponentCommand<CircleRendererComponent>(m_ActiveScene, m_SelectedEntity));
+					if (!g_SelectedEntity.HasComponent<CircleRendererComponent>())
+						CommandHistory::AddCommand(new AddComponentCommand<CircleRendererComponent>(m_ActiveScene, g_SelectedEntity));
 					else
 						LOCUS_CORE_WARN("This entity already has a Circle Renderer Component");
 					ImGui::CloseCurrentPopup();
@@ -79,8 +80,8 @@ namespace Locus
 
 				if (ImGui::MenuItem("Cube Renderer"))
 				{
-					if (!m_SelectedEntity.HasComponent<CubeRendererComponent>())
-						CommandHistory::AddCommand(new AddComponentCommand<CubeRendererComponent>(m_ActiveScene, m_SelectedEntity));
+					if (!g_SelectedEntity.HasComponent<CubeRendererComponent>())
+						CommandHistory::AddCommand(new AddComponentCommand<CubeRendererComponent>(m_ActiveScene, g_SelectedEntity));
 					else
 						LOCUS_CORE_WARN("This entity already has a Cube Renderer Component");
 					ImGui::CloseCurrentPopup();
@@ -88,8 +89,8 @@ namespace Locus
 
 				if (ImGui::MenuItem("Mesh Renderer"))
 				{
-					if (!m_SelectedEntity.HasComponent<MeshRendererComponent>())
-						CommandHistory::AddCommand(new AddComponentCommand<MeshRendererComponent>(m_ActiveScene, m_SelectedEntity));
+					if (!g_SelectedEntity.HasComponent<MeshRendererComponent>())
+						CommandHistory::AddCommand(new AddComponentCommand<MeshRendererComponent>(m_ActiveScene, g_SelectedEntity));
 					else
 						LOCUS_CORE_WARN("This entity already has a Mesh Renderer Component");
 					ImGui::CloseCurrentPopup();
@@ -97,8 +98,8 @@ namespace Locus
 
 				if (ImGui::MenuItem("Point Light"))
 				{
-					if (!m_SelectedEntity.HasComponent<PointLightComponent>())
-						CommandHistory::AddCommand(new AddComponentCommand<PointLightComponent>(m_ActiveScene, m_SelectedEntity));
+					if (!g_SelectedEntity.HasComponent<PointLightComponent>())
+						CommandHistory::AddCommand(new AddComponentCommand<PointLightComponent>(m_ActiveScene, g_SelectedEntity));
 					else
 						LOCUS_CORE_WARN("This entity already has a Point Light Component");
 					ImGui::CloseCurrentPopup();
@@ -106,8 +107,8 @@ namespace Locus
 
 				if (ImGui::MenuItem("Directional Light"))
 				{
-					if (!m_SelectedEntity.HasComponent<DirectionalLightComponent>())
-						CommandHistory::AddCommand(new AddComponentCommand<DirectionalLightComponent>(m_ActiveScene, m_SelectedEntity));
+					if (!g_SelectedEntity.HasComponent<DirectionalLightComponent>())
+						CommandHistory::AddCommand(new AddComponentCommand<DirectionalLightComponent>(m_ActiveScene, g_SelectedEntity));
 					else
 						LOCUS_CORE_WARN("This entity already has a Directional Light Component");
 					ImGui::CloseCurrentPopup();
@@ -115,8 +116,8 @@ namespace Locus
 
 				if (ImGui::MenuItem("Spot Light"))
 				{
-					if (!m_SelectedEntity.HasComponent<SpotLightComponent>())
-						CommandHistory::AddCommand(new AddComponentCommand<SpotLightComponent>(m_ActiveScene, m_SelectedEntity));
+					if (!g_SelectedEntity.HasComponent<SpotLightComponent>())
+						CommandHistory::AddCommand(new AddComponentCommand<SpotLightComponent>(m_ActiveScene, g_SelectedEntity));
 					else
 						LOCUS_CORE_WARN("This entity already has a Spot Light Component");
 					ImGui::CloseCurrentPopup();
@@ -124,8 +125,8 @@ namespace Locus
 
 				if (ImGui::MenuItem("Rigidbody 2D"))
 				{
-					if (!m_SelectedEntity.HasComponent<Rigidbody2DComponent>())
-						CommandHistory::AddCommand(new AddComponentCommand<Rigidbody2DComponent>(m_ActiveScene, m_SelectedEntity));
+					if (!g_SelectedEntity.HasComponent<Rigidbody2DComponent>())
+						CommandHistory::AddCommand(new AddComponentCommand<Rigidbody2DComponent>(m_ActiveScene, g_SelectedEntity));
 					else
 						LOCUS_CORE_WARN("This entity already has a Rigidbody2D Component");
 					ImGui::CloseCurrentPopup();
@@ -133,8 +134,8 @@ namespace Locus
 
 				if (ImGui::MenuItem("Box Collider 2D"))
 				{
-					if (!m_SelectedEntity.HasComponent<BoxCollider2DComponent>())
-						CommandHistory::AddCommand(new AddComponentCommand<BoxCollider2DComponent>(m_ActiveScene, m_SelectedEntity));
+					if (!g_SelectedEntity.HasComponent<BoxCollider2DComponent>())
+						CommandHistory::AddCommand(new AddComponentCommand<BoxCollider2DComponent>(m_ActiveScene, g_SelectedEntity));
 					else
 						LOCUS_CORE_WARN("This entity already has a BoxCollider2D Component");
 					ImGui::CloseCurrentPopup();
@@ -142,8 +143,8 @@ namespace Locus
 
 				if (ImGui::MenuItem("Circle Collider 2D"))
 				{
-					if (!m_SelectedEntity.HasComponent<CircleCollider2DComponent>())
-						CommandHistory::AddCommand(new AddComponentCommand<CircleCollider2DComponent>(m_ActiveScene, m_SelectedEntity));
+					if (!g_SelectedEntity.HasComponent<CircleCollider2DComponent>())
+						CommandHistory::AddCommand(new AddComponentCommand<CircleCollider2DComponent>(m_ActiveScene, g_SelectedEntity));
 					else
 						LOCUS_CORE_WARN("This entity already has a CircleCollider2D Component");
 					ImGui::CloseCurrentPopup();
@@ -151,8 +152,8 @@ namespace Locus
 
 				if (ImGui::MenuItem("Script"))
 				{
-					if (!m_SelectedEntity.HasComponent<ScriptComponent>())
-						CommandHistory::AddCommand(new AddComponentCommand<ScriptComponent>(m_ActiveScene, m_SelectedEntity));
+					if (!g_SelectedEntity.HasComponent<ScriptComponent>())
+						CommandHistory::AddCommand(new AddComponentCommand<ScriptComponent>(m_ActiveScene, g_SelectedEntity));
 					else
 						LOCUS_CORE_WARN("This entity already has a Script Component");
 					ImGui::CloseCurrentPopup();
@@ -169,9 +170,9 @@ namespace Locus
 		// --- Popup when clicking empty area ---
 		if (ImGui::BeginPopupContextWindow(0, 1 | ImGuiPopupFlags_NoOpenOverItems))
 		{
-			if (m_ClipboardComponentType != ComponentType::None && m_SelectedEntity)
+			if (m_ClipboardComponentType != ComponentType::None && g_SelectedEntity)
 				if (ImGui::MenuItem("Paste Component"))
-					PasteComponent(m_SelectedEntity);
+					PasteComponent(g_SelectedEntity);
 			ImGui::EndPopup();
 		}
 
@@ -228,7 +229,7 @@ namespace Locus
 						removeComponent = true;
 				}
 				if (ImGui::MenuItem("Copy Component"))
-					CopyComponentToClipboard<T>(m_SelectedEntity);
+					CopyComponentToClipboard<T>(g_SelectedEntity);
 				ImGui::EndPopup();
 			}
 
@@ -740,52 +741,52 @@ namespace Locus
 	{
 		if (typeid(T) == typeid(TransformComponent))
 		{
-			m_ClipboardComponent.Transform = CreateRef<TransformComponent>(m_SelectedEntity.GetComponent<TransformComponent>());
+			m_ClipboardComponent.Transform = CreateRef<TransformComponent>(g_SelectedEntity.GetComponent<TransformComponent>());
 			m_ClipboardComponentType = ComponentType::Transform;
 		}
 		if (typeid(T) == typeid(SpriteRendererComponent))
 		{
-			m_ClipboardComponent.SpriteRenderer = CreateRef<SpriteRendererComponent>(m_SelectedEntity.GetComponent<SpriteRendererComponent>());
+			m_ClipboardComponent.SpriteRenderer = CreateRef<SpriteRendererComponent>(g_SelectedEntity.GetComponent<SpriteRendererComponent>());
 			m_ClipboardComponentType = ComponentType::SpriteRenderer;
 		}
 		if (typeid(T) == typeid(CircleRendererComponent))
 		{
-			m_ClipboardComponent.CircleRenderer = CreateRef<CircleRendererComponent>(m_SelectedEntity.GetComponent<CircleRendererComponent>());
+			m_ClipboardComponent.CircleRenderer = CreateRef<CircleRendererComponent>(g_SelectedEntity.GetComponent<CircleRendererComponent>());
 			m_ClipboardComponentType = ComponentType::CircleRenderer;
 		}
 		if (typeid(T) == typeid(CubeRendererComponent))
 		{
-			m_ClipboardComponent.CubeRenderer = CreateRef<CubeRendererComponent>(m_SelectedEntity.GetComponent<CubeRendererComponent>());
+			m_ClipboardComponent.CubeRenderer = CreateRef<CubeRendererComponent>(g_SelectedEntity.GetComponent<CubeRendererComponent>());
 			m_ClipboardComponentType = ComponentType::CubeRenderer;
 		}
 		if (typeid(T) == typeid(PointLightComponent))
 		{
-			m_ClipboardComponent.PointLight = CreateRef<PointLightComponent>(m_SelectedEntity.GetComponent<PointLightComponent>());
+			m_ClipboardComponent.PointLight = CreateRef<PointLightComponent>(g_SelectedEntity.GetComponent<PointLightComponent>());
 			m_ClipboardComponentType = ComponentType::PointLight;
 		}
 		if (typeid(T) == typeid(CameraComponent))
 		{
-			m_ClipboardComponent.Camera = CreateRef<CameraComponent>(m_SelectedEntity.GetComponent<CameraComponent>());
+			m_ClipboardComponent.Camera = CreateRef<CameraComponent>(g_SelectedEntity.GetComponent<CameraComponent>());
 			m_ClipboardComponentType = ComponentType::Camera;
 		}
 		if (typeid(T) == typeid(Rigidbody2DComponent))
 		{
-			m_ClipboardComponent.Rigidbody2D = CreateRef<Rigidbody2DComponent>(m_SelectedEntity.GetComponent<Rigidbody2DComponent>());
+			m_ClipboardComponent.Rigidbody2D = CreateRef<Rigidbody2DComponent>(g_SelectedEntity.GetComponent<Rigidbody2DComponent>());
 			m_ClipboardComponentType = ComponentType::Rigidbody2D;
 		}
 		if (typeid(T) == typeid(BoxCollider2DComponent))
 		{
-			m_ClipboardComponent.BoxCollider2D = CreateRef<BoxCollider2DComponent>(m_SelectedEntity.GetComponent<BoxCollider2DComponent>());
+			m_ClipboardComponent.BoxCollider2D = CreateRef<BoxCollider2DComponent>(g_SelectedEntity.GetComponent<BoxCollider2DComponent>());
 			m_ClipboardComponentType = ComponentType::BoxCollider2D;
 		}
 		if (typeid(T) == typeid(CircleCollider2DComponent))
 		{
-			m_ClipboardComponent.CircleCollider2D = CreateRef<CircleCollider2DComponent>(m_SelectedEntity.GetComponent<CircleCollider2DComponent>());
+			m_ClipboardComponent.CircleCollider2D = CreateRef<CircleCollider2DComponent>(g_SelectedEntity.GetComponent<CircleCollider2DComponent>());
 			m_ClipboardComponentType = ComponentType::CircleCollider2D;
 		}
 		if (typeid(T) == typeid(ScriptComponent))
 		{
-			m_ClipboardComponent.Script = CreateRef<ScriptComponent>(m_SelectedEntity.GetComponent<ScriptComponent>());
+			m_ClipboardComponent.Script = CreateRef<ScriptComponent>(g_SelectedEntity.GetComponent<ScriptComponent>());
 			m_ClipboardComponentType = ComponentType::Script;
 		}
 	}

@@ -36,6 +36,7 @@
 #include "Locus/Scene/SceneCamera.h"
 #include "Locus/Scene/Entity.h"
 #include "Locus/Math/Math.h"
+#include "Locus/Resource/TextureManager.h"
 
 namespace Locus
 {
@@ -122,8 +123,8 @@ namespace Locus
 	{
 		// TODO: Take in a material
 		glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
-		Ref<Texture2D> Texture;
-		std::string TexturePath;
+		//Ref<Texture2D> Texture;
+		TextureHandle Texture = TextureHandle::Null;
 		float TilingFactor = 1.0f;
 
 		SpriteRendererComponent() = default;

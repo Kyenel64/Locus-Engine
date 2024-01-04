@@ -90,15 +90,15 @@ namespace Locus
 
 				if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
 				{
-					const wchar_t* itemPath = relativePath.c_str();
+					uint64_t resourceUUID = 14472635303842515361;
 
 					if (extension == "locus")
-						ImGui::SetDragDropPayload("SCENE_ITEM_PATH", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
+						ImGui::SetDragDropPayload("SCENE_ITEM_PATH", &resourceUUID, sizeof(uint64_t));
 					else if (extension == "png" || extension == "jpg" || extension == "tiff" || extension == "tif"
 						|| extension == "bmp" || extension == "tga")
-						ImGui::SetDragDropPayload("TEXTURE_ITEM_PATH", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
+						ImGui::SetDragDropPayload("TEXTURE_ITEM_PATH", &resourceUUID, sizeof(uint64_t));
 					else if (extension == "obj" || extension == "fbx")
-						ImGui::SetDragDropPayload("MESH_ITEM_PATH", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
+						ImGui::SetDragDropPayload("MESH_ITEM_PATH", &resourceUUID, sizeof(uint64_t));
 
 					ImGui::EndDragDropSource();
 				}

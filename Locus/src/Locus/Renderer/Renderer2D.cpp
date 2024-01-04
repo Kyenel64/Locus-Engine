@@ -9,6 +9,9 @@
 #include "Locus/Renderer/VertexArray.h"
 #include "Locus/Renderer/Shader.h"
 #include "Locus/Renderer/UniformBuffer.h"
+#include "Locus/Resource/TextureManager.h"
+
+#include <glad/glad.h>
 
 namespace Locus
 {
@@ -217,6 +220,7 @@ namespace Locus
 
 	void Renderer2D::Flush()
 	{
+		glDisable(GL_CULL_FACE); // temp
 		if (s_Data.QuadIndexCount)
 		{
 			uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase);
@@ -254,6 +258,7 @@ namespace Locus
 
 			RendererStats::GetStats().DrawCalls++;
 		}
+		glEnable(GL_CULL_FACE);
 	}
 
 	void Renderer2D::DrawQuadMask(const glm::mat4& transform, Ref<Shader> shader)
@@ -410,8 +415,9 @@ namespace Locus
 
 	void Renderer2D::DrawSprite(const glm::mat4& transform, SpriteRendererComponent& src, int entityID)
 	{
-		if (src.Texture)
-			DrawQuad(transform, src.Texture, src.TilingFactor, src.Color, entityID);
+		Ref<Texture2D> texture = TextureManager::GetTexture(src.Texture);
+		if (texture)
+			DrawQuad(transform, texture, src.TilingFactor, src.Color, entityID);
 		else
 			DrawQuad(transform, src.Color, entityID);
 	}

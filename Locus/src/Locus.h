@@ -47,5 +47,9 @@
 // --- Scripting ---
 #include "Locus/Scripting/ScriptEngine.h"
 
+// --- Resource ---
+#include "Locus/Resource/ResourceManager.h"
+#include "Locus/Resource/TextureManager.h"
+
 // --- Utils ---
 #include "Locus/Utils/PlatformUtils.h"

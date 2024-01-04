@@ -350,7 +350,7 @@ namespace Locus
 				{
 					ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 					if (ImGui::IsMouseDoubleClicked(0))
-						component.Texture = nullptr;
+						component.Texture = TextureHandle::Null;
 				}
 
 				ImGui::SameLine();
@@ -358,29 +358,21 @@ namespace Locus
 				ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_FrameBg));
 				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyleColorVec4(ImGuiCol_FrameBgHovered));
 				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyleColorVec4(ImGuiCol_FrameBgActive));
-				if (component.Texture == nullptr)
+				if (!component.Texture)
 					ImGui::Button("##EmptyTexture", { 50.0f, 50.0f });
 				else
-					ImGui::ImageButton((ImTextureID)(uint64_t)component.Texture->GetRendererID(), { 50.0f, 50.0f }, { 0, 1 }, { 1, 0 });
+					ImGui::ImageButton((ImTextureID)(uint64_t)TextureManager::GetTexture(component.Texture)->GetRendererID(), { 50.0f, 50.0f }, { 0, 1 }, { 1, 0 });
 
 				if (ImGui::BeginDragDropTarget())
 				{
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TEXTURE_ITEM_PATH"))
 					{
-						const wchar_t* path = (const wchar_t*)payload->Data;
-						std::filesystem::path texturePath = std::filesystem::path(m_ProjectDirectory) / path;
-						CommandHistory::AddCommand(new ChangeTextureCommand(Texture2D::Create(texturePath.string()), component.Texture, component.TexturePath));
+						uint64_t* uuid = (uint64_t*)payload->Data;
+						TextureHandle textureHandle = TextureHandle(*uuid);
+						component.Texture = textureHandle;
 					}
 					ImGui::EndDragDropTarget();
 				}
-
-				ImGui::SameLine();
-
-				ImGui::SetCursorPosY(ImGui::GetCursorPos().y + 25.0f - ImGui::GetFontSize() * 0.5f);
-				if (component.Texture == nullptr)
-					ImGui::Button("##EmptyTexturePath", { -1.0f, 0.0f });
-				else
-					ImGui::Button(component.Texture->GetTextureName().c_str(), { -1.0f, 0.0f });
 				ImGui::PopStyleColor(3);
 				ImGui::PopStyleVar();
 

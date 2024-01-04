@@ -11,6 +11,7 @@ namespace Locus
 		static void Init();
 
 		static const std::vector<std::filesystem::path>& GetTexturePaths();
+		static const std::vector<std::filesystem::path>& GetMaterialPaths();
 		static std::filesystem::path GetAssetsDirectory();
 	};
 }

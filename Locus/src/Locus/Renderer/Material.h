@@ -12,6 +12,7 @@ namespace Locus
 	public:
 
 		Material();
+		Material(const std::filesystem::path& path);
 		~Material() = default;
 
 		bool operator==(const Material& other) const

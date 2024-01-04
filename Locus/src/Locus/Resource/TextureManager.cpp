@@ -13,6 +13,7 @@ namespace Locus
 	struct TextureManagerData
 	{
 		std::unordered_map<TextureHandle, Ref<Texture2D>> Textures;
+		uint32_t TextureCount = 0;
 	};
 
 	static TextureManagerData s_TMData;
@@ -38,6 +39,7 @@ namespace Locus
 			UUID uuid = data["UUID"].as<uint64_t>();
 			TextureHandle texHandle = TextureHandle(uuid);
 			s_TMData.Textures[texHandle] = Texture2D::Create(texturePath.string());
+			s_TMData.TextureCount++;
 			LOCUS_CORE_TRACE("  Loaded texture: {0}", texturePath);
 			return texHandle;
 		}
@@ -45,6 +47,7 @@ namespace Locus
 		{
 			TextureHandle texHandle = TextureHandle();
 			s_TMData.Textures[texHandle] = Texture2D::Create(texturePath.string());
+			s_TMData.TextureCount++;
 			YAML::Emitter out;
 			out << YAML::BeginMap; // Scene
 			out << YAML::Key << "UUID" << YAML::Value << (uint64_t)texHandle;

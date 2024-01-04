@@ -141,10 +141,6 @@ namespace Locus
 		// Lighting
 		SceneLighting m_SceneLighting;
 
-		Ref<Model> m_TestModel;
-		Ref<Model> m_TestModel2;
-		Ref<Material> m_TestMaterial;
-
 	public:
 		friend class Entity;
 		friend class SceneSerializer;

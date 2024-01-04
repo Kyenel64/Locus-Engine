@@ -18,24 +18,13 @@
 #include "Locus/Scripting/ScriptEngine.h"
 #include "Locus/Physics2D/ContactListener2D.h"
 #include "Locus/Physics2D/PhysicsUtils.h"
+#include "Locus/Resource/TextureManager.h"
 
 namespace Locus
 {
 	Scene::Scene()
 	{
 		m_ContactListener = CreateRef<ContactListener2D>();
-		m_TestModel = CreateRef<Model>("C:/Users/Kye/Desktop/Locus-Engine/SampleProject/Assets/Models/backpack.obj");
-		m_TestModel2 = CreateRef<Model>("C:/Users/Kye/Desktop/Locus-Engine/SampleProject/Assets/Models/test.fbx");
-		m_TestMaterial = CreateRef<Material>();
-		m_TestMaterial->m_Albedo = { 1.0f, 0.0f, 0.0f };
-		m_TestMaterial->m_Metallic = 0.5f;
-		m_TestMaterial->m_Roughness = 0.2f;
-		m_TestMaterial->m_AO = 0.5f;
-		m_TestMaterial->m_AlbedoTexture = Texture2D::Create("C:/Users/Kye/Desktop/Locus-Engine/SampleProject/Assets/Textures/Backpack/diffuse.jpg");
-		m_TestMaterial->m_NormalMapTexture = Texture2D::Create("C:/Users/Kye/Desktop/Locus-Engine/SampleProject/Assets/Textures/Backpack/normal.png");
-		m_TestMaterial->m_MetallicTexture = Texture2D::Create("C:/Users/Kye/Desktop/Locus-Engine/SampleProject/Assets/Textures/Backpack/specular.jpg");
-		m_TestMaterial->m_RoughnessTexture = Texture2D::Create("C:/Users/Kye/Desktop/Locus-Engine/SampleProject/Assets/Textures/Backpack/roughness.jpg");
-		m_TestMaterial->m_AOTexture = Texture2D::Create("C:/Users/Kye/Desktop/Locus-Engine/SampleProject/Assets/Textures/Backpack/ao.jpg");
 	}
 
 	Entity Scene::CreateEntity(const std::string& name)
@@ -156,19 +145,6 @@ namespace Locus
 		Renderer3D::BeginScene(camera, this);
 		DrawCubes();
 		DrawMeshes();
-		//Renderer3D::DrawMesh(glm::mat4(1.0f), m_TestModel->GetMesh(78), m_TestMaterial, -1);
-		glm::mat4 transform = glm::mat4(1.0f);
-		for (int i = 0; i < 80; i++)
-		{
-			transform = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, i * 5));
-			Renderer3D::DrawModel(transform, m_TestModel->GetVertexArray(), m_TestMaterial, -1);
-		}
-		for (int i = 0; i < 100; i++)
-		{
-			transform = glm::translate(glm::mat4(1.0f), glm::vec3(i * 5, 0, 0));
-			Renderer3D::DrawModel(transform, m_TestModel2->GetVertexArray(), m_TestMaterial, -2);
-		}
-		//Renderer3D::DrawModel(glm::mat4(1.0f), m_TestModel->GetVertexArray(), m_TestMaterial, -1);
 		Renderer3D::EndScene();
 		// Grid
 		if (camera.GetGridVisibility())
@@ -610,8 +586,9 @@ namespace Locus
 		{
 			Entity entity = Entity(e, this);
 			auto& cube = entity.GetComponent<CubeRendererComponent>();
+			Ref<Material> material = MaterialManager::GetMaterial(cube.Material);
 			if (entity.GetComponent<TagComponent>().Enabled)
-				Renderer3D::DrawCube(GetWorldTransform(entity), m_TestMaterial, (int)e);
+				Renderer3D::DrawCube(GetWorldTransform(entity), material, (int)e);
 		}
 	}
 
@@ -623,7 +600,7 @@ namespace Locus
 			Entity entity = Entity(e, this);
 			auto& mrc = entity.GetComponent<MeshRendererComponent>();
 			if (entity.GetComponent<TagComponent>().Enabled && mrc.Mesh)
-				Renderer3D::DrawModel(GetWorldTransform(entity), mrc.Mesh->GetVertexArray(), m_TestMaterial, (int)e);
+				Renderer3D::DrawModel(GetWorldTransform(entity), mrc.Mesh->GetVertexArray(), nullptr, (int)e);
 		}
 	}
 

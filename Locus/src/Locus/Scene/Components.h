@@ -37,6 +37,7 @@
 #include "Locus/Scene/Entity.h"
 #include "Locus/Math/Math.h"
 #include "Locus/Resource/TextureManager.h"
+#include "Locus/Resource/MaterialManager.h"
 
 namespace Locus
 {
@@ -144,16 +145,7 @@ namespace Locus
 
 	struct CubeRendererComponent
 	{
-		// TODO: Put in material
-		glm::vec4 Albedo = { 1.0f, 1.0f, 1.0f, 1.0f };
-		float Metallic = 0.5f;
-		float Roughness = 0.5f;
-		float AO = 0.5f;
-		Ref<Texture2D> AlbedoTexture = nullptr;
-		Ref<Texture2D> NormalTexture = nullptr;
-		Ref<Texture2D> MetallicTexture = nullptr;
-		Ref<Texture2D> RoughnessTexture = nullptr;
-		Ref<Texture2D> AOTexture = nullptr;
+		MaterialHandle Material = MaterialHandle(1527949787500932682);
 
 		CubeRendererComponent() = default;
 		CubeRendererComponent(const CubeRendererComponent&) = default;

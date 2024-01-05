@@ -342,40 +342,7 @@ namespace Locus
 		DrawComponentUI<SpriteRendererComponent>("Sprite Renderer", entity, [this](auto& component)
 			{
 				// Sprite
-				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, ImGui::GetStyle().ItemSpacing.y });
-
-				Widgets::DrawControlLabel("Sprite", { ImGui::GetContentRegionAvail().x * 0.5f, 50.0f});
-
-				if (ImGui::IsItemHovered())
-				{
-					ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-					if (ImGui::IsMouseDoubleClicked(0))
-						component.Texture = TextureHandle::Null;
-				}
-
-				ImGui::SameLine();
-
-				ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_FrameBg));
-				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyleColorVec4(ImGuiCol_FrameBgHovered));
-				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyleColorVec4(ImGuiCol_FrameBgActive));
-				if (!component.Texture)
-					ImGui::Button("##EmptyTexture", { 50.0f, 50.0f });
-				else
-					ImGui::ImageButton((ImTextureID)(uint64_t)TextureManager::GetTexture(component.Texture)->GetRendererID(), { 50.0f, 50.0f }, { 0, 1 }, { 1, 0 });
-
-				if (ImGui::BeginDragDropTarget())
-				{
-					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TEXTURE_ITEM_PATH"))
-					{
-						uint64_t* uuid = (uint64_t*)payload->Data;
-						TextureHandle textureHandle = TextureHandle(*uuid);
-						component.Texture = textureHandle;
-					}
-					ImGui::EndDragDropTarget();
-				}
-				ImGui::PopStyleColor(3);
-				ImGui::PopStyleVar();
-
+				Widgets::DrawTextureDropdown("Sprite", component.Texture);
 				// Color
 				Widgets::DrawColorControl("Color", component.Color, { 1.0f, 1.0f, 1.0f, 1.0f});
 				// Tiling Factor
@@ -395,42 +362,13 @@ namespace Locus
 		// --- Cube Renderer Component ----------------------------------------
 		DrawComponentUI<CubeRendererComponent>("Cube Renderer", entity, [this](auto& component) 
 			{
-				//Widgets::DrawColorControl("Albedo", component.Albedo, { 0.5f, 0.5f, 0.5f, 1.0f });
-				//Widgets::DrawTextureSlot("Albedo Texture", component.AlbedoTexture, m_ProjectDirectory);
-				//
-				//Widgets::DrawTextureSlot("Normal Texture", component.NormalTexture, m_ProjectDirectory);
-				//
-				//Widgets::DrawValueControl("Metallic", component.Metallic, 0.5f, 0.05f, nullptr, -1.0f, -1.0f, 0.0f, 1.0f);
-				//Widgets::DrawTextureSlot("Metallic Texture", component.MetallicTexture, m_ProjectDirectory);
-				//
-				//Widgets::DrawValueControl("Roughness", component.Roughness, 0.5f, 0.05f, nullptr, -1.0f, -1.0f, 0.0f, 1.0f);
-				//Widgets::DrawTextureSlot("Roughness Texture", component.RoughnessTexture, m_ProjectDirectory);
-				//
-				//Widgets::DrawValueControl("AO", component.AO, 0.5f, 0.05f, nullptr, -1.0f, -1.0f, 0.0f, 1.0f);
-				//Widgets::DrawTextureSlot("AO Texture", component.AOTexture, m_ProjectDirectory);
+				Widgets::DrawMaterialDropdown("Material", component.Material);
 			});
 
 		DrawComponentUI<MeshRendererComponent>("Mesh Renderer", entity, [this](auto& component)
-		{
-			Widgets::DrawControlLabel("Mesh");
-			ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_FrameBg));
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyleColorVec4(ImGuiCol_FrameBgHovered));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyleColorVec4(ImGuiCol_FrameBgActive));
-
-			ImGui::Button("##MeshButton");
-
-			if (ImGui::BeginDragDropTarget())
 			{
-				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MESH_ITEM_PATH"))
-				{
-					const wchar_t* path = (const wchar_t*)payload->Data;
-					std::filesystem::path meshPath = m_ProjectDirectory / path;
-					component.Mesh = CreateRef<Model>(meshPath);
-				}
-				ImGui::EndDragDropTarget();
-			}
-			ImGui::PopStyleColor(3);
-		});
+				Widgets::DrawMaterialDropdown("Material", component.Material);
+			});
 
 		// --- Point Light Component ----------------------------------------
 		DrawComponentUI<PointLightComponent>("Point Light", entity, [this](auto& component)

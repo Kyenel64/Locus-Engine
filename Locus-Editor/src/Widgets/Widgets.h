@@ -31,7 +31,8 @@ namespace Locus::Widgets
 	// Displays a 8x2 grid for each collision layer.
 	void DrawCollisionGrid(const std::string& name, uint16_t& changeValue, uint16_t resetValue = 0, float labelWidth = -1.0f, float inputWidth = -1.0f);
 
-	void DrawTextureSlot(const std::string& name, Ref<Texture2D>& texture, const std::filesystem::path& projectDirectory, float labelWidth = -1.0f, float inputWidth = -1.0f);
+	void DrawTextureDropdown(const std::string& name, TextureHandle& textureHandle, float labelWidth = -1.0f, float inputWidth = -1.0f);
+	void DrawMaterialDropdown(const std::string& name, MaterialHandle& textureHandle, float labelWidth = -1.0f, float inputWidth = -1.0f);
 
 	// Control widget for float, double, int16_t, int, int64_t, uint16_t, uint32_t, uint64_t.
 	template<typename T>

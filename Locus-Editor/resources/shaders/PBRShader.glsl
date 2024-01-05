@@ -47,7 +47,7 @@ void main()
 	v_Normal = a_Normal;
 	v_TexCoord = a_TexCoord;
 	v_EntityID = a_EntityID;
-	v_MaterialIndex = v_MaterialIndex;
+	v_MaterialIndex = a_MaterialIndex;
 	v_ViewPos = u_CameraPosition.xyz;
 
 	gl_Position = u_Projection * u_View * a_InstanceModelMatrix * vec4(a_Position, 1.0f);

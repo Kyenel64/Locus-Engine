@@ -70,6 +70,8 @@ namespace Locus
 		return nullptr;
 	}
 
+	const std::unordered_map<TextureHandle, Ref<Texture2D>> TextureManager::GetTextures() { return s_TMData.Textures; }
+
 	bool TextureManager::IsValid(TextureHandle handle) 
 	{ 
 		return s_TMData.Textures.find(handle) != s_TMData.Textures.end(); 

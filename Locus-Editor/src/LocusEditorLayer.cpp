@@ -460,6 +460,10 @@ namespace Locus
 				proj = &camera.Camera.GetProjection();
 				view = &glm::inverse(m_ActiveScene->GetWorldTransform(primaryCameraEntity));
 			}
+			else
+			{
+				return;
+			}
 		}
 
 		// Entity transform
@@ -642,7 +646,7 @@ namespace Locus
 
 		// --- Gizmo ---
 		// Checks for first click to prevent moving the object when selecting an entity.
-		if (g_SelectedEntity && m_GizmoType != -1)
+		if (g_SelectedEntity.IsValid() && m_GizmoType != -1)
 		{
 			if (!m_GizmoFirstClick)
 				DrawGizmo();

@@ -384,40 +384,137 @@ namespace Locus::Widgets
 		ImGui::PopStyleVar();
 	}
 
-	void Widgets::DrawTextureSlot(const std::string& name, Ref<Texture2D>& texture, const std::filesystem::path& projectDirectory, float labelWidth, float inputWidth)
+	void Widgets::DrawTextureDropdown(const std::string& name, TextureHandle& textureHandle, float labelWidth, float inputWidth)
 	{
-		// Sprite
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, ImGui::GetStyle().ItemSpacing.y });
+		ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_FrameBg));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyleColorVec4(ImGuiCol_FrameBgHovered));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyleColorVec4(ImGuiCol_FrameBgActive));
 
-		Widgets::DrawControlLabel(name.c_str(), {ImGui::GetContentRegionAvail().x * 0.5f, 50.0f});
+		Ref<Texture2D> texture = TextureManager::GetTexture(textureHandle);
+		ImDrawList* drawList = ImGui::GetWindowDrawList();
+		float imageSize = 45.0f;
+		float labelHeight = 55.0f;
 
+		if (labelWidth == -1)
+			labelWidth = ImGui::GetContentRegionAvail().x * 0.5f;
+
+		Widgets::DrawControlLabel(name.c_str(), { labelWidth, labelHeight });
 		if (ImGui::IsItemHovered())
 		{
 			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 			if (ImGui::IsMouseDoubleClicked(0))
-				texture = nullptr;
+			{
+				CommandHistory::AddCommand(new ChangeValueCommand(TextureHandle::Null, textureHandle));
+			}
 		}
 
 		ImGui::SameLine();
 
+		ImVec2 topLeft = { ImGui::GetCursorScreenPos().x + (ImGui::GetContentRegionAvail().x / 2) - (imageSize / 2), ImGui::GetCursorScreenPos().y + (labelHeight - imageSize) / 2 };
+		ImVec2 popupPos = { ImGui::GetCursorScreenPos().x - 50.0f, ImGui::GetCursorScreenPos().y + labelHeight };
+		if (ImGui::Button("##SpriteDropdown", { -1.0f , labelHeight }))
+			ImGui::OpenPopup("SpriteSelectorPopup");
+
+		if (texture)
+			drawList->AddImage((ImTextureID)(uint64_t)texture->GetRendererID(), topLeft, { topLeft.x + imageSize, topLeft.y + imageSize }, { 0, 1 }, { 1, 0 });
+
+		ImGui::SetNextWindowPos(popupPos);
+		ImGui::SetNextWindowSize({ 50.0f + ImGui::GetItemRectSize().x, 300.0f});
+		if (ImGui::BeginPopup("SpriteSelectorPopup"))
+		{
+			drawList = ImGui::GetWindowDrawList();
+
+			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0.0f });
+			for (auto& [ texHandle, tex] : TextureManager::GetTextures())
+			{
+				std::string texLabel = "##" + tex->GetTextureName();
+				topLeft = { ImGui::GetCursorScreenPos().x + (labelHeight - imageSize) / 2, ImGui::GetCursorScreenPos().y + (labelHeight - imageSize) / 2 };
+				ImVec4 buttonColor = LocusColors::Transparent;
+				if (texHandle == textureHandle)
+					buttonColor = LocusColors::DarkGrey;
+
+				ImGui::PushStyleColor(ImGuiCol_Button, buttonColor);
+				if (ImGui::Button(texLabel.c_str(), { -1.0f, labelHeight }))
+					CommandHistory::AddCommand(new ChangeValueCommand(texHandle, textureHandle));
+				ImGui::PopStyleColor();
+
+				drawList->AddImage((ImTextureID)(uint64_t)tex->GetRendererID(), topLeft, { topLeft.x + imageSize, topLeft.y + imageSize }, { 0, 1 }, { 1, 0 });
+				drawList->AddText({ topLeft.x + imageSize + 10.0f, topLeft.y + 12.0f }, ImGui::GetColorU32(LocusColors::White), tex->GetTextureName().c_str());
+			}
+			ImGui::PopStyleVar(2);
+			ImGui::EndPopup();
+		}
+
+		ImGui::PopStyleColor(3);
+		ImGui::PopStyleVar();
+	}
+
+	void Widgets::DrawMaterialDropdown(const std::string& name, MaterialHandle& materialHandle, float labelWidth, float inputWidth)
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, ImGui::GetStyle().ItemSpacing.y });
 		ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_FrameBg));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyleColorVec4(ImGuiCol_FrameBgHovered));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyleColorVec4(ImGuiCol_FrameBgActive));
-		if (texture == nullptr)
-			ImGui::Button("##EmptyTexture", { 50.0f, 50.0f });
-		else
-			ImGui::ImageButton((ImTextureID)(uint64_t)texture->GetRendererID(), { 50.0f, 50.0f }, { 0, 1 }, { 1, 0 });
 
-		if (ImGui::BeginDragDropTarget())
+		Ref<Material> material = MaterialManager::GetMaterial(materialHandle);
+		ImDrawList* drawList = ImGui::GetWindowDrawList();
+		float imageSize = 45.0f;
+		float labelHeight = 55.0f;
+
+		if (labelWidth == -1)
+			labelWidth = ImGui::GetContentRegionAvail().x * 0.5f;
+
+		Widgets::DrawControlLabel(name.c_str(), { labelWidth, labelHeight });
+		if (ImGui::IsItemHovered())
 		{
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TEXTURE_ITEM_PATH"))
+			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+			if (ImGui::IsMouseDoubleClicked(0))
 			{
-				const wchar_t* path = (const wchar_t*)payload->Data;
-				std::filesystem::path texturePath = projectDirectory / path;
-				CommandHistory::AddCommand(new ChangeTextureCommand(Texture2D::Create(texturePath.string()), texture, std::string()));
+				CommandHistory::AddCommand(new ChangeValueCommand(MaterialHandle::Null, materialHandle));
 			}
-			ImGui::EndDragDropTarget();
 		}
+
+		ImGui::SameLine();
+
+		ImVec2 topLeft = { ImGui::GetCursorScreenPos().x + (ImGui::GetContentRegionAvail().x / 2) - (imageSize / 2), ImGui::GetCursorScreenPos().y + (labelHeight - imageSize) / 2 };
+		ImVec2 popupPos = { ImGui::GetCursorScreenPos().x - 50.0f, ImGui::GetCursorScreenPos().y + labelHeight };
+		if (ImGui::Button("##MaterialDropdown", { -1.0f , labelHeight }))
+			ImGui::OpenPopup("MaterialSelectorPopup");
+
+		if (material)
+			drawList->AddImageRounded((ImTextureID)(uint64_t)material->m_AlbedoTexture->GetRendererID(), topLeft, {topLeft.x + imageSize, topLeft.y + imageSize}, {0, 1}, {1, 0}, ImGui::GetColorU32(0), imageSize / 2);
+
+		ImGui::SetNextWindowPos(popupPos);
+		ImGui::SetNextWindowSize({ 50.0f + ImGui::GetItemRectSize().x, 300.0f });
+		if (ImGui::BeginPopup("MaterialSelectorPopup"))
+		{
+			drawList = ImGui::GetWindowDrawList();
+
+			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0.0f });
+			for (auto& [matHandle, mat] : MaterialManager::GetMaterials())
+			{
+				std::string matLabel = "##" + mat->GetName();
+				topLeft = { ImGui::GetCursorScreenPos().x + (labelHeight - imageSize) / 2, ImGui::GetCursorScreenPos().y + (labelHeight - imageSize) / 2 };
+				ImVec4 buttonColor = LocusColors::Transparent;
+				if (matHandle == materialHandle)
+					buttonColor = LocusColors::DarkGrey;
+
+				ImGui::PushStyleColor(ImGuiCol_Button, buttonColor);
+				if (ImGui::Button(matLabel.c_str(), { -1.0f, labelHeight }))
+					CommandHistory::AddCommand(new ChangeValueCommand(matHandle, materialHandle));
+				ImGui::PopStyleColor();
+
+				if (mat->m_AlbedoTexture)
+					drawList->AddImageRounded((ImTextureID)(uint64_t)mat->m_AlbedoTexture->GetRendererID(), topLeft, { topLeft.x + imageSize, topLeft.y + imageSize }, { 0, 1 }, { 1, 0 }, ImGui::GetColorU32(0), imageSize / 2);
+				drawList->AddText({ topLeft.x + imageSize + 10.0f, topLeft.y + 12.0f }, ImGui::GetColorU32(LocusColors::White), mat->GetName().c_str());
+			}
+			ImGui::PopStyleVar(2);
+			ImGui::EndPopup();
+		}
+
 		ImGui::PopStyleColor(3);
 		ImGui::PopStyleVar();
 	}

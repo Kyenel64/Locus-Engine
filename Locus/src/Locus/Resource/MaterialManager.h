@@ -33,6 +33,7 @@ namespace Locus
 		static MaterialHandle LoadMaterial(const std::filesystem::path& materialPath);
 
 		static Ref<Material> GetMaterial(MaterialHandle handle);
+		static const std::unordered_map<MaterialHandle, Ref<Material>> GetMaterials();
 
 		static bool IsValid(MaterialHandle handle);
 	};

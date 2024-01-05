@@ -33,6 +33,7 @@ namespace Locus
 		static TextureHandle LoadTexture(const std::filesystem::path& path);
 		
 		static Ref<Texture2D> GetTexture(TextureHandle handle);
+		static const std::unordered_map<TextureHandle, Ref<Texture2D>> GetTextures();
 
 		static bool IsValid(TextureHandle handle);
 	};

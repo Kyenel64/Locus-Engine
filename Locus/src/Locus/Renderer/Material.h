@@ -11,19 +11,18 @@ namespace Locus
 	{
 	public:
 
-		Material();
+		Material() = default;
 		Material(const std::filesystem::path& path);
 		~Material() = default;
 
-		bool operator==(const Material& other) const
-		{
-			return m_UUID == other.m_UUID;
-		}
+		const std::string& GetName() const { return m_Name; }
+		const std::filesystem::path& GetPath() const { return m_Path; }
 
 	public:
-		Ref<Shader> m_Shader = nullptr;
+		std::filesystem::path m_Path;
+		std::string m_Name;
 
-		UUID m_UUID;
+		Ref<Shader> m_Shader = nullptr;
 
 		glm::vec3 m_Albedo = { 1.0f, 1.0f, 1.0f };
 		float m_Metallic = 0.5f;

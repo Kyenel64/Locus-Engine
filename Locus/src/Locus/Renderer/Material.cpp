@@ -38,16 +38,12 @@ namespace YAML
 
 namespace Locus
 {
-	Material::Material()
-		: m_UUID(UUID())
-	{
-
-	}
-
 	Material::Material(const std::filesystem::path& path)
+		: m_Path(path)
 	{
+		m_Name = path.stem().string();
+
 		YAML::Node data = YAML::LoadFile(path.string());
-		m_UUID = data["UUID"].as<uint64_t>();
 		auto colors = data["Colors"];
 		m_Albedo = colors["Albedo"].as<glm::vec4>();
 		m_Metallic = colors["Metallic"].as<float>();

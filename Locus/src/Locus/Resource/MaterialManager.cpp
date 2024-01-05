@@ -70,6 +70,7 @@ namespace Locus
 			return s_MMData.Materials[handle];
 		return nullptr;
 	}
+	const std::unordered_map<MaterialHandle, Ref<Material>> MaterialManager::GetMaterials() { return s_MMData.Materials; }
 
 	bool MaterialManager::IsValid(MaterialHandle handle)
 	{

@@ -599,8 +599,10 @@ namespace Locus
 		{
 			Entity entity = Entity(e, this);
 			auto& mrc = entity.GetComponent<MeshRendererComponent>();
-			if (entity.GetComponent<TagComponent>().Enabled && mrc.Mesh)
-				Renderer3D::DrawModel(GetWorldTransform(entity), mrc.Mesh->GetVertexArray(), nullptr, (int)e);
+			Ref<Model> model = ModelManager::GetModel(mrc.Model);
+			Ref<Material> material = MaterialManager::GetMaterial(mrc.Material);
+			if (entity.GetComponent<TagComponent>().Enabled)
+				Renderer3D::DrawModel(GetWorldTransform(entity), model ? model->GetVertexArray() : nullptr, material, (int)e);
 		}
 	}
 

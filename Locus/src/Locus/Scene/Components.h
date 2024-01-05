@@ -38,6 +38,7 @@
 #include "Locus/Math/Math.h"
 #include "Locus/Resource/TextureManager.h"
 #include "Locus/Resource/MaterialManager.h"
+#include "Locus/Resource/ModelManager.h"
 
 namespace Locus
 {
@@ -152,7 +153,7 @@ namespace Locus
 	struct MeshRendererComponent
 	{
 		MaterialHandle Material;
-		Ref<Model> Mesh; // TODO: Mesh manager
+		ModelHandle Model = ModelHandle(13288067935641795863);
 
 		MeshRendererComponent() = default;
 		MeshRendererComponent(const MeshRendererComponent&) = default;

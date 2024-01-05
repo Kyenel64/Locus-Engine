@@ -91,7 +91,7 @@ namespace Locus
 							ImGui::SetDragDropPayload("SCENE_ITEM_PATH", &resourceUUID, sizeof(uint64_t));
 						else if (extension == ".png" || extension == ".jpg" || extension == ".tiff" || extension == ".tif" || extension == ".bmp" || extension == ".tga")
 							ImGui::SetDragDropPayload("TEXTURE_ITEM_PATH", &resourceUUID, sizeof(uint64_t));
-						else if (extension == ".obj" || extension == ".fbx")
+						else if (extension == ".obj" || extension == ".fbx" || extension == ".gltf")
 							ImGui::SetDragDropPayload("MESH_ITEM_PATH", &resourceUUID, sizeof(uint64_t));
 						else if (extension == ".lmat")
 							ImGui::SetDragDropPayload("MATERIAL_ITEM_PATH", &resourceUUID, sizeof(uint64_t));

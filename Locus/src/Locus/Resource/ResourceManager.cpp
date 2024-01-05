@@ -7,6 +7,7 @@
 #include "Locus/Core/Application.h"
 #include "Locus/Resource/TextureManager.h"
 #include "Locus/Resource/MaterialManager.h"
+#include "Locus/Resource/ModelManager.h"
 
 namespace Locus
 {
@@ -14,6 +15,7 @@ namespace Locus
 	{
 		std::vector<std::filesystem::path> TexturePaths;
 		std::vector<std::filesystem::path> MaterialPaths;
+		std::vector<std::filesystem::path> ModelPaths;
 
 		std::filesystem::path ProjectDirectory;
 	};
@@ -27,20 +29,25 @@ namespace Locus
 
 		for (const auto& dirEntry : std::filesystem::recursive_directory_iterator(s_RMData.ProjectDirectory / "Assets"))
 		{
-			if (dirEntry.path().extension() == ".jpg" || dirEntry.path().extension() == ".png")
+			std::string ext = dirEntry.path().extension().string();
+			if (ext == ".jpg" || ext == ".png")
 				s_RMData.TexturePaths.push_back(dirEntry);
-			else if (dirEntry.path().extension() == ".lmat")
+			else if (ext == ".lmat")
 				s_RMData.MaterialPaths.push_back(dirEntry);
+			else if (ext == ".obj" || ext == ".fbx" || ext == ".gltf")
+				s_RMData.ModelPaths.push_back(dirEntry);
 		}
 
 		// Initialize sub resource managers
 		TextureManager::Init();
 		MaterialManager::Init();
+		ModelManager::Init();
 	}
 
 	// Getters
 	const std::vector<std::filesystem::path>& ResourceManager::GetTexturePaths() { return s_RMData.TexturePaths; }
 	const std::vector<std::filesystem::path>& ResourceManager::GetMaterialPaths() { return s_RMData.MaterialPaths; }
+	const std::vector<std::filesystem::path>& ResourceManager::GetModelPaths() { return s_RMData.ModelPaths; }
 	std::filesystem::path ResourceManager::GetAssetsDirectory() { return s_RMData.ProjectDirectory / "Assets"; }
 
 	UUID ResourceManager::GetResourceUUID(const std::filesystem::path& path)

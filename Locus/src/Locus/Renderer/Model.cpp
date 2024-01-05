@@ -18,7 +18,7 @@ namespace Locus
 	void Model::LoadModel()
 	{
 		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFile(m_FilePath.string(), aiProcess_Triangulate | aiProcess_FlipUVs);
+		const aiScene* scene = importer.ReadFile(m_FilePath.string(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
 		LOCUS_CORE_ASSERT(scene, "Model::LoadModel(): Assimp failed to load model");
 		LOCUS_CORE_ASSERT(scene->mFlags & AI_SCENE_FLAGS_VALIDATED || scene->mRootNode, "Model::LoadModel(): Assimp failed to load model");
 
@@ -112,7 +112,7 @@ namespace Locus
 				indices.push_back(face.mIndices[j]);
 			}
 		}
-		m_IndexOffset += static_cast<uint32_t>(indices.size());
+		m_IndexOffset += static_cast<uint32_t>(vertices.size());
 
 		return Mesh(vertices, indices, textures);
 	}

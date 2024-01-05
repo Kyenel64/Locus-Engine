@@ -393,6 +393,9 @@ namespace Locus
 	{
 		LOCUS_PROFILE_FUNCTION();
 
+		if (!va)
+			return;
+
 		if (s_R3DData.InstanceIndex >= s_R3DData.MaxInstances)
 			FlushAndReset();
 

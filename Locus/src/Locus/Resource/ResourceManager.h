@@ -14,6 +14,7 @@ namespace Locus
 
 		static const std::vector<std::filesystem::path>& GetTexturePaths();
 		static const std::vector<std::filesystem::path>& GetMaterialPaths();
+		static const std::vector<std::filesystem::path>& GetModelPaths();
 		static std::filesystem::path GetAssetsDirectory();
 		static UUID GetResourceUUID(const std::filesystem::path& path);
 	};

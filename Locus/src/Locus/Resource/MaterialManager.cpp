@@ -77,6 +77,11 @@ namespace Locus
 		return s_MMData.Materials.find(handle) != s_MMData.Materials.end();
 	}
 
+	Ref<Material> MaterialHandle::Get() const
+	{
+		return MaterialManager::GetMaterial(Handle);
+	}
+
 	MaterialHandle::operator bool() const
 	{
 		return MaterialManager::IsValid(Handle);

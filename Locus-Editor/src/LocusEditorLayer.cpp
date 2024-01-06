@@ -8,10 +8,15 @@
 #include <ImGuizmo.h>
 
 #include "Widgets/Widgets.h"
+#include "Command/Command.h"
+#include "Command/CommandHistory.h"
+#include "Command/EntityCommands.h"
+#include "Command/ValueCommands.h"
 
 namespace Locus
 {
 	extern Entity g_SelectedEntity = {};
+	extern UUID g_SelectedResourceID;
 
 	LocusEditorLayer::LocusEditorLayer()
 		: Layer("LocusEditorLayer")
@@ -26,6 +31,7 @@ namespace Locus
 		m_PropertiesPanel = CreateRef<PropertiesPanel>();
 		m_ContentBrowserPanel = CreateRef<ContentBrowserPanel>();
 		m_ConsolePanel = CreateRef<ConsolePanel>();
+		m_ResourceInspectorPanel = CreateRef<ResourceInspectorPanel>(m_ContentBrowserPanel);
 
 		CommandHistory::Init(this);
 
@@ -369,7 +375,6 @@ namespace Locus
 		if (m_SceneState != SceneState::Edit)
 			OnSceneStop();
 		g_SelectedEntity = {};
-		m_HoveredEntity = {};
 		m_EditorScene = CreateRef<Scene>();
 		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_ActiveScene = m_EditorScene;
@@ -392,7 +397,6 @@ namespace Locus
 		if (m_SceneState != SceneState::Edit)
 			OnSceneStop();
 		g_SelectedEntity = {};
-		m_HoveredEntity = {};
 		m_EditorScene = CreateRef<Scene>();
 		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_ActiveScene = m_EditorScene;
@@ -613,7 +617,8 @@ namespace Locus
 		m_PropertiesPanel->OnImGuiRender();
 		m_ContentBrowserPanel->OnImGuiRender();
 		m_ConsolePanel->OnImGuiRender();
-		//ImGui::ShowDemoWindow();
+		m_ResourceInspectorPanel->OnImGuiRender();
+		ImGui::ShowDemoWindow();
 
 
 		ProcessSavePopup();
@@ -1071,13 +1076,9 @@ namespace Locus
 		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
 		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
 
-		std::string name = "None";
-		if (m_HoveredEntity.IsValid())
-			if (m_HoveredEntity.HasComponent<IDComponent>())
-				name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
-		ImGui::Text("Hovered Entity: %s", name.c_str());
-
+		// IDs
 		ImGui::Text("Entity Value: %d", (entt::entity)g_SelectedEntity);
+		ImGui::Text("Resource ID: %d", g_SelectedResourceID);
 
 		// Collision
 		if (g_SelectedEntity.IsValid())

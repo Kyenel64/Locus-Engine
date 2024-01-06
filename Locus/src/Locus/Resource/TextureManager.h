@@ -12,6 +12,7 @@ namespace Locus
 		TextureHandle(UUID uuid) : Handle(uuid) {}
 		~TextureHandle() = default;
 
+		Ref<Texture2D> Get() const;
 		operator uint64_t() const { return (uint64_t)Handle; }
 		operator bool() const;
 		bool operator==(const TextureHandle& other) const { return Handle == other.Handle; }

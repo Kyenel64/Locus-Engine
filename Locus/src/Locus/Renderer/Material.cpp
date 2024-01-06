@@ -52,15 +52,15 @@ namespace Locus
 
 		auto textures = data["Textures"];
 		TextureHandle albedoTex = TextureHandle(textures["Albedo"].as<uint64_t>());
-		m_AlbedoTexture = TextureManager::GetTexture(albedoTex);
+		m_AlbedoTexture = albedoTex;
 		TextureHandle normalTex = TextureHandle(textures["Normal"].as<uint64_t>());
-		m_NormalMapTexture = TextureManager::GetTexture(normalTex);
+		m_NormalMapTexture = normalTex;
 		TextureHandle metallicTex = TextureHandle(textures["Metallic"].as<uint64_t>());
-		m_MetallicTexture = TextureManager::GetTexture(metallicTex);
+		m_MetallicTexture = metallicTex;
 		TextureHandle roughnessTex = TextureHandle(textures["Roughness"].as<uint64_t>());
-		m_RoughnessTexture = TextureManager::GetTexture(roughnessTex);
+		m_RoughnessTexture = roughnessTex;
 		TextureHandle aoTex = TextureHandle(textures["AO"].as<uint64_t>());
-		m_AOTexture = TextureManager::GetTexture(aoTex);
+		m_AOTexture = aoTex;
 
 	}
 }

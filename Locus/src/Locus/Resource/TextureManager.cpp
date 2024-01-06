@@ -77,6 +77,11 @@ namespace Locus
 		return s_TMData.Textures.find(handle) != s_TMData.Textures.end(); 
 	}
 
+	Ref<Texture2D> TextureHandle::Get() const
+	{
+		return TextureManager::GetTexture(Handle);
+	}
+
 	TextureHandle::operator bool() const
 	{
 		return TextureManager::IsValid(Handle);

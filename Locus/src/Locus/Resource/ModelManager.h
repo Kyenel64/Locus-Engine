@@ -12,6 +12,8 @@ namespace Locus
 		ModelHandle(UUID uuid) : Handle(uuid) {}
 		~ModelHandle() = default;
 
+		Ref<Model> Get() const;
+
 		operator uint64_t() const { return (uint64_t)Handle; }
 		operator bool() const;
 		bool operator==(const ModelHandle& other) const { return Handle == other.Handle; }

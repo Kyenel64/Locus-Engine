@@ -12,6 +12,7 @@ namespace Locus
 		MaterialHandle(UUID uuid) : Handle(uuid) {}
 		~MaterialHandle() = default;
 
+		Ref<Material> Get() const;
 		operator uint64_t() const { return (uint64_t)Handle; }
 		operator bool() const;
 		bool operator==(const MaterialHandle& other) const { return Handle == other.Handle; }

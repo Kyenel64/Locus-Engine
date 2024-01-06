@@ -161,7 +161,7 @@ namespace Locus::Widgets
 		if (labelWidth == -1)
 			labelWidth = ImGui::GetContentRegionAvail().x * 0.5f;
 
-		Widgets::DrawControlLabel("Color", { labelWidth, 0.0f });
+		Widgets::DrawControlLabel(name.c_str(), {labelWidth, 0.0f});
 		ImGui::SameLine();
 
 		if (ImGui::IsItemHovered())
@@ -413,15 +413,17 @@ namespace Locus::Widgets
 
 		ImVec2 topLeft = { ImGui::GetCursorScreenPos().x + (ImGui::GetContentRegionAvail().x / 2) - (imageSize / 2), ImGui::GetCursorScreenPos().y + (labelHeight - imageSize) / 2 };
 		ImVec2 popupPos = { ImGui::GetCursorScreenPos().x - 50.0f, ImGui::GetCursorScreenPos().y + labelHeight };
-		if (ImGui::Button("##SpriteDropdown", { -1.0f , labelHeight }))
-			ImGui::OpenPopup("SpriteSelectorPopup");
+		std::string buttonLabel = "##TextureDropdown" + name;
+		std::string popupLabel = "TextureSelectorPopup" + name;
+		if (ImGui::Button(buttonLabel.c_str(), {-1.0f , labelHeight}))
+			ImGui::OpenPopup(popupLabel.c_str());
 
 		if (texture)
 			drawList->AddImage((ImTextureID)(uint64_t)texture->GetRendererID(), topLeft, { topLeft.x + imageSize, topLeft.y + imageSize }, { 0, 1 }, { 1, 0 });
 
 		ImGui::SetNextWindowPos(popupPos);
 		ImGui::SetNextWindowSize({ 50.0f + ImGui::GetItemRectSize().x, 300.0f});
-		if (ImGui::BeginPopup("SpriteSelectorPopup"))
+		if (ImGui::BeginPopup(popupLabel.c_str()))
 		{
 			drawList = ImGui::GetWindowDrawList();
 
@@ -480,15 +482,17 @@ namespace Locus::Widgets
 
 		ImVec2 topLeft = { ImGui::GetCursorScreenPos().x + (ImGui::GetContentRegionAvail().x / 2) - (imageSize / 2), ImGui::GetCursorScreenPos().y + (labelHeight - imageSize) / 2 };
 		ImVec2 popupPos = { ImGui::GetCursorScreenPos().x - 50.0f, ImGui::GetCursorScreenPos().y + labelHeight };
-		if (ImGui::Button("##MaterialDropdown", { -1.0f , labelHeight }))
-			ImGui::OpenPopup("MaterialSelectorPopup");
+		std::string buttonLabel = "##MaterialDropdown" + name;
+		std::string popupLabel = "MaterialSelectorPopup" + name;
+		if (ImGui::Button(buttonLabel.c_str(), {-1.0f , labelHeight}))
+			ImGui::OpenPopup(popupLabel.c_str());
 
 		if (material)
-			drawList->AddImageRounded((ImTextureID)(uint64_t)material->m_AlbedoTexture->GetRendererID(), topLeft, {topLeft.x + imageSize, topLeft.y + imageSize}, {0, 1}, {1, 0}, ImGui::GetColorU32(0), imageSize / 2);
+			drawList->AddImageRounded((ImTextureID)(uint64_t)material->m_AlbedoTexture.Get()->GetRendererID(), topLeft, {topLeft.x + imageSize, topLeft.y + imageSize}, {0, 1}, {1, 0}, ImGui::GetColorU32(0), imageSize / 2);
 
 		ImGui::SetNextWindowPos(popupPos);
 		ImGui::SetNextWindowSize({ 50.0f + ImGui::GetItemRectSize().x, 300.0f });
-		if (ImGui::BeginPopup("MaterialSelectorPopup"))
+		if (ImGui::BeginPopup(popupLabel.c_str()))
 		{
 			drawList = ImGui::GetWindowDrawList();
 
@@ -508,7 +512,7 @@ namespace Locus::Widgets
 				ImGui::PopStyleColor();
 
 				if (mat->m_AlbedoTexture)
-					drawList->AddImageRounded((ImTextureID)(uint64_t)mat->m_AlbedoTexture->GetRendererID(), topLeft, { topLeft.x + imageSize, topLeft.y + imageSize }, { 0, 1 }, { 1, 0 }, ImGui::GetColorU32(0), imageSize / 2);
+					drawList->AddImageRounded((ImTextureID)(uint64_t)mat->m_AlbedoTexture.Get()->GetRendererID(), topLeft, {topLeft.x + imageSize, topLeft.y + imageSize}, {0, 1}, {1, 0}, ImGui::GetColorU32(0), imageSize / 2);
 				drawList->AddText({ topLeft.x + imageSize + 10.0f, topLeft.y + 12.0f }, ImGui::GetColorU32(LocusColors::White), mat->GetName().c_str());
 			}
 			ImGui::PopStyleVar(2);

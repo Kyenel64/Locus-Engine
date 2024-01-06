@@ -10,6 +10,9 @@
 
 #include <Locus.h>
 
+#include "Command/CommandHistory.h"
+#include "Command/ValueCommands.h"
+
 namespace Locus::Widgets
 {
 	// Displays a label with given size.

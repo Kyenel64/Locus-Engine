@@ -124,7 +124,7 @@ namespace Locus
 	struct SpriteRendererComponent
 	{
 		glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
-		TextureHandle Texture = TextureHandle::Null;
+		TextureHandle Texture;
 		float TilingFactor = 1.0f;
 
 		SpriteRendererComponent() = default;
@@ -153,7 +153,7 @@ namespace Locus
 	struct MeshRendererComponent
 	{
 		MaterialHandle Material;
-		ModelHandle Model = ModelHandle(13288067935641795863);
+		ModelHandle Model = ModelHandle(9305466487919443545);
 
 		MeshRendererComponent() = default;
 		MeshRendererComponent(const MeshRendererComponent&) = default;

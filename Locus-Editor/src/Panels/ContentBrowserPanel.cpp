@@ -6,6 +6,9 @@
 
 namespace Locus
 {
+	extern UUID g_SelectedResourceID = 0;
+	extern ResourceType g_SelectedResourceType = ResourceType::None;
+
 	ContentBrowserPanel::ContentBrowserPanel()
 	{
 		m_ProjectDirectory = Application::Get().GetProjectPath() / "Assets";
@@ -63,12 +66,12 @@ namespace Locus
 		if (columnCount < 1)
 			columnCount = 1;
 
-		static ImGuiTableFlags flags = ImGuiTableFlags_RowBg;
+		static ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_ContextMenuInBody;
 		ImGui::PushStyleColor(ImGuiCol_TableRowBg, LocusColors::MediumDarkGrey);
 		if (ImGui::BeginTable("DVTable", columnCount, flags))
 		{
 			ImGui::TableNextRow(ImGuiTableRowFlags_None, ImGui::GetContentRegionAvail().y - 40.0f);
-			for (auto& item : std::filesystem::directory_iterator(m_CurrentDirectory))
+			for (auto& item : std::filesystem::directory_iterator(m_CurrentDirectory)) // TODO: Iterate through resource manager
 			{
 				if (item.path().extension() != ".meta")
 				{
@@ -77,6 +80,16 @@ namespace Locus
 					const auto& path = item.path();
 					std::string filenameString = path.stem().string() + path.extension().string();
 					std::string extension = path.extension().string();
+
+					ResourceType type = ResourceType::None;
+					if (extension == ".locus")
+						type = ResourceType::Scene;
+					else if (extension == ".png" || extension == ".jpg" || extension == ".tiff" || extension == ".tif" || extension == ".bmp" || extension == ".tga")
+						type = ResourceType::Texture;
+					else if (extension == ".obj" || extension == ".fbx" || extension == ".gltf")
+						type = ResourceType::Model;
+					else if (extension == ".lmat")
+						type = ResourceType::Material;
 
 					Ref<Texture2D> icon = item.is_directory() ? m_FolderIcon : m_FileIcon;
 					ImGui::PushID(filenameString.c_str());
@@ -87,33 +100,42 @@ namespace Locus
 					{
 						uint64_t resourceUUID = ResourceManager::GetResourceUUID(path.string() + ".meta"); // TODO: slow
 
-						if (extension == ".locus")
-							ImGui::SetDragDropPayload("SCENE_ITEM_PATH", &resourceUUID, sizeof(uint64_t));
-						else if (extension == ".png" || extension == ".jpg" || extension == ".tiff" || extension == ".tif" || extension == ".bmp" || extension == ".tga")
-							ImGui::SetDragDropPayload("TEXTURE_ITEM_PATH", &resourceUUID, sizeof(uint64_t));
-						else if (extension == ".obj" || extension == ".fbx" || extension == ".gltf")
-							ImGui::SetDragDropPayload("MESH_ITEM_PATH", &resourceUUID, sizeof(uint64_t));
-						else if (extension == ".lmat")
-							ImGui::SetDragDropPayload("MATERIAL_ITEM_PATH", &resourceUUID, sizeof(uint64_t));
-
+						switch (type)
+						{
+						case Locus::ResourceType::None: break;
+						case Locus::ResourceType::Texture: ImGui::SetDragDropPayload("TEXTURE_ITEM_PATH", &resourceUUID, sizeof(uint64_t)); break;
+						case Locus::ResourceType::Material: ImGui::SetDragDropPayload("MATERIAL_ITEM_PATH", &resourceUUID, sizeof(uint64_t)); break;
+						case Locus::ResourceType::Model: ImGui::SetDragDropPayload("MODEL_ITEM_PATH", &resourceUUID, sizeof(uint64_t)); break;
+						case Locus::ResourceType::Scene: ImGui::SetDragDropPayload("SCENE_ITEM_PATH", &resourceUUID, sizeof(uint64_t)); break;
+						case Locus::ResourceType::Script: break;
+						}
 						ImGui::EndDragDropSource();
 					}
 
 					ImGui::PopID();
 					ImGui::PopStyleColor();
 
-					if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+					if (ImGui::IsItemHovered())
 					{
-						if (item.is_directory())
-						{
+						if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && item.is_directory())
 							m_CurrentDirectory /= path.filename();
+						else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+						{
+							g_SelectedResourceID = ResourceManager::GetResourceUUID(path.string() + ".meta");
+							switch (type)
+							{
+							case Locus::ResourceType::None: g_SelectedResourceType = ResourceType::None; break;
+							case Locus::ResourceType::Texture: g_SelectedResourceType = ResourceType::Texture; break;
+							case Locus::ResourceType::Material: g_SelectedResourceType = ResourceType::Material; break;
+							case Locus::ResourceType::Model: g_SelectedResourceType = ResourceType::Model; break;
+							case Locus::ResourceType::Scene: g_SelectedResourceType = ResourceType::Scene; break;
+							case Locus::ResourceType::Script: g_SelectedResourceType = ResourceType::Script; break;
+							}
 						}
 					}
 					ImGui::TextWrapped(filenameString.c_str());
 				}
 			}
-			ImGui::TableNextRow(ImGuiTableRowFlags_None, 40.0f);
-			ImGui::Text("Testing Row");
 
 			ImGui::EndTable();
 		}

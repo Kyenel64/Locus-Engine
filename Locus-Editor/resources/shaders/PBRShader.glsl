@@ -43,7 +43,7 @@ layout (location = 5) out flat vec3 v_ViewPos;
 
 void main()
 {
-	v_FragPos = a_Position;
+	v_FragPos = vec4(a_InstanceModelMatrix * vec4(a_Position, 1.0f)).xyz;
 	v_Normal = a_Normal;
 	v_TexCoord = a_TexCoord;
 	v_EntityID = a_EntityID;

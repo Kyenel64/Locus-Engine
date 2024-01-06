@@ -403,11 +403,11 @@ namespace Locus
 		int materialIndex = 0;
 		if (material)
 		{
-			int albedoTexIndex = ProcessTextureSlot(material->m_AlbedoTexture);
-			int normalTexIndex = ProcessTextureSlot(material->m_NormalMapTexture);
-			int metallicTexIndex = ProcessTextureSlot(material->m_MetallicTexture);
-			int roughnessTexIndex = ProcessTextureSlot(material->m_RoughnessTexture);
-			int aoTexIndex = ProcessTextureSlot(material->m_AOTexture);
+			int albedoTexIndex = ProcessTextureSlot(material->m_AlbedoTexture.Get());
+			int normalTexIndex = ProcessTextureSlot(material->m_NormalMapTexture.Get());
+			int metallicTexIndex = ProcessTextureSlot(material->m_MetallicTexture.Get());
+			int roughnessTexIndex = ProcessTextureSlot(material->m_RoughnessTexture.Get());
+			int aoTexIndex = ProcessTextureSlot(material->m_AOTexture.Get());
 
 			// Material uniform data
 			materialIndex = ProcessMaterialSlot(material, albedoTexIndex, normalTexIndex, metallicTexIndex, roughnessTexIndex, aoTexIndex);
@@ -481,7 +481,7 @@ namespace Locus
 		{
 			for (uint32_t i = 1; i < s_R3DData.MaterialSlotIndex; i++)
 			{
-				if (s_R3DData.MaterialBuffer[i].Albedo == glm::vec4(material->m_Albedo, 1.0f) && s_R3DData.MaterialBuffer[i].Metallic == material->m_Metallic && 
+				if (s_R3DData.MaterialBuffer[i].Albedo == material->m_Albedo && s_R3DData.MaterialBuffer[i].Metallic == material->m_Metallic && 
 					s_R3DData.MaterialBuffer[i].Roughness == material->m_Roughness && s_R3DData.MaterialBuffer[i].AO == material->m_AO && 
 					s_R3DData.MaterialBuffer[i].AlbedoTexIndex == albedoIndex && s_R3DData.MaterialBuffer[i].NormalMapTexIndex == normalIndex && 
 					s_R3DData.MaterialBuffer[i].MetallicTexIndex == metallicIndex && s_R3DData.MaterialBuffer[i].RoughnessTexIndex == roughnessIndex && s_R3DData.MaterialBuffer[i].AOTexIndex == aoIndex)
@@ -491,7 +491,7 @@ namespace Locus
 				FlushAndReset();
 
 			int slot = s_R3DData.MaterialSlotIndex;
-			s_R3DData.MaterialBuffer[slot].Albedo = glm::vec4(material->m_Albedo, 1.0f);
+			s_R3DData.MaterialBuffer[slot].Albedo = material->m_Albedo;
 			s_R3DData.MaterialBuffer[slot].Metallic = material->m_Metallic;
 			s_R3DData.MaterialBuffer[slot].Roughness = material->m_Roughness;
 			s_R3DData.MaterialBuffer[slot].AO = material->m_AO;

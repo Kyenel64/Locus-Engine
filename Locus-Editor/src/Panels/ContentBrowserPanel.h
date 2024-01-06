@@ -16,6 +16,8 @@ namespace Locus
 
 		void OnImGuiRender();
 
+		void SetDirectory(const std::filesystem::path& path) { m_CurrentDirectory = path; }
+
 	private:
 		void DrawCurrentDirectoryView();
 		void DrawRootDirectoryView();

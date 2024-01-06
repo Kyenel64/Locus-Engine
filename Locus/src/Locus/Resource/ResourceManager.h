@@ -4,6 +4,8 @@
 
 namespace Locus
 {
+	enum class ResourceType { None = 0, Texture = 1, Material = 2, Model = 3, Scene = 4, Script = 5 };
+
 	class ResourceManager
 	{
 	public:

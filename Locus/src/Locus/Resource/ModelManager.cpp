@@ -75,6 +75,11 @@ namespace Locus
 		return s_MMData.Models.find(handle) != s_MMData.Models.end();
 	}
 
+	Ref<Model> ModelHandle::Get() const
+	{
+		return ModelManager::GetModel(Handle);
+	}
+
 	ModelHandle::operator bool() const
 	{
 		return ModelManager::IsValid(Handle);

@@ -379,5 +379,5 @@ Locus-Editor/imgui.ini
 scripts/__pycache__
 premake/
 
-!Locus/vendor/assimp/lib/**
 !SampleProject/Assets/**
+*.meta

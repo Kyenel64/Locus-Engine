@@ -4,14 +4,11 @@
 
 #include <Locus.h>
 
-#include "Command/Command.h"
-#include "Command/CommandHistory.h"
-#include "Command/EntityCommands.h"
-#include "Command/ValueCommands.h"
 #include "Panels/SceneHierarchyPanel.h"
 #include "Panels/ContentBrowserPanel.h"
 #include "Panels/PropertiesPanel.h"
 #include "Panels/ConsolePanel.h"
+#include "Panels/ResourceInspectorPanel.h"
 
 namespace Locus
 {
@@ -108,7 +105,6 @@ namespace Locus
 		Ref<Shader> OutlinePostProcessShader;
 
 		// Entity
-		Entity m_HoveredEntity;
 		Entity m_SelectedEntity;
 		Entity m_ClipboardEntity;
 
@@ -122,6 +118,7 @@ namespace Locus
 		Ref<ContentBrowserPanel> m_ContentBrowserPanel;
 		Ref<PropertiesPanel> m_PropertiesPanel;
 		Ref<ConsolePanel> m_ConsolePanel;
+		Ref<ResourceInspectorPanel> m_ResourceInspectorPanel;
 
 		// Layout
 		LayoutStyle m_LayoutStyle = LayoutStyle::Default;

@@ -36,6 +36,9 @@
 #include "Locus/Scene/SceneCamera.h"
 #include "Locus/Scene/Entity.h"
 #include "Locus/Math/Math.h"
+#include "Locus/Resource/TextureManager.h"
+#include "Locus/Resource/MaterialManager.h"
+#include "Locus/Resource/ModelManager.h"
 
 namespace Locus
 {
@@ -120,10 +123,8 @@ namespace Locus
 
 	struct SpriteRendererComponent
 	{
-		// TODO: Take in a material
 		glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
-		Ref<Texture2D> Texture;
-		std::string TexturePath;
+		TextureHandle Texture;
 		float TilingFactor = 1.0f;
 
 		SpriteRendererComponent() = default;
@@ -143,16 +144,7 @@ namespace Locus
 
 	struct CubeRendererComponent
 	{
-		// TODO: Put in material
-		glm::vec4 Albedo = { 1.0f, 1.0f, 1.0f, 1.0f };
-		float Metallic = 0.5f;
-		float Roughness = 0.5f;
-		float AO = 0.5f;
-		Ref<Texture2D> AlbedoTexture = nullptr;
-		Ref<Texture2D> NormalTexture = nullptr;
-		Ref<Texture2D> MetallicTexture = nullptr;
-		Ref<Texture2D> RoughnessTexture = nullptr;
-		Ref<Texture2D> AOTexture = nullptr;
+		MaterialHandle Material;
 
 		CubeRendererComponent() = default;
 		CubeRendererComponent(const CubeRendererComponent&) = default;
@@ -160,7 +152,8 @@ namespace Locus
 	
 	struct MeshRendererComponent
 	{
-		Ref<Model> Mesh;
+		MaterialHandle Material;
+		ModelHandle Model = ModelHandle(9305466487919443545);
 
 		MeshRendererComponent() = default;
 		MeshRendererComponent(const MeshRendererComponent&) = default;

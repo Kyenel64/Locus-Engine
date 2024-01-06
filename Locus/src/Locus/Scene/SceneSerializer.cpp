@@ -218,8 +218,8 @@ namespace Locus
 
 			out << YAML::Key << "SpriteRendererComponent";
 			out << YAML::BeginMap; // Sprite Renderer Component
+			out << YAML::Key << "Texture" << YAML::Value << (uint64_t)src.Texture;
 			out << YAML::Key << "Color" << YAML::Value << src.Color;
-			out << YAML::Key << "TexturePath" << YAML::Value << src.TexturePath;
 			out << YAML::Key << "TilingFactor" << YAML::Value << src.TilingFactor;
 			out << YAML::EndMap; // End Sprite Renderer Component
 		}
@@ -244,10 +244,7 @@ namespace Locus
 
 			out << YAML::Key << "CubeRendererComponent";
 			out << YAML::BeginMap; // Cube Renderer Component
-			out << YAML::Key << "Albedo" << YAML::Value << crc.Albedo;
-			out << YAML::Key << "Metallic" << YAML::Value << crc.Metallic;
-			out << YAML::Key << "Roughness" << YAML::Value << crc.Roughness;
-			out << YAML::Key << "AO" << YAML::Value << crc.AO;
+			out << YAML::Key << "Material" << YAML::Value << (uint64_t)crc.Material;
 			out << YAML::EndMap;
 		}
 
@@ -504,10 +501,8 @@ namespace Locus
 				if (spriteRendererComponent)
 				{
 					auto& src = deserializedEntity.AddComponent<SpriteRendererComponent>();
+					src.Texture = TextureHandle(spriteRendererComponent["Texture"].as<uint64_t>());
 					src.Color = spriteRendererComponent["Color"].as<glm::vec4>();
-					src.TexturePath = spriteRendererComponent["TexturePath"].as<std::string>();
-					if (src.TexturePath != std::string())
-						src.Texture = Texture2D::Create(src.TexturePath);
 					src.TilingFactor = spriteRendererComponent["TilingFactor"].as<float>();
 				}
 
@@ -526,10 +521,7 @@ namespace Locus
 				if (cubeRendererComponent)
 				{
 					auto& crc = deserializedEntity.AddComponent<CubeRendererComponent>();
-					crc.Albedo = cubeRendererComponent["Albedo"].as<glm::vec4>();
-					crc.Metallic = cubeRendererComponent["Metallic"].as<float>();
-					crc.Roughness = cubeRendererComponent["Roughness"].as<float>();
-					crc.AO = cubeRendererComponent["AO"].as<float>();
+					crc.Material = MaterialHandle(spriteRendererComponent["Material"].as<uint64_t>());
 				}
 
 				// --- Point Light Component ---

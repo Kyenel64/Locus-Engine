@@ -71,7 +71,7 @@ namespace Locus
 		};
 		MaterialBufferData MaterialBuffer[MaxMaterialSlots];
 		Ref<UniformBuffer> MaterialUniformBuffer;
-		uint32_t MaterialSlotIndex = 0;
+		uint32_t MaterialSlotIndex;
 
 		//InstanceData InstanceBuffer[MaxCubes];
 		uint32_t InstanceIndex;
@@ -284,6 +284,17 @@ namespace Locus
 		uint64_t whiteTextureData = 0xfffffffff;
 		s_R3DData.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
 		s_R3DData.TextureSlots[0] = s_R3DData.WhiteTexture;
+
+		// Default material
+		s_R3DData.MaterialBuffer[0].Albedo = { 1.0f, 1.0f, 1.0f, 1.0f };
+		s_R3DData.MaterialBuffer[0].Metallic = 0.0f;
+		s_R3DData.MaterialBuffer[0].Roughness = 0.5f;
+		s_R3DData.MaterialBuffer[0].AO = 1.0f;
+		s_R3DData.MaterialBuffer[0].AlbedoTexIndex = 0;
+		s_R3DData.MaterialBuffer[0].NormalMapTexIndex = 0;
+		s_R3DData.MaterialBuffer[0].MetallicTexIndex = 0;
+		s_R3DData.MaterialBuffer[0].RoughnessTexIndex = 0;
+		s_R3DData.MaterialBuffer[0].AOTexIndex = 0;
 	}
 
 	void Renderer3D::Shutdown()
@@ -332,7 +343,7 @@ namespace Locus
 		LOCUS_PROFILE_FUNCTION();
 
 		s_R3DData.TextureSlotIndex = 1;
-		s_R3DData.MaterialSlotIndex = 0;
+		s_R3DData.MaterialSlotIndex = 1;
 		s_R3DData.InstanceIndex = 0;
 		s_R3DData.Models.clear();
 	}
@@ -351,6 +362,7 @@ namespace Locus
 
 		for (auto& [ va, instanceData ] : s_R3DData.Models)
 		{
+			// VertexBuffer[1] in our model is where the instanced data is.
 			va->GetVertexBuffers()[1]->SetData(instanceData.data(), static_cast<uint32_t>(instanceData.size() * sizeof(InstanceData)));
 			if (va->GetIndexBuffer())
 				RenderCommand::DrawIndexedInstanced(va, va->GetIndexBuffer()->GetCount(), static_cast<uint32_t>(instanceData.size()));
@@ -367,7 +379,7 @@ namespace Locus
 		EndScene();
 		
 		s_R3DData.TextureSlotIndex = 1;
-		s_R3DData.MaterialSlotIndex = 0;
+		s_R3DData.MaterialSlotIndex = 1;
 		s_R3DData.InstanceIndex = 0;
 		s_R3DData.Models.clear();
 	}
@@ -381,18 +393,25 @@ namespace Locus
 	{
 		LOCUS_PROFILE_FUNCTION();
 
+		if (!va)
+			return;
+
 		if (s_R3DData.InstanceIndex >= s_R3DData.MaxInstances)
 			FlushAndReset();
 
 		// Add texture to texture slot. Handles duplicates.
-		int albedoTexIndex = ProcessTextureSlot(material->m_AlbedoTexture);
-		int normalTexIndex = ProcessTextureSlot(material->m_NormalMapTexture);
-		int metallicTexIndex = ProcessTextureSlot(material->m_MetallicTexture);
-		int roughnessTexIndex = ProcessTextureSlot(material->m_RoughnessTexture);
-		int aoTexIndex = ProcessTextureSlot(material->m_AOTexture);
+		int materialIndex = 0;
+		if (material)
+		{
+			int albedoTexIndex = ProcessTextureSlot(material->m_AlbedoTexture.Get());
+			int normalTexIndex = ProcessTextureSlot(material->m_NormalMapTexture.Get());
+			int metallicTexIndex = ProcessTextureSlot(material->m_MetallicTexture.Get());
+			int roughnessTexIndex = ProcessTextureSlot(material->m_RoughnessTexture.Get());
+			int aoTexIndex = ProcessTextureSlot(material->m_AOTexture.Get());
 
-		// Material uniform data
-		int materialIndex = ProcessMaterialSlot(material, albedoTexIndex, normalTexIndex, metallicTexIndex, roughnessTexIndex, aoTexIndex);
+			// Material uniform data
+			materialIndex = ProcessMaterialSlot(material, albedoTexIndex, normalTexIndex, metallicTexIndex, roughnessTexIndex, aoTexIndex);
+		}
 
 		// Instance data
 		InstanceData data = {};
@@ -462,14 +481,17 @@ namespace Locus
 		{
 			for (uint32_t i = 1; i < s_R3DData.MaterialSlotIndex; i++)
 			{
-				if (s_R3DData.MaterialBuffer[i].Albedo == glm::vec4(material->m_Albedo, 1.0f))
+				if (s_R3DData.MaterialBuffer[i].Albedo == material->m_Albedo && s_R3DData.MaterialBuffer[i].Metallic == material->m_Metallic && 
+					s_R3DData.MaterialBuffer[i].Roughness == material->m_Roughness && s_R3DData.MaterialBuffer[i].AO == material->m_AO && 
+					s_R3DData.MaterialBuffer[i].AlbedoTexIndex == albedoIndex && s_R3DData.MaterialBuffer[i].NormalMapTexIndex == normalIndex && 
+					s_R3DData.MaterialBuffer[i].MetallicTexIndex == metallicIndex && s_R3DData.MaterialBuffer[i].RoughnessTexIndex == roughnessIndex && s_R3DData.MaterialBuffer[i].AOTexIndex == aoIndex)
 					return i;
 			}
-			if (s_R3DData.MaterialSlotIndex >= Renderer3DData::MaxMaterialSlots - 1)
+			if (s_R3DData.MaterialSlotIndex >= Renderer3DData::MaxMaterialSlots)
 				FlushAndReset();
 
 			int slot = s_R3DData.MaterialSlotIndex;
-			s_R3DData.MaterialBuffer[slot].Albedo = glm::vec4(material->m_Albedo, 1.0f);
+			s_R3DData.MaterialBuffer[slot].Albedo = material->m_Albedo;
 			s_R3DData.MaterialBuffer[slot].Metallic = material->m_Metallic;
 			s_R3DData.MaterialBuffer[slot].Roughness = material->m_Roughness;
 			s_R3DData.MaterialBuffer[slot].AO = material->m_AO;
@@ -479,6 +501,7 @@ namespace Locus
 			s_R3DData.MaterialBuffer[slot].RoughnessTexIndex = roughnessIndex;
 			s_R3DData.MaterialBuffer[slot].AOTexIndex = aoIndex;
 			s_R3DData.MaterialSlotIndex++;
+			return slot;
 		}
 
 		return 0;

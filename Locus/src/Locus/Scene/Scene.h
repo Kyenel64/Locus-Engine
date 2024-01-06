@@ -141,8 +141,8 @@ namespace Locus
 		// Lighting
 		SceneLighting m_SceneLighting;
 
+		// Tests
 		Ref<Model> m_TestModel;
-		Ref<Model> m_TestModel2;
 		Ref<Material> m_TestMaterial;
 
 	public:

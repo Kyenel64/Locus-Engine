@@ -3,6 +3,7 @@
 
 #include "Locus/Renderer/Renderer.h"
 #include "Locus/Scripting/ScriptEngine.h"
+#include "Locus/Resource/ResourceManager.h"
 
 namespace Locus
 {
@@ -28,6 +29,7 @@ namespace Locus
 		// Initialize subsystems if project is set. 
 		Renderer::Init();
 		ScriptEngine::Init();
+		ResourceManager::Init();
 	}
 
 	void Application::PushLayer(Layer* layer)

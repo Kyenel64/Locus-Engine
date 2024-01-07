@@ -35,7 +35,7 @@ namespace Locus
 		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
 
-	OpenGLTexture2D::OpenGLTexture2D(const std::string& path) : m_Path(path)
+	OpenGLTexture2D::OpenGLTexture2D(const std::filesystem::path& path) : m_Path(path)
 	{
 		LOCUS_PROFILE_FUNCTION();
 
@@ -44,7 +44,7 @@ namespace Locus
 		stbi_uc* data = nullptr;
 		{
 			LOCUS_PROFILE_SCOPE("stbi_load - OpenGLTexture2D::OpenGLTexture2D(const std::string& path)")
-			data = stbi_load(path.c_str(), &width, &height, &channels, 0);
+			data = stbi_load(path.string().c_str(), &width, &height, &channels, 0);
 			if (data == NULL)
 			{
 				data = stbi_load("resources/textures/MissingTexture.png", &width, &height, &channels, 0);
@@ -123,10 +123,6 @@ namespace Locus
 
 	const std::string OpenGLTexture2D::GetTextureName() const
 	{
-		std::string textureName;
-		size_t textureNamePos = m_Path.find_last_of("\\") + 1;
-		if (textureNamePos != std::string::npos)
-			textureName = m_Path.substr(textureNamePos, m_Path.size());
-		return textureName;
+		return m_Path.filename().string();
 	}
 }

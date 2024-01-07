@@ -124,7 +124,7 @@ namespace Locus
 		ChangeTextureCommand(const Ref<Texture2D> newTexture, Ref<Texture2D>& textureToChange, std::string& texturePath)
 			: m_NewTexture(newTexture), m_TextureToChange(textureToChange), m_PathToChange(texturePath)
 		{
-			m_NewPath = newTexture->GetTexturePath();
+			m_NewPath = newTexture->GetTexturePath().string();
 			m_OldPath = std::string();
 		}
 

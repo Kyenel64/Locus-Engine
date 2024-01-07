@@ -2,7 +2,7 @@
 
 #include <Locus.h>
 
-#include "Panels/ContentBrowserPanel.h"
+#include "Panels/ProjectBrowserPanel.h"
 
 namespace Locus
 {
@@ -10,7 +10,7 @@ namespace Locus
 	{
 	public:
 		ResourceInspectorPanel() = default;
-		ResourceInspectorPanel(Ref<ContentBrowserPanel> contentBrowserPanel) : m_ContentBrowserPanel(contentBrowserPanel) {}
+		ResourceInspectorPanel(Ref<ProjectBrowserPanel> ProjectBrowserPanel) : m_ProjectBrowserPanel(ProjectBrowserPanel) {}
 		~ResourceInspectorPanel() = default;
 
 		void OnImGuiRender();
@@ -19,6 +19,6 @@ namespace Locus
 		void DrawMaterialInspector();
 
 	private:
-		Ref<ContentBrowserPanel> m_ContentBrowserPanel;
+		Ref<ProjectBrowserPanel> m_ProjectBrowserPanel;
 	};
 }

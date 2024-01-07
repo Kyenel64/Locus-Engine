@@ -5,7 +5,7 @@
 #include <Locus.h>
 
 #include "Panels/SceneHierarchyPanel.h"
-#include "Panels/ContentBrowserPanel.h"
+#include "Panels/ProjectBrowserPanel.h"
 #include "Panels/PropertiesPanel.h"
 #include "Panels/ConsolePanel.h"
 #include "Panels/ResourceInspectorPanel.h"
@@ -115,7 +115,7 @@ namespace Locus
 
 		// Panels
 		Ref<SceneHierarchyPanel> m_SceneHierarchyPanel;
-		Ref<ContentBrowserPanel> m_ContentBrowserPanel;
+		Ref<ProjectBrowserPanel> m_ProjectBrowserPanel;
 		Ref<PropertiesPanel> m_PropertiesPanel;
 		Ref<ConsolePanel> m_ConsolePanel;
 		Ref<ResourceInspectorPanel> m_ResourceInspectorPanel;

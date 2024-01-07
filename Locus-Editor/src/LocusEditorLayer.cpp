@@ -29,9 +29,9 @@ namespace Locus
 		// Initialize panels
 		m_SceneHierarchyPanel = CreateRef<SceneHierarchyPanel>();
 		m_PropertiesPanel = CreateRef<PropertiesPanel>();
-		m_ContentBrowserPanel = CreateRef<ContentBrowserPanel>();
+		m_ProjectBrowserPanel = CreateRef<ProjectBrowserPanel>();
 		m_ConsolePanel = CreateRef<ConsolePanel>();
-		m_ResourceInspectorPanel = CreateRef<ResourceInspectorPanel>(m_ContentBrowserPanel);
+		m_ResourceInspectorPanel = CreateRef<ResourceInspectorPanel>(m_ProjectBrowserPanel);
 
 		CommandHistory::Init(this);
 
@@ -192,6 +192,8 @@ namespace Locus
 
 	void LocusEditorLayer::OnEvent(Event& e)
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		if (m_ViewportHovered)
 			m_EditorCamera.OnEvent(e);
 
@@ -211,12 +213,16 @@ namespace Locus
 
 	void LocusEditorLayer::OnRenderOverlay()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		if (g_SelectedEntity.IsValid())
 			Renderer::DrawPostProcess(m_MaskTexture, OutlinePostProcessShader);
 	}
 
 	bool LocusEditorLayer::OnWindowClose(WindowCloseEvent& e)
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		if (m_IsSaved)
 			Application::Get().Close();
 		else
@@ -228,6 +234,8 @@ namespace Locus
 
 	bool LocusEditorLayer::OnKeyPressed(KeyPressedEvent& e)
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		if (m_BlockEditorKeyInput)
 			return false;
 		bool control = Input::IsKeyHeld(Key::LeftControl) || Input::IsKeyHeld(Key::RightControl);
@@ -350,6 +358,8 @@ namespace Locus
 
 	bool LocusEditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& e)
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		auto [mx, my] = ImGui::GetMousePos();
 		mx -= m_ViewportBounds[0].x;
 		my -= m_ViewportBounds[0].y;
@@ -372,6 +382,8 @@ namespace Locus
 
 	void LocusEditorLayer::NewScene()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		if (m_SceneState != SceneState::Edit)
 			OnSceneStop();
 		g_SelectedEntity = {};
@@ -387,6 +399,8 @@ namespace Locus
 
 	void LocusEditorLayer::OpenScene()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		std::string path = FileDialogs::OpenFile("Locus Scene (*.locus)\0*.locus\0");
 		if (!path.empty())
 			OpenScene(path);
@@ -394,6 +408,8 @@ namespace Locus
 
 	void LocusEditorLayer::OpenScene(const std::filesystem::path& path)
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		if (m_SceneState != SceneState::Edit)
 			OnSceneStop();
 		g_SelectedEntity = {};
@@ -412,6 +428,8 @@ namespace Locus
 	// Returns false if canceling file dialog.
 	bool LocusEditorLayer::SaveSceneAs()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		std::string path = FileDialogs::SaveFile("Locus Scene (*.locus)\0*.locus\0");
 		if (!path.empty())
 		{
@@ -426,6 +444,8 @@ namespace Locus
 
 	bool LocusEditorLayer::SaveScene()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		if (m_SavePath.empty())
 		{
 			return SaveSceneAs();
@@ -441,6 +461,8 @@ namespace Locus
 
 	void LocusEditorLayer::DrawGizmo()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		ImGuizmo::SetOrthographic(false);
 		ImGuizmo::SetDrawlist();
 		ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportSize.x, m_ViewportSize.y);
@@ -534,6 +556,8 @@ namespace Locus
 
 	void LocusEditorLayer::ProcessViewportDragDrop()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SCENE_ITEM_PATH"))
@@ -549,6 +573,8 @@ namespace Locus
 
 	void LocusEditorLayer::OnScenePlay()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		m_SceneState = SceneState::Play;
 		m_ActiveScene = Scene::Copy(m_EditorScene);
 		ScriptEngine::OnRuntimeStart(m_ActiveScene);
@@ -559,6 +585,8 @@ namespace Locus
 
 	void LocusEditorLayer::OnPhysicsPlay()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		m_SceneState = SceneState::Physics;
 		m_ActiveScene = Scene::Copy(m_EditorScene);
 		m_ActiveScene->OnPhysicsStart();
@@ -568,6 +596,8 @@ namespace Locus
 
 	void LocusEditorLayer::OnSceneStop()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		g_SelectedEntity = {};
 		m_SceneState = SceneState::Edit;
 		ScriptEngine::OnRuntimeStop();
@@ -579,6 +609,8 @@ namespace Locus
 
 	void LocusEditorLayer::DrawDefaultLayout()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		// --- Dockspace ---
 		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar |
@@ -615,7 +647,7 @@ namespace Locus
 		DrawDebugPanel();
 		m_SceneHierarchyPanel->OnImGuiRender();
 		m_PropertiesPanel->OnImGuiRender();
-		m_ContentBrowserPanel->OnImGuiRender();
+		m_ProjectBrowserPanel->OnImGuiRender();
 		m_ConsolePanel->OnImGuiRender();
 		m_ResourceInspectorPanel->OnImGuiRender();
 		ImGui::ShowDemoWindow();
@@ -628,6 +660,8 @@ namespace Locus
 
 	void LocusEditorLayer::DrawViewport()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
 		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_TabBarAlignLeft | ImGuiWindowFlags_DockedWindowBorder;
 		if (!m_IsSaved)
@@ -690,6 +724,8 @@ namespace Locus
 
 	void LocusEditorLayer::DrawViewportToolbar(const glm::vec2& position)
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Transparent);
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Transparent);
@@ -766,6 +802,8 @@ namespace Locus
 
 	void LocusEditorLayer::DrawToolbar()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_None;
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
@@ -921,6 +959,8 @@ namespace Locus
 	
 	void LocusEditorLayer::ProcessSavePopup()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		if (m_OpenSavePopup)
 			ImGui::OpenPopup("You have unsaved changes...");
 
@@ -958,6 +998,8 @@ namespace Locus
 
 	void LocusEditorLayer::ProcessViewSettingsPopup()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 10.0f, 10.0f });
 
 		ImGui::SetNextWindowPos({ ImGui::GetWindowPos().x, ImGui::GetWindowPos().y + ImGui::GetWindowSize().y});
@@ -1063,6 +1105,8 @@ namespace Locus
 
 	void LocusEditorLayer::DrawDebugPanel()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_TabBarAlignLeft | ImGuiWindowFlags_DockedWindowBorder;
 		ImGui::Begin("Debug", false, windowFlags);
 
@@ -1139,6 +1183,8 @@ namespace Locus
 
 	void LocusEditorLayer::DrawActiveCameraView()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		if (g_SelectedEntity.IsValid())
 		{
 			if (g_SelectedEntity.HasComponent<CameraComponent>())
@@ -1152,6 +1198,8 @@ namespace Locus
 
 	void LocusEditorLayer::DrawToMaskFramebuffer()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		// Mask framebuffer
 		m_MaskFramebuffer->ClearAttachmentInt(0, 0);
 		if (g_SelectedEntity.IsValid())

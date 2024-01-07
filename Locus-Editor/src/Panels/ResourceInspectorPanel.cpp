@@ -46,7 +46,7 @@ namespace Locus
 		ImGui::Text(material->GetName().c_str());
 		ImGui::SameLine(ImGui::GetContentRegionAvail().x - 75.0f);
 		if (ImGui::Button("Locate", { 75.0f, 0.0f }))
-			m_ContentBrowserPanel->SetDirectory(material->GetPath().parent_path());
+			m_ProjectBrowserPanel->SetDirectory(material->GetPath().parent_path());
 
 		ImGui::Separator();
 

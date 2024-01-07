@@ -158,6 +158,7 @@ namespace Locus
 		Renderer3D::BeginScene(camera, this);
 		DrawCubes();
 		DrawMeshes();
+#if 0
 		glm::mat4 transform = glm::mat4(1.0f);
 		for (int i = 0; i < 50; i++)
 		{
@@ -167,6 +168,7 @@ namespace Locus
 				Renderer3D::DrawModel(transform, m_TestModel->GetVertexArray(), m_TestMaterial, -1);
 			}
 		}
+#endif
 		Renderer3D::EndScene();
 		// Grid
 		if (camera.GetGridVisibility())

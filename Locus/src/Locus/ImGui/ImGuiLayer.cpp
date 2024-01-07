@@ -56,6 +56,7 @@ namespace Locus
 
 		// Load fonts
 		io.Fonts->AddFontFromFileTTF("resources/fonts/Inter/Inter-Bold.ttf", 20.0f);
+		io.Fonts->AddFontFromFileTTF("resources/fonts/Inter/Inter-Regular.ttf", 16.0f);
 		io.FontDefault = io.Fonts->AddFontFromFileTTF("resources/fonts/Inter/Inter-Regular.ttf", 18.0f);
 
 		// Styling
@@ -72,10 +73,10 @@ namespace Locus
 		style.ScrollbarSize = 5.0f;
 		style.DockingSplitterSize = 12.0f;
 		style.WindowMenuButtonPosition = ImGuiDir_None;
-		style.ItemSpacing = { 6.0f, 6.0f };
+		style.ItemSpacing = { 6.0f, 4.0f };
 		style.ItemInnerSpacing = { 0.0f, 6.0f };
 		style.WindowPadding = { 6.0f, 6.0f };
-		style.FramePadding = { 10.0f, 4.0f };
+		style.FramePadding = { 10.0f, 3.0f };
 
 		SetDarkTheme();
 
@@ -181,7 +182,7 @@ namespace Locus
 		colors[ImGuiCol_PopupBg] = LocusColors::Grey;
 
 		// Child
-		colors[ImGuiCol_ChildBg] = LocusColors::MediumDarkGrey;
+		colors[ImGuiCol_ChildBg] = LocusColors::DarkGrey;
 
 		// Separator
 		colors[ImGuiCol_Separator] = LocusColors::Orange;

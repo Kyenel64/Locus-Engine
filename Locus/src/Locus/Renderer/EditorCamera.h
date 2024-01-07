@@ -73,7 +73,7 @@ namespace Locus
 	private:
 		glm::mat4 m_ViewMatrix; // Projection in Camera class
 
-		glm::vec4 m_BackgroundColor = { 0.1f, 0.1f, 0.1f, 1.0f };
+		glm::vec4 m_BackgroundColor = { 0.15f, 0.15f, 0.15f, 1.0f };
 
 		glm::vec3 m_Position = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 m_FocalPoint = { 0.0f, 0.0f, 0.0f };

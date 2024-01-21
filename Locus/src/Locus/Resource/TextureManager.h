@@ -8,19 +8,20 @@ namespace Locus
 	class TextureHandle
 	{
 	public:
-		TextureHandle() : Handle(UUID()) {}
-		TextureHandle(UUID uuid) : Handle(uuid) {}
+		TextureHandle() : m_Path(std::filesystem::path()) {}
+		TextureHandle(const std::filesystem::path& path) : m_Path(path) {}
 		~TextureHandle() = default;
 
 		Ref<Texture2D> Get() const;
-		operator uint64_t() const { return (uint64_t)Handle; }
+		operator std::string() const { return m_Path.string(); }
+
 		operator bool() const;
-		bool operator==(const TextureHandle& other) const { return Handle == other.Handle; }
-		bool operator!=(const TextureHandle& other) const { return Handle != other.Handle; }
+		bool operator==(const TextureHandle& other) const { return m_Path == other.m_Path; }
+		bool operator!=(const TextureHandle& other) const { return m_Path != other.m_Path; }
 
 		static TextureHandle Null;
 	private:
-		UUID Handle;
+		std::filesystem::path m_Path;
 	};
 
 	class TextureManager
@@ -47,7 +48,7 @@ namespace std
 	{
 		std::size_t operator()(const Locus::TextureHandle& handle) const
 		{
-			return hash<uint64_t>()((uint64_t)handle);
+			return hash<std::string>()(handle);
 		}
 	};
 }

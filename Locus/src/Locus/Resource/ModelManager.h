@@ -8,20 +8,20 @@ namespace Locus
 	class ModelHandle
 	{
 	public:
-		ModelHandle() : Handle(UUID()) {}
-		ModelHandle(UUID uuid) : Handle(uuid) {}
+		ModelHandle() : m_Path(std::filesystem::path()) {}
+		ModelHandle(const std::filesystem::path& path) : m_Path(path) {}
 		~ModelHandle() = default;
 
 		Ref<Model> Get() const;
 
-		operator uint64_t() const { return (uint64_t)Handle; }
+		operator std::string() const { return m_Path.string(); }
 		operator bool() const;
-		bool operator==(const ModelHandle& other) const { return Handle == other.Handle; }
-		bool operator!=(const ModelHandle& other) const { return Handle != other.Handle; }
+		bool operator==(const ModelHandle& other) const { return m_Path == other.m_Path; }
+		bool operator!=(const ModelHandle& other) const { return m_Path != other.m_Path; }
 
 		static ModelHandle Null;
 	private:
-		UUID Handle;
+		std::filesystem::path m_Path;
 	};
 
 	class ModelManager
@@ -48,7 +48,7 @@ namespace std
 	{
 		std::size_t operator()(const Locus::ModelHandle& handle) const
 		{
-			return hash<uint64_t>()((uint64_t)handle);
+			return hash<std::string>()(handle);
 		}
 	};
 }

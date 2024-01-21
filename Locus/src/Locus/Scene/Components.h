@@ -153,7 +153,7 @@ namespace Locus
 	struct MeshRendererComponent
 	{
 		MaterialHandle Material;
-		ModelHandle Model = ModelHandle(9305466487919443545);
+		ModelHandle Model = ModelHandle("C:\\Users\\Kye\\Desktop\\EmptyProject\\Assets\\Models\\SciFiHelmet\\SciFiHelmet.gltf");
 
 		MeshRendererComponent() = default;
 		MeshRendererComponent(const MeshRendererComponent&) = default;

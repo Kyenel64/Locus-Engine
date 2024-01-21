@@ -8,7 +8,7 @@
 
 namespace Locus
 {
-	MaterialHandle MaterialHandle::Null = MaterialHandle(0);
+	MaterialHandle MaterialHandle::Null = MaterialHandle();
 
 	struct MaterialManagerData
 	{
@@ -37,8 +37,7 @@ namespace Locus
 		{
 			// Load texture from metadata path
 			YAML::Node data = YAML::LoadFile(metadataPath.string());
-			UUID uuid = data["UUID"].as<uint64_t>();
-			MaterialHandle matHandle = MaterialHandle(uuid);
+			MaterialHandle matHandle = MaterialHandle(materialPath);
 			s_MMData.Materials[matHandle] = CreateRef<Material>(materialPath.string());
 			s_MMData.MaterialCount++;
 			LOCUS_CORE_TRACE("  Loaded material: {0}", materialPath);
@@ -51,7 +50,6 @@ namespace Locus
 			s_MMData.MaterialCount++;
 			YAML::Emitter out;
 			out << YAML::BeginMap; // Scene
-			out << YAML::Key << "UUID" << YAML::Value << (uint64_t)matHandle;
 			out << YAML::Key << "Path" << YAML::Value << materialPath.string();
 			out << YAML::EndMap; // End Scene
 			std::ofstream fout(metadataPath);
@@ -79,11 +77,11 @@ namespace Locus
 
 	Ref<Material> MaterialHandle::Get() const
 	{
-		return MaterialManager::GetMaterial(Handle);
+		return MaterialManager::GetMaterial(m_Path);
 	}
 
 	MaterialHandle::operator bool() const
 	{
-		return MaterialManager::IsValid(Handle);
+		return MaterialManager::IsValid(m_Path);
 	}
 }

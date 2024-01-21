@@ -8,7 +8,7 @@
 
 namespace Locus
 {
-	ModelHandle ModelHandle::Null = ModelHandle(0);
+	ModelHandle ModelHandle::Null = ModelHandle();
 
 	struct ModelManagerData
 	{
@@ -35,8 +35,7 @@ namespace Locus
 		{
 			// Load texture from metadata path
 			YAML::Node data = YAML::LoadFile(metadataPath.string());
-			UUID uuid = data["UUID"].as<uint64_t>();
-			ModelHandle matHandle = ModelHandle(uuid);
+			ModelHandle matHandle = ModelHandle(modelPath);
 			s_MMData.Models[matHandle] = CreateRef<Model>(modelPath);
 			s_MMData.ModelCount++;
 			LOCUS_CORE_TRACE("  Loaded Model: {0}", modelPath);
@@ -44,12 +43,11 @@ namespace Locus
 		}
 		else
 		{
-			ModelHandle matHandle = ModelHandle();
+			ModelHandle matHandle = ModelHandle(modelPath);
 			s_MMData.Models[matHandle] = CreateRef<Model>(modelPath);
 			s_MMData.ModelCount++;
 			YAML::Emitter out;
 			out << YAML::BeginMap; // Scene
-			out << YAML::Key << "UUID" << YAML::Value << (uint64_t)matHandle;
 			out << YAML::Key << "Path" << YAML::Value << modelPath.string();
 			out << YAML::EndMap; // End Scene
 			std::ofstream fout(metadataPath);
@@ -77,11 +75,11 @@ namespace Locus
 
 	Ref<Model> ModelHandle::Get() const
 	{
-		return ModelManager::GetModel(Handle);
+		return ModelManager::GetModel(m_Path);
 	}
 
 	ModelHandle::operator bool() const
 	{
-		return ModelManager::IsValid(Handle);
+		return ModelManager::IsValid(m_Path);
 	}
 }

@@ -7,15 +7,14 @@
 
 namespace Locus
 {
-	extern UUID g_SelectedResourceID;
-	extern ResourceType g_SelectedResourceType;
+	extern std::filesystem::path g_SelectedResourcePath;
 
 	void ResourceInspectorPanel::OnImGuiRender()
 	{
 		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_TabBarAlignLeft | ImGuiWindowFlags_DockedWindowBorder;
 		ImGui::Begin("Resource Inspector", false, windowFlags);
 
-		if (g_SelectedResourceType == ResourceType::Material && g_SelectedResourceID)
+		if (MaterialManager::IsValid(g_SelectedResourcePath) && !g_SelectedResourcePath.empty())
 			DrawMaterialInspector();
 
 		ImGui::End();
@@ -23,7 +22,7 @@ namespace Locus
 
 	void ResourceInspectorPanel::DrawMaterialInspector()
 	{
-		Ref<Material> material = MaterialManager::GetMaterial(MaterialHandle(g_SelectedResourceID));
+		Ref<Material> material = MaterialHandle(g_SelectedResourcePath).Get();
 		ImDrawList* drawList = ImGui::GetWindowDrawList();
 
 		ImVec2 matPreviewSize = { 60.0f, 60.0f };

@@ -8,19 +8,20 @@ namespace Locus
 	class MaterialHandle
 	{
 	public:
-		MaterialHandle() : Handle(UUID()) {}
-		MaterialHandle(UUID uuid) : Handle(uuid) {}
+		MaterialHandle() : m_Path(std::filesystem::path()) {}
+		MaterialHandle(const std::filesystem::path& path) : m_Path(path) {}
 		~MaterialHandle() = default;
 
 		Ref<Material> Get() const;
-		operator uint64_t() const { return (uint64_t)Handle; }
+
+		operator std::string() const { return m_Path.string(); }
 		operator bool() const;
-		bool operator==(const MaterialHandle& other) const { return Handle == other.Handle; }
-		bool operator!=(const MaterialHandle& other) const { return Handle != other.Handle; }
+		bool operator==(const MaterialHandle& other) const { return m_Path == other.m_Path; }
+		bool operator!=(const MaterialHandle& other) const { return m_Path != other.m_Path; }
 
 		static MaterialHandle Null;
 	private:
-		UUID Handle;
+		std::filesystem::path m_Path;
 	};
 
 	class MaterialManager
@@ -47,7 +48,7 @@ namespace std
 	{
 		std::size_t operator()(const Locus::MaterialHandle& handle) const
 		{
-			return hash<uint64_t>()((uint64_t)handle);
+			return hash<std::string>()(handle);
 		}
 	};
 }

@@ -25,19 +25,6 @@ namespace Locus
 	Scene::Scene()
 	{
 		m_ContactListener = CreateRef<ContactListener2D>();
-
-		// Test
-		m_TestModel = CreateRef<Model>("C:/Users/Kye/Desktop/EmptyProject/Assets/Models/SciFiHelmet/SciFiHelmet.gltf");
-		m_TestMaterial = CreateRef<Material>();
-		m_TestMaterial->m_Albedo = { 1.0f, 1.0f, 1.0f, 1.0f };
-		m_TestMaterial->m_Metallic = 0.5f;
-		m_TestMaterial->m_Roughness = 0.2f;
-		m_TestMaterial->m_AO = 0.5f;
-		m_TestMaterial->m_AlbedoTexture = TextureHandle(2329076529957829662);
-		m_TestMaterial->m_NormalMapTexture = TextureHandle(16561968382328225303);
-		m_TestMaterial->m_MetallicTexture = TextureHandle(15610262073959451248);
-		m_TestMaterial->m_RoughnessTexture = TextureHandle(15610262073959451248);
-		m_TestMaterial->m_AOTexture = TextureHandle(15418870819293905196);
 	}
 
 	Entity Scene::CreateEntity(const std::string& name)

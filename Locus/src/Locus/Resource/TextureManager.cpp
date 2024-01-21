@@ -8,7 +8,7 @@
 
 namespace Locus
 {
-	TextureHandle TextureHandle::Null = TextureHandle(0);
+	TextureHandle TextureHandle::Null = TextureHandle();
 
 	struct TextureManagerData
 	{
@@ -36,8 +36,7 @@ namespace Locus
 		{
 			// Load texture from metadata path
 			YAML::Node data = YAML::LoadFile(metadataPath.string());
-			UUID uuid = data["UUID"].as<uint64_t>();
-			TextureHandle texHandle = TextureHandle(uuid);
+			TextureHandle texHandle = TextureHandle(texturePath);
 			s_TMData.Textures[texHandle] = Texture2D::Create(texturePath.string());
 			s_TMData.TextureCount++;
 			LOCUS_CORE_TRACE("  Loaded texture: {0}", texturePath);
@@ -50,7 +49,6 @@ namespace Locus
 			s_TMData.TextureCount++;
 			YAML::Emitter out;
 			out << YAML::BeginMap; // Scene
-			out << YAML::Key << "UUID" << YAML::Value << (uint64_t)texHandle;
 			out << YAML::Key << "Path" << YAML::Value << texturePath.string();
 			out << YAML::EndMap; // End Scene
 			std::ofstream fout(metadataPath);
@@ -79,12 +77,12 @@ namespace Locus
 
 	Ref<Texture2D> TextureHandle::Get() const
 	{
-		return TextureManager::GetTexture(Handle);
+		return TextureManager::GetTexture(m_Path);
 	}
 
 	TextureHandle::operator bool() const
 	{
-		return TextureManager::IsValid(Handle);
+		return TextureManager::IsValid(m_Path);
 	}
 
 }

@@ -6,8 +6,7 @@
 
 namespace Locus
 {
-	extern UUID g_SelectedResourceID = 0;
-	extern ResourceType g_SelectedResourceType = ResourceType::None;
+	extern std::filesystem::path g_SelectedResourcePath = std::filesystem::path();
 
 	ProjectBrowserPanel::ProjectBrowserPanel()
 	{
@@ -19,15 +18,13 @@ namespace Locus
 
 		m_CurrentDirectory = m_AssetsDirectory / "Models" / "SciFiHelmet";
 
-		for (auto& item : std::filesystem::directory_iterator(m_CurrentDirectory))
-		{
-			m_DirectoryItems.push_back(item);
-		}
+		SetDirectory(m_CurrentDirectory);
 	}
 
 	void ProjectBrowserPanel::OnImGuiRender()
 	{
 		LOCUS_PROFILE_FUNCTION();
+
 		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_TabBarAlignLeft | ImGuiWindowFlags_DockedWindowBorder | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
 		ImGui::Begin("Project Browser", false, windowFlags);
 
@@ -43,15 +40,15 @@ namespace Locus
 		{
 			ImGui::TableNextRow(ImGuiTableRowFlags_None, ImGui::GetContentRegionAvail().y);
 			ImGui::TableNextColumn();
-
+		
 			// --- Project view ---
 			DrawProjectDirectoryView();
-
+		
 			ImGui::TableNextColumn();
-
+		
 			// --- Directory view ---
 			DrawCurrentDirectoryView();
-
+		
 			ImGui::EndTable();
 		}
 		ImGui::PopStyleColor(4);
@@ -62,6 +59,7 @@ namespace Locus
 	void ProjectBrowserPanel::DrawTopBar()
 	{
 		LOCUS_PROFILE_FUNCTION();
+
 		// Plus button
 		ImVec2 textSize = ImGui::CalcTextSize("A");
 		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
@@ -82,7 +80,7 @@ namespace Locus
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
 		if (ImGui::Button("Assets"))
-			m_CurrentDirectory = m_AssetsDirectory;
+			SetDirectory(m_AssetsDirectory);
 		while (curPath != m_AssetsDirectory.string())
 		{
 			size_t filenameBegin = curPath.find_last_of("\\\\");
@@ -97,17 +95,16 @@ namespace Locus
 			if (ImGui::Button(m_Breadcrumb.top().c_str()))
 			{
 				while (m_CurrentDirectory.filename() != m_Breadcrumb.top())
-					m_CurrentDirectory = m_CurrentDirectory.parent_path();
+					SetDirectory(m_CurrentDirectory.parent_path());
 			}
-
 			m_Breadcrumb.pop();
 		}
-		if (!m_SelectedResource.empty())
+		if (!g_SelectedResourcePath.empty())
 		{
 			ImGui::SameLine();
 			ImGui::Text(">");
 			ImGui::SameLine();
-			ImGui::Button(m_SelectedResource.filename().string().c_str());
+			ImGui::Button(g_SelectedResourcePath.filename().string().c_str());
 		}
 		ImGui::PopStyleColor();
 		ImGui::PopStyleVar(2);
@@ -156,137 +153,33 @@ namespace Locus
 	void ProjectBrowserPanel::DrawCurrentDirectoryView()
 	{
 		LOCUS_PROFILE_FUNCTION();
-#if 0
-		if (m_CurrentDirectory != m_ProjectDirectory)
-		{
-			if (ImGui::Button("<-"))
-			{
-				m_CurrentDirectory = m_CurrentDirectory.parent_path();
-			}
-		}
 
-		static float padding = 16.0f;
-		static float thumbnailSize = 64.0f;
-		float cellSize = thumbnailSize + padding;
-
-		//ImGui::PushItemWidth(-1);
-		float panelWidth = ImGui::GetContentRegionAvail().x;
-		//ImGui::PopItemWidth();
-		int columnCount = (int)(panelWidth / cellSize);
-		if (columnCount < 1)
-			columnCount = 1;
-
-		static ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_ContextMenuInBody;
-		ImGui::PushStyleColor(ImGuiCol_TableRowBg, LocusColors::MediumDarkGrey);
-		if (ImGui::BeginTable("DVTable", columnCount, flags))
-		{
-			ImGui::TableNextRow(ImGuiTableRowFlags_None, ImGui::GetContentRegionAvail().y - 40.0f);
-			for (auto& item : std::filesystem::directory_iterator(m_CurrentDirectory)) // TODO: Iterate through resource manager
-			{
-				if (item.path().extension() != ".meta")
-				{
-					ImGui::TableNextColumn();
-
-					const auto& path = item.path();
-					std::string filenameString = path.stem().string() + path.extension().string();
-					std::string extension = path.extension().string();
-
-					ResourceType type = ResourceType::None;
-					if (extension == ".locus")
-						type = ResourceType::Scene;
-					else if (extension == ".png" || extension == ".jpg" || extension == ".tiff" || extension == ".tif" || extension == ".bmp" || extension == ".tga")
-						type = ResourceType::Texture;
-					else if (extension == ".obj" || extension == ".fbx" || extension == ".gltf")
-						type = ResourceType::Model;
-					else if (extension == ".lmat")
-						type = ResourceType::Material;
-
-					Ref<Texture2D> icon = item.is_directory() ? m_FolderIcon : m_FileIcon;
-					ImGui::PushID(filenameString.c_str());
-					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-					ImGui::ImageButton((ImTextureID)(uint64_t)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
-
-					if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
-					{
-						uint64_t resourceUUID = ResourceManager::GetResourceUUID(path.string() + ".meta"); // TODO: slow
-
-						switch (type)
-						{
-						case Locus::ResourceType::None: break;
-						case Locus::ResourceType::Texture: ImGui::SetDragDropPayload("TEXTURE_ITEM_PATH", &resourceUUID, sizeof(uint64_t)); break;
-						case Locus::ResourceType::Material: ImGui::SetDragDropPayload("MATERIAL_ITEM_PATH", &resourceUUID, sizeof(uint64_t)); break;
-						case Locus::ResourceType::Model: ImGui::SetDragDropPayload("MODEL_ITEM_PATH", &resourceUUID, sizeof(uint64_t)); break;
-						case Locus::ResourceType::Scene: ImGui::SetDragDropPayload("SCENE_ITEM_PATH", &resourceUUID, sizeof(uint64_t)); break;
-						case Locus::ResourceType::Script: break;
-						}
-						ImGui::EndDragDropSource();
-					}
-
-					ImGui::PopID();
-					ImGui::PopStyleColor();
-
-					if (ImGui::IsItemHovered())
-					{
-						if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && item.is_directory())
-							m_CurrentDirectory /= path.filename();
-						else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-						{
-							g_SelectedResourceID = ResourceManager::GetResourceUUID(path.string() + ".meta");
-							switch (type)
-							{
-							case Locus::ResourceType::None: g_SelectedResourceType = ResourceType::None; break;
-							case Locus::ResourceType::Texture: g_SelectedResourceType = ResourceType::Texture; break;
-							case Locus::ResourceType::Material: g_SelectedResourceType = ResourceType::Material; break;
-							case Locus::ResourceType::Model: g_SelectedResourceType = ResourceType::Model; break;
-							case Locus::ResourceType::Scene: g_SelectedResourceType = ResourceType::Scene; break;
-							case Locus::ResourceType::Script: g_SelectedResourceType = ResourceType::Script; break;
-							}
-						}
-					}
-					ImGui::TextWrapped(filenameString.c_str());
-				}
-			}
-
-			ImGui::EndTable();
-		}
-		ImGui::PopStyleColor();
-#endif
 		ImGui::BeginChild("CurrentDirectoryView", { -1.0f, -1.0f });
+
 		float contentWidth = ImGui::GetContentRegionAvail().x;
 		int maxPerRow = static_cast<int>(contentWidth / (m_IconSize + ImGui::GetStyle().ItemSpacing.x)) - 1;
-		ImGuiTableFlags flags = ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_Resizable;
+		ImGuiTableFlags flags = ImGuiTableFlags_SizingStretchSame;
 		ImGui::BeginTable("Table", maxPerRow, flags, { -1.0f, -1.0f }, -1.0f);
 
-		for (auto& item : std::filesystem::directory_iterator(m_CurrentDirectory))
+		for (auto& item : m_DirectoryItems)
 		{
-			if (item.path().extension() != ".meta")
-			{
-				ImGui::TableNextColumn();
-				const std::filesystem::path& path = item.path();
-				std::string filenameString = path.filename().string() + path.extension().string();
-				std::string extension = path.extension().string();
+			ImGui::TableNextColumn();
+			const std::filesystem::path& path = item.path();
 		
-				ResourceType type = ResourceType::None;
-				if (extension == ".locus")
-					type = ResourceType::Scene;
-				else if (extension == ".png" || extension == ".jpg" || extension == ".tiff" || extension == ".tif" || extension == ".bmp" || extension == ".tga")
-					type = ResourceType::Texture;
-				else if (extension == ".obj" || extension == ".fbx" || extension == ".gltf")
-					type = ResourceType::Model;
-				else if (extension == ".lmat")
-					type = ResourceType::Material;
+			Ref<Texture2D> icon = nullptr;
+			if (item.is_directory())
+				icon = m_FolderIcon;
+			else if (TextureManager::IsValid(item.path()))
+				icon = TextureManager::GetTexture(path);
+			else
+				icon = m_FileIcon;
 		
-				Ref<Texture2D> icon = nullptr;
-				if (item.is_directory())
-					icon = m_FolderIcon;
-				//else if (type == ResourceType::Texture)
-				//	icon = TextureHandle(ResourceManager::GetResourceUUID(item.path().string() + ".meta")).Get(); // TODO: slow
-				else
-					icon = m_FileIcon;
-		
-				DrawItem(item, icon, type);
-			}
+			DrawItem(item, icon);
 		}
+
+		// Select nothing if clicking in blank space
+		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered() || g_SelectedResourcePath.empty())
+			g_SelectedResourcePath = std::filesystem::path();
 
 		ImGui::EndTable();
 
@@ -296,54 +189,64 @@ namespace Locus
 	void ProjectBrowserPanel::DrawProjectDirectoryView()
 	{
 		LOCUS_PROFILE_FUNCTION();
+
 		ImGui::BeginChild("ProjectDirectoryView", { -1.0f, -1.0f });
 		ImGui::EndChild();
 	}
 
-	void ProjectBrowserPanel::DrawItem(const std::filesystem::path& item, Ref<Texture2D> icon, ResourceType type)
+	void ProjectBrowserPanel::DrawItem(const std::filesystem::directory_entry& item, Ref<Texture2D> icon)
 	{
 		LOCUS_PROFILE_FUNCTION();
-		std::string itemName = item.filename().string();
+
+		std::string itemName = item.path().filename().string();
 		std::string label = "##" + itemName;
 		ImGui::PushID(itemName.c_str());
 
 		ImVec4 buttonColor = LocusColors::Transparent;
-		if (m_SelectedResource == item)
+		if (g_SelectedResourcePath == item)
 			buttonColor = LocusColors::LightGrey;
-
+		
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0.0f, 0.0f });
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 		ImGui::PushStyleColor(ImGuiCol_Button, buttonColor);
 		if (ImGui::ImageButton((ImTextureID)(uint64_t)icon->GetRendererID(), { m_IconSize, m_IconSize }, { 0, 1 }, { 1, 0 }))
+			g_SelectedResourcePath = item.path().string();
+		
+		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 		{
-			m_SelectedResource = item;
-			g_SelectedResourceID = ResourceManager::GetResourceUUID(item.string() + ".meta");
-			switch (type)
-			{
-			case Locus::ResourceType::None: g_SelectedResourceType = ResourceType::None; break;
-			case Locus::ResourceType::Texture: g_SelectedResourceType = ResourceType::Texture; break;
-			case Locus::ResourceType::Material: g_SelectedResourceType = ResourceType::Material; break;
-			case Locus::ResourceType::Model: g_SelectedResourceType = ResourceType::Model; break;
-			case Locus::ResourceType::Scene: g_SelectedResourceType = ResourceType::Scene; break;
-			case Locus::ResourceType::Script: g_SelectedResourceType = ResourceType::Script; break;
-			}
+			if (item.is_directory())
+				SetDirectory(item.path());
 		}
-		//char buffer[256];
-		//memset(buffer, 0, sizeof(buffer));
-		//strcpy_s(buffer, sizeof(buffer), itemName.c_str());
-		//
-		//ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
-		//ImVec2 textSize = ImGui::CalcTextSize(itemName.c_str());
-		//ImGui::PushItemWidth(-1);
-		//ImGui::InputText(label.c_str(), buffer, sizeof(buffer), ImGuiInputTextFlags_EnterReturnsTrue);
-		//ImGui::PopFont();
-
+		
 		ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
-		ImGui::TextWrapped(itemName.c_str());
+		//ImGui::Text(itemName.c_str());
+		char buffer[256];
+		memset(buffer, 0, sizeof(buffer));
+		strcpy_s(buffer, sizeof(buffer), itemName.c_str());
+		ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
+		ImGui::PushStyleColor(ImGuiCol_FrameBg, buttonColor);
+		ImGui::PushItemWidth(-1.0f);
+		if (ImGui::InputText(item.path().string().c_str(), buffer, sizeof(buffer), flags))
+		{
+			g_SelectedResourcePath = item;
+		}
+		ImGui::PopStyleColor();
 		ImGui::PopFont();
-
+		
 		ImGui::PopID();
 		ImGui::PopStyleColor();
 		ImGui::PopStyleVar(2);
+	}
+
+	void ProjectBrowserPanel::SetDirectory(const std::filesystem::path& path)
+	{
+		m_CurrentDirectory = path;
+
+		m_DirectoryItems.clear();
+		for (auto& item : std::filesystem::directory_iterator(m_CurrentDirectory))
+		{
+			if (TextureManager::IsValid(item.path()) || MaterialManager::IsValid(item.path()) || ModelManager::IsValid(item.path()) || item.is_directory())
+				m_DirectoryItems.push_back(item);
+		}
 	}
 }

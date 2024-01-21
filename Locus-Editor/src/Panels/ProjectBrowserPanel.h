@@ -16,21 +16,21 @@ namespace Locus
 
 		void OnImGuiRender();
 
-		void SetDirectory(const std::filesystem::path& path) { m_CurrentDirectory = path; }
+		void SetDirectory(const std::filesystem::path& path);
 
 	private:
 		void DrawTopBar();
 		void DrawCurrentDirectoryView();
 		void DrawProjectDirectoryView();
 
-		void DrawItem(const std::filesystem::path& item, Ref<Texture2D> icon, ResourceType type);
+		void DrawItem(const std::filesystem::directory_entry& item, Ref<Texture2D> icon);
 
 	private:
 		std::filesystem::path m_AssetsDirectory;
 		std::filesystem::path m_CurrentDirectory;
 		std::filesystem::path m_SelectedResource;
 
-		std::vector<std::filesystem::path> m_DirectoryItems;
+		std::vector<std::filesystem::directory_entry> m_DirectoryItems;
 
 		std::stack<std::string> m_Breadcrumb;
 

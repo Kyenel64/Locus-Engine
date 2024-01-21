@@ -16,7 +16,6 @@
 namespace Locus
 {
 	extern Entity g_SelectedEntity = {};
-	extern UUID g_SelectedResourceID;
 
 	LocusEditorLayer::LocusEditorLayer()
 		: Layer("LocusEditorLayer")
@@ -1122,7 +1121,6 @@ namespace Locus
 
 		// IDs
 		ImGui::Text("Entity Value: %d", (entt::entity)g_SelectedEntity);
-		ImGui::Text("Resource ID: %d", g_SelectedResourceID);
 
 		// Collision
 		if (g_SelectedEntity.IsValid())

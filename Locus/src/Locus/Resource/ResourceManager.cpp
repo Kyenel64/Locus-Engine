@@ -49,16 +49,4 @@ namespace Locus
 	const std::vector<std::filesystem::path>& ResourceManager::GetMaterialPaths() { return s_RMData.MaterialPaths; }
 	const std::vector<std::filesystem::path>& ResourceManager::GetModelPaths() { return s_RMData.ModelPaths; }
 	std::filesystem::path ResourceManager::GetAssetsDirectory() { return s_RMData.ProjectDirectory / "Assets"; }
-
-	UUID ResourceManager::GetResourceUUID(const std::filesystem::path& path)
-	{
-		if (!std::filesystem::exists(path))
-			return 0;
-		YAML::Node data = YAML::LoadFile(path.string());
-		if (data["UUID"])
-			return data["UUID"].as<uint64_t>();
-		else
-			return 0;
-	}
-
 }

@@ -501,7 +501,7 @@ namespace Locus
 				if (spriteRendererComponent)
 				{
 					auto& src = deserializedEntity.AddComponent<SpriteRendererComponent>();
-					src.Texture = TextureHandle(spriteRendererComponent["Texture"].as<uint64_t>());
+					src.Texture = TextureHandle(spriteRendererComponent["Texture"].as<std::string>());
 					src.Color = spriteRendererComponent["Color"].as<glm::vec4>();
 					src.TilingFactor = spriteRendererComponent["TilingFactor"].as<float>();
 				}
@@ -521,7 +521,7 @@ namespace Locus
 				if (cubeRendererComponent)
 				{
 					auto& crc = deserializedEntity.AddComponent<CubeRendererComponent>();
-					crc.Material = MaterialHandle(spriteRendererComponent["Material"].as<uint64_t>());
+					crc.Material = MaterialHandle(spriteRendererComponent["Material"].as<std::string>());
 				}
 
 				// --- Point Light Component ---

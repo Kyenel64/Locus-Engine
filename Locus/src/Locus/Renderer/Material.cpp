@@ -51,15 +51,15 @@ namespace Locus
 		m_AO = colors["AO"].as<float>();
 
 		auto textures = data["Textures"];
-		TextureHandle albedoTex = TextureHandle(textures["Albedo"].as<uint64_t>());
+		TextureHandle albedoTex = TextureHandle(textures["Albedo"].as<std::string>());
 		m_AlbedoTexture = albedoTex;
-		TextureHandle normalTex = TextureHandle(textures["Normal"].as<uint64_t>());
+		TextureHandle normalTex = TextureHandle(textures["Normal"].as<std::string>());
 		m_NormalMapTexture = normalTex;
-		TextureHandle metallicTex = TextureHandle(textures["Metallic"].as<uint64_t>());
+		TextureHandle metallicTex = TextureHandle(textures["Metallic"].as<std::string>());
 		m_MetallicTexture = metallicTex;
-		TextureHandle roughnessTex = TextureHandle(textures["Roughness"].as<uint64_t>());
+		TextureHandle roughnessTex = TextureHandle(textures["Roughness"].as<std::string>());
 		m_RoughnessTexture = roughnessTex;
-		TextureHandle aoTex = TextureHandle(textures["AO"].as<uint64_t>());
+		TextureHandle aoTex = TextureHandle(textures["AO"].as<std::string>());
 		m_AOTexture = aoTex;
 
 	}

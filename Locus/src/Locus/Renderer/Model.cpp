@@ -12,6 +12,7 @@ namespace Locus
 	Model::Model(const std::filesystem::path& filePath)
 		: m_FilePath(filePath)
 	{
+		m_Name = filePath.stem().string();
 		LoadModel();
 	}
 

@@ -31,11 +31,11 @@ namespace Locus
 		{
 			std::string ext = dirEntry.path().extension().string();
 			if (ext == ".jpg" || ext == ".png")
-				s_RMData.TexturePaths.push_back(dirEntry);
+				s_RMData.TexturePaths.push_back(std::filesystem::relative(dirEntry, s_RMData.ProjectDirectory));
 			else if (ext == ".lmat")
-				s_RMData.MaterialPaths.push_back(dirEntry);
+				s_RMData.MaterialPaths.push_back(std::filesystem::relative(dirEntry, s_RMData.ProjectDirectory));
 			else if (ext == ".obj" || ext == ".fbx" || ext == ".gltf")
-				s_RMData.ModelPaths.push_back(dirEntry);
+				s_RMData.ModelPaths.push_back(std::filesystem::relative(dirEntry, s_RMData.ProjectDirectory));
 		}
 
 		// Initialize sub resource managers

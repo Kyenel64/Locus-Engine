@@ -5,6 +5,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include "Locus/Resource/ResourceManager.h"
+#include "Locus/Core/Application.h"
 
 namespace Locus
 {
@@ -30,13 +31,14 @@ namespace Locus
 
 	ModelHandle ModelManager::LoadModel(const std::filesystem::path& modelPath)
 	{
-		std::filesystem::path metadataPath = modelPath.string() + ".meta";
+		std::filesystem::path metaPath = modelPath;
+		std::filesystem::path metadataPath = Application::Get().GetProjectPath() / metaPath.replace_extension(".meta");
 		if (std::filesystem::exists(metadataPath))
 		{
-			// Load texture from metadata path
+			// Load model from metadata path. Temp. Load metadata when implemented
 			YAML::Node data = YAML::LoadFile(metadataPath.string());
 			ModelHandle matHandle = ModelHandle(modelPath);
-			s_MMData.Models[matHandle] = CreateRef<Model>(modelPath);
+			s_MMData.Models[matHandle] = CreateRef<Model>(Application::Get().GetProjectPath() / modelPath);
 			s_MMData.ModelCount++;
 			LOCUS_CORE_TRACE("  Loaded Model: {0}", modelPath);
 			return matHandle;
@@ -44,11 +46,11 @@ namespace Locus
 		else
 		{
 			ModelHandle matHandle = ModelHandle(modelPath);
-			s_MMData.Models[matHandle] = CreateRef<Model>(modelPath);
+			s_MMData.Models[matHandle] = CreateRef<Model>(Application::Get().GetProjectPath() / modelPath);
 			s_MMData.ModelCount++;
 			YAML::Emitter out;
 			out << YAML::BeginMap; // Scene
-			out << YAML::Key << "Path" << YAML::Value << modelPath.string();
+			out << YAML::Key << "Path" << YAML::Value << Application::Get().GetProjectPath().string() + "/" + modelPath.string();
 			out << YAML::EndMap; // End Scene
 			std::ofstream fout(metadataPath);
 			fout << out.c_str();

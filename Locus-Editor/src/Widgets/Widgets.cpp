@@ -522,4 +522,68 @@ namespace Locus::Widgets
 		ImGui::PopStyleColor(3);
 		ImGui::PopStyleVar();
 	}
+
+	void Widgets::DrawModelDropdown(const std::string& name, ModelHandle& modelHandle, float labelWidth, float inputWidth)
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, ImGui::GetStyle().ItemSpacing.y });
+		ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_FrameBg));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyleColorVec4(ImGuiCol_FrameBgHovered));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyleColorVec4(ImGuiCol_FrameBgActive));
+
+		ImDrawList* drawList = ImGui::GetWindowDrawList();
+		float imageSize = 45.0f;
+		float labelHeight = 55.0f;
+
+		if (labelWidth == -1)
+			labelWidth = ImGui::GetContentRegionAvail().x * 0.5f;
+
+		Widgets::DrawControlLabel(name.c_str(), { labelWidth, labelHeight });
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+			if (ImGui::IsMouseDoubleClicked(0))
+			{
+				CommandHistory::AddCommand(new ChangeValueCommand(ModelHandle::Null, modelHandle));
+			}
+		}
+
+		ImGui::SameLine();
+
+		ImVec2 topLeft = { ImGui::GetCursorScreenPos().x + (ImGui::GetContentRegionAvail().x / 2) - (imageSize / 2), ImGui::GetCursorScreenPos().y + (labelHeight - imageSize) / 2 };
+		ImVec2 popupPos = { ImGui::GetCursorScreenPos().x - 50.0f, ImGui::GetCursorScreenPos().y + labelHeight };
+		std::string buttonLabel = "##ModelDropdown" + name;
+		std::string popupLabel = "ModelSelectorPopup" + name;
+		if (ImGui::Button(buttonLabel.c_str(), { -1.0f , labelHeight }))
+			ImGui::OpenPopup(popupLabel.c_str());
+
+		ImGui::SetNextWindowPos(popupPos);
+		ImGui::SetNextWindowSize({ 50.0f + ImGui::GetItemRectSize().x, 300.0f });
+		if (ImGui::BeginPopup(popupLabel.c_str()))
+		{
+			drawList = ImGui::GetWindowDrawList();
+
+			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0.0f });
+			for (auto& [modHandle, model] : ModelManager::GetModels())
+			{
+				std::string modLabel = "##" + model->GetName();
+				topLeft = { ImGui::GetCursorScreenPos().x + (labelHeight - imageSize) / 2, ImGui::GetCursorScreenPos().y + (labelHeight - imageSize) / 2 };
+				ImVec4 buttonColor = LocusColors::Transparent;
+				if (modHandle == modelHandle)
+					buttonColor = LocusColors::DarkGrey;
+
+				ImGui::PushStyleColor(ImGuiCol_Button, buttonColor);
+				if (ImGui::Button(modLabel.c_str(), { -1.0f, labelHeight }))
+					CommandHistory::AddCommand(new ChangeValueCommand(modHandle, modelHandle));
+				ImGui::PopStyleColor();
+
+				drawList->AddText({ topLeft.x + imageSize + 10.0f, topLeft.y + 12.0f }, ImGui::GetColorU32(LocusColors::White), model->GetName().c_str());
+			}
+			ImGui::PopStyleVar(2);
+			ImGui::EndPopup();
+		}
+
+		ImGui::PopStyleColor(3);
+		ImGui::PopStyleVar();
+	}
 }

@@ -1,124 +1,5 @@
 Scene: Untitled
 Entities:
-  - Entity: 2133543131861452376
-    TagComponent:
-      Tag: RedLight
-      Group: Default
-      Enabled: true
-    TransformComponent:
-      Self: 2133543131861452376
-      Parent: 0
-      LocalPosition: [3.0289278, 2.88138342, 3.03539991]
-      LocalRotation: [90, 0, 0]
-      LocalRotationQuat: [0.707106769, 0, 0, 0.707106769]
-      LocalScale: [0.330000043, 0.330000013, 0.330000013]
-    SpriteRendererComponent:
-      Color: [1, 0, 0, 1]
-      TexturePath: ""
-      TilingFactor: 1
-    PointLightComponent:
-      Color: [0.980842888, 0.00751603488, 0.00751603488, 1]
-      Intensity: 33.9000015
-  - Entity: 1288625638692608292
-    TagComponent:
-      Tag: Cube
-      Group: Default
-      Enabled: true
-    TransformComponent:
-      Self: 1288625638692608292
-      Parent: 0
-      LocalPosition: [0, 0.567745447, 0]
-      LocalRotation: [0, 0, 0]
-      LocalRotationQuat: [0, 0, 0, 1]
-      LocalScale: [1, 1, 1]
-    CubeRendererComponent:
-      Albedo: [1, 1, 1, 1]
-      Metallic: 0.75
-      Roughness: 0.550000012
-      AO: 1
-  - Entity: 16537085232736534767
-    TagComponent:
-      Tag: Floor
-      Group: Default
-      Enabled: true
-    TransformComponent:
-      Self: 16537085232736534767
-      Parent: 0
-      LocalPosition: [0, 0, 0]
-      LocalRotation: [0, 0, 0]
-      LocalRotationQuat: [0, 0, 0, 1]
-      LocalScale: [11.0494995, 0.149778917, 11.0494995]
-    CubeRendererComponent:
-      Albedo: [0.321839094, 0.321839273, 1, 1]
-      Metallic: 0.699999988
-      Roughness: 0.25
-      AO: 1
-  - Entity: 12283204534066177914
-    TagComponent:
-      Tag: BlueLight
-      Group: Default
-      Enabled: true
-    TransformComponent:
-      Self: 12283204534066177914
-      Parent: 0
-      LocalPosition: [-1.7451278, 2.82540107, -0.650270402]
-      LocalRotation: [-90, 0, 0]
-      LocalRotationQuat: [-0.707106769, 0, 0, 0.707106769]
-      LocalScale: [0.189999998, 0.189999998, 0.189999998]
-    SpriteRendererComponent:
-      Color: [0.0588235296, 0.0117647061, 1, 1]
-      TexturePath: ""
-      TilingFactor: 1
-    PointLightComponent:
-      Color: [0.0569429398, 0.0114942789, 1, 1]
-      Intensity: 12.1999998
-  - Entity: 3634114854483520410
-    TagComponent:
-      Tag: Camera
-      Group: Default
-      Enabled: true
-    TransformComponent:
-      Self: 3634114854483520410
-      Parent: 0
-      LocalPosition: [0, 2.97933078, 9.97348881]
-      LocalRotation: [-16.310009, 0, 0]
-      LocalRotationQuat: [-0.141851589, 0, 0, 0.989887953]
-      LocalScale: [0.280000001, 0.280000001, 0.280000001]
-    SpriteRendererComponent:
-      Color: [1, 1, 1, 1]
-      TexturePath: ""
-      TilingFactor: 1
-    CameraComponent:
-      Camera:
-        BackgroundColor: [0.0498084426, 0.0498084426, 0.0498084426, 1]
-        ProjectionType: 1
-        OrthographicSize: 5
-        OrthographicNearClip: -1
-        OrthographicFarClip: 1000
-        PerspectiveFOV: 45
-        PerspectiveNearClip: 0.00999999978
-        PerspectiveFarClip: 1000
-      Primary: true
-      FixedAspectRatio: false
-  - Entity: 9260451069407990866
-    TagComponent:
-      Tag: Directional
-      Group: Default
-      Enabled: true
-    TransformComponent:
-      Self: 9260451069407990866
-      Parent: 0
-      LocalPosition: [-2.21843314, 2.03633904, 3.70071173]
-      LocalRotation: [51.0026321, 51.505188, 44.0955467]
-      LocalRotationQuat: [0.212206095, 0.5090397, 0.131776839, 0.82370013]
-      LocalScale: [0.529999971, 0.529999971, 0.529999971]
-    SpriteRendererComponent:
-      Color: [1, 1, 1, 1]
-      TexturePath: ""
-      TilingFactor: 1
-    DirectionalLightComponent:
-      Color: [1, 1, 1, 1]
-      Intensity: 0.400000006
   - Entity: 10373646394376031043
     TagComponent:
       Tag: SpotLight
@@ -132,11 +13,124 @@ Entities:
       LocalRotationQuat: [0.538430333, -0.389675409, 0.30827871, 0.680595338]
       LocalScale: [0.360000014, 0.360000014, 0.360000014]
     SpriteRendererComponent:
+      Texture: ""
       Color: [0.896551609, 0, 1, 1]
-      TexturePath: ""
       TilingFactor: 1
     SpotLightComponent:
       Color: [0.898039222, 0, 1, 1]
       Intensity: 181
       CutOff: 15.1000004
       OuterCutOff: 57.5
+  - Entity: 9260451069407990866
+    TagComponent:
+      Tag: Directional
+      Group: Default
+      Enabled: true
+    TransformComponent:
+      Self: 9260451069407990866
+      Parent: 0
+      LocalPosition: [-2.21843314, 2.03633904, 3.70071173]
+      LocalRotation: [51.0026321, 51.505188, 44.0955467]
+      LocalRotationQuat: [0.212206095, 0.5090397, 0.131776839, 0.82370013]
+      LocalScale: [0.529999971, 0.529999971, 0.529999971]
+    SpriteRendererComponent:
+      Texture: ""
+      Color: [1, 1, 1, 1]
+      TilingFactor: 1
+    DirectionalLightComponent:
+      Color: [1, 1, 1, 1]
+      Intensity: 0.400000006
+  - Entity: 3634114854483520410
+    TagComponent:
+      Tag: Camera
+      Group: Default
+      Enabled: true
+    TransformComponent:
+      Self: 3634114854483520410
+      Parent: 0
+      LocalPosition: [0, 2.97933078, 9.97348881]
+      LocalRotation: [-16.310009, 0, 0]
+      LocalRotationQuat: [-0.141851589, 0, 0, 0.989887953]
+      LocalScale: [0.280000001, 0.280000001, 0.280000001]
+    SpriteRendererComponent:
+      Texture: ""
+      Color: [1, 1, 1, 1]
+      TilingFactor: 1
+    CameraComponent:
+      Camera:
+        BackgroundColor: [0.0498084426, 0.0498084426, 0.0498084426, 1]
+        ProjectionType: 1
+        OrthographicSize: 5
+        OrthographicNearClip: -1
+        OrthographicFarClip: 1000
+        PerspectiveFOV: 45
+        PerspectiveNearClip: 0.00999999978
+        PerspectiveFarClip: 1000
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 12283204534066177914
+    TagComponent:
+      Tag: BlueLight
+      Group: Default
+      Enabled: true
+    TransformComponent:
+      Self: 12283204534066177914
+      Parent: 0
+      LocalPosition: [-1.7451278, 2.82540107, -0.650270402]
+      LocalRotation: [-90, 0, 0]
+      LocalRotationQuat: [-0.707106769, 0, 0, 0.707106769]
+      LocalScale: [0.189999998, 0.189999998, 0.189999998]
+    SpriteRendererComponent:
+      Texture: ""
+      Color: [0.0588235296, 0.0117647061, 1, 1]
+      TilingFactor: 1
+    PointLightComponent:
+      Color: [0.0569429398, 0.0114942789, 1, 1]
+      Intensity: 12.1999998
+  - Entity: 16537085232736534767
+    TagComponent:
+      Tag: Floor
+      Group: Default
+      Enabled: true
+    TransformComponent:
+      Self: 16537085232736534767
+      Parent: 0
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [11.0494995, 0.149778917, 11.0494995]
+    CubeRendererComponent:
+      Material: Assets\Materials\TileMat.lmat
+  - Entity: 1288625638692608292
+    TagComponent:
+      Tag: Cube
+      Group: Default
+      Enabled: true
+    TransformComponent:
+      Self: 1288625638692608292
+      Parent: 0
+      LocalPosition: [0, 0.567745447, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    CubeRendererComponent:
+      Material: Assets\Materials\TileMat.lmat
+  - Entity: 2133543131861452376
+    TagComponent:
+      Tag: RedLight
+      Group: Default
+      Enabled: true
+    TransformComponent:
+      Self: 2133543131861452376
+      Parent: 0
+      LocalPosition: [3.0289278, 2.88138342, 3.03539991]
+      LocalRotation: [90, 0, 0]
+      LocalRotationQuat: [0.707106769, 0, 0, 0.707106769]
+      LocalScale: [0.330000043, 0.330000013, 0.330000013]
+    SpriteRendererComponent:
+      Texture: ""
+      Color: [1, 0, 0, 1]
+      TilingFactor: 1
+    PointLightComponent:
+      Color: [0.980842888, 0.00751603488, 0.00751603488, 1]
+      Intensity: 33.9000015

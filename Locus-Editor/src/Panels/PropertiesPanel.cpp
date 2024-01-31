@@ -368,6 +368,7 @@ namespace Locus
 		// --- Mesh Renderer Component ----------------------------------------
 		DrawComponentUI<MeshRendererComponent>("Mesh Renderer", entity, [this](auto& component)
 			{
+				Widgets::DrawModelDropdown("Model", component.Model);
 				Widgets::DrawMaterialDropdown("Material", component.Material);
 			});
 

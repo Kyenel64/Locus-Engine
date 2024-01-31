@@ -218,7 +218,7 @@ namespace Locus
 
 			out << YAML::Key << "SpriteRendererComponent";
 			out << YAML::BeginMap; // Sprite Renderer Component
-			out << YAML::Key << "Texture" << YAML::Value << (uint64_t)src.Texture;
+			out << YAML::Key << "Texture" << YAML::Value << (std::string)src.Texture;
 			out << YAML::Key << "Color" << YAML::Value << src.Color;
 			out << YAML::Key << "TilingFactor" << YAML::Value << src.TilingFactor;
 			out << YAML::EndMap; // End Sprite Renderer Component
@@ -244,7 +244,7 @@ namespace Locus
 
 			out << YAML::Key << "CubeRendererComponent";
 			out << YAML::BeginMap; // Cube Renderer Component
-			out << YAML::Key << "Material" << YAML::Value << (uint64_t)crc.Material;
+			out << YAML::Key << "Material" << YAML::Value << (std::string)crc.Material;
 			out << YAML::EndMap;
 		}
 
@@ -501,7 +501,8 @@ namespace Locus
 				if (spriteRendererComponent)
 				{
 					auto& src = deserializedEntity.AddComponent<SpriteRendererComponent>();
-					src.Texture = TextureHandle(spriteRendererComponent["Texture"].as<std::string>());
+					if (spriteRendererComponent["Texture"])
+						src.Texture = TextureHandle(spriteRendererComponent["Texture"].as<std::string>());
 					src.Color = spriteRendererComponent["Color"].as<glm::vec4>();
 					src.TilingFactor = spriteRendererComponent["TilingFactor"].as<float>();
 				}
@@ -521,7 +522,8 @@ namespace Locus
 				if (cubeRendererComponent)
 				{
 					auto& crc = deserializedEntity.AddComponent<CubeRendererComponent>();
-					crc.Material = MaterialHandle(spriteRendererComponent["Material"].as<std::string>());
+					if (cubeRendererComponent["Material"])
+						crc.Material = MaterialHandle(cubeRendererComponent["Material"].as<std::string>());
 				}
 
 				// --- Point Light Component ---

@@ -19,6 +19,7 @@ namespace Locus
 
 		Mesh& GetMesh(int index) { return m_Meshes[index]; }
 		std::vector<Mesh>& GetMeshes() { return m_Meshes; }
+		const std::string& GetName() const { return m_Name; }
 
 		Ref<VertexArray> GetVertexArray() const { return m_VertexArray; }
 
@@ -30,6 +31,7 @@ namespace Locus
 	private:
 		std::vector<Mesh> m_Meshes;
 		std::filesystem::path m_FilePath;
+		std::string m_Name;
 
 		uint32_t m_IndexOffset = 0;
 

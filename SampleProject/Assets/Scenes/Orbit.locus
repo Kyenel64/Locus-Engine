@@ -1,21 +1,43 @@
 Scene: Untitled
 Entities:
-  - Entity: 4172512803253741771
+  - Entity: 5979509514547691761
     TagComponent:
-      Tag: Earth
+      Tag: Mesh
       Group: Default
-      Enabled: true
+      Enabled: false
     TransformComponent:
-      Self: 4172512803253741771
-      Parent: 0
+      Self: 5979509514547691761
+      Parent: 2433011861349912028
       LocalPosition: [0, 0, 0]
       LocalRotation: [0, 0, 0]
       LocalRotationQuat: [0, 0, 0, 1]
-      LocalScale: [1.41999996, 1.41999996, 1.41999996]
+      LocalScale: [0.560000002, 0.560000002, 0.560000002]
+    CircleRendererComponent:
+      Color: [1, 0, 0, 1]
+      Thickness: 1
+      Fade: 0.00499999989
+  - Entity: 785250229868369602
+    TagComponent:
+      Tag: Moon
+      Group: Default
+      Enabled: true
+    TransformComponent:
+      Self: 785250229868369602
+      Parent: 0
+      LocalPosition: [-6.99763918, 0, 0]
+      LocalRotation: [0, 0, 0.785398185]
+      LocalRotationQuat: [0, 0, 0.00685383845, 0.999976516]
+      LocalScale: [0.460000008, 0.460000008, 0.460000008]
     SpriteRendererComponent:
-      Color: [1, 1, 1, 1]
-      TexturePath: SandboxProject/Assets\Textures\Sprite-0001.png
+      Texture: Assets\Textures\Sprite-0001.png
+      Color: [0.389610529, 1, 0, 1]
       TilingFactor: 1
+    ScriptComponent:
+      ScriptClass: Sandbox::OrbitPlanet
+      Fields:
+        centerMass: 1000018.5
+        initialForce: 5
+        thisMass: 1
   - Entity: 2433011861349912028
     TagComponent:
       Tag: Camera
@@ -48,41 +70,19 @@ Entities:
       ScriptClass: Sandbox::CameraController2D
       Fields:
         {}
-  - Entity: 785250229868369602
+  - Entity: 4172512803253741771
     TagComponent:
-      Tag: Moon
+      Tag: Earth
       Group: Default
       Enabled: true
     TransformComponent:
-      Self: 785250229868369602
+      Self: 4172512803253741771
       Parent: 0
-      LocalPosition: [-6.99763918, 0, 0]
-      LocalRotation: [0, 0, 0.785398185]
-      LocalRotationQuat: [0, 0, 0.00685383845, 0.999976516]
-      LocalScale: [0.460000008, 0.460000008, 0.460000008]
-    SpriteRendererComponent:
-      Color: [0.389610529, 1, 0, 1]
-      TexturePath: SandboxProject/Assets\Textures\Sprite-0001.png
-      TilingFactor: 1
-    ScriptComponent:
-      ScriptClass: Sandbox::OrbitPlanet
-      Fields:
-        centerMass: 1000018.5
-        initialForce: 5
-        thisMass: 1
-  - Entity: 5979509514547691761
-    TagComponent:
-      Tag: Mesh
-      Group: Default
-      Enabled: false
-    TransformComponent:
-      Self: 5979509514547691761
-      Parent: 2433011861349912028
       LocalPosition: [0, 0, 0]
       LocalRotation: [0, 0, 0]
       LocalRotationQuat: [0, 0, 0, 1]
-      LocalScale: [0.560000002, 0.560000002, 0.560000002]
-    CircleRendererComponent:
-      Color: [1, 0, 0, 1]
-      Thickness: 1
-      Fade: 0.00499999989
+      LocalScale: [1.41999996, 1.41999996, 1.41999996]
+    SpriteRendererComponent:
+      Texture: Assets\Textures\Sprite-0001.png
+      Color: [1, 1, 1, 1]
+      TilingFactor: 1

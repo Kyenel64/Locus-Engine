@@ -5,6 +5,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include "Locus/Resource/ResourceManager.h"
+#include "Locus/Core/Application.h"
 
 namespace Locus
 {
@@ -31,13 +32,14 @@ namespace Locus
 
 	TextureHandle TextureManager::LoadTexture(const std::filesystem::path& texturePath)
 	{
-		std::filesystem::path metadataPath = texturePath.string() + ".meta";
+		std::filesystem::path metaPath = texturePath;
+		std::filesystem::path metadataPath = Application::Get().GetProjectPath() / metaPath.replace_extension(".meta");
 		if (std::filesystem::exists(metadataPath))
 		{
-			// Load texture from metadata path
+			// Load texture from metadata path. Temp. Load metadata when implemented
 			YAML::Node data = YAML::LoadFile(metadataPath.string());
 			TextureHandle texHandle = TextureHandle(texturePath);
-			s_TMData.Textures[texHandle] = Texture2D::Create(texturePath.string());
+			s_TMData.Textures[texHandle] = Texture2D::Create(Application::Get().GetProjectPath() / texturePath.string());
 			s_TMData.TextureCount++;
 			LOCUS_CORE_TRACE("  Loaded texture: {0}", texturePath);
 			return texHandle;
@@ -45,11 +47,11 @@ namespace Locus
 		else
 		{
 			TextureHandle texHandle = TextureHandle();
-			s_TMData.Textures[texHandle] = Texture2D::Create(texturePath.string());
+			s_TMData.Textures[texHandle] = Texture2D::Create(Application::Get().GetProjectPath() / texturePath.string());
 			s_TMData.TextureCount++;
 			YAML::Emitter out;
 			out << YAML::BeginMap; // Scene
-			out << YAML::Key << "Path" << YAML::Value << texturePath.string();
+			out << YAML::Key << "Path" << YAML::Value << Application::Get().GetProjectPath().string() + "/" + texturePath.string();
 			out << YAML::EndMap; // End Scene
 			std::ofstream fout(metadataPath);
 			fout << out.c_str();

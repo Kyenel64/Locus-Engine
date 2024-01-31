@@ -16,7 +16,7 @@ namespace Locus
 		m_FileIcon = Texture2D::Create("resources/icons/FileIcon.png");
 		m_PlusIcon = Texture2D::Create("resources/icons/PlusIcon.png");
 
-		m_CurrentDirectory = m_AssetsDirectory / "Models" / "SciFiHelmet";
+		m_CurrentDirectory = m_AssetsDirectory;
 
 		SetDirectory(m_CurrentDirectory);
 	}
@@ -164,13 +164,13 @@ namespace Locus
 		for (auto& item : m_DirectoryItems)
 		{
 			ImGui::TableNextColumn();
-			const std::filesystem::path& path = item.path();
+			const std::filesystem::path& path = std::filesystem::relative(item, Application::Get().GetProjectPath());
 		
 			Ref<Texture2D> icon = nullptr;
-			if (item.is_directory())
+			if (!item.has_extension())
 				icon = m_FolderIcon;
-			else if (TextureManager::IsValid(item.path()))
-				icon = TextureManager::GetTexture(path);
+			else if (TextureManager::IsValid(item))
+				icon = TextureManager::GetTexture(item);
 			else
 				icon = m_FileIcon;
 		
@@ -194,11 +194,11 @@ namespace Locus
 		ImGui::EndChild();
 	}
 
-	void ProjectBrowserPanel::DrawItem(const std::filesystem::directory_entry& item, Ref<Texture2D> icon)
+	void ProjectBrowserPanel::DrawItem(const std::filesystem::path& item, Ref<Texture2D> icon)
 	{
 		LOCUS_PROFILE_FUNCTION();
 
-		std::string itemName = item.path().filename().string();
+		std::string itemName = item.filename().string();
 		std::string label = "##" + itemName;
 		ImGui::PushID(itemName.c_str());
 
@@ -210,27 +210,16 @@ namespace Locus
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 		ImGui::PushStyleColor(ImGuiCol_Button, buttonColor);
 		if (ImGui::ImageButton((ImTextureID)(uint64_t)icon->GetRendererID(), { m_IconSize, m_IconSize }, { 0, 1 }, { 1, 0 }))
-			g_SelectedResourcePath = item.path().string();
+			g_SelectedResourcePath = item.string();
 		
 		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 		{
-			if (item.is_directory())
-				SetDirectory(item.path());
+			if (!item.has_extension())
+				SetDirectory(item);
 		}
 		
 		ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
-		//ImGui::Text(itemName.c_str());
-		char buffer[256];
-		memset(buffer, 0, sizeof(buffer));
-		strcpy_s(buffer, sizeof(buffer), itemName.c_str());
-		ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
-		ImGui::PushStyleColor(ImGuiCol_FrameBg, buttonColor);
-		ImGui::PushItemWidth(-1.0f);
-		if (ImGui::InputText(item.path().string().c_str(), buffer, sizeof(buffer), flags))
-		{
-			g_SelectedResourcePath = item;
-		}
-		ImGui::PopStyleColor();
+		ImGui::Text(itemName.c_str());
 		ImGui::PopFont();
 		
 		ImGui::PopID();
@@ -240,13 +229,14 @@ namespace Locus
 
 	void ProjectBrowserPanel::SetDirectory(const std::filesystem::path& path)
 	{
-		m_CurrentDirectory = path;
+		m_CurrentDirectory = Application::Get().GetProjectPath() / path;
 
 		m_DirectoryItems.clear();
 		for (auto& item : std::filesystem::directory_iterator(m_CurrentDirectory))
 		{
-			if (TextureManager::IsValid(item.path()) || MaterialManager::IsValid(item.path()) || ModelManager::IsValid(item.path()) || item.is_directory())
-				m_DirectoryItems.push_back(item);
+			std::filesystem::path itemPath = std::filesystem::relative(item.path(), Application::Get().GetProjectPath());
+			if (TextureManager::IsValid(itemPath) || MaterialManager::IsValid(itemPath) || ModelManager::IsValid(itemPath) || item.is_directory())
+				m_DirectoryItems.push_back(itemPath);
 		}
 	}
 }

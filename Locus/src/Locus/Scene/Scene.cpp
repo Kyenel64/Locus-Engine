@@ -238,6 +238,7 @@ namespace Locus
 			// 3D
 			Renderer3D::BeginScene(*mainCamera, cameraTransform, this);
 			DrawCubes();
+			DrawMeshes();
 			Renderer3D::EndScene();
 
 			Renderer::EndScene();
@@ -296,6 +297,7 @@ namespace Locus
 		// 3D
 		Renderer3D::BeginScene(camera, this);
 		DrawCubes();
+		DrawMeshes();
 		Renderer3D::EndScene();
 		// Grid
 		if (camera.GetGridVisibility())
@@ -402,6 +404,7 @@ namespace Locus
 			// 3D
 			Renderer3D::BeginScene(*mainCamera, cameraTransform, this);
 			DrawCubes();
+			DrawMeshes();
 			Renderer3D::EndScene();
 
 			Renderer::EndScene();
@@ -432,6 +435,7 @@ namespace Locus
 		// 3D
 		Renderer3D::BeginScene(camera, this);
 		DrawCubes();
+		DrawMeshes();
 		Renderer3D::EndScene();
 		// Grid
 		if (camera.GetGridVisibility())
@@ -461,6 +465,7 @@ namespace Locus
 		// 3D
 		Renderer3D::BeginScene(camera, cameraTransform, this);
 		DrawCubes();
+		DrawMeshes();
 		Renderer3D::EndScene();
 
 		Renderer::EndScene();

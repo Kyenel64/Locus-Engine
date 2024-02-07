@@ -11,6 +11,7 @@ namespace Sandbox
 		public float centerMass = 1000000.0f;
 
 		public float initialForce = 5.0f;
+		public float tickRate = 0.5f;
 
 		private Vec3 originalPosition;
 		private Vec3 newPosition;
@@ -30,7 +31,7 @@ namespace Sandbox
 
 		void OnUpdate(float deltaTime)
 		{
-			float time = 0.001f;
+			float time = tickRate * deltaTime;
 			originalPosition = position;
 			acceleration = (CalculateForceDirection() / thisMass);
 

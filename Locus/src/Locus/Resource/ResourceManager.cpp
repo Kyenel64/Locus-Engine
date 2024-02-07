@@ -30,7 +30,7 @@ namespace Locus
 		for (const auto& dirEntry : std::filesystem::recursive_directory_iterator(s_RMData.ProjectDirectory / "Assets"))
 		{
 			std::string ext = dirEntry.path().extension().string();
-			if (ext == ".jpg" || ext == ".png")
+			if (ext == ".jpg" || ext == ".png" || ext == ".jpeg")
 				s_RMData.TexturePaths.push_back(std::filesystem::relative(dirEntry, s_RMData.ProjectDirectory));
 			else if (ext == ".lmat")
 				s_RMData.MaterialPaths.push_back(std::filesystem::relative(dirEntry, s_RMData.ProjectDirectory));

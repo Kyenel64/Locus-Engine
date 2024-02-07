@@ -248,6 +248,18 @@ namespace Locus
 			out << YAML::EndMap;
 		}
 
+		// --- Mesh Renderer Component ---
+		if (entity.HasComponent<MeshRendererComponent>())
+		{
+			auto& mrc = entity.GetComponent<MeshRendererComponent>();
+
+			out << YAML::Key << "MeshRendererComponent";
+			out << YAML::BeginMap; // Mesh Renderer Component
+			out << YAML::Key << "Model" << YAML::Value << (std::string)mrc.Model;
+			out << YAML::Key << "Material" << YAML::Value << (std::string)mrc.Material;
+			out << YAML::EndMap;
+		}
+
 		// --- Point Light Component ---
 		if (entity.HasComponent<PointLightComponent>())
 		{
@@ -524,6 +536,17 @@ namespace Locus
 					auto& crc = deserializedEntity.AddComponent<CubeRendererComponent>();
 					if (cubeRendererComponent["Material"])
 						crc.Material = MaterialHandle(cubeRendererComponent["Material"].as<std::string>());
+				}
+
+				// --- Mesh Renderer Component ---
+				auto meshRendererComponent = entity["MeshRendererComponent"];
+				if (meshRendererComponent)
+				{
+					auto& mrc = deserializedEntity.AddComponent<MeshRendererComponent>();
+					if (meshRendererComponent["Model"])
+						mrc.Model = ModelHandle(meshRendererComponent["Model"].as<std::string>());
+					if (meshRendererComponent["Material"])
+						mrc.Material = MaterialHandle(meshRendererComponent["Material"].as<std::string>());
 				}
 
 				// --- Point Light Component ---

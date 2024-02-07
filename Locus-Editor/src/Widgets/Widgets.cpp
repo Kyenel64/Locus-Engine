@@ -484,11 +484,14 @@ namespace Locus::Widgets
 		ImVec2 popupPos = { ImGui::GetCursorScreenPos().x - 50.0f, ImGui::GetCursorScreenPos().y + labelHeight };
 		std::string buttonLabel = "##MaterialDropdown" + name;
 		std::string popupLabel = "MaterialSelectorPopup" + name;
-		if (ImGui::Button(buttonLabel.c_str(), {-1.0f , labelHeight}))
+		if (ImGui::Button(buttonLabel.c_str(), { -1.0f , labelHeight }))
 			ImGui::OpenPopup(popupLabel.c_str());
 
 		if (material)
-			drawList->AddImageRounded((ImTextureID)(uint64_t)material->m_AlbedoTexture.Get()->GetRendererID(), topLeft, {topLeft.x + imageSize, topLeft.y + imageSize}, {0, 1}, {1, 0}, ImGui::GetColorU32(0), imageSize / 2);
+		{
+			if (material->m_AlbedoTexture)
+				drawList->AddImageRounded((ImTextureID)(uint64_t)material->m_AlbedoTexture.Get()->GetRendererID(), topLeft, { topLeft.x + imageSize, topLeft.y + imageSize }, { 0, 1 }, { 1, 0 }, ImGui::GetColorU32(0), imageSize / 2);
+		}
 
 		ImGui::SetNextWindowPos(popupPos);
 		ImGui::SetNextWindowSize({ 50.0f + ImGui::GetItemRectSize().x, 300.0f });

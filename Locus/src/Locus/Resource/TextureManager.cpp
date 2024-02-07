@@ -46,7 +46,7 @@ namespace Locus
 		}
 		else
 		{
-			TextureHandle texHandle = TextureHandle();
+			TextureHandle texHandle = TextureHandle(texturePath);
 			s_TMData.Textures[texHandle] = Texture2D::Create(Application::Get().GetProjectPath() / texturePath.string());
 			s_TMData.TextureCount++;
 			YAML::Emitter out;

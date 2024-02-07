@@ -47,7 +47,7 @@ namespace Locus
 		}
 		else
 		{
-			MaterialHandle matHandle = MaterialHandle();
+			MaterialHandle matHandle = MaterialHandle(materialPath);
 			s_MMData.Materials[matHandle] = CreateRef<Material>(Application::Get().GetProjectPath() / materialPath.string());
 			s_MMData.MaterialCount++;
 			YAML::Emitter out;

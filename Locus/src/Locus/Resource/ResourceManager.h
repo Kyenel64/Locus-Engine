@@ -14,6 +14,8 @@ namespace Locus
 
 		static void Init();
 
+		static void Rescan();
+
 		static const std::vector<std::filesystem::path>& GetTexturePaths();
 		static const std::vector<std::filesystem::path>& GetMaterialPaths();
 		static const std::vector<std::filesystem::path>& GetModelPaths();

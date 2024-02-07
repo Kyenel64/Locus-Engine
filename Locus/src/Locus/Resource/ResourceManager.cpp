@@ -44,6 +44,40 @@ namespace Locus
 		ModelManager::Init();
 	}
 
+	void ResourceManager::Rescan()
+	{
+		LOCUS_CORE_INFO("Rescanning for resources");
+		for (const auto& dirEntry : std::filesystem::recursive_directory_iterator(s_RMData.ProjectDirectory / "Assets"))
+		{
+			std::string ext = dirEntry.path().extension().string();
+			std::filesystem::path relativePath = std::filesystem::relative(dirEntry, s_RMData.ProjectDirectory);
+			if (ext == ".jpg" || ext == ".png" || ext == ".jpeg")
+			{
+				if (std::find(s_RMData.TexturePaths.begin(), s_RMData.TexturePaths.end(), relativePath) == s_RMData.TexturePaths.end())
+				{
+					s_RMData.TexturePaths.push_back(relativePath);
+					TextureManager::LoadTexture(relativePath);
+				}
+			}
+			else if (ext == ".lmat")
+			{
+				if (std::find(s_RMData.MaterialPaths.begin(), s_RMData.MaterialPaths.end(), relativePath) == s_RMData.MaterialPaths.end())
+				{
+					s_RMData.MaterialPaths.push_back(relativePath);
+					MaterialManager::LoadMaterial(relativePath);
+				}
+			}
+			else if (ext == ".obj" || ext == ".fbx" || ext == ".gltf")
+			{
+				if (std::find(s_RMData.ModelPaths.begin(), s_RMData.ModelPaths.end(), relativePath) == s_RMData.ModelPaths.end())
+				{
+					s_RMData.ModelPaths.push_back(relativePath);
+					ModelManager::LoadModel(relativePath);
+				}
+			}
+		}
+	}
+
 	// Getters
 	const std::vector<std::filesystem::path>& ResourceManager::GetTexturePaths() { return s_RMData.TexturePaths; }
 	const std::vector<std::filesystem::path>& ResourceManager::GetMaterialPaths() { return s_RMData.MaterialPaths; }

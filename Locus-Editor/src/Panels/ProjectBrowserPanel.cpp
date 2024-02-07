@@ -67,10 +67,22 @@ namespace Locus
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { ImGui::GetStyle().FramePadding.y, ImGui::GetStyle().FramePadding.y });
 		if (ImGui::ImageButton((ImTextureID)(uintptr_t)m_PlusIcon->GetRendererID(), { textSize.y, textSize.y }, { 0, 1 }, { 1, 0 }))
 		{
-
+			ImGui::OpenPopup("CreateResourcePopup");
 		}
 		ImGui::PopStyleVar(2);
 		ImGui::PopStyleColor();
+
+		// Popup when clicking plus button. 
+		ImGui::SetNextWindowPos({ ImGui::GetWindowPos().x + ImGui::GetCursorPosX(), ImGui::GetWindowPos().y + ImGui::GetCursorPosY() - ImGui::GetStyle().ItemSpacing.y });
+		if (ImGui::BeginPopup("CreateResourcePopup"))
+		{
+			if (ImGui::MenuItem("Create new material"))
+				m_OpenCreateNewMaterialPopup = true;
+
+			ImGui::EndPopup();
+		}
+
+		ProcessCreateNewMaterialPopup();
 
 		ImGui::SameLine();
 
@@ -237,6 +249,61 @@ namespace Locus
 			std::filesystem::path itemPath = std::filesystem::relative(item.path(), Application::Get().GetProjectPath());
 			if (TextureManager::IsValid(itemPath) || MaterialManager::IsValid(itemPath) || ModelManager::IsValid(itemPath) || item.is_directory())
 				m_DirectoryItems.push_back(itemPath);
+		}
+	}
+
+	void ProjectBrowserPanel::ReloadDirectory()
+	{
+		for (auto& item : std::filesystem::directory_iterator(m_CurrentDirectory))
+		{
+			std::filesystem::path itemPath = std::filesystem::relative(item.path(), Application::Get().GetProjectPath());
+			std::string ext = itemPath.extension().string();
+			if (ext == ".jpg" || ext == ".png" || ext == ".jpeg" || ext == ".lmat" || ext == ".obj" || ext == ".fbx" || ext == ".gltf")
+			{
+				if (std::find(m_DirectoryItems.begin(), m_DirectoryItems.end(), itemPath) == m_DirectoryItems.end())
+					m_DirectoryItems.push_back(itemPath);
+			}
+		}
+	}
+
+	void ProjectBrowserPanel::ProcessCreateNewMaterialPopup()
+	{
+		if (m_OpenCreateNewMaterialPopup)
+			ImGui::OpenPopup("Create New Material");
+		if (ImGui::BeginPopup("Create New Material"))
+		{
+			ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Transparent);
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Transparent);
+			ImGui::PushStyleColor(ImGuiCol_Border, LocusColors::Transparent);
+			ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, { 0, 0.5f });
+
+			ImGui::Button("Material Name", { 130.0f, 0 });
+			ImGui::SameLine();
+			char newMaterialNameBuffer[256];
+			memset(newMaterialNameBuffer, 0, sizeof(newMaterialNameBuffer));
+			strcpy_s(newMaterialNameBuffer, sizeof(newMaterialNameBuffer), m_CreateNewMaterialName.c_str());
+			ImGui::PushItemWidth(500.0f);
+			if (ImGui::InputText("##Project Name", newMaterialNameBuffer, sizeof(newMaterialNameBuffer)))
+				m_CreateNewMaterialName = std::string(newMaterialNameBuffer);
+			
+
+			ImGui::PopStyleColor(4);
+			ImGui::PopStyleVar();
+			
+			ImGui::SameLine();
+			if (ImGui::Button("Create Material"))
+			{
+				m_CreateNewMaterialName.append(".lmat");
+				std::ofstream fout(m_CurrentDirectory / m_CreateNewMaterialName);
+				fout << "Colors:\n  Albedo: [1, 1, 1, 1]\n  Metallic: 0.5\n  Roughness: 0.5\n  AO: 0.5\nTextures:\n  Albedo:\n  Normal:\n  Metallic:\n  Roughness:\n  AO:";
+				fout.close();
+				m_CreateNewMaterialName = std::string();
+				m_OpenCreateNewMaterialPopup = false;
+				ResourceManager::Rescan();
+				ReloadDirectory();
+			}
+			ImGui::EndPopup();
 		}
 	}
 }

@@ -866,6 +866,11 @@ namespace Locus
 				ScriptEngine::ReloadScripts();
 				m_PropertiesPanel->m_ScriptClasses = ScriptEngine::GetClassNames();
 			}
+
+			if (ImGui::MenuItem("Rescan Resources"))
+			{
+				ResourceManager::Rescan();
+			}
 			ImGui::EndPopup();
 		}
 		ImGui::PopStyleVar();

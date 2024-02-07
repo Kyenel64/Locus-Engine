@@ -17,6 +17,7 @@ namespace Locus
 		void OnImGuiRender();
 
 		void SetDirectory(const std::filesystem::path& path);
+		void ReloadDirectory();
 
 	private:
 		void DrawTopBar();
@@ -24,6 +25,8 @@ namespace Locus
 		void DrawProjectDirectoryView();
 
 		void DrawItem(const std::filesystem::path& item, Ref<Texture2D> icon);
+
+		void ProcessCreateNewMaterialPopup();
 
 	private:
 		std::filesystem::path m_AssetsDirectory;
@@ -35,6 +38,9 @@ namespace Locus
 		std::stack<std::string> m_Breadcrumb;
 
 		float m_IconSize = 70.0f;
+
+		bool m_OpenCreateNewMaterialPopup = false;
+		std::string m_CreateNewMaterialName;
 
 		// Textures
 		Ref<Texture2D> m_PlusIcon;

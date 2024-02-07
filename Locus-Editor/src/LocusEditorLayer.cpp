@@ -649,7 +649,7 @@ namespace Locus
 		m_ProjectBrowserPanel->OnImGuiRender();
 		m_ConsolePanel->OnImGuiRender();
 		m_ResourceInspectorPanel->OnImGuiRender();
-		ImGui::ShowDemoWindow();
+		//ImGui::ShowDemoWindow();
 
 
 		ProcessSavePopup();

@@ -6,12 +6,20 @@
 //	Child
 //	SpriteRenderer
 //	CircleRenderer
+//	CubeRenderer
+//	MeshRenderer
+//	PointLight
+//	DirectionalLight
+//	SpotLight
 //	Camera
 //	Rigidbody2D
 //	BoxCollider2D
 //	CircleCollider2D
 //	NativeScript
 //	Script
+// 
+// Classes to edit when writing a new component:
+//	Scene.cpp, PropertiesPanel.cpp, SceneSerializer.cpp, EntityCommands.h
 #pragma once
 
 #include <stack>
@@ -28,6 +36,9 @@
 #include "Locus/Scene/SceneCamera.h"
 #include "Locus/Scene/Entity.h"
 #include "Locus/Math/Math.h"
+#include "Locus/Resource/TextureManager.h"
+#include "Locus/Resource/MaterialManager.h"
+#include "Locus/Resource/ModelManager.h"
 
 namespace Locus
 {
@@ -112,10 +123,8 @@ namespace Locus
 
 	struct SpriteRendererComponent
 	{
-		// TODO: Take in a material
 		glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
-		Ref<Texture2D> Texture;
-		std::string TexturePath;
+		TextureHandle Texture;
 		float TilingFactor = 1.0f;
 
 		SpriteRendererComponent() = default;
@@ -131,6 +140,52 @@ namespace Locus
 
 		CircleRendererComponent() = default;
 		CircleRendererComponent(const CircleRendererComponent&) = default;
+	};
+
+	struct CubeRendererComponent
+	{
+		MaterialHandle Material;
+
+		CubeRendererComponent() = default;
+		CubeRendererComponent(const CubeRendererComponent&) = default;
+	};
+	
+	struct MeshRendererComponent
+	{
+		MaterialHandle Material;
+		ModelHandle Model;
+
+		MeshRendererComponent() = default;
+		MeshRendererComponent(const MeshRendererComponent&) = default;
+	};
+
+	struct PointLightComponent
+	{
+		glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
+		float Intensity = 1.0f;
+
+		PointLightComponent() = default;
+		PointLightComponent(const PointLightComponent&) = default;
+	};
+
+	struct DirectionalLightComponent
+	{
+		glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
+		float Intensity = 1.0f;
+
+		DirectionalLightComponent() = default;
+		DirectionalLightComponent(const DirectionalLightComponent&) = default;
+	};
+
+	struct SpotLightComponent
+	{
+		glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
+		float Intensity = 1.0f;
+		float CutOff = 10.0f;
+		float OuterCutOff = 20.0f;
+
+		SpotLightComponent() = default;
+		SpotLightComponent(const SpotLightComponent&) = default;
 	};
 
 	struct CameraComponent
@@ -199,23 +254,6 @@ namespace Locus
 		CircleCollider2DComponent(const CircleCollider2DComponent&) = default;
 	};
 
-	class ScriptableEntity;
-
-	struct NativeScriptComponent
-	{
-		ScriptableEntity* Instance = nullptr;
-
-		ScriptableEntity* (*InstantiateScript)();
-		void (*DestroyScript)(NativeScriptComponent*);
-
-		template <typename T>
-		void Bind()
-		{
-			InstantiateScript = []() { return static_cast<ScriptableEntity*>(new T()); };
-			DestroyScript = [](NativeScriptComponent* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };
-		}
-	};
-
 	struct ScriptComponent
 	{
 		std::string ScriptClass;
@@ -225,7 +263,6 @@ namespace Locus
 		ScriptComponent(const std::string& scriptClass) : ScriptClass(scriptClass) {}
 	};
 
-
 	enum class ComponentType
 	{
 		None = 0,
@@ -234,11 +271,15 @@ namespace Locus
 		Child,
 		SpriteRenderer,
 		CircleRenderer,
+		CubeRenderer,
+		MeshRenderer,
+		PointLight,
+		DirectionalLight,
+		SpotLight,
 		Camera,
 		Rigidbody2D,
 		BoxCollider2D,
 		CircleCollider2D,
-		NativeScript,
 		Script
 	};
 
@@ -251,11 +292,15 @@ namespace Locus
 		Ref<TransformComponent> Transform;
 		Ref<SpriteRendererComponent> SpriteRenderer;
 		Ref<CircleRendererComponent> CircleRenderer;
+		Ref<CubeRendererComponent> CubeRenderer;
+		Ref<MeshRendererComponent> MeshRenderer;
+		Ref<PointLightComponent> PointLight;
+		Ref<DirectionalLightComponent> DirectionalLight;
+		Ref<SpotLightComponent> SpotLight;
 		Ref<CameraComponent> Camera;
 		Ref<Rigidbody2DComponent> Rigidbody2D;
 		Ref<BoxCollider2DComponent> BoxCollider2D;
 		Ref<CircleCollider2DComponent> CircleCollider2D;
-		Ref<NativeScriptComponent> NativeScript;
 		Ref<ScriptComponent> Script;
 	};
 }

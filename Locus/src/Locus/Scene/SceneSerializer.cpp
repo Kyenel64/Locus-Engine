@@ -218,8 +218,8 @@ namespace Locus
 
 			out << YAML::Key << "SpriteRendererComponent";
 			out << YAML::BeginMap; // Sprite Renderer Component
+			out << YAML::Key << "Texture" << YAML::Value << (std::string)src.Texture;
 			out << YAML::Key << "Color" << YAML::Value << src.Color;
-			out << YAML::Key << "TexturePath" << YAML::Value << src.TexturePath;
 			out << YAML::Key << "TilingFactor" << YAML::Value << src.TilingFactor;
 			out << YAML::EndMap; // End Sprite Renderer Component
 		}
@@ -234,6 +234,67 @@ namespace Locus
 			out << YAML::Key << "Color" << YAML::Value << crc.Color;
 			out << YAML::Key << "Thickness" << YAML::Value << crc.Thickness;
 			out << YAML::Key << "Fade" << YAML::Value << crc.Fade;
+			out << YAML::EndMap;
+		}
+
+		// --- Cube Renderer Component ---
+		if (entity.HasComponent<CubeRendererComponent>())
+		{
+			auto& crc = entity.GetComponent<CubeRendererComponent>();
+
+			out << YAML::Key << "CubeRendererComponent";
+			out << YAML::BeginMap; // Cube Renderer Component
+			out << YAML::Key << "Material" << YAML::Value << (std::string)crc.Material;
+			out << YAML::EndMap;
+		}
+
+		// --- Mesh Renderer Component ---
+		if (entity.HasComponent<MeshRendererComponent>())
+		{
+			auto& mrc = entity.GetComponent<MeshRendererComponent>();
+
+			out << YAML::Key << "MeshRendererComponent";
+			out << YAML::BeginMap; // Mesh Renderer Component
+			out << YAML::Key << "Model" << YAML::Value << (std::string)mrc.Model;
+			out << YAML::Key << "Material" << YAML::Value << (std::string)mrc.Material;
+			out << YAML::EndMap;
+		}
+
+		// --- Point Light Component ---
+		if (entity.HasComponent<PointLightComponent>())
+		{
+			auto& plc = entity.GetComponent<PointLightComponent>();
+
+			out << YAML::Key << "PointLightComponent";
+			out << YAML::BeginMap; // Point Light Component
+			out << YAML::Key << "Color" << YAML::Value << plc.Color;
+			out << YAML::Key << "Intensity" << YAML::Value << plc.Intensity;
+			out << YAML::EndMap;
+		}
+
+		// --- Directional Light Component ---
+		if (entity.HasComponent<DirectionalLightComponent>())
+		{
+			auto& dlc = entity.GetComponent<DirectionalLightComponent>();
+
+			out << YAML::Key << "DirectionalLightComponent";
+			out << YAML::BeginMap; // Directional Light Component
+			out << YAML::Key << "Color" << YAML::Value << dlc.Color;
+			out << YAML::Key << "Intensity" << YAML::Value << dlc.Intensity;
+			out << YAML::EndMap;
+		}
+
+		// --- Spot Light Component ---
+		if (entity.HasComponent<SpotLightComponent>())
+		{
+			auto& slc = entity.GetComponent<SpotLightComponent>();
+
+			out << YAML::Key << "SpotLightComponent";
+			out << YAML::BeginMap; // Spot Light Component
+			out << YAML::Key << "Color" << YAML::Value << slc.Color;
+			out << YAML::Key << "Intensity" << YAML::Value << slc.Intensity;
+			out << YAML::Key << "CutOff" << YAML::Value << slc.CutOff;
+			out << YAML::Key << "OuterCutOff" << YAML::Value << slc.OuterCutOff;
 			out << YAML::EndMap;
 		}
 
@@ -452,10 +513,9 @@ namespace Locus
 				if (spriteRendererComponent)
 				{
 					auto& src = deserializedEntity.AddComponent<SpriteRendererComponent>();
+					if (spriteRendererComponent["Texture"])
+						src.Texture = TextureHandle(spriteRendererComponent["Texture"].as<std::string>());
 					src.Color = spriteRendererComponent["Color"].as<glm::vec4>();
-					src.TexturePath = spriteRendererComponent["TexturePath"].as<std::string>();
-					if (src.TexturePath != std::string())
-						src.Texture = Texture2D::Create(src.TexturePath);
 					src.TilingFactor = spriteRendererComponent["TilingFactor"].as<float>();
 				}
 
@@ -467,6 +527,55 @@ namespace Locus
 					crc.Color = circleRendererComponent["Color"].as<glm::vec4>();
 					crc.Thickness = circleRendererComponent["Thickness"].as<float>();
 					crc.Fade = circleRendererComponent["Fade"].as<float>();
+				}
+
+				// --- Cube Renderer Component ---
+				auto cubeRendererComponent = entity["CubeRendererComponent"];
+				if (cubeRendererComponent)
+				{
+					auto& crc = deserializedEntity.AddComponent<CubeRendererComponent>();
+					if (cubeRendererComponent["Material"])
+						crc.Material = MaterialHandle(cubeRendererComponent["Material"].as<std::string>());
+				}
+
+				// --- Mesh Renderer Component ---
+				auto meshRendererComponent = entity["MeshRendererComponent"];
+				if (meshRendererComponent)
+				{
+					auto& mrc = deserializedEntity.AddComponent<MeshRendererComponent>();
+					if (meshRendererComponent["Model"])
+						mrc.Model = ModelHandle(meshRendererComponent["Model"].as<std::string>());
+					if (meshRendererComponent["Material"])
+						mrc.Material = MaterialHandle(meshRendererComponent["Material"].as<std::string>());
+				}
+
+				// --- Point Light Component ---
+				auto pointLightComponent = entity["PointLightComponent"];
+				if (pointLightComponent)
+				{
+					auto& plc = deserializedEntity.AddComponent<PointLightComponent>();
+					plc.Color = pointLightComponent["Color"].as<glm::vec4>();
+					plc.Intensity = pointLightComponent["Intensity"].as<float>();
+				}
+
+				// --- Directional Light Component ---
+				auto directionalLightComponent = entity["DirectionalLightComponent"];
+				if (directionalLightComponent)
+				{
+					auto& dlc = deserializedEntity.AddComponent<DirectionalLightComponent>();
+					dlc.Color = directionalLightComponent["Color"].as<glm::vec4>();
+					dlc.Intensity = directionalLightComponent["Intensity"].as<float>();
+				}
+
+				// --- Spot Light Component ---
+				auto spotLightComponent = entity["SpotLightComponent"];
+				if (spotLightComponent)
+				{
+					auto& slc = deserializedEntity.AddComponent<SpotLightComponent>();
+					slc.Color = spotLightComponent["Color"].as<glm::vec4>();
+					slc.Intensity = spotLightComponent["Intensity"].as<float>();
+					slc.CutOff = spotLightComponent["CutOff"].as<float>();
+					slc.OuterCutOff = spotLightComponent["OuterCutOff"].as<float>();
 				}
 
 				// --- Camera Component ---

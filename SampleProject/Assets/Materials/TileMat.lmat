@@ -1,0 +1,11 @@
+Colors:
+  Albedo: [1, 1, 1, 1]
+  Metallic: 0.5
+  Roughness: 0.5
+  AO: 0.5
+Textures:
+  Albedo: Assets\Textures\Tile\Tile_Color.jpg
+  Normal: Assets\Textures\Tile\Tile_Normal.jpg
+  Metallic:
+  Roughness: Assets\Textures\Tile\Tile_Roughness.jpg
+  AO: Assets\Textures\Tile\Tile_AO.jpg

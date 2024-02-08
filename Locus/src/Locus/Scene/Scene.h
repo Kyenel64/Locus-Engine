@@ -7,6 +7,8 @@
 #include "Locus/Core/Timestep.h"
 #include "Locus/Core/UUID.h"
 #include "Locus/Renderer/EditorCamera.h"
+#include "Locus/Renderer/Model.h"
+#include "Locus/Renderer/Material.h"
 
 class b2World;
 
@@ -14,6 +16,43 @@ namespace Locus
 {
 	class Entity;
 	class ContactListener2D;
+
+	struct PointLight
+	{
+		glm::vec4 Position = glm::vec4(0.0f);
+		glm::vec4 Color = glm::vec4(0.0f);
+		float Intensity = 0.0f;
+		bool Enabled = false;
+		glm::vec2 padding;
+	};
+
+	struct DirectionalLight
+	{
+		glm::vec4 Direction = glm::vec4(0.0f);
+		glm::vec4 Color = glm::vec4(0.0f);
+		float Intensity = 0.0f;
+		bool Enabled = false;
+		glm::vec2 padding;
+	};
+
+	struct SpotLight
+	{
+		glm::vec4 Position = glm::vec4(0.0f);
+		glm::vec4 Direction = glm::vec4(0.0f);
+		glm::vec4 Color = glm::vec4(0.0f);
+		float CutOff = 0.0f;
+		float OuterCutOff = 0.0f;
+		float Intensity = 0.0f;
+		bool Enabled = false;
+	};
+
+	struct SceneLighting
+	{
+		// TODO: Use deferred shading for unlimited light sources
+		DirectionalLight DirectionalLights[16];
+		PointLight PointLights[16];
+		SpotLight SpotLights[16];
+	};
 
 	class Scene
 	{
@@ -40,6 +79,7 @@ namespace Locus
 		// On Update
 		void OnRuntimeUpdate(Timestep deltaTime);
 		void OnPhysicsUpdate(Timestep deltaTime, EditorCamera& camera);
+		void OnPreviewUpdate(Entity entity);
 
 		// On Start
 		void OnRuntimeStart();
@@ -72,9 +112,21 @@ namespace Locus
 
 		glm::mat4 Scene::GetWorldTransform(Entity entity);
 
+		const SceneLighting& GetLightingData() const { return m_SceneLighting; }
+
 		void SetSceneName(const std::string& name) { m_SceneName = name; }
 
 	private:
+
+		void ClearLightingData();
+		void ProcessPointLights();
+		void ProcessDirectionalLights();
+		void ProcessSpotLights();
+		void DrawSprites();
+		void DrawCircles();
+		void DrawCubes();
+		void DrawMeshes();
+
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);
 	private:
@@ -86,6 +138,10 @@ namespace Locus
 		b2World* m_Box2DWorld = nullptr;
 		Ref<ContactListener2D> m_ContactListener;
 
+		// Lighting
+		SceneLighting m_SceneLighting;
+
+	public:
 		friend class Entity;
 		friend class SceneSerializer;
 	};

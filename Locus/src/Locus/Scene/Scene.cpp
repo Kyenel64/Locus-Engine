@@ -8,15 +8,17 @@
 #include <box2d/b2_circle_shape.h>
 #include <box2d/b2_fixture.h>
 
+#include "Locus/Renderer/Renderer.h"
 #include "Locus/Renderer/Renderer2D.h"
+#include "Locus/Renderer/Renderer3D.h"
 #include "Locus/Renderer/RenderCommand.h"
 #include "Locus/Renderer/EditorCamera.h"
 #include "Locus/Scene/Components.h"
-#include "Locus/Scene/ScriptableEntity.h"
 #include "Locus/Scene/Entity.h"
 #include "Locus/Scripting/ScriptEngine.h"
 #include "Locus/Physics2D/ContactListener2D.h"
 #include "Locus/Physics2D/PhysicsUtils.h"
+#include "Locus/Resource/TextureManager.h"
 
 namespace Locus
 {
@@ -111,56 +113,60 @@ namespace Locus
 		CopyComponent<TransformComponent>(from, to);
 		CopyComponent<SpriteRendererComponent>(from, to);
 		CopyComponent<CircleRendererComponent>(from, to);
+		CopyComponent<CubeRendererComponent>(from, to);
+		CopyComponent<MeshRendererComponent>(from, to);
+		CopyComponent<PointLightComponent>(from, to);
+		CopyComponent<DirectionalLightComponent>(from, to);
+		CopyComponent<SpotLightComponent>(from, to);
 		CopyComponent<CameraComponent>(from, to);
 		CopyComponent<Rigidbody2DComponent>(from, to);
 		CopyComponent<BoxCollider2DComponent>(from, to);
 		CopyComponent<CircleCollider2DComponent>(from, to);
-		CopyComponent<NativeScriptComponent>(from, to);
 		CopyComponent<ScriptComponent>(from, to);
 	}
 
 	void Scene::OnEditorUpdate(Timestep deltaTime, EditorCamera& camera)
 	{
-		RenderCommand::SetClearColor(camera.GetBackgroundColor());
-		RenderCommand::Clear();
+		// --- Lighting ---
+		ClearLightingData();
+		ProcessPointLights();
+		ProcessDirectionalLights();
+		ProcessSpotLights();
 
-		// Main rendering
+		// --- Rendering ---
+		Renderer::BeginScene(camera);
+
+		// 2D
 		Renderer2D::BeginScene(camera);
-
-		{ // Sprite
-			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent, TagComponent>();
-			for (auto e : view)
-			{
-				Entity entity = Entity(e, this);
-				auto& sprite = entity.GetComponent<SpriteRendererComponent>();
-				if (entity.GetComponent<TagComponent>().Enabled)
-					Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
-			}
-		}
-
-		{ // Circle
-			auto view = m_Registry.view<TransformComponent, CircleRendererComponent, TagComponent>();
-			for (auto e : view)
-			{
-				Entity entity = Entity(e, this);
-				auto& circle = entity.GetComponent<CircleRendererComponent>();
-				if (entity.GetComponent<TagComponent>().Enabled)
-					Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
-			}
-		}
-
-		// 3D grid plane
-		if (camera.GetGridVisibility())
-			Renderer2D::DrawGrid();
-
+		DrawSprites();
+		DrawCircles();
 		Renderer2D::EndScene();
+		// 3D
+		Renderer3D::BeginScene(camera, this);
+		DrawCubes();
+		DrawMeshes();
+#if 0
+		glm::mat4 transform = glm::mat4(1.0f);
+		for (int i = 0; i < 50; i++)
+		{
+			for (int j = 0; j < 50; j++)
+			{
+				transform = glm::translate(glm::mat4(1.0f), glm::vec3(j * 5, 0, i * 5));
+				Renderer3D::DrawModel(transform, m_TestModel->GetVertexArray(), m_TestMaterial, -1);
+			}
+		}
+#endif
+		Renderer3D::EndScene();
+		// Grid
+		if (camera.GetGridVisibility())
+			Renderer3D::DrawGrid();
+		Renderer::EndScene();
 	}
 
 	void Scene::OnRuntimeUpdate(Timestep deltaTime)
 	{
 		// --- Physics ---
-		// Check physics data for changes
-		{
+		{ // Check physics data for changes
 			auto view = m_Registry.view<IDComponent>();
 			for (auto e : view)
 			{
@@ -168,8 +174,8 @@ namespace Locus
 				UpdatePhysicsData(entity);
 			}
 		}
-		// Simulate physics
-		{
+
+		{ // Simulate physics
 			m_Box2DWorld->Step(deltaTime, 6, 2); // TODO: paremeterize
 			m_ContactListener->Execute();
 			auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
@@ -188,35 +194,25 @@ namespace Locus
 				}
 			}
 		}
-		// --- Update Native Scripts ---
-		{
-			auto view = m_Registry.view<NativeScriptComponent, TagComponent>();
-			for (auto e : view)
-			{
-				Entity entity = Entity(e, this);
-				auto& nsc = view.get<NativeScriptComponent>(entity);
-				if (entity.GetComponent<TagComponent>().Enabled)
-				{
-					nsc.Instance->OnUpdate(deltaTime);
-				}
-			}
-		}
 
 		// --- Update C# Scripts ---
 		{
-			// Example API
 			auto view = m_Registry.view<ScriptComponent, TagComponent>();
 			for (auto e : view)
 			{
 				Entity entity = Entity(e, this);
 				if (entity.GetComponent<TagComponent>().Enabled)
-				{
 					ScriptEngine::OnUpdateEntityScript(entity, deltaTime);
-				}
 			}
 		}
 
-		// --- Rendering 2D ---
+		// --- Lighting ---
+		ClearLightingData();
+		ProcessPointLights();
+		ProcessDirectionalLights();
+		ProcessSpotLights();
+
+		// --- Rendering ---
 		// Find first camera with "Primary" property enabled.
 		SceneCamera* mainCamera = nullptr;
 		glm::mat4 cameraTransform;
@@ -230,38 +226,22 @@ namespace Locus
 				cameraTransform = GetWorldTransform(primaryCameraEntity);
 			}
 		}
-		// Render if main camera exists
 		if (mainCamera)
 		{
-			// Main rendering
-			RenderCommand::SetClearColor(mainCamera->GetBackgroundColor());
-			RenderCommand::Clear();
+			Renderer::BeginScene(*mainCamera, cameraTransform);
 
+			// 2D
 			Renderer2D::BeginScene(*mainCamera, cameraTransform);
-
-			{ // Sprite
-				auto view = m_Registry.view<TransformComponent, SpriteRendererComponent, TagComponent>();
-				for (auto e : view)
-				{
-					Entity entity = Entity(e, this);
-					auto& sprite = entity.GetComponent<SpriteRendererComponent>();
-					if (entity.GetComponent<TagComponent>().Enabled)
-						Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
-				}
-			}
-			
-			{ // Circle
-				auto view = m_Registry.view<TransformComponent, CircleRendererComponent, TagComponent>();
-				for (auto e : view)
-				{
-					Entity entity = Entity(e, this);
-					auto& circle = entity.GetComponent<CircleRendererComponent>();
-					if (entity.GetComponent<TagComponent>().Enabled)
-						Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
-				}
-			}
-			
+			DrawSprites();
+			DrawCircles();
 			Renderer2D::EndScene();
+			// 3D
+			Renderer3D::BeginScene(*mainCamera, cameraTransform, this);
+			DrawCubes();
+			DrawMeshes();
+			Renderer3D::EndScene();
+
+			Renderer::EndScene();
 		}
 		else
 		{
@@ -273,8 +253,7 @@ namespace Locus
 	void Scene::OnPhysicsUpdate(Timestep deltaTime, EditorCamera& camera)
 	{
 		// --- Physics ---
-		// Check physics data for changes
-		{
+		{ // Check physics data for changes
 			auto view = m_Registry.view<IDComponent>();
 			for (auto e : view)
 			{
@@ -282,8 +261,7 @@ namespace Locus
 				UpdatePhysicsData(entity);
 			}
 		}
-		// Simulate physics
-		{
+		{ // Simulate physics
 			m_Box2DWorld->Step(deltaTime, 6, 2); // TODO: paremeterize
 			auto view = m_Registry.view<Rigidbody2DComponent, TagComponent>();
 			for (auto e : view)
@@ -302,41 +280,30 @@ namespace Locus
 			}
 		}
 
-		RenderCommand::SetClearColor(camera.GetBackgroundColor());
-		RenderCommand::Clear();
+		// --- Lighting ---
+		ClearLightingData();
+		ProcessPointLights();
+		ProcessDirectionalLights();
+		ProcessSpotLights();
 
-		// Main rendering
+		// --- Rendering ---
+		Renderer::BeginScene(camera);
+
+		// 2D
 		Renderer2D::BeginScene(camera);
-
-		// --- Sprite ---
-		{
-			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent, TagComponent>();
-			for (auto e : view)
-			{
-				Entity entity = Entity(e, this);
-				auto& sprite = entity.GetComponent<SpriteRendererComponent>();
-				if (entity.GetComponent<TagComponent>().Enabled)
-					Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
-			}
-		}
-
-		// --- Circle ---
-		{
-			auto view = m_Registry.view<TransformComponent, CircleRendererComponent, TagComponent>();
-			for (auto e : view)
-			{
-				Entity entity = Entity(e, this);
-				auto& circle = entity.GetComponent<CircleRendererComponent>();
-				if (entity.GetComponent<TagComponent>().Enabled)
-					Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
-			}
-		}
-
-		// 3D grid plane
-		if (camera.GetGridVisibility())
-			Renderer2D::DrawGrid();
-
+		DrawSprites();
+		DrawCircles();
 		Renderer2D::EndScene();
+		// 3D
+		Renderer3D::BeginScene(camera, this);
+		DrawCubes();
+		DrawMeshes();
+		Renderer3D::EndScene();
+		// Grid
+		if (camera.GetGridVisibility())
+			Renderer3D::DrawGrid();
+
+		Renderer::EndScene();
 	}
 
 	void Scene::OnRuntimeStart()
@@ -352,22 +319,6 @@ namespace Locus
 				Entity entity = Entity(e, this);
 				if (entity.GetComponent<TagComponent>().Enabled)
 					CreatePhysicsData(entity);
-			}
-		}
-
-		// --- Native Script ---
-		{
-			auto view = m_Registry.view<NativeScriptComponent, TagComponent>();
-			for (auto e : view)
-			{
-				Entity entity = Entity(e, this);
-				auto& nsc = entity.GetComponent<NativeScriptComponent>();
-				if (entity.GetComponent<TagComponent>().Enabled)
-				{
-					nsc.Instance = nsc.InstantiateScript();
-					nsc.Instance->m_Entity = entity;
-					nsc.Instance->OnCreate();
-				}
 			}
 		}
 
@@ -416,7 +367,13 @@ namespace Locus
 
 	void Scene::OnRuntimePause(Timestep deltaTime)
 	{
-		// --- Rendering 2D ---
+		// --- Lighting ---
+		ClearLightingData();
+		ProcessPointLights();
+		ProcessDirectionalLights();
+		ProcessSpotLights();
+
+		// --- Rendering ---
 		// Find first camera with "Primary" property enabled.
 		SceneCamera* mainCamera = nullptr;
 		glm::mat4 cameraTransform;
@@ -435,38 +392,22 @@ namespace Locus
 				}
 			}
 		}
-		// Render if main camera exists
 		if (mainCamera)
 		{
-			// Main rendering
-			RenderCommand::SetClearColor(mainCamera->GetBackgroundColor());
-			RenderCommand::Clear();
+			Renderer::BeginScene(*mainCamera, cameraTransform);
 
+			// 2D
 			Renderer2D::BeginScene(*mainCamera, cameraTransform);
-
-			{ // Sprite
-				auto view = m_Registry.view<TransformComponent, SpriteRendererComponent, TagComponent>();
-				for (auto e : view)
-				{
-					Entity entity = Entity(e, this);
-					auto& sprite = entity.GetComponent<SpriteRendererComponent>();
-					if (entity.GetComponent<TagComponent>().Enabled)
-						Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
-				}
-			}
-
-			{ // Circle
-				auto view = m_Registry.view<TransformComponent, CircleRendererComponent, TagComponent>();
-				for (auto e : view)
-				{
-					Entity entity = Entity(e, this);
-					auto& circle = entity.GetComponent<CircleRendererComponent>();
-					if (entity.GetComponent<TagComponent>().Enabled)
-						Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
-				}
-			}
-
+			DrawSprites();
+			DrawCircles();
 			Renderer2D::EndScene();
+			// 3D
+			Renderer3D::BeginScene(*mainCamera, cameraTransform, this);
+			DrawCubes();
+			DrawMeshes();
+			Renderer3D::EndScene();
+
+			Renderer::EndScene();
 		}
 		else
 		{
@@ -477,39 +418,208 @@ namespace Locus
 
 	void Scene::OnPhysicsPause(Timestep deltaTime, EditorCamera& camera)
 	{
-		RenderCommand::SetClearColor(camera.GetBackgroundColor());
-		RenderCommand::Clear();
+		// --- Lighting ---
+		ClearLightingData();
+		ProcessPointLights();
+		ProcessDirectionalLights();
+		ProcessSpotLights();
 
-		// Main rendering
+		// --- Rendering ---
+		Renderer::BeginScene(camera);
+
+		// 2D
 		Renderer2D::BeginScene(camera);
-
-		{ // Sprite
-			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent, TagComponent>();
-			for (auto e : view)
-			{
-				Entity entity = Entity(e, this);
-				auto& sprite = entity.GetComponent<SpriteRendererComponent>();
-				if (entity.GetComponent<TagComponent>().Enabled)
-					Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
-			}
-		}
-
-		{ // Circle
-			auto view = m_Registry.view<TransformComponent, CircleRendererComponent, TagComponent>();
-			for (auto e : view)
-			{
-				Entity entity = Entity(e, this);
-				auto& circle = entity.GetComponent<CircleRendererComponent>();
-				if (entity.GetComponent<TagComponent>().Enabled)
-					Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
-			}
-		}
-
-		// 3D grid plane
-		if (camera.GetGridVisibility())
-			Renderer2D::DrawGrid();
-
+		DrawSprites();
+		DrawCircles();
 		Renderer2D::EndScene();
+		// 3D
+		Renderer3D::BeginScene(camera, this);
+		DrawCubes();
+		DrawMeshes();
+		Renderer3D::EndScene();
+		// Grid
+		if (camera.GetGridVisibility())
+			Renderer3D::DrawGrid();
+		Renderer::EndScene();
+	}
+
+	void Scene::OnPreviewUpdate(Entity entity)
+	{
+		// --- Lighting ---
+		ClearLightingData();
+		ProcessPointLights();
+		ProcessDirectionalLights();
+		ProcessSpotLights();
+
+		// --- Rendering ---
+		SceneCamera& camera = entity.GetComponent<CameraComponent>().Camera;
+		glm::mat4 cameraTransform = GetWorldTransform(entity);
+
+		Renderer::BeginScene(camera, cameraTransform);
+
+		// 2D
+		Renderer2D::BeginScene(camera, cameraTransform);
+		DrawSprites();
+		DrawCircles();
+		Renderer2D::EndScene();
+		// 3D
+		Renderer3D::BeginScene(camera, cameraTransform, this);
+		DrawCubes();
+		DrawMeshes();
+		Renderer3D::EndScene();
+
+		Renderer::EndScene();
+	}
+
+	void Scene::ClearLightingData()
+	{
+		for (int i = 0; i < 16; i++)
+		{
+			m_SceneLighting.PointLights[i].Position = glm::vec4(0.0f);
+			m_SceneLighting.PointLights[i].Color = glm::vec4(0.0f);
+			m_SceneLighting.PointLights[i].Intensity = 0.0f;
+			m_SceneLighting.PointLights[i].Enabled = false;
+			m_SceneLighting.DirectionalLights[i].Direction = glm::vec4(0.0f);
+			m_SceneLighting.DirectionalLights[i].Color = glm::vec4(0.0f);
+			m_SceneLighting.DirectionalLights[i].Intensity = 0.0f;
+			m_SceneLighting.DirectionalLights[i].Enabled = false;
+			m_SceneLighting.SpotLights[i].Position = glm::vec4(0.0f);
+			m_SceneLighting.SpotLights[i].Direction = glm::vec4(0.0f);
+			m_SceneLighting.SpotLights[i].Color = glm::vec4(0.0f);
+			m_SceneLighting.SpotLights[i].Intensity = 0.0f;
+			m_SceneLighting.SpotLights[i].CutOff = 0.0f;
+			m_SceneLighting.SpotLights[i].OuterCutOff = 0.0f;
+			m_SceneLighting.SpotLights[i].Enabled = false;
+		}
+	}
+
+	void Scene::ProcessPointLights()
+	{
+		int index = 0;
+		auto view = m_Registry.view<TransformComponent, PointLightComponent, TagComponent>();
+		for (auto e : view)
+		{
+			Entity entity = Entity(e, this);
+			auto& pointLight = entity.GetComponent<PointLightComponent>();
+			if (entity.GetComponent<TagComponent>().Enabled)
+			{
+				glm::mat4 worldTransform = GetWorldTransform(entity);
+				m_SceneLighting.PointLights[index].Position = { worldTransform[3].x, worldTransform[3].y, worldTransform[3].z, 1.0f };
+				m_SceneLighting.PointLights[index].Color = pointLight.Color;
+				m_SceneLighting.PointLights[index].Intensity = pointLight.Intensity;
+				m_SceneLighting.PointLights[index].Enabled = true;
+
+				index++;
+			}
+		}
+	}
+
+	void Scene::ProcessDirectionalLights()
+	{
+		int index = 0;
+		auto view = m_Registry.view<TransformComponent, DirectionalLightComponent, TagComponent>();
+		for (auto e : view)
+		{
+			Entity entity = Entity(e, this);
+			auto& directionalLight = entity.GetComponent<DirectionalLightComponent>();
+			if (entity.GetComponent<TagComponent>().Enabled)
+			{
+				// Calculate the forward vector of the directional light.
+				glm::quat worldRotationQuat;
+				glm::mat4 worldTransform = GetWorldTransform(entity);
+				Math::Decompose(worldTransform, glm::vec3(), worldRotationQuat, glm::vec3());
+				glm::vec3 worldRotationEuler = glm::eulerAngles(worldRotationQuat);
+				glm::vec4 lightDirection = { cos(worldRotationEuler.x) * sin(worldRotationEuler.y), -sin(worldRotationEuler.x), cos(worldRotationEuler.x) * cos(worldRotationEuler.y), 1.0f };
+
+				m_SceneLighting.DirectionalLights[index].Direction = lightDirection;
+				m_SceneLighting.DirectionalLights[index].Color = directionalLight.Color;
+				m_SceneLighting.DirectionalLights[index].Intensity = directionalLight.Intensity;
+				m_SceneLighting.DirectionalLights[index].Enabled = true;
+
+				index++;
+			}
+		}
+	}
+
+	void Scene::ProcessSpotLights()
+	{
+		int index = 0;
+		auto view = m_Registry.view<TransformComponent, SpotLightComponent, TagComponent>();
+		for (auto e : view)
+		{
+			Entity entity = Entity(e, this);
+			auto& directionalLight = entity.GetComponent<SpotLightComponent>();
+			if (entity.GetComponent<TagComponent>().Enabled)
+			{
+				// Calculate the forward vector of the directional light.
+				glm::quat worldRotationQuat;
+				glm::mat4 worldTransform = GetWorldTransform(entity);
+				Math::Decompose(worldTransform, glm::vec3(), worldRotationQuat, glm::vec3());
+				glm::vec3 worldRotationEuler = glm::eulerAngles(worldRotationQuat);
+				glm::vec4 lightDirection = { cos(worldRotationEuler.x) * sin(worldRotationEuler.y), -sin(worldRotationEuler.x), cos(worldRotationEuler.x) * cos(worldRotationEuler.y), 1.0f };
+
+				m_SceneLighting.SpotLights[index].Position = { worldTransform[3].x, worldTransform[3].y, worldTransform[3].z, 1.0f };
+				m_SceneLighting.SpotLights[index].Direction = lightDirection;
+				m_SceneLighting.SpotLights[index].Color = directionalLight.Color;
+				m_SceneLighting.SpotLights[index].Intensity = directionalLight.Intensity;
+				m_SceneLighting.SpotLights[index].CutOff = cos(glm::radians(directionalLight.CutOff));
+				m_SceneLighting.SpotLights[index].OuterCutOff = cos(glm::radians(directionalLight.OuterCutOff));
+				m_SceneLighting.SpotLights[index].Enabled = true;
+
+				index++;
+			}
+		}
+	}
+
+	void Scene::DrawSprites()
+	{
+		auto view = m_Registry.view<TransformComponent, SpriteRendererComponent, TagComponent>();
+		for (auto e : view)
+		{
+			Entity entity = Entity(e, this);
+			auto& sprite = entity.GetComponent<SpriteRendererComponent>();
+			if (entity.GetComponent<TagComponent>().Enabled)
+				Renderer2D::DrawSprite(GetWorldTransform(entity), sprite, (int)e);
+		}
+	}
+
+	void Scene::DrawCircles()
+	{
+		auto view = m_Registry.view<TransformComponent, CircleRendererComponent, TagComponent>();
+		for (auto e : view)
+		{
+			Entity entity = Entity(e, this);
+			auto& circle = entity.GetComponent<CircleRendererComponent>();
+			if (entity.GetComponent<TagComponent>().Enabled)
+				Renderer2D::DrawCircle(GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, (int)e);
+		}
+	}
+
+	void Scene::DrawCubes()
+	{
+		auto view = m_Registry.view<TransformComponent, CubeRendererComponent, TagComponent>();
+		for (auto e : view)
+		{
+			Entity entity = Entity(e, this);
+			auto& cube = entity.GetComponent<CubeRendererComponent>();
+			Ref<Material> material = MaterialManager::GetMaterial(cube.Material);
+			if (entity.GetComponent<TagComponent>().Enabled)
+				Renderer3D::DrawCube(GetWorldTransform(entity), material, (int)e);
+		}
+	}
+
+	void Scene::DrawMeshes()
+	{
+		auto view = m_Registry.view<TransformComponent, MeshRendererComponent, TagComponent>();
+		for (auto e : view)
+		{
+			Entity entity = Entity(e, this);
+			auto& mrc = entity.GetComponent<MeshRendererComponent>();
+			Ref<Model> model = ModelManager::GetModel(mrc.Model);
+			Ref<Material> material = MaterialManager::GetMaterial(mrc.Material);
+			if (entity.GetComponent<TagComponent>().Enabled)
+				Renderer3D::DrawModel(GetWorldTransform(entity), model ? model->GetVertexArray() : nullptr, material, (int)e);
+		}
 	}
 
 	void Scene::CreatePhysicsData(Entity entity)
@@ -819,6 +929,36 @@ namespace Locus
 	}
 
 	template<>
+	void Scene::OnComponentAdded<CubeRendererComponent>(Entity entity, CubeRendererComponent& component)
+	{
+
+	}
+
+	template<>
+	void Scene::OnComponentAdded<MeshRendererComponent>(Entity entity, MeshRendererComponent& component)
+	{
+
+	}
+
+	template<>
+	void Scene::OnComponentAdded<PointLightComponent>(Entity entity, PointLightComponent& component)
+	{
+
+	}
+
+	template<>
+	void Scene::OnComponentAdded<DirectionalLightComponent>(Entity entity, DirectionalLightComponent& component)
+	{
+
+	}
+
+	template<>
+	void Scene::OnComponentAdded<SpotLightComponent>(Entity entity, SpotLightComponent& component)
+	{
+
+	}
+
+	template<>
 	void Scene::OnComponentAdded<CameraComponent>(Entity entity, CameraComponent& component)
 	{
 		if (m_ViewportWidth > 0 && m_ViewportHeight > 0)
@@ -839,12 +979,6 @@ namespace Locus
 
 	template<>
 	void Scene::OnComponentAdded<CircleCollider2DComponent>(Entity entity, CircleCollider2DComponent& component)
-	{
-
-	}
-
-	template<>
-	void Scene::OnComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent& component)
 	{
 
 	}

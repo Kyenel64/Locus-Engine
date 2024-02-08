@@ -66,7 +66,7 @@ namespace Locus
 
 					case FramebufferTextureFormat::RED_INT:
 						glTexImage2D(textureTarget, 0, GL_R32I, m_Specification.Width, m_Specification.Height, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, nullptr);
-						break;
+						break; 
 				}
 
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -137,10 +137,17 @@ namespace Locus
 	int OpenGLFramebuffer::ReadPixel(uint32_t attachmentIndex, int x, int y)
 	{
 		LOCUS_CORE_ASSERT(attachmentIndex < m_ColorAttachments.size(), "Attachment Index out of bounds!");
+		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
 		glReadBuffer(GL_COLOR_ATTACHMENT0 + attachmentIndex);
 		int pixelData;
 		glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &pixelData);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		return pixelData;
+	}
+
+	void OpenGLFramebuffer::BindTexture(uint32_t attachmentIndex)
+	{
+		glBindTextureUnit(0, m_ColorAttachments[attachmentIndex]);
 	}
 
 	void OpenGLFramebuffer::ClearAttachmentInt(uint32_t attachmentIndex, int value)

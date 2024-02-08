@@ -10,17 +10,16 @@
 
 namespace Locus
 {
-	extern const std::filesystem::path g_ProjectPath;
+	extern Entity g_SelectedEntity;
 
 	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& context)
 	{
-		SetContext(context);
+		SetScene(context);
 	}
 
-	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
+	void SceneHierarchyPanel::SetScene(const Ref<Scene>& context)
 	{
 		m_ActiveScene = context;
-		m_SelectedEntity = {};
 		m_PlusIcon = Texture2D::Create("resources/icons/PlusIcon.png");
 	}
 
@@ -99,8 +98,8 @@ namespace Locus
 		}
 
 		// Select nothing if clicking in blank space
-		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered() || !m_SelectedEntity.IsValid())
-			m_SelectedEntity = {};
+		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered() || !g_SelectedEntity.IsValid())
+			g_SelectedEntity = {};
 
 		// Popup when clicking in empty space.
 		if (ImGui::BeginPopupContextWindow("HierarchyPopup", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
@@ -119,10 +118,10 @@ namespace Locus
 	{
 		auto& tag = entity.GetComponent<TagComponent>().Tag;
 
-		ImGuiTreeNodeFlags flags = ((m_SelectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0)
+		ImGuiTreeNodeFlags flags = ((g_SelectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0)
 			| ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Framed;
 		ImVec4 headerColor = LocusColors::Transparent;
-		if (m_SelectedEntity == entity)
+		if (g_SelectedEntity == entity)
 			headerColor = LocusColors::Orange;
 
 		ImGui::PushStyleColor(ImGuiCol_Header, headerColor);
@@ -135,15 +134,15 @@ namespace Locus
 		ImGui::PopStyleColor(3);
 
 		if (ImGui::IsItemClicked())
-			m_SelectedEntity = entity;
+			g_SelectedEntity = entity;
 
 		bool entityDeleted = false;
 		bool openOnCreate = false;
-		if (m_SelectedEntity && ImGui::BeginPopupContextItem()) // TODO: Create child when hovering too
+		if (g_SelectedEntity && ImGui::BeginPopupContextItem()) // TODO: Create child when hovering too
 		{
 			if (ImGui::MenuItem("Create Empty Entity"))
 			{
-				CommandHistory::AddCommand(new CreateChildEntityCommand(m_ActiveScene, "Empty Entity", m_SelectedEntity));
+				CommandHistory::AddCommand(new CreateChildEntityCommand(m_ActiveScene, "Empty Entity", g_SelectedEntity));
 				openOnCreate = true;
 			}
 
@@ -172,8 +171,8 @@ namespace Locus
 		if (entityDeleted)
 		{
 			CommandHistory::AddCommand(new DestroyEntityCommand(m_ActiveScene, entity));
-			if (m_SelectedEntity == entity)
-				m_SelectedEntity = {};
+			if (g_SelectedEntity == entity)
+				g_SelectedEntity = {};
 		}
 
 	}

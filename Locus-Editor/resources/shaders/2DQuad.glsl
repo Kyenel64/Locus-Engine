@@ -13,7 +13,10 @@ layout(location = 5) in int a_EntityID;
 
 layout(std140, binding = 0) uniform Camera
 {
-	mat4 u_ViewProjection;
+	mat4 u_View;
+	mat4 u_Projection;
+	vec4 u_CameraPosition;
+	vec2 u_ViewportSize;
 };
 
 struct VertexOutput
@@ -35,7 +38,7 @@ void main()
 	v_TexIndex = a_TexIndex;
 	v_EntityID = a_EntityID;
 
-	gl_Position = u_ViewProjection * vec4(a_Position, 1.0f);
+	gl_Position = u_Projection * u_View * vec4(a_Position, 1.0f);
 }
 
 
@@ -105,7 +108,7 @@ void main()
 	if (texColor.a == 0.0) // TOOD: Implement order independent transparency
 		discard;
 
+	// --- Outputs ---
 	o_Color = texColor;
-
 	o_EntityID = v_EntityID;
 }

@@ -8,7 +8,10 @@ layout(location = 0) in int a_Index;
 
 layout(std140, binding = 0) uniform Camera
 {
-	mat4 u_ViewProjection;
+	mat4 u_View;
+    mat4 u_Projection;
+    vec4 u_CameraPosition;
+    vec2 u_ViewportSize;
 };
 
 layout(location = 0) out vec3 v_NearPoint;
@@ -31,11 +34,11 @@ vec3 UnprojectPoint(float x, float y, float z, mat4 viewProjection)
 
 void main()
 {
-	v_ViewProj = u_ViewProjection;
+	v_ViewProj = u_Projection * u_View;
 
 	vec3 p = gridPlane[a_Index].xyz;
-	v_NearPoint = UnprojectPoint(p.x, p.y, 0.0, u_ViewProjection).xyz; // unprojecting on the near plane
-	v_FarPoint = UnprojectPoint(p.x, p.y, 1.0, u_ViewProjection).xyz; // unprojecting on the far plane
+	v_NearPoint = UnprojectPoint(p.x, p.y, 0.0, u_Projection * u_View).xyz; // unprojecting on the near plane
+	v_FarPoint = UnprojectPoint(p.x, p.y, 1.0, u_Projection * u_View).xyz; // unprojecting on the far plane
 
 	gl_Position = vec4(p, 1.0f);
 }

@@ -1,0 +1,10 @@
+C:\Users\Kye\Desktop\LocusTest\Locus-Editor\SampleProject\bin\Sandbox.dll
+C:\Users\Kye\Desktop\LocusTest\Locus-Editor\SampleProject\bin\Sandbox.pdb
+C:\Users\Kye\Desktop\LocusTest\Locus-Editor\SampleProject\bin\Locus-Script.dll
+C:\Users\Kye\Desktop\LocusTest\Locus-Editor\SampleProject\bin\Locus-Script.pdb
+C:\Users\Kye\Desktop\LocusTest\Locus-Editor\SampleProject\bin\Locus-Script.xml
+C:\Users\Kye\Desktop\LocusTest\Locus-Editor\SampleProject\int\Debug\Sandbox.csproj.AssemblyReference.cache
+C:\Users\Kye\Desktop\LocusTest\Locus-Editor\SampleProject\int\Debug\Sandbox.csproj.CoreCompileInputs.cache
+C:\Users\Kye\Desktop\LocusTest\Locus-Editor\SampleProject\int\Debug\Sandbox.csproj.CopyComplete
+C:\Users\Kye\Desktop\LocusTest\Locus-Editor\SampleProject\int\Debug\Sandbox.dll
+C:\Users\Kye\Desktop\LocusTest\Locus-Editor\SampleProject\int\Debug\Sandbox.pdb

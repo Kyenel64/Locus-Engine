@@ -33,6 +33,8 @@ namespace Locus
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_LINE_SMOOTH);
+
+		glEnable(GL_CULL_FACE);
 	}
 
 	void OpenGLRendererAPI::SetClearColor(const glm::vec4 color)
@@ -50,6 +52,24 @@ namespace Locus
 		vertexArray->Bind();
 		uint32_t count = indexCount ? indexCount : vertexArray->GetIndexBuffer()->GetCount();
 		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
+	}
+
+	void OpenGLRendererAPI::DrawArray(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)
+	{
+		vertexArray->Bind();
+		glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+	}
+
+	void OpenGLRendererAPI::DrawIndexedInstanced(const Ref<VertexArray>& vertexArray, uint32_t indexCount, uint32_t instanceCount, uint32_t instanceBase)
+	{
+		vertexArray->Bind();
+		glDrawElementsInstancedBaseInstance(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr, instanceCount, instanceBase);
+	}
+
+	void OpenGLRendererAPI::DrawArrayInstanced(const Ref<VertexArray>& vertexArray, uint32_t vertexCount, uint32_t instanceCount, uint32_t instanceBase)
+	{
+		vertexArray->Bind();
+		glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, vertexCount, instanceCount, instanceBase);
 	}
 
 	void OpenGLRendererAPI::DrawLine(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)

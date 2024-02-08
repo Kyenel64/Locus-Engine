@@ -4,13 +4,11 @@
 // Handles events for all layers.
 // Optionally takes in command line args. The first argument takes in a path
 //  to a .locus scene file which will open on startup.
-// The client needs to create a class that derives from Application and 
-//  define the CreateApplication function to create a Locus app. 
-//  See LocusEditorApp.cpp for an example.
 #pragma once
 
-#include "Core.h"
+#include <filesystem>
 
+#include "Locus/Core/Core.h"
 #include "Locus/Core/Window.h"
 #include "Locus/Core/LayerStack.h"
 #include "Locus/Events/Event.h"
@@ -22,22 +20,10 @@
 
 namespace Locus
 {
-	struct ApplicationCommandLineArgs
-	{
-		int Count = 0;
-		char** Args = nullptr;
-
-		const char* operator[](int index) const
-		{
-			LOCUS_CORE_ASSERT(index < Count, "No CommandLineArgs!");
-			return Args[index];
-		}
-	};
-
 	class Application
 	{
 	public:
-		Application(const std::string& name = "Locus App", ApplicationCommandLineArgs args = ApplicationCommandLineArgs());
+		Application(const std::string& name, const std::string& projectPath = std::string(), const std::string& projectName = std::string());
 		virtual ~Application() = default;
 
 		void PushLayer(Layer* layer);
@@ -52,9 +38,11 @@ namespace Locus
 		inline static Application& Get() { return *s_Instance; }
 		inline ImGuiLayer* GetImGuiLayer() const { return m_ImGuiLayer; }
 
-		inline bool IsRunning() const { return m_Running; }
+		const std::filesystem::path& GetProjectPath() const { return m_ProjectPath; }
+		const std::string& GetProjectName() const { return m_ProjectName; }
+		inline uint32_t GetFPS() const { return m_FPS; }
 
-		inline ApplicationCommandLineArgs GetCommandLineArgs() const { return m_CommandLineArgs; }
+		inline bool IsRunning() const { return m_Running; }
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
@@ -62,7 +50,8 @@ namespace Locus
 	private:
 		static Application* s_Instance;
 
-		ApplicationCommandLineArgs m_CommandLineArgs;
+		std::filesystem::path m_ProjectPath;
+		std::string m_ProjectName;
 
 		Scope<Window> m_Window;
 		ImGuiLayer* m_ImGuiLayer;
@@ -71,8 +60,6 @@ namespace Locus
 		LayerStack m_LayerStack;
 
 		float m_LastFrameTime = 0.0f;
+		uint32_t m_FPS = 0;
 	};
-
-	// To be defined in client
-	Application* CreateApplication(ApplicationCommandLineArgs args);
 }

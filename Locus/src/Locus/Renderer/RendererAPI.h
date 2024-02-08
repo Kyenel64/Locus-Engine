@@ -24,6 +24,9 @@ namespace Locus
 		virtual void Clear() = 0;
 
 		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) = 0;
+		virtual void DrawArray(const Ref<VertexArray>& vertexArray, uint32_t vertexCount = 0) = 0;
+		virtual void DrawIndexedInstanced(const Ref<VertexArray>& vertexArray, uint32_t indexCount, uint32_t instanceCount, uint32_t instanceBase = 0) = 0;
+		virtual void DrawArrayInstanced(const Ref<VertexArray>& vertexArray, uint32_t vertexCount, uint32_t instanceCount, uint32_t instanceBase = 0) = 0;
 		virtual void DrawLine(const Ref<VertexArray>& vertexArray, uint32_t vertexCount = 0) = 0;
 
 		virtual void Resize(int x, int y, int width, int height) = 0;

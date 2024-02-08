@@ -29,6 +29,21 @@ namespace Locus
 			s_RendererAPI->DrawIndexed(vertexArray, indexCount);
 		}
 
+		inline static void DrawArray(const Ref<VertexArray>& vertexArray, uint32_t vertexCount = 0)
+		{
+			s_RendererAPI->DrawArray(vertexArray, vertexCount);
+		}
+
+		inline static void DrawIndexedInstanced(const Ref<VertexArray>& vertexArray, uint32_t indexCount, uint32_t instanceCount, uint32_t instanceBase = 0)
+		{
+			s_RendererAPI->DrawIndexedInstanced(vertexArray, indexCount, instanceCount, instanceBase);
+		}
+
+		inline static void DrawArrayInstanced(const Ref<VertexArray>& vertexArray, uint32_t vertexCount, uint32_t instanceCount, uint32_t instanceBase = 0)
+		{
+			s_RendererAPI->DrawArrayInstanced(vertexArray, vertexCount, instanceCount, instanceBase);
+		}
+
 		inline static void DrawLine(const Ref<VertexArray>& vertexArray, uint32_t vertexCount = 0)
 		{
 			s_RendererAPI->DrawLine(vertexArray, vertexCount);

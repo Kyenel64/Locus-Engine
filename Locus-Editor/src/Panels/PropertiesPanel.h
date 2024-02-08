@@ -11,16 +11,12 @@ namespace Locus
 	class PropertiesPanel
 	{
 	public:
-		PropertiesPanel() = default;
-		PropertiesPanel(const Ref<Scene>& context);
+		PropertiesPanel();
 		~PropertiesPanel() = default;
 
-		void SetContext(const Ref<Scene>& context);
+		void SetScene(const Ref<Scene>& context);
 
 		void OnImGuiRender();
-
-		Entity GetSelectedEntity() const { return m_SelectedEntity; }
-		void SetSelectedEntity(Entity entity) { m_SelectedEntity = entity; }
 
 	private:
 		void DrawComponents(Entity entity);
@@ -35,7 +31,8 @@ namespace Locus
 
 	private:
 		Ref<Scene> m_ActiveScene;
-		Entity m_SelectedEntity;
+
+		std::filesystem::path m_ProjectDirectory;
 
 		// Textures
 		Ref<Texture2D> m_MenuIcon;

@@ -58,7 +58,6 @@ namespace Locus
 				glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 			#endif
 			m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
-			glfwMaximizeWindow(m_Window);
 			glfwGetWindowSize(m_Window, &(int&)m_Data.Width, &(int&)m_Data.Height); // Set window size after maximizing window
 		}
 		m_Context = GraphicsContext::Create(m_Window);
@@ -195,6 +194,11 @@ namespace Locus
 			glfwSwapInterval(0);
 
 		m_Data.VSync = enabled;
+	}
+
+	void WindowsWindow::SetFullscreen()
+	{
+		glfwMaximizeWindow(m_Window);
 	}
 
 	bool WindowsWindow::IsVSync() const

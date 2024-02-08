@@ -379,3 +379,5 @@ Locus-Editor/imgui.ini
 scripts/__pycache__
 premake/
 
+!SampleProject/Assets/**
+*.meta

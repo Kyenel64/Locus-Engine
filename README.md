@@ -4,17 +4,20 @@
   <a style="font-size: 1.5em" href="https://locusengine.com">Website & Documentation</a>
 </p>
 
-Locus is an open-source, lightweight, general-purpose game engine for Windows.
+Locus is an open-source, general-purpose 2D/3D game engine for Windows.
 
 ## Progress
 Locus is still in early stages of development. Progress for Locus can be followed [here](https://trello.com/b/NNDPkCjF/locus-kanban).
 
-## Features for Locus 2D
+## Core Features
 - Integrated editor
 - C# scripting
-- 2D physics system
+- PBR lighting & materials
+- Custom mesh loading
 - Sprite rendering
-- Circle rendering
+- Primitive shape rendering (Circles, Cubes)
+- 2D physics
+- 3D physics (WIP)
 - UI rendering (WIP)
 - Spritesheets (WIP)
 - Skeletal animations (WIP)
@@ -23,11 +26,10 @@ Locus is still in early stages of development. Progress for Locus can be followe
 
 ## Locus Editor
 <p>
-  <img src="./Resources/Branding/DemoScene.png" alt="Locus Editor" width="800"/>
+  <img src="./Resources/Branding/editor.png" alt="Locus Editor" width="800"/>
 </p>
 
 ## How to Build
-
 #### Requirements
 - Windows OS
 - OpenGL 4.5 supported hardware
@@ -44,6 +46,7 @@ Locus is still in early stages of development. Progress for Locus can be followe
 
 #### 3. Build using Visual Studio
 - Open Locus.sln
+- Build the Locus-Script project before building the solution.
 - Build solution. (Locus-Editor should be selected as the startup project).
 
 #### 3.1 (Temp) Build SandboxProject
@@ -53,6 +56,9 @@ Locus is still in early stages of development. Progress for Locus can be followe
 
 #### 4. Running the engine editor
 - The .exe file will be generated in bin/(Config)-windows-x86_64/Locus-Editor
+
+#### Sample Project
+- If you would like to run the sample project, import it through the Locus Launcher.
 
 ## Dependencies
 - [GLFW](https://github.com/glfw/glfw)

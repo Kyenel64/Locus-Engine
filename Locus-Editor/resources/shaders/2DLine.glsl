@@ -10,7 +10,10 @@ layout(location = 2) in int a_EntityID;
 
 layout(std140, binding = 0) uniform Camera
 {
-	mat4 u_ViewProjection;
+	mat4 u_View;
+	mat4 u_Projection;
+	vec4 u_CameraPosition;
+	vec2 u_ViewportSize;
 };
 
 layout(location = 0) out vec4 v_Color;
@@ -20,7 +23,7 @@ void main()
 {
 	v_Color = a_Color;
 	v_EntityID = a_EntityID;
-	gl_Position = u_ViewProjection * vec4(a_Position, 1.0f);
+	gl_Position = u_Projection * u_View * vec4(a_Position, 1.0f);
 }
 
 

@@ -13,9 +13,11 @@ namespace Locus
 
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
+		virtual void SetWidth(uint32_t width) = 0;
+		virtual void SetHeight(uint32_t height) = 0;
 		virtual uint32_t GetRendererID() const = 0;
 
-		virtual const std::string& GetTexturePath() const = 0;
+		virtual const std::filesystem::path& GetTexturePath() const = 0;
 		virtual const std::string GetTextureName() const = 0;
 
 		virtual void SetData(void* data, uint32_t size) = 0;
@@ -31,6 +33,7 @@ namespace Locus
 	{
 	public:
 		static Ref<Texture2D> Create(uint32_t width, uint32_t height);
-		static Ref<Texture2D> Create(const std::string& path);
+		static Ref<Texture2D> Create(uint32_t width, uint32_t height, uint32_t rendererID);
+		static Ref<Texture2D> Create(const std::filesystem::path& path);
 	};
 }

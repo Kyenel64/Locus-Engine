@@ -4,10 +4,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Locus/Renderer/RendererStats.h"
 #include "Locus/Renderer/RenderCommand.h"
 #include "Locus/Renderer/VertexArray.h"
 #include "Locus/Renderer/Shader.h"
 #include "Locus/Renderer/UniformBuffer.h"
+#include "Locus/Resource/TextureManager.h"
+
+#include <glad/glad.h>
 
 namespace Locus
 {
@@ -38,11 +42,6 @@ namespace Locus
 		int EntityID;
 	};
 
-	struct GridVertex
-	{
-		int Index;
-	};
-
 	struct Renderer2DData
 	{
 		static const uint32_t MaxQuads = 20000; // Max quads for each draw call.
@@ -62,10 +61,6 @@ namespace Locus
 		Ref<VertexBuffer> LineVB;
 		Ref<Shader> LineShader;
 
-		Ref<VertexArray> GridVA;
-		Ref<VertexBuffer> GridVB;
-		Ref<Shader> GridShader;
-
 		uint32_t QuadIndexCount = 0;
 		QuadVertex* QuadVertexBufferBase = nullptr;
 		QuadVertex* QuadVertexBufferPtr = nullptr;
@@ -78,10 +73,6 @@ namespace Locus
 		LineVertex* LineVertexBufferBase = nullptr;
 		LineVertex* LineVertexBufferPtr = nullptr;
 
-		uint32_t GridIndexCount = 0;
-		GridVertex* GridVertexBufferBase = nullptr;
-		GridVertex* GridVertexBufferPtr = nullptr;
-
 		float LineWidth = 2.0f;
 
 		std::array<Ref<Texture2D>, MaxTextureSlots> TextureSlots;
@@ -90,25 +81,6 @@ namespace Locus
 
 		glm::vec4 QuadVertexPositions[4];
 		glm::vec2 TexCoords[4];
-
-		Renderer2D::Statistics Stats;
-
-		struct CameraData
-		{
-			glm::mat4 ViewProjection;
-		};
-		CameraData CameraBuffer;
-		Ref<UniformBuffer> CameraUniformBuffer;
-
-		struct GridData
-		{
-			glm::vec4 Color;
-			float Near;
-			float Far;
-			float GridScale;
-		};
-		GridData GridBuffer;
-		Ref<UniformBuffer> GridUniformBuffer;
 	};
 
 	static Renderer2DData s_Data;
@@ -179,45 +151,15 @@ namespace Locus
 		s_Data.LineVA->AddVertexBuffer(s_Data.LineVB);
 		s_Data.LineVertexBufferBase = new LineVertex[s_Data.MaxVertices];
 
-		// --- Grid -----------------------------------------------------------
-		s_Data.GridVA = VertexArray::Create();
-		// Create VB
-		s_Data.GridVB = VertexBuffer::Create(4 * sizeof(GridVertex));
-		s_Data.GridVB->SetLayout({
-			{ ShaderDataType::Int, "a_Index"}
-			});
-		s_Data.GridVA->AddVertexBuffer(s_Data.GridVB);
-		// Create IB
-		uint32_t* gridIndices = new uint32_t[6];
-		gridIndices[0] = 0;
-		gridIndices[1] = 1;
-		gridIndices[2] = 2;
-						 
-		gridIndices[3] = 2;
-		gridIndices[4] = 3;
-		gridIndices[5] = 0;
-
-		Ref<IndexBuffer> gridIB = IndexBuffer::Create(gridIndices, 6);
-		s_Data.GridVA->SetIndexBuffer(gridIB);
-		delete[] gridIndices;
-		s_Data.GridVertexBufferBase = new GridVertex[4];
-
-
 		// --- Initializations ------------------------------------------------
 		// Create a base texture for single color textures.
 		s_Data.WhiteTexture = Texture2D::Create(1, 1);
 		uint64_t whiteTextureData = 0xfffffffff;
 		s_Data.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
 
-		// Create and initialize textures
-		int32_t samplers[s_Data.MaxTextureSlots] = {};
-		for (uint32_t i = 0; i < s_Data.MaxTextureSlots; i++)
-			samplers[i] = i;
-
 		s_Data.QuadShader = Shader::Create("resources/shaders/2DQuad.glsl");
 		s_Data.CircleShader = Shader::Create("resources/shaders/2DCircle.glsl");
 		s_Data.LineShader = Shader::Create("resources/shaders/2DLine.glsl");
-		s_Data.GridShader = Shader::Create("resources/shaders/GridShader.glsl"); // temp
 		s_Data.TextureSlots[0] = s_Data.WhiteTexture;
 
 		// Initialize quad data
@@ -230,9 +172,6 @@ namespace Locus
 		s_Data.TexCoords[1] = { 1.0f, 0.0f };
 		s_Data.TexCoords[2] = { 1.0f, 1.0f };
 		s_Data.TexCoords[3] = { 0.0f, 1.0f };
-
-		s_Data.CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DData::CameraData), 0);
-		s_Data.GridUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DData::GridData), 1);
 	}
 
 	void Renderer2D::Shutdown()
@@ -242,32 +181,18 @@ namespace Locus
 		delete[] s_Data.QuadVertexBufferBase;
 		delete[] s_Data.CircleVertexBufferBase;
 		delete[] s_Data.LineVertexBufferBase;
-		delete[] s_Data.GridVertexBufferBase;
-	}
-
-	void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform)
-	{
-		LOCUS_PROFILE_FUNCTION();
-		
-		s_Data.CameraBuffer.ViewProjection = camera.GetProjection() * glm::inverse(transform);
-		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer2DData::CameraData));
-
-		StartBatch();
 	}
 
 	void Renderer2D::BeginScene(const EditorCamera& camera)
 	{
 		LOCUS_PROFILE_FUNCTION();
 
-		s_Data.CameraBuffer.ViewProjection = camera.GetViewProjectionMatrix();
-		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer2DData::CameraData));
+		StartBatch();
+	}
 
-		// Editor grid
-		s_Data.GridBuffer.Color = camera.GetGridColor();
-		s_Data.GridBuffer.Near = camera.GetNearClip();
-		s_Data.GridBuffer.Far = camera.GetFarClip();
-		s_Data.GridBuffer.GridScale = camera.GetGridScale();
-		s_Data.GridUniformBuffer->SetData(&s_Data.GridBuffer, sizeof(Renderer2DData::GridData));
+	void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform)
+	{
+		LOCUS_PROFILE_FUNCTION();
 
 		StartBatch();
 	}
@@ -290,14 +215,12 @@ namespace Locus
 		s_Data.LineVertexCount = 0;
 		s_Data.LineVertexBufferPtr = s_Data.LineVertexBufferBase;
 
-		s_Data.GridIndexCount = 0;
-		s_Data.GridVertexBufferPtr = s_Data.GridVertexBufferBase;
-
 		s_Data.TextureSlotIndex = 1;
 	}
 
 	void Renderer2D::Flush()
 	{
+		glDisable(GL_CULL_FACE); // temp
 		if (s_Data.QuadIndexCount)
 		{
 			uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase);
@@ -310,7 +233,7 @@ namespace Locus
 			s_Data.QuadShader->Bind();
 			RenderCommand::DrawIndexed(s_Data.QuadVA, s_Data.QuadIndexCount);
 
-			s_Data.Stats.DrawCalls++;
+			RendererStats::GetStats().DrawCalls++;
 		}
 		
 		if (s_Data.CircleIndexCount)
@@ -321,7 +244,7 @@ namespace Locus
 			s_Data.CircleShader->Bind();
 			RenderCommand::DrawIndexed(s_Data.CircleVA, s_Data.CircleIndexCount);
 
-			s_Data.Stats.DrawCalls++;
+			RendererStats::GetStats().DrawCalls++;
 		}
 
 		if (s_Data.LineVertexCount)
@@ -333,19 +256,31 @@ namespace Locus
 			RenderCommand::SetLineWidth(s_Data.LineWidth);
 			RenderCommand::DrawLine(s_Data.LineVA, s_Data.LineVertexCount);
 
-			s_Data.Stats.DrawCalls++;
+			RendererStats::GetStats().DrawCalls++;
 		}
+		glEnable(GL_CULL_FACE);
+	}
 
-		if (s_Data.GridIndexCount)
+	void Renderer2D::DrawQuadMask(const glm::mat4& transform, Ref<Shader> shader)
+	{
+		LOCUS_PROFILE_FUNCTION();
+
+		s_Data.QuadIndexCount = 0;
+		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
+
+		for (uint32_t i = 0; i < 4; i++)
 		{
-			uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.GridVertexBufferPtr - (uint8_t*)s_Data.GridVertexBufferBase);
-			s_Data.GridVB->SetData(s_Data.GridVertexBufferBase, dataSize);
-
-			s_Data.GridShader->Bind();
-			RenderCommand::DrawIndexed(s_Data.GridVA, s_Data.GridIndexCount);
-
-			s_Data.Stats.DrawCalls++;
+			s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[i];
+			s_Data.QuadVertexBufferPtr++;
 		}
+
+		s_Data.QuadVB->SetData(s_Data.QuadVertexBufferBase, sizeof(QuadVertex) * 4);
+
+		shader->Bind();
+		RenderCommand::DrawIndexed(s_Data.QuadVA, 6);
+
+		RendererStats::GetStats().QuadCount++;
+		RendererStats::GetStats().DrawCalls++;
 	}
 
 	void Renderer2D::FlushAndReset()
@@ -360,9 +295,6 @@ namespace Locus
 
 		s_Data.LineVertexCount = 0;
 		s_Data.LineVertexBufferPtr = s_Data.LineVertexBufferBase;
-
-		s_Data.GridIndexCount = 0;
-		s_Data.GridVertexBufferPtr = s_Data.GridVertexBufferBase;
 
 		s_Data.TextureSlotIndex = 1;
 	}
@@ -390,7 +322,7 @@ namespace Locus
 
 		s_Data.QuadIndexCount += 6;
 
-		s_Data.Stats.QuadCount++;
+		RendererStats::GetStats().QuadCount++;
 	}
 
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor, int entityID)
@@ -433,7 +365,7 @@ namespace Locus
 
 		s_Data.QuadIndexCount += 6;
 
-		s_Data.Stats.QuadCount++;
+		RendererStats::GetStats().QuadCount++;
 	}
 
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<SubTexture2D>& subTexture, float tilingFactor, const glm::vec4& tintColor, int entityID)
@@ -478,13 +410,14 @@ namespace Locus
 
 		s_Data.QuadIndexCount += 6;
 
-		s_Data.Stats.QuadCount++;
+		RendererStats::GetStats().QuadCount++;
 	}
 
 	void Renderer2D::DrawSprite(const glm::mat4& transform, SpriteRendererComponent& src, int entityID)
 	{
-		if (src.Texture)
-			DrawQuad(transform, src.Texture, src.TilingFactor, src.Color, entityID);
+		Ref<Texture2D> texture = TextureManager::GetTexture(src.Texture);
+		if (texture)
+			DrawQuad(transform, texture, src.TilingFactor, src.Color, entityID);
 		else
 			DrawQuad(transform, src.Color, entityID);
 	}
@@ -508,7 +441,7 @@ namespace Locus
 
 		s_Data.CircleIndexCount += 6;
 
-		s_Data.Stats.QuadCount++;
+		RendererStats::GetStats().QuadCount++;
 	}
 
 	void Renderer2D::DrawDebugCircle(const glm::mat4& transform, const glm::vec4& color, uint32_t sides)
@@ -554,19 +487,6 @@ namespace Locus
 		DrawLine(points[1], points[2], color);
 		DrawLine(points[2], points[3], color);
 		DrawLine(points[3], points[0], color);
-	}
-
-	void Renderer2D::DrawGrid()
-	{
-		LOCUS_PROFILE_FUNCTION();
-
-		for (uint32_t i = 0; i < 4; i++)
-		{
-			s_Data.GridVertexBufferPtr->Index = i;
-			s_Data.GridVertexBufferPtr++;
-		}
-
-		s_Data.GridIndexCount += 6;
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
@@ -672,35 +592,5 @@ namespace Locus
 	void Renderer2D::SetLineWidth(float width)
 	{
 		s_Data.LineWidth = width;
-	}
-
-	// --- Stats --------------------------------------------------------------
-
-	void Renderer2D::ResetStats()
-	{
-		//memset(&s_Data.Stats, 0, sizeof(Statistics));
-		s_Data.Stats.DrawCalls = 0;
-		s_Data.Stats.QuadCount = 0;
-		s_Data.Stats.FrameTime = 0;
-	}
-
-	Renderer2D::Statistics Renderer2D::GetStats()
-	{
-		return s_Data.Stats;
-	}
-
-	void Renderer2D::StatsStartFrame()
-	{
-		s_Data.Stats.StartTime = std::chrono::steady_clock().now();
-	}
-
-	void Renderer2D::StatsEndFrame()
-	{
-		s_Data.Stats.EndTime = std::chrono::steady_clock().now();
-		long long start = std::chrono::time_point_cast<std::chrono::microseconds>(s_Data.Stats.StartTime).time_since_epoch().count();
-		long long end = std::chrono::time_point_cast<std::chrono::microseconds>(s_Data.Stats.EndTime).time_since_epoch().count();
-		s_Data.Stats.FrameTime = (end - start) * 0.001f;
-		s_Data.Stats.FramesPerSecond = 1.0f / s_Data.Stats.FrameTime * 1000.0f;
-
 	}
 }

@@ -28,6 +28,6 @@ group "Dependencies"
 group ""
 
 include "Locus"
-include "Sandbox"
 include "Locus-Editor"
 include "Locus-Script"
+include "Locus-Launcher"

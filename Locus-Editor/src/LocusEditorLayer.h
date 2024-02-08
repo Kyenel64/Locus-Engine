@@ -2,18 +2,13 @@
 // Locus's editor. Uses dockspace ImGui.
 #pragma once
 
-#include <filesystem>
-
 #include <Locus.h>
 
-#include "Command/Command.h"
-#include "Command/CommandHistory.h"
-#include "Command/EntityCommands.h"
-#include "Command/ValueCommands.h"
 #include "Panels/SceneHierarchyPanel.h"
-#include "Panels/ContentBrowserPanel.h"
+#include "Panels/ProjectBrowserPanel.h"
 #include "Panels/PropertiesPanel.h"
 #include "Panels/ConsolePanel.h"
+#include "Panels/ResourceInspectorPanel.h"
 
 namespace Locus
 {
@@ -64,15 +59,17 @@ namespace Locus
 
 		// Overlay
 		void OnRenderOverlay();
-		void DrawCollisionMesh();
 		// Draws to a framebuffer. Rendering is separate.
 		void DrawActiveCameraView();
+		void DrawToMaskFramebuffer();
 
 	private:
 		glm::vec2 m_WindowSize;
 		bool m_IsSaved = true;
 		bool m_OpenSavePopup = false;
 		bool m_BlockEditorKeyInput = false;
+		std::filesystem::path m_ProjectPath;
+		std::string m_ProjectName;
 
 		// Scene
 		std::string m_SavePath;
@@ -99,14 +96,15 @@ namespace Locus
 		glm::vec2 m_ViewportBounds[2];
 
 		// Overlay
-		glm::vec4 m_CollisionMeshColor;
-		glm::vec4 m_FocusOutlineColor;
 		bool m_ShowAllCollisionMesh = false;
-		Ref<Framebuffer> m_ActiveCameraFramebuffer;
 		glm::vec2 m_ActiveCameraViewportSize;
+		Ref<Framebuffer> m_ActiveCameraFramebuffer;
+		Ref<Framebuffer> m_MaskFramebuffer;
+		Ref<Texture> m_MaskTexture;
+		Ref<Shader> m_MaskShader;
+		Ref<Shader> OutlinePostProcessShader;
 
 		// Entity
-		Entity m_HoveredEntity;
 		Entity m_SelectedEntity;
 		Entity m_ClipboardEntity;
 
@@ -116,10 +114,11 @@ namespace Locus
 		bool m_GizmoFirstClick = true;
 
 		// Panels
-		SceneHierarchyPanel m_SceneHierarchyPanel;
-		ContentBrowserPanel m_ContentBrowserPanel;
-		PropertiesPanel m_PropertiesPanel;
-		ConsolePanel m_ConsolePanel;
+		Ref<SceneHierarchyPanel> m_SceneHierarchyPanel;
+		Ref<ProjectBrowserPanel> m_ProjectBrowserPanel;
+		Ref<PropertiesPanel> m_PropertiesPanel;
+		Ref<ConsolePanel> m_ConsolePanel;
+		Ref<ResourceInspectorPanel> m_ResourceInspectorPanel;
 
 		// Layout
 		LayoutStyle m_LayoutStyle = LayoutStyle::Default;

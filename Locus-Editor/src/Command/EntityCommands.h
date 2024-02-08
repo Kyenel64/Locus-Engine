@@ -30,6 +30,16 @@ namespace Locus
 			data->SpriteRenderer = CreateRef<SpriteRendererComponent>(entity.GetComponent<SpriteRendererComponent>());
 		if (entity.HasComponent<CircleRendererComponent>())
 			data->CircleRenderer = CreateRef<CircleRendererComponent>(entity.GetComponent<CircleRendererComponent>());
+		if (entity.HasComponent<CubeRendererComponent>())
+			data->CubeRenderer = CreateRef<CubeRendererComponent>(entity.GetComponent<CubeRendererComponent>());
+		if (entity.HasComponent<MeshRendererComponent>())
+			data->MeshRenderer = CreateRef<MeshRendererComponent>(entity.GetComponent<MeshRendererComponent>());
+		if (entity.HasComponent<PointLightComponent>())
+			data->PointLight = CreateRef<PointLightComponent>(entity.GetComponent<PointLightComponent>());
+		if (entity.HasComponent<DirectionalLightComponent>())
+			data->DirectionalLight = CreateRef<DirectionalLightComponent>(entity.GetComponent<DirectionalLightComponent>());
+		if (entity.HasComponent<SpotLightComponent>())
+			data->SpotLight = CreateRef<SpotLightComponent>(entity.GetComponent<SpotLightComponent>());
 		if (entity.HasComponent<CameraComponent>())
 			data->Camera = CreateRef<CameraComponent>(entity.GetComponent<CameraComponent>());
 		if (entity.HasComponent<Rigidbody2DComponent>())
@@ -38,8 +48,6 @@ namespace Locus
 			data->BoxCollider2D = CreateRef<BoxCollider2DComponent>(entity.GetComponent<BoxCollider2DComponent>());
 		if (entity.HasComponent<CircleCollider2DComponent>())
 			data->CircleCollider2D = CreateRef<CircleCollider2DComponent>(entity.GetComponent<CircleCollider2DComponent>());
-		if (entity.HasComponent<NativeScriptComponent>())
-			data->NativeScript = CreateRef<NativeScriptComponent>(entity.GetComponent<NativeScriptComponent>());
 		if (entity.HasComponent<ScriptComponent>())
 			data->Script = CreateRef<ScriptComponent>(entity.GetComponent<ScriptComponent>());
 	}
@@ -56,6 +64,16 @@ namespace Locus
 			entity.AddComponent<SpriteRendererComponent>(*data->SpriteRenderer);
 		if (data->CircleRenderer)
 			entity.AddComponent<CircleRendererComponent>(*data->CircleRenderer);
+		if (data->CubeRenderer)
+			entity.AddComponent<CubeRendererComponent>(*data->CubeRenderer);
+		if (data->MeshRenderer)
+			entity.AddComponent<MeshRendererComponent>(*data->MeshRenderer);
+		if (data->PointLight)
+			entity.AddComponent<PointLightComponent>(*data->PointLight);
+		if (data->DirectionalLight)
+			entity.AddComponent<DirectionalLightComponent>(*data->DirectionalLight);
+		if (data->SpotLight)
+			entity.AddComponent<SpotLightComponent>(*data->SpotLight);
 		if (data->Camera)
 			entity.AddComponent<CameraComponent>(*data->Camera);
 		if (data->Rigidbody2D)
@@ -64,8 +82,6 @@ namespace Locus
 			entity.AddComponent<BoxCollider2DComponent>(*data->BoxCollider2D);
 		if (data->CircleCollider2D)
 			entity.AddComponent<CircleCollider2DComponent>(*data->CircleCollider2D);
-		if (data->NativeScript)
-			entity.AddComponent<NativeScriptComponent>(*data->NativeScript);
 		if (data->Script)
 			entity.AddComponent<ScriptComponent>(*data->Script);
 	}

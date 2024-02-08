@@ -3,13 +3,14 @@
 
 #include "Locus/Renderer/Renderer.h"
 #include "Locus/Scripting/ScriptEngine.h"
+#include "Locus/Resource/ResourceManager.h"
 
 namespace Locus
 {
 	Application* Application::s_Instance = nullptr;
 
-	Application::Application(const std::string& name, ApplicationCommandLineArgs args)
-		: m_CommandLineArgs(args)
+	Application::Application(const std::string& name, const std::string& projectPath, const std::string& projectName)
+		: m_ProjectPath(projectPath), m_ProjectName(projectName)
 	{
 		LOCUS_PROFILE_FUNCTION();
 
@@ -20,13 +21,15 @@ namespace Locus
 
 		m_Window = Window::Create(name);
 		m_Window->SetEventCallback(LOCUS_BIND_EVENT_FN(Application::OnEvent));
+		m_Window->SetVSync(false);
 
-		// Subsystem startups
-		Renderer::Init();
-		ScriptEngine::Init();
-		
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
+
+		// Initialize subsystems if project is set. 
+		Renderer::Init();
+		ScriptEngine::Init();
+		ResourceManager::Init();
 	}
 
 	void Application::PushLayer(Layer* layer)
@@ -90,6 +93,18 @@ namespace Locus
 
 			// Call window OnUpdate() after all layers
 			m_Window->OnUpdate();
+
+			// Calculate FPS
+			static int frames = 0;
+			static float timer = 1.0f;
+			timer -= timestep;
+			frames++;
+			if (timer <= 0.0f)
+			{
+				m_FPS = frames;
+				timer = 1.0f;
+				frames = 0;
+			}
 		}
 	}
 

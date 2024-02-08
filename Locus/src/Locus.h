@@ -25,6 +25,8 @@
 // --- Renderer ---
 #include "Locus/Renderer/Renderer.h"
 #include "Locus/Renderer/Renderer2D.h"
+#include "Locus/Renderer/Renderer3D.h"
+#include "Locus/Renderer/RendererStats.h"
 #include "Locus/Renderer/RendererAPI.h"
 #include "Locus/Renderer/RenderCommand.h"
 #include "Locus/Renderer/Buffer.h"
@@ -38,13 +40,16 @@
 // --- Scene ---
 #include "Locus/Scene/Scene.h"
 #include "Locus/Scene/Entity.h"
-#include "Locus/Scene/ScriptableEntity.h"
 #include "Locus/Scene/Components.h"
 #include "Locus/Scene/SceneCamera.h"
 #include "Locus/Scene/SceneSerializer.h"
 
 // --- Scripting ---
 #include "Locus/Scripting/ScriptEngine.h"
+
+// --- Resource ---
+#include "Locus/Resource/ResourceManager.h"
+#include "Locus/Resource/TextureManager.h"
 
 // --- Utils ---
 #include "Locus/Utils/PlatformUtils.h"

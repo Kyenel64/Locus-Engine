@@ -1,0 +1,172 @@
+Scene: Untitled
+Entities:
+  - Entity: 18139430477408812975
+    TagComponent:
+      Tag: LeftWall
+      Group: Default
+      Enabled: true
+    TransformComponent:
+      Self: 18139430477408812975
+      Parent: 0
+      LocalPosition: [-5.57347727, 0.499999344, 0]
+      LocalRotation: [0, 90.0000076, -90]
+      LocalRotationQuat: [0.5, 0.5, -0.49999994, 0.49999994]
+      LocalScale: [11.0494986, 0.149778903, 5.52474928]
+    CubeRendererComponent:
+      Material: Assets\Materials\TileMat.lmat
+  - Entity: 14209466320750737221
+    TagComponent:
+      Tag: Floor
+      Group: Default
+      Enabled: true
+    TransformComponent:
+      Self: 14209466320750737221
+      Parent: 0
+      LocalPosition: [0, -2.3587141, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [11.0494995, 0.149778917, 11.0494995]
+    CubeRendererComponent:
+      Material: Assets\Materials\TileMat.lmat
+  - Entity: 6797639216477299321
+    TagComponent:
+      Tag: RightWall
+      Group: Default
+      Enabled: true
+    TransformComponent:
+      Self: 6797639216477299321
+      Parent: 0
+      LocalPosition: [5.5387845, 0.499999344, 1.32469927e-06]
+      LocalRotation: [90, -90.0000076, 360]
+      LocalRotationQuat: [-0.49999997, 0.49999997, -0.50000006, -0.499999911]
+      LocalScale: [11.0494986, 0.149778903, 5.52474928]
+    CubeRendererComponent:
+      Material: Assets\Materials\TileMat.lmat
+  - Entity: 8127462159327438274
+    TagComponent:
+      Tag: Ceiling
+      Group: Default
+      Enabled: true
+    TransformComponent:
+      Self: 8127462159327438274
+      Parent: 0
+      LocalPosition: [0, 3.22081852, -1.70187171e-08]
+      LocalRotation: [180, 0, 0]
+      LocalRotationQuat: [1, 0, -0, -4.37113883e-08]
+      LocalScale: [11.0494995, 0.149778917, 11.0494995]
+    CubeRendererComponent:
+      Material: Assets\Materials\TileMat.lmat
+  - Entity: 13590360217214974838
+    TagComponent:
+      Tag: BlueLight
+      Group: Default
+      Enabled: true
+    TransformComponent:
+      Self: 13590360217214974838
+      Parent: 0
+      LocalPosition: [-1.30270839, 0.73880887, 0.975984812]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [0.160000026, 0.160000026, 0.160000026]
+    SpriteRendererComponent:
+      Texture: ""
+      Color: [0.196078435, 0.376470596, 0.752941191, 1]
+      TilingFactor: 1
+    PointLightComponent:
+      Color: [0.194653615, 0.377182335, 0.752851725, 1]
+      Intensity: 33.5999985
+  - Entity: 1288625638692608292
+    TagComponent:
+      Tag: Cube
+      Group: Default
+      Enabled: true
+    TransformComponent:
+      Self: 1288625638692608292
+      Parent: 0
+      LocalPosition: [1.12927639, 0.567745447, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [0.439999998, 0.439999998, 0.439999998]
+    ScriptComponent:
+      ScriptClass: Sandbox::OrbitPlanet
+      Fields:
+        centerMass: 1000000
+        initialForce: 5
+        thisMass: 1
+        tickRate: 0.5
+  - Entity: 16537085232736534767
+    TagComponent:
+      Tag: BackWall
+      Group: Default
+      Enabled: true
+    TransformComponent:
+      Self: 16537085232736534767
+      Parent: 0
+      LocalPosition: [0, 0.499996126, -5.5]
+      LocalRotation: [89.9999619, 1.14440918e-05, 360]
+      LocalRotationQuat: [-0.707106531, -1.32434963e-07, 8.80044126e-09, -0.707107008]
+      LocalScale: [11.0494986, 0.149778903, 5.52474928]
+    CubeRendererComponent:
+      Material: Assets\Materials\TileMat.lmat
+  - Entity: 3634114854483520410
+    TagComponent:
+      Tag: Camera
+      Group: Default
+      Enabled: true
+    TransformComponent:
+      Self: 3634114854483520410
+      Parent: 0
+      LocalPosition: [0, 2.97933078, 9.97348881]
+      LocalRotation: [-16.310009, 0, 0]
+      LocalRotationQuat: [-0.141851589, 0, 0, 0.989887953]
+      LocalScale: [0.280000001, 0.280000001, 0.280000001]
+    SpriteRendererComponent:
+      Texture: ""
+      Color: [1, 1, 1, 1]
+      TilingFactor: 1
+    CameraComponent:
+      Camera:
+        BackgroundColor: [0.0498084426, 0.0498084426, 0.0498084426, 1]
+        ProjectionType: 1
+        OrthographicSize: 5
+        OrthographicNearClip: -1
+        OrthographicFarClip: 1000
+        PerspectiveFOV: 36
+        PerspectiveNearClip: 0.00999999978
+        PerspectiveFarClip: 1000
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 2209267865368707708
+    TagComponent:
+      Tag: OrangeLight
+      Group: Default
+      Enabled: true
+    TransformComponent:
+      Self: 2209267865368707708
+      Parent: 0
+      LocalPosition: [1.09500837, 0.933445513, 0.949474573]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [0.160000026, 0.160000026, 0.160000026]
+    SpriteRendererComponent:
+      Texture: ""
+      Color: [0.866666675, 0.427450985, 0.152941182, 1]
+      TilingFactor: 1
+    PointLightComponent:
+      Color: [0.866920173, 0.429042101, 0.151628628, 1]
+      Intensity: 17.3999996
+  - Entity: 649820031160199973
+    TagComponent:
+      Tag: Helmet
+      Group: Default
+      Enabled: true
+    TransformComponent:
+      Self: 649820031160199973
+      Parent: 0
+      LocalPosition: [0, 0, 0]
+      LocalRotation: [0, 0, 0]
+      LocalRotationQuat: [0, 0, 0, 1]
+      LocalScale: [1, 1, 1]
+    MeshRendererComponent:
+      Model: Assets\Models\SciFiHelmet\SciFiHelmet.gltf
+      Material: Assets\Models\SciFiHelmet\SciFiHelmetMat.lmat

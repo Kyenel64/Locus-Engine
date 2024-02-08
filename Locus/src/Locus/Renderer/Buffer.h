@@ -41,12 +41,13 @@ namespace Locus
 		uint32_t Size;
 		uint32_t Offset;
 		bool Normalized;
+		uint32_t Instanced;
 
 		BufferElement() = default;
 		~BufferElement() = default;
 
-		BufferElement(ShaderDataType type, const std::string& name, bool normalized = false)
-			: Name(name), Type(type), Size(ShaderDataTypeSize(type)), Offset(0), Normalized(normalized)
+		BufferElement(ShaderDataType type, const std::string& name, uint32_t instanced = 0, bool normalized = false)
+			: Name(name), Type(type), Size(ShaderDataTypeSize(type)), Offset(0), Normalized(normalized), Instanced(instanced)
 		{
 		}
 
@@ -142,6 +143,8 @@ namespace Locus
 
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
+
+		virtual void SetData(const void* data, uint32_t size) = 0;
 
 		virtual uint32_t GetCount() const = 0;
 

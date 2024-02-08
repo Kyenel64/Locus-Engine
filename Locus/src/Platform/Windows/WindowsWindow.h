@@ -25,6 +25,7 @@ namespace Locus
 
 		virtual inline void SetEventCallback(const std::function<void(Event&)>& callback) override { m_Data.EventCallback = callback; }
 		virtual void SetVSync(bool enabled) override;
+		virtual void SetFullscreen() override;
 		virtual bool IsVSync() const override;
 
 		inline virtual void* GetNativeWindow() const { return m_Window; }

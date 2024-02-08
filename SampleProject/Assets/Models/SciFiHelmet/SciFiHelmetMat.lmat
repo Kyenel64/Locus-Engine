@@ -1,0 +1,11 @@
+Colors:
+  Albedo: [1, 1, 1, 1]
+  Metallic: 0.5
+  Roughness: 0.5
+  AO: 0.5
+Textures:
+  Albedo: Assets\Models\SciFiHelmet\SciFiHelmet_BaseColor.png
+  Normal: Assets\Models\SciFiHelmet\SciFiHelmet_Normal.png
+  Metallic: Assets\Models\SciFiHelmet\SciFiHelmet_MetallicRoughness.png
+  Roughness: Assets\Models\SciFiHelmet\SciFiHelmet_MetallicRoughness.png
+  AO: Assets\Models\SciFiHelmet\SciFiHelmet_AmbientOcclusion.png

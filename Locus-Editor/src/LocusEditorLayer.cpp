@@ -8,14 +8,33 @@
 #include <ImGuizmo.h>
 
 #include "Widgets/Widgets.h"
+#include "Command/Command.h"
+#include "Command/CommandHistory.h"
+#include "Command/EntityCommands.h"
+#include "Command/ValueCommands.h"
 
 namespace Locus
 {
-	extern const std::filesystem::path g_ProjectPath;
+	extern Entity g_SelectedEntity = {};
 
 	LocusEditorLayer::LocusEditorLayer()
 		: Layer("LocusEditorLayer")
 	{
+		Application::Get().GetWindow().SetFullscreen();
+
+		m_ProjectPath = Application::Get().GetProjectPath();
+		m_ProjectName = Application::Get().GetProjectName();
+
+		// Initialize panels
+		m_SceneHierarchyPanel = CreateRef<SceneHierarchyPanel>();
+		m_PropertiesPanel = CreateRef<PropertiesPanel>();
+		m_ProjectBrowserPanel = CreateRef<ProjectBrowserPanel>();
+		m_ConsolePanel = CreateRef<ConsolePanel>();
+		m_ResourceInspectorPanel = CreateRef<ResourceInspectorPanel>(m_ProjectBrowserPanel);
+
+		CommandHistory::Init(this);
+
+		// Textures
 		m_PlayIcon = Texture2D::Create("resources/icons/PlayIcon.png");
 		m_StopIcon = Texture2D::Create("resources/icons/StopIcon.png");
 		m_PauseIcon = Texture2D::Create("resources/icons/PauseIcon.png");
@@ -25,7 +44,9 @@ namespace Locus
 		m_ScaleIcon = Texture2D::Create("resources/icons/ScaleIcon.png");
 		m_RotateIcon = Texture2D::Create("resources/icons/RotateIcon.png");
 
-		CommandHistory::Init(this);
+		// Shaders
+		m_MaskShader = Shader::Create("resources/shaders/MaskShader.glsl");
+		OutlinePostProcessShader = Shader::Create("resources/shaders/OutlinePostProcessShader.glsl");
 	}
 
 	LocusEditorLayer::~LocusEditorLayer()
@@ -44,38 +65,33 @@ namespace Locus
 		framebufferSpecs.Height = 1080;
 		m_Framebuffer = Framebuffer::Create(framebufferSpecs);
 
+		// Camera preview
 		FramebufferSpecification activeCameraFramebufferSpecs;
 		activeCameraFramebufferSpecs.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth };
 		activeCameraFramebufferSpecs.Width = 640;
 		activeCameraFramebufferSpecs.Height = 360;
 		m_ActiveCameraFramebuffer = Framebuffer::Create(activeCameraFramebufferSpecs);
 
+		// Mask framebuffer for outline post processing
+		FramebufferSpecification maskFramebufferSpecs;
+		maskFramebufferSpecs.Attachments = { FramebufferTextureFormat::RED_INT };
+		maskFramebufferSpecs.Width = 1920;
+		maskFramebufferSpecs.Height = 1080;
+		m_MaskFramebuffer = Framebuffer::Create(maskFramebufferSpecs);
+		m_MaskTexture = Texture2D::Create(m_MaskFramebuffer->GetSpecification().Width, m_MaskFramebuffer->GetSpecification().Height, m_MaskFramebuffer->GetColorAttachmentRendererID(0));
+
 		// Scene
 		m_EditorScene = CreateRef<Scene>();
 		m_ActiveScene = m_EditorScene;
 
-		// Open startup project given through args
-		auto commandLineArgs = Application::Get().GetCommandLineArgs();
-		if (commandLineArgs.Count > 1)
-		{
-			auto sceneFilePath = commandLineArgs[1];
-			SceneSerializer serializer(m_ActiveScene);
-			serializer.Deserialize(sceneFilePath);
-			m_SavePath = sceneFilePath;
-			LOCUS_CORE_INFO("Loaded startup scene: {0}", commandLineArgs[1]);
-		}
-
 		// Panels
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-		m_PropertiesPanel.SetContext(m_ActiveScene);
+		m_SceneHierarchyPanel->SetScene(m_ActiveScene);
+		m_PropertiesPanel->SetScene(m_ActiveScene);
 
 		// Editor Camera
 		m_EditorCamera = EditorCamera(30.0f, 1920.0f / 1080.0f, 0.1f, 10000.0f);
 
 		m_WindowSize = { Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight() };
-
-		m_CollisionMeshColor = ToGLMVec4(LocusColors::LightBlue);
-		m_FocusOutlineColor = ToGLMVec4(LocusColors::Green);
 	}
 
 	void LocusEditorLayer::OnDetach()
@@ -87,7 +103,7 @@ namespace Locus
 	{
 		// Profiling
 		LOCUS_PROFILE_FUNCTION();
-		Renderer2D::StatsStartFrame();
+		RendererStats::StatsStartFrame();
 
 		// On viewport resize
 		if (FramebufferSpecification spec = m_Framebuffer->GetSpecification();
@@ -95,6 +111,7 @@ namespace Locus
 			(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
 		{
 			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_MaskFramebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_ActiveCameraViewportSize = m_ViewportSize * 0.2f;
@@ -107,7 +124,7 @@ namespace Locus
 			m_WindowSize = { Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight() };
 		}
 
-		Renderer2D::ResetStats();
+		RendererStats::ResetStats();
 		m_Framebuffer->Bind();
 		m_Framebuffer->ClearAttachmentInt(1, -1);
 
@@ -143,28 +160,8 @@ namespace Locus
 			}
 		}
 
-		// Read pixel
-		auto [mx, my] = ImGui::GetMousePos();
-		mx -= m_ViewportBounds[0].x;
-		my -= m_ViewportBounds[0].y;
-		my = m_ViewportSize.y - my;
-		int mouseX = (int)mx;
-		int mouseY = (int)my;
-
-		// Set hovered and selected entity
-		m_HoveredEntity = {};
-		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)m_ViewportSize.x && mouseY < (int)m_ViewportSize.y)
-		{
-			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY); // TODO: This is really slow??
-			m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
-		}
-		m_SelectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
-		if (!m_SelectedEntity.IsValid())
-			m_SelectedEntity = {};
-		m_PropertiesPanel.SetSelectedEntity(m_SelectedEntity);
-
 		// Gizmo visibility
-		if (m_SelectedEntity.IsValid())
+		if (g_SelectedEntity.IsValid())
 			m_GizmoVisible = true;
 		else
 			m_GizmoVisible = false;
@@ -184,13 +181,18 @@ namespace Locus
 		// Make sure this is after unbinding main framebuffer as it uses a separate framebuffer.
 		DrawActiveCameraView();
 
+		// Render to the mask frame buffer for post processing effects like outlines.
+		DrawToMaskFramebuffer();
+
 		Input::ProcessKeys();
 
-		Renderer2D::StatsEndFrame();
+		RendererStats::StatsEndFrame();
 	}
 
 	void LocusEditorLayer::OnEvent(Event& e)
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		if (m_ViewportHovered)
 			m_EditorCamera.OnEvent(e);
 
@@ -210,44 +212,16 @@ namespace Locus
 
 	void LocusEditorLayer::OnRenderOverlay()
 	{
-		if (m_SceneState == SceneState::Edit)
-		{
-			Renderer2D::BeginScene(m_EditorCamera);
-		}
-		else if (m_SceneState == SceneState::Play)
-		{
-			Entity primaryCamera = m_ActiveScene->GetPrimaryCameraEntity();
-			if (primaryCamera)
-			{
-				glm::mat4 transform = m_ActiveScene->GetWorldTransform(primaryCamera);
-				Renderer2D::BeginScene(primaryCamera.GetComponent<CameraComponent>().Camera, transform);
-			}
-		}
+		LOCUS_PROFILE_FUNCTION();
 
-
-		if (m_SelectedEntity.IsValid())
-		{
-			// Display focus outline
-			auto& tc = m_SelectedEntity.GetComponent<TransformComponent>();
-			glm::mat4 transform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
-			transform *= glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0.001f));
-			if (m_SelectedEntity.HasComponent<SpriteRendererComponent>())
-			{
-				Renderer2D::DrawRect(transform, m_FocusOutlineColor);
-			}
-			else if (m_SelectedEntity.HasComponent<CircleRendererComponent>())
-			{
-				Renderer2D::DrawDebugCircle(transform, m_FocusOutlineColor);
-			}
-		}
-
-		DrawCollisionMesh();
-
-		Renderer2D::EndScene();
+		if (g_SelectedEntity.IsValid())
+			Renderer::DrawPostProcess(m_MaskTexture, OutlinePostProcessShader);
 	}
 
 	bool LocusEditorLayer::OnWindowClose(WindowCloseEvent& e)
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		if (m_IsSaved)
 			Application::Get().Close();
 		else
@@ -259,6 +233,8 @@ namespace Locus
 
 	bool LocusEditorLayer::OnKeyPressed(KeyPressedEvent& e)
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		if (m_BlockEditorKeyInput)
 			return false;
 		bool control = Input::IsKeyHeld(Key::LeftControl) || Input::IsKeyHeld(Key::RightControl);
@@ -291,8 +267,8 @@ namespace Locus
 			{
 				if (control)
 				{
-					if (m_SelectedEntity)
-						m_ClipboardEntity = m_SelectedEntity;
+					if (g_SelectedEntity)
+						m_ClipboardEntity = g_SelectedEntity;
 				}
 				break;
 			}
@@ -301,8 +277,8 @@ namespace Locus
 			{
 				if (control)
 				{
-					if (m_ClipboardEntity.IsValid())
-						CommandHistory::AddCommand(new DuplicateEntityCommand(m_ActiveScene, m_ClipboardEntity));
+					if (g_SelectedEntity.IsValid())
+						CommandHistory::AddCommand(new DuplicateEntityCommand(m_ActiveScene, g_SelectedEntity));
 				}
 				break;
 			}
@@ -311,24 +287,24 @@ namespace Locus
 			{
 				if (control)
 				{
-					if (m_SelectedEntity)
-						CommandHistory::AddCommand(new DuplicateEntityCommand(m_ActiveScene, m_SelectedEntity));
+					if (g_SelectedEntity)
+						CommandHistory::AddCommand(new DuplicateEntityCommand(m_ActiveScene, g_SelectedEntity));
 				}
 				break;
 			}
 
 			case Key::Delete:
 			{
-				if (m_SelectedEntity)
-					CommandHistory::AddCommand(new DestroyEntityCommand(m_ActiveScene, m_SelectedEntity));
+				if (g_SelectedEntity)
+					CommandHistory::AddCommand(new DestroyEntityCommand(m_ActiveScene, g_SelectedEntity));
 				break;
 			}
 
 			case Key::F:
 			{
-				if (m_SelectedEntity)
+				if (g_SelectedEntity)
 				{
-					glm::mat4 transform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
+					glm::mat4 transform = m_ActiveScene->GetWorldTransform(g_SelectedEntity);
 					glm::vec3 position;
 					Math::Decompose(transform, glm::vec3(), glm::quat(), position);
 					m_EditorCamera.SetFocalPoint(position);
@@ -366,7 +342,7 @@ namespace Locus
 				if (control && shift)
 				{
 					ScriptEngine::ReloadScripts();
-					m_PropertiesPanel.m_ScriptClasses = ScriptEngine::GetClassNames();
+					m_PropertiesPanel->m_ScriptClasses = ScriptEngine::GetClassNames();
 				}
 				else
 				{
@@ -381,12 +357,22 @@ namespace Locus
 
 	bool LocusEditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& e)
 	{
+		LOCUS_PROFILE_FUNCTION();
+
+		auto [mx, my] = ImGui::GetMousePos();
+		mx -= m_ViewportBounds[0].x;
+		my -= m_ViewportBounds[0].y;
+		my = m_ViewportSize.y - my;
+		int mouseX = (int)mx;
+		int mouseY = (int)my;
+
 		if (e.GetMouseButton() == Mouse::ButtonLeft)
 		{
-			if (m_ViewportHovered && (!ImGuizmo::IsOver() || ImGuizmo::IsOver() && !m_GizmoVisible))
+			if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)m_ViewportSize.x && mouseY < (int)m_ViewportSize.y 
+				&& m_ViewportHovered && (!ImGuizmo::IsOver() || ImGuizmo::IsOver() && !m_GizmoVisible))
 			{
-				m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
-				m_SelectedEntity = m_HoveredEntity;
+				int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY); // TODO: This is really slow??
+				g_SelectedEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 				m_GizmoFirstClick = true;
 			}
 		}
@@ -395,15 +381,16 @@ namespace Locus
 
 	void LocusEditorLayer::NewScene()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		if (m_SceneState != SceneState::Edit)
 			OnSceneStop();
-		m_SelectedEntity = {};
-		m_HoveredEntity = {};
+		g_SelectedEntity = {};
 		m_EditorScene = CreateRef<Scene>();
 		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_ActiveScene = m_EditorScene;
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-		m_PropertiesPanel.SetContext(m_ActiveScene);
+		m_SceneHierarchyPanel->SetScene(m_ActiveScene);
+		m_PropertiesPanel->SetScene(m_ActiveScene);
 		m_SavePath = std::string();
 		m_IsSaved = false;
 		CommandHistory::Reset();
@@ -411,6 +398,8 @@ namespace Locus
 
 	void LocusEditorLayer::OpenScene()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		std::string path = FileDialogs::OpenFile("Locus Scene (*.locus)\0*.locus\0");
 		if (!path.empty())
 			OpenScene(path);
@@ -418,15 +407,16 @@ namespace Locus
 
 	void LocusEditorLayer::OpenScene(const std::filesystem::path& path)
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		if (m_SceneState != SceneState::Edit)
 			OnSceneStop();
-		m_SelectedEntity = {};
-		m_HoveredEntity = {};
+		g_SelectedEntity = {};
 		m_EditorScene = CreateRef<Scene>();
 		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		m_ActiveScene = m_EditorScene;
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-		m_PropertiesPanel.SetContext(m_ActiveScene);
+		m_SceneHierarchyPanel->SetScene(m_ActiveScene);
+		m_PropertiesPanel->SetScene(m_ActiveScene);
 		SceneSerializer serializer(m_EditorScene);
 		serializer.Deserialize(path.string());
 		m_SavePath = path.string();
@@ -437,6 +427,8 @@ namespace Locus
 	// Returns false if canceling file dialog.
 	bool LocusEditorLayer::SaveSceneAs()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		std::string path = FileDialogs::SaveFile("Locus Scene (*.locus)\0*.locus\0");
 		if (!path.empty())
 		{
@@ -451,6 +443,8 @@ namespace Locus
 
 	bool LocusEditorLayer::SaveScene()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		if (m_SavePath.empty())
 		{
 			return SaveSceneAs();
@@ -466,10 +460,12 @@ namespace Locus
 
 	void LocusEditorLayer::DrawGizmo()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		ImGuizmo::SetOrthographic(false);
 		ImGuizmo::SetDrawlist();
 		ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportSize.x, m_ViewportSize.y);
-		ImGuizmo::AllowAxisFlip(false);
+		ImGuizmo::AllowAxisFlip(true);
 
 		// Camera
 		const glm::mat4* proj = nullptr;
@@ -488,13 +484,16 @@ namespace Locus
 				auto& camera = primaryCameraEntity.GetComponent<CameraComponent>();
 				proj = &camera.Camera.GetProjection();
 				view = &glm::inverse(m_ActiveScene->GetWorldTransform(primaryCameraEntity));
-				//view = &primaryCameraEntity.GetComponent<TransformComponent>().GetLocalTransform();
+			}
+			else
+			{
+				return;
 			}
 		}
 
 		// Entity transform
-		auto& tc = m_SelectedEntity.GetComponent<TransformComponent>();
-		glm::mat4& transform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
+		auto& tc = g_SelectedEntity.GetComponent<TransformComponent>();
+		glm::mat4& transform = m_ActiveScene->GetWorldTransform(g_SelectedEntity);
 
 		// Snapping
 		bool snap = Input::IsKeyHeld(Key::LeftControl);
@@ -556,6 +555,8 @@ namespace Locus
 
 	void LocusEditorLayer::ProcessViewportDragDrop()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SCENE_ITEM_PATH"))
@@ -563,7 +564,7 @@ namespace Locus
 				if (m_SceneState == SceneState::Play)
 					OnSceneStop();
 				const wchar_t* path = (const wchar_t*)payload->Data;
-				OpenScene(std::filesystem::path(g_ProjectPath) / path);
+				OpenScene(m_ProjectPath / path);
 			}
 			ImGui::EndDragDropTarget();
 		}
@@ -571,36 +572,44 @@ namespace Locus
 
 	void LocusEditorLayer::OnScenePlay()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		m_SceneState = SceneState::Play;
 		m_ActiveScene = Scene::Copy(m_EditorScene);
 		ScriptEngine::OnRuntimeStart(m_ActiveScene);
 		m_ActiveScene->OnRuntimeStart();
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_SceneHierarchyPanel->SetScene(m_ActiveScene);
 		ImGui::SetWindowFocus("Viewport");
 	}
 
 	void LocusEditorLayer::OnPhysicsPlay()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		m_SceneState = SceneState::Physics;
 		m_ActiveScene = Scene::Copy(m_EditorScene);
 		m_ActiveScene->OnPhysicsStart();
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_SceneHierarchyPanel->SetScene(m_ActiveScene);
 		ImGui::SetWindowFocus("Viewport");
 	}
 
 	void LocusEditorLayer::OnSceneStop()
 	{
-		m_SelectedEntity = {};
+		LOCUS_PROFILE_FUNCTION();
+
+		g_SelectedEntity = {};
 		m_SceneState = SceneState::Edit;
 		ScriptEngine::OnRuntimeStop();
 		m_ActiveScene->OnRuntimeStop();
 
 		m_ActiveScene = m_EditorScene;
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_SceneHierarchyPanel->SetScene(m_ActiveScene);
 	}
 
 	void LocusEditorLayer::DrawDefaultLayout()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		// --- Dockspace ---
 		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar |
@@ -635,10 +644,11 @@ namespace Locus
 		DrawToolbar();
 		DrawViewport();
 		DrawDebugPanel();
-		m_SceneHierarchyPanel.OnImGuiRender();
-		m_PropertiesPanel.OnImGuiRender();
-		m_ContentBrowserPanel.OnImGuiRender();
-		m_ConsolePanel.OnImGuiRender();
+		m_SceneHierarchyPanel->OnImGuiRender();
+		m_PropertiesPanel->OnImGuiRender();
+		m_ProjectBrowserPanel->OnImGuiRender();
+		m_ConsolePanel->OnImGuiRender();
+		m_ResourceInspectorPanel->OnImGuiRender();
 		//ImGui::ShowDemoWindow();
 
 
@@ -649,6 +659,8 @@ namespace Locus
 
 	void LocusEditorLayer::DrawViewport()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
 		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_TabBarAlignLeft | ImGuiWindowFlags_DockedWindowBorder;
 		if (!m_IsSaved)
@@ -672,7 +684,7 @@ namespace Locus
 
 		// --- Gizmo ---
 		// Checks for first click to prevent moving the object when selecting an entity.
-		if (m_SelectedEntity && m_GizmoType != -1)
+		if (g_SelectedEntity.IsValid() && m_GizmoType != -1)
 		{
 			if (!m_GizmoFirstClick)
 				DrawGizmo();
@@ -685,9 +697,9 @@ namespace Locus
 		DrawViewportToolbar(toolbarPos);
 
 		// --- Active camera view ---
-		if (m_SelectedEntity.IsValid() && m_SceneState == SceneState::Edit)
+		if (g_SelectedEntity.IsValid() && m_SceneState == SceneState::Edit)
 		{
-			if (m_SelectedEntity.HasComponent<CameraComponent>())
+			if (g_SelectedEntity.HasComponent<CameraComponent>())
 			{
 				// Draw view of camera if a camera component is selected
 				float margin = 10.0f;
@@ -711,6 +723,8 @@ namespace Locus
 
 	void LocusEditorLayer::DrawViewportToolbar(const glm::vec2& position)
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		ImGui::PushStyleColor(ImGuiCol_Button, LocusColors::Transparent);
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, LocusColors::Transparent);
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, LocusColors::Transparent);
@@ -787,6 +801,8 @@ namespace Locus
 
 	void LocusEditorLayer::DrawToolbar()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_None;
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
@@ -848,7 +864,12 @@ namespace Locus
 			if (ImGui::MenuItem("Reload Scripts", "Ctrl+Shift+R"))
 			{
 				ScriptEngine::ReloadScripts();
-				m_PropertiesPanel.m_ScriptClasses = ScriptEngine::GetClassNames();
+				m_PropertiesPanel->m_ScriptClasses = ScriptEngine::GetClassNames();
+			}
+
+			if (ImGui::MenuItem("Rescan Resources"))
+			{
+				ResourceManager::Rescan();
 			}
 			ImGui::EndPopup();
 		}
@@ -942,6 +963,8 @@ namespace Locus
 	
 	void LocusEditorLayer::ProcessSavePopup()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		if (m_OpenSavePopup)
 			ImGui::OpenPopup("You have unsaved changes...");
 
@@ -949,7 +972,7 @@ namespace Locus
 		ImGui::SetNextWindowPos(center, ImGuiCond_None, { 0.5f, 0.5f });
 		if (ImGui::BeginPopupModal("You have unsaved changes...", &m_OpenSavePopup, ImGuiWindowFlags_AlwaysAutoResize))
 		{
-			m_SelectedEntity = {};
+			g_SelectedEntity = {};
 
 			ImGui::Text("Save Current Project?");
 
@@ -979,6 +1002,8 @@ namespace Locus
 
 	void LocusEditorLayer::ProcessViewSettingsPopup()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 10.0f, 10.0f });
 
 		ImGui::SetNextWindowPos({ ImGui::GetWindowPos().x, ImGui::GetWindowPos().y + ImGui::GetWindowSize().y});
@@ -1084,38 +1109,36 @@ namespace Locus
 
 	void LocusEditorLayer::DrawDebugPanel()
 	{
+		LOCUS_PROFILE_FUNCTION();
+
 		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_TabBarAlignLeft | ImGuiWindowFlags_DockedWindowBorder;
 		ImGui::Begin("Debug", false, windowFlags);
 
-		auto stats = Renderer2D::GetStats();
-		ImGui::Text("Renderer2D Stats:");
+		// FPS
+		ImGui::Text("FPS: %i", Application::Get().GetFPS());
+
+		auto& stats = RendererStats::GetStats();
+		ImGui::Text("Renderer Stats:");
 		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
 		ImGui::Text("Quads: %d", stats.QuadCount);
 		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
 		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
-		ImGui::Text("Frame Time: %f", stats.FrameTime);
-		ImGui::Text("FPS: %f", stats.FramesPerSecond);
 
-		std::string name = "None";
-		if (m_HoveredEntity.IsValid())
-			if (m_HoveredEntity.HasComponent<IDComponent>())
-				name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
-		ImGui::Text("Hovered Entity: %s", name.c_str());
-
-		ImGui::Text("Entity Value: %d", (entt::entity)m_SelectedEntity);
+		// IDs
+		ImGui::Text("Entity Value: %d", (entt::entity)g_SelectedEntity);
 
 		// Collision
-		if (m_SelectedEntity.IsValid())
+		if (g_SelectedEntity.IsValid())
 		{
-			if (m_SelectedEntity.HasComponent<BoxCollider2DComponent>())
-				ImGui::Text("Collision category: %d", m_SelectedEntity.GetComponent<BoxCollider2DComponent>().CollisionCategory);
+			if (g_SelectedEntity.HasComponent<BoxCollider2DComponent>())
+				ImGui::Text("Collision category: %d", g_SelectedEntity.GetComponent<BoxCollider2DComponent>().CollisionCategory);
 		}
 		// Child debug
-		if (m_SelectedEntity.IsValid())
+		if (g_SelectedEntity.IsValid())
 		{
-			if (m_SelectedEntity.HasComponent<ChildComponent>())
+			if (g_SelectedEntity.HasComponent<ChildComponent>())
 			{
-				auto& cc = m_SelectedEntity.GetComponent<ChildComponent>();
+				auto& cc = g_SelectedEntity.GetComponent<ChildComponent>();
 				ImGui::Separator();
 				ImGui::Text("Children:");
 				ImGui::Indent();
@@ -1129,12 +1152,12 @@ namespace Locus
 		}
 
 		// Transforms
-		if (m_SelectedEntity.IsValid())
+		if (g_SelectedEntity.IsValid())
 		{
 			ImGui::Separator();
 			ImGui::Text("Transforms");
 
-			auto& tc = m_SelectedEntity.GetComponent<TransformComponent>();
+			auto& tc = g_SelectedEntity.GetComponent<TransformComponent>();
 			if (tc.Parent)
 				ImGui::Text("Parent: %s", m_ActiveScene->GetEntityByUUID(tc.Parent).GetComponent<TagComponent>().Tag.c_str());
 			else
@@ -1142,7 +1165,7 @@ namespace Locus
 
 			ImGui::Text("Self: %s", m_ActiveScene->GetEntityByUUID(tc.Self).GetComponent<TagComponent>().Tag.c_str());
 
-			glm::mat4 worldTransform = m_ActiveScene->GetWorldTransform(m_SelectedEntity);
+			glm::mat4 worldTransform = m_ActiveScene->GetWorldTransform(g_SelectedEntity);
 			glm::vec3 worldPosition, worldScale;
 			glm::quat worldRotationQuat;
 			Math::Decompose(worldTransform, worldScale, worldRotationQuat, worldPosition);
@@ -1161,130 +1184,49 @@ namespace Locus
 		ImGui::End();
 	}
 
-	void LocusEditorLayer::DrawCollisionMesh()
+	void LocusEditorLayer::DrawActiveCameraView()
 	{
-		// Draw single collision mesh for selected entity
-		if (m_SelectedEntity.IsValid() && !m_ShowAllCollisionMesh)
+		LOCUS_PROFILE_FUNCTION();
+
+		if (g_SelectedEntity.IsValid())
 		{
-			// Box collider
-			if (m_SelectedEntity.HasComponent<BoxCollider2DComponent>())
+			if (g_SelectedEntity.HasComponent<CameraComponent>())
 			{
-				auto& b2D = m_SelectedEntity.GetComponent<BoxCollider2DComponent>();
-				auto& tc = m_SelectedEntity.GetComponent<TransformComponent>();
-
-				// Combine the box collider offset and size to the transform
-				glm::mat4 transform = tc.GetLocalTransform();
-				transform *= glm::translate(glm::mat4(1.0f), { b2D.Offset.x, b2D.Offset.y, 0.001f })
-					* glm::scale(glm::mat4(1.0f), { b2D.Size.x, b2D.Size.y, 1.0f });
-
-				Renderer2D::DrawRect(transform, m_CollisionMeshColor);
-			}
-			// Circle collider
-			else if (m_SelectedEntity.HasComponent<CircleCollider2DComponent>())
-			{
-				auto& c2D = m_SelectedEntity.GetComponent<CircleCollider2DComponent>();
-				auto& tc = m_SelectedEntity.GetComponent<TransformComponent>();
-
-				// Combine the box collider offset and size to the transform and
-				// calculate the circle radius for the larger scale axis (x or y).
-				float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
-				glm::mat4 transform = glm::translate(glm::mat4(1.0f), tc.LocalPosition)
-					* glm::rotate(glm::mat4(1.0f), tc.LocalRotation.z, glm::vec3(0, 0, 1))
-					* glm::scale(glm::mat4(1.0f), { maxScale, maxScale, 1.0f });
-				transform *= glm::translate(glm::mat4(1.0f), { c2D.Offset.x, c2D.Offset.y, 0.001f })
-					* glm::scale(glm::mat4(1.0f), { c2D.Radius * 2.0f, c2D.Radius * 2.0f, 1.0f });
-
-				Renderer2D::DrawDebugCircle(transform, m_CollisionMeshColor);
-			}
-		}
-		// Draw collision mesh for all entities in the scene
-		else if (m_ShowAllCollisionMesh)
-		{
-			// Box collider
-			{
-				auto view = m_ActiveScene->GetEntitiesWith<BoxCollider2DComponent>();
-				for (auto e : view)
-				{
-					Entity entity = Entity(e, m_ActiveScene.get());
-					auto& b2D = entity.GetComponent<BoxCollider2DComponent>();
-					auto& tc = entity.GetComponent<TransformComponent>();
-
-					// Circle colliders never becomes ovals. 
-					// Radius of collision circle is always equal to the larger scale axis.
-					glm::mat4 transform = tc.GetLocalTransform();
-					transform *= glm::translate(glm::mat4(1.0f), { b2D.Offset.x, b2D.Offset.y, 0.001f })
-						* glm::scale(glm::mat4(1.0f), { b2D.Size.x, b2D.Size.y, 1.0f });
-					Renderer2D::DrawRect(transform, m_CollisionMeshColor);
-				}
-			}
-			// Circle collider
-			{
-				auto view = m_ActiveScene->GetEntitiesWith<CircleCollider2DComponent>();
-				for (auto e : view)
-				{
-					Entity entity = Entity(e, m_ActiveScene.get());
-					auto& c2D = entity.GetComponent<CircleCollider2DComponent>();
-					auto& tc = entity.GetComponent<TransformComponent>();
-
-					// Circle colliders never becomes ovals. 
-					// Radius of collision circle is always equal to the larger scale axis.
-					float maxScale = tc.LocalScale.x > tc.LocalScale.y ? tc.LocalScale.x : tc.LocalScale.y;
-					glm::mat4 transform = glm::translate(glm::mat4(1.0f), tc.LocalPosition)
-						* glm::rotate(glm::mat4(1.0f), tc.LocalRotation.z, glm::vec3(0, 0, 1))
-						* glm::scale(glm::mat4(1.0f), { maxScale, maxScale, 1.0f });
-					transform *= glm::translate(glm::mat4(1.0f), { c2D.Offset.x, c2D.Offset.y, 0.001f })
-						* glm::scale(glm::mat4(1.0f), { c2D.Radius * 2.0f, c2D.Radius * 2.0f, 1.0f });
-
-					Renderer2D::DrawDebugCircle(transform, m_CollisionMeshColor);
-				}
+				m_ActiveCameraFramebuffer->Bind();
+				m_ActiveScene->OnPreviewUpdate(g_SelectedEntity);
+				m_ActiveCameraFramebuffer->Unbind();
 			}
 		}
 	}
 
-	void LocusEditorLayer::DrawActiveCameraView()
+	void LocusEditorLayer::DrawToMaskFramebuffer()
 	{
-		if (m_SelectedEntity.IsValid())
+		LOCUS_PROFILE_FUNCTION();
+
+		// Mask framebuffer
+		m_MaskFramebuffer->ClearAttachmentInt(0, 0);
+		if (g_SelectedEntity.IsValid())
 		{
-			if (m_SelectedEntity.HasComponent<CameraComponent>())
+			m_MaskFramebuffer->Bind();
+			if (m_SceneState == SceneState::Play || m_SceneState == SceneState::Pause)
 			{
-				SceneCamera& camera = m_SelectedEntity.GetComponent<CameraComponent>().Camera;
-				camera.SetViewportSize((uint32_t)(m_ViewportSize.x * 0.2f), (uint32_t)(m_ViewportSize.y * 0.2f));
-				m_ActiveCameraFramebuffer->Bind();
-				m_Framebuffer->ClearAttachmentInt(1, -1);
-
-				RenderCommand::SetClearColor(camera.GetBackgroundColor());
-				RenderCommand::Clear();
-
-				Renderer2D::BeginScene(camera, m_ActiveScene->GetWorldTransform(m_SelectedEntity));
-
-				{ // Sprite
-					auto view = m_ActiveScene->GetEntitiesWith<SpriteRendererComponent>();
-					for (auto e : view)
-					{
-						Entity entity = Entity(e, m_ActiveScene.get());
-						bool enabled = entity.GetComponent<TagComponent>().Enabled;
-						auto& sprite = entity.GetComponent<SpriteRendererComponent>();
-						if (enabled)
-							Renderer2D::DrawSprite(m_ActiveScene->GetWorldTransform(entity), sprite, -1);
-					}
-				}
-
-				{ // Circle
-					auto view = m_ActiveScene->GetEntitiesWith<CircleRendererComponent>();
-					for (auto e : view)
-					{
-						Entity entity = Entity(e, m_ActiveScene.get());
-						bool enabled = entity.GetComponent<TagComponent>().Enabled;
-						auto& circle = entity.GetComponent<CircleRendererComponent>();
-						if (enabled)
-							Renderer2D::DrawCircle(m_ActiveScene->GetWorldTransform(entity), circle.Color, circle.Thickness, circle.Fade, -1);
-					}
-				}
-
-				Renderer2D::EndScene();
-
-				m_ActiveCameraFramebuffer->Unbind();
+				if (g_SelectedEntity.HasComponent<CameraComponent>())
+					Renderer::BeginScene(g_SelectedEntity.GetComponent<CameraComponent>().Camera, m_ActiveScene->GetWorldTransform(g_SelectedEntity));
 			}
+			else
+			{
+				Renderer::BeginScene(m_EditorCamera);
+			}
+			
+			m_MaskFramebuffer->ClearAttachmentInt(0, 0);
+
+			if (g_SelectedEntity.HasComponent<CubeRendererComponent>())
+				Renderer3D::DrawCubeMask(m_ActiveScene->GetWorldTransform(g_SelectedEntity), m_MaskShader);
+			if (g_SelectedEntity.HasComponent<SpriteRendererComponent>() || g_SelectedEntity.HasComponent<CircleRendererComponent>())
+				Renderer2D::DrawQuadMask(m_ActiveScene->GetWorldTransform(g_SelectedEntity), m_MaskShader);
+
+			Renderer::EndScene();
+			m_MaskFramebuffer->Unbind();
 		}
 	}
 }
